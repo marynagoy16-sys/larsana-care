@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+frontend/dist
+dist
+.git
+.env
+.env.local
+*.md
+plataforma-fisio-textos-extraidos
+.cursor
+data
+terminals
+agent-transcripts
+**/.seed-sp-geography.checkpoint.json

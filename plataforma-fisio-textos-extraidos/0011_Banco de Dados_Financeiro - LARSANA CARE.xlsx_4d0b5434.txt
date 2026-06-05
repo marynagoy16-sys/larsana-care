@@ -1,0 +1,49 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Banco de Dados\Financeiro - LARSANA CARE.xlsx ===
+=== EXTRAÍDO EM: 2026-06-05T00:53:16 ===
+
+=== PLANILHA: DashBoard ANUAL ===
+Mês	Total Entradas	Total Saídas	Saldo Mensal	% Margem
+MAIO	0	0	0	0
+JUNHO	
+JULHO	
+AGOSTO
+SETEMBRO
+OUTUBRO
+NOVEMBRO
+DEZEMBRO
+
+=== PLANILHA: PacientesValores ===
+Nome do Paciente	CPF	Frequência Semanal	Valor de Comissão Liquida	Status
+Manoel Francisco de Aragão	61776521820	2	0	ATIVO
+Jessica Alves da Silva	38299859832	2	-360	ATIVO
+Maria dos Anjos dos Santos	14017398812	2	0	PAUSA
+Herminio Apolonio dos Santos	21577838815	1	-580	ATIVO
+Vilson Bozzato	50193066815	2	0	ATIVO
+Maria Valdina Borges Granjeiro	22408211832	1	0	ATIVO
+Edith Emilia Sitta Battistioli	94374058834	2	-420	ATIVO
+Margarida de Fátima Santos Aquino	087.322.238-54	1		
+Lenir Ribeiro	60613254872	2		
+Severina Rosa Ramos de Sena	14004735866	2		
+Rubens Biondi	094.183.268-68	2		
+Creusa Borges da Costa	29353230845	2		
+Izabel da Silva Carvalho	52836991534	2		
+Maria Do Carmo Araújo Braga	072.685.268-65	1		
+Sirlene Aparecida Maschio	11327000865	2		
+Antônio Querino de Lima	13525018487	2		
+Leticia Cavalcante da Silva		1		
+Felipe Augusto Sanchez		2		
+
+=== PLANILHA: LançamentosMAIO ===
+Faturamento	Total de Repasse	Comissões Bruta de Maio	Gastos internos	Comissão Liquida de Maio					
+7950	5065	2885	850	2035					
+Gastos Mensais									
+Despesas FIXAS	Valor	Vencimento	Forma de Pagamento	Data do pagamento Efetuado					
+Aluguel Endereço Fiscal	99.0	2026-05-27 00:00:00	Cartão de Crédito						
+Mensalidade Contabilidade	250.0	2026-05-15 00:00:00	Boleto	2026-05-07 00:00:00					
+Parcela Abertura de Empresa 1/3	600.0	2026-05-15 00:00:00	Boleto	2026-05-07 00:00:00					
+Canva	24.25	2026-05-27 00:00:00	Cartão de Crédito						
+Responsável Técnico	1200.0	2026-05-30 00:00:00	PIX						
+Despesas VARIÁEIS	Valor	Vencimento	Forma de Pagamento						
+UBER		2026-05-27 00:00:00	Cartão de Crédito						
+Gasolina Meriva			Débito						
+			--						

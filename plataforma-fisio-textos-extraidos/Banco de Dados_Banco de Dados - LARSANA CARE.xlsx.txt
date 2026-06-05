@@ -1,0 +1,184 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Banco de Dados\Banco de Dados - LARSANA CARE.xlsx ===
+=== EXTRAÍDO EM: 2026-06-05T00:52:35 ===
+
+=== PLANILHA: DadosProfissional ===
+Carimbo de data/hora	Classe	Número de Contrato	Endereço de e-mail	Nome:	Data de Nascimento	CPF/CNPJ	Endereço Completo	Telefone de Contado	Wallet ID	Conselho de Classe	Número do Registro Profissional	Especialidade	RG/CNH	Carteirinha do Conselho de Classe	Como nos conheceu?	Condição	Diretrizes - Termos de Uso e Políticas de Privacidade da Plataforma Larsana Care - PROFISSIONAIS PARCEIROS	Antecedentes Criminais	Certificado(s) da(s) Especialização(ões)	Foto Para Cartão de Visita	Ecaminhado	Assinado
+2026-03-31 20:17:52.163000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0001	marcela.scarranaro@gmail.com	Marcela Scarranaro Vedovate	1994-09-16 00:00:00	40071784877.0	Rua Álvares Machado 183 vila bocaina Mauá	11955567405.0	adcaa4f3-4233-497d-9e3f-44c01cd02b65	CREFITO	308315-F	Respiratória	https://drive.google.com/open?id=1w_wWO7XEFd6CTL8ziEfPfqh5axMsG9oH	https://drive.google.com/open?id=1Zb2zhOwgO54uQcOk5LLewQBNwLvCdJqU	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/12Q07lMr8A6YLKadvFDHlry7RCf4xA7jG/view?usp=share_link	https://drive.google.com/drive/folders/1qfeD2o21lRRV81BJYAsnShiUgWrdDI7J?usp=share_link		SIM	SIM
+2026-04-01 12:42:31.267000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0002	aline_donoso2@hotmail.com	Aline Giseli Olimpio Donoso	1994-01-18 00:00:00	40177578807.0	Rua: Minas Gerais 206, cidade são Jorge, Santo André, SP, cep 09111-700	11984566553.0	992fda75-d3a8-44be-bf12-be29b246ceb6	CREFITO	269110-F	Respiratória, Saude publica	https://drive.google.com/open?id=1AZn9Xc-cLR2TQ47JurDg1og_8ExRmoV6	https://drive.google.com/open?id=1e62CLr2dvEogGE8BtWLFhcBHfOwqwguT	Convite	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/1NCdnyltVKJf5tm9omElZDa40WPZj9ZUj/view?usp=share_link	https://drive.google.com/file/d/1QQspM9FVj3cB-w8ozZPXU6br6wK6DDet/view?usp=share_link		SIM	SIM
+2026-04-01 17:43:19.388000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0003	larissabergofisio@gmail.com	Larissa dos Santos Bergo	2000-10-07 00:00:00	49130453852.0	Rua Mário Milanesi, 975	11971799814.0	00978185-4af7-40f2-afb4-c9aa73cd052e	CREFITO	341992-F	Respiratória	https://drive.google.com/open?id=1diwTce7NiDxaDtMq78Hyu6Yx-aWXyMFy	https://drive.google.com/open?id=1XJ-4VsuLc3LNOcN9CWRfJKx09X7IkNTh	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/13abWvLnQ3-XXLCEUHuj_U0HkTgUptu50/view?usp=share_link		https://drive.google.com/file/d/19AF4Gcu5mQbJhW85bFLklpoZXME4ibMc/view?usp=share_link	SIM	SIM
+2026-04-03 15:43:40.914000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0004	milla.stn13@gmail.com	Camila Santana dos Santos	1996-11-20 00:00:00	45448649840.0	Rua Pietro dunda 166, C2, vila Bocaina, Ribeirão Pires, sp	11923537888.0	e2fd0272-9d2c-4d99-a165-e943238a57ea	CREFITO	449461-F		https://drive.google.com/open?id=1JUf1N5iYKFWZxD9Zo2TjeB_RVME9uJzX	https://drive.google.com/open?id=1Y-Zuw9pGAeqU1M42W1alMfjbqqTmClmv	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.				SIM	SIM
+2026-04-04 04:57:13.435000	Ouro	CONTRATO Nº LRS-PROF.FISIO-2026-0005	maryna.goy16@gmail.com	Marina Silva Batista	1996-11-16 00:00:00	38927340892.0	Rua Luiz Viola, 45	11950689943.0	79dfcd2b-54ac-42d9-847e-990af8696987	CREFITO	277681-F	Neurologia, Ortopedia, Geriatria	https://drive.google.com/open?id=1CkTddfgl0OrWU9fImgFAMQtjyxtktdMa	https://drive.google.com/open?id=1_tnNy9LOqdielRBPvAwk0twx8P3tlTBC	Inidicação de outro profissional	PJ	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/1wwy080lA2bOErMfTN_lhPjvjCOMZVKbm/view?usp=share_link	https://drive.google.com/drive/folders/1CjauS2yyHJR1Ptj5PU2uXkC9qIpmOs-0?usp=share_link	https://drive.google.com/file/d/1kecnozmSk7GV9DJmHCVoCvfPUwDGpNZZ/view?usp=share_link		
+2026-04-05 20:04:46.563000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0006	nathalyc295@gmail.com	Nathaly dos Santos Cordeiro Toledo	1998-01-29 00:00:00	45661637845.0	Rua arco íris 77a Vila Cristiane Rio Grande da Serra	11998695731.0	1fd5d7fc-9409-4347-a4a5-52e84e7da878	CREFITO	436173-F	Neurologia, Ortopedia, Geriatria	https://drive.google.com/open?id=1HRUgvdZ-tJNjJ6NMMmzVn2uRMlscRjjo	https://drive.google.com/open?id=14cti27pdlq7tMzbRPrDymxZByxtGZLBZ	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/1dWT5uOD6RzoLiAW3Mfhz0yytcIXhnKG7/view?usp=share_link	https://drive.google.com/file/d/14MrOEqlPKThcWZgM3ev6ohkT7rJMqbz0/view?usp=share_link	https://drive.google.com/file/d/11az6isHOvFtZc7BDbw4yvpNdBSiTsz2D/view?usp=share_link	SIM	SIM
+2026-04-08 10:15:09.632000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0007	dehboni2016@gmail.com	Débora Silva Bonifácio Lima	1997-06-03 00:00:00	45102251805.0	Avenida Aricanduva,9196 APTO 85A	11945283115.0	0d9fb04a-df5e-477a-bb92-b4c59806cc3b	CREFITO	434968-F		https://drive.google.com/open?id=1_UZ66Blaa2Ocy43X4wAVq9txlhxBweaJ	https://drive.google.com/open?id=13kUkCXSe9Y0EQktvxQntHuvjewdGawGi	Convite	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.				SIM	SIM
+2026-04-08 13:55:00.302000	Bronze	CONTRATO Nº LRS-PROF.CUIDA-2026-0002	geyslanec993@gmail.com	Geyslane Costa Barbosa	2000-02-01 00:00:00	08400161319	Rua leonidia de Oliveira Neves	11949045161.0		COREN	Cuidadora		https://drive.google.com/open?id=1UuAHgkuZ0FYjZn5JP-_bpLw_fnJIIrIL	https://drive.google.com/open?id=16z4HVDWZZZRg20OpX9hhxKAiLgEr0TUy	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.				NÃO	NÃO
+2026-04-08 16:04:50.094000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0008	fernandapinattifisio@gmail.com	Fernanda Lou Manoel Pinatti	1980-04-21 00:00:00	28152931888.0	Avenida Líbero Badaró, 370 Jd São Caetano SCS SP CEP 09581-610	11982539724.0	8a52caaf-2bf0-4f48-9d23-37ab6ac2f971	CREFITO	432371-F	Ortopedia, Geriatria, Auriculoterapia / Geriatria e Gerontologia	https://drive.google.com/open?id=1sOWQNcG-sZchkNTsMk2E18arXYZlGXWl	https://drive.google.com/open?id=1pukzPGRl-qguWrdX_3iOZ-1e4m6MKbHH	Convite	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/1IutBBa-8lGhpHXYbPzj6hnYh3rLfM-HV/view?usp=share_link	https://drive.google.com/drive/folders/1oxgQfYWHKfNO0qkkylgoVnRERyKjpJXC?usp=share_link	https://drive.google.com/file/d/14H7lEjSci9FgbuvJe0GCNfCqmp3fMG9V/view?usp=share_link	SIM	SIM
+2026-04-08 16:40:30.020000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0009	danocamoreno74@gmail.com	Danielle de Souza Moreno	1974-12-30 00:00:00	26076024836.0	Rua Pangaua, 247 - Vila Ré - São Paulo	11997253232.0	7e15274b-832f-40b8-9acf-b7d55130a75a	CREFITO	317206-F	Ortopedia, Respiratória, Cardiovascular	https://drive.google.com/open?id=1__ZV04XquE6eO5o7yLvdFe5MJTkrTyhi	https://drive.google.com/open?id=1Zkci69xMPJMJBNb_w50nRHzN5y5d5mQP	Convite	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.				SIM	NÃO
+2026-04-09 11:37:01.430000	Bronze	CONTRATO Nº LRS-PROF.CUIDA-2026-0001	alinesilvafilho30@gmail.com	Aline Santana da Silva	2001-03-30 00:00:00	86561051599.0	Rua Edmar Matozinho, parque dos bandeirantes, n 149	75981804723.0		COREN	Cuidadora	Auxiliar de enfermagem	https://drive.google.com/open?id=1qJq5rXqifMZOHYjZNyr6fdn6l5Y8jQU7	https://drive.google.com/open?id=13gmWZy0Ou8asjpePdyS5aTgsCPByTBtP	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/file/d/1DFfRmR_SWm-5cmdJTOTA0RH-IRv1wMAW/view?usp=share_link		https://drive.google.com/file/d/1UIeItHzdGMtwr_zrwz5h-XEkak6OCcOK/view?usp=share_link	SIM	SIM
+2026-04-11 18:37:54.911000	Bronze	CONTRATO Nº LRS-PROF.FISIO-2026-0010	gabrielabfisio@gmail.com	Gabriela Bruno Lourenço	1997-10-13 00:00:00	48178592886.0	Rua Silvia 1784 SCS / SP	11974145306.0	25786f72-977a-4ba6-81a8-4d1778ae5ba4	CREFITO	281807-F	Dermatofuncional	https://drive.google.com/open?id=1TmumUkttDiDveht_-TiNFUCwqPOmmtii	https://drive.google.com/open?id=1zW7iSVaLjnTkkpiwZZCBAmmwh8eZkysO	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/open?id=1atcaWYIuyLfx8aHc-A6-sr9JTxxR_c_K		https://drive.google.com/open?id=16HcPNXF_g_WQOAt4ujHH-3IbkmSNhZvZ	SIM	NÃO
+2026-05-22 22:39:50.864000	Bronze		tamaramartins844@gmail.com	Tamara Pires Martins	1992-11-15 00:00:00	40869469800.0	Av Loreto, 403 - bl72 apto 13 Santo André-sp	11996312216.0	798b9168-6c82-4af6-9b67-a0a878f6fc00	CREFITO	262933-F	Respiratória	https://drive.google.com/open?id=1GdoIImHnTmAGn2zLALsjCWsJWvPNAb-9	https://drive.google.com/open?id=1vE6WoeahiSGeJNUXkQ8hzKoNIoIa3V04	Inidicação de outro profissional	PF	Declaro que li e aceito os Termos de Uso, as Diretrizes e a Política de Privacidade da Plataforma Larsana Care.	https://drive.google.com/open?id=19p9UkIjZYTvY0I9zZy01rUzmWnX-wPSP	https://drive.google.com/open?id=117FnuC_cRMKE0-OXGD3EtBjPZ_TGAN2A	https://drive.google.com/open?id=1lOX5EYnskwNZP5w9MWEDCX6nW2l5Cz3p	NÃO	NÃO
+
+=== PLANILHA: DadosPaciente ===
+Carimbo de data/hora	Endereço de e-mail	Nome do Paciente	Data de Nascimento	CPF	Nome do Responsável	CPF do Responsável	Endereço Completo	Telefone do Responsável	E-mail	Telefone de Recado	Documentos Paciente	Documentos Responsável	Comentários	Registro de Atendimento	Frequência semanal Sugerida	Profissional Parceiro	CREFITO	Nível do Paciente	Cidade	Região	Dados Completos	Status	Status Atendimento	Quantidade
+2026-04-07 07:49:43.905000	aline_donoso2@hotmail.com	Manoel Francisco de Aragão	1941-02-25 00:00:00	61776521820.0	Elza Aparecida Matioli Aragão		Rua deputado antonio silva da cunha bueno n 60 itapark	11997620923.0	elza.matioli@hotmail.com	1145783838.0	https://drive.google.com/open?id=1lmb9_fTQaCB_EYub-uJQOAtARUJxYzLR			Avaliação Manoel
+
+Paciente com histórico de Erisipela em ambos os membros inferiores (MMII) há aproximadamente 9 meses, apresentando quadro associado de fraqueza muscular em MMII. Possui comorbidades relevantes, incluindo doença renal crônica e Insuficiência Cardíaca Congestiva, estando em acompanhamento com nefrologista e cardiologista.
+
+Faz uso de sonda vesical de demora devido a quadro prostático. Ao exame, apresenta estado mental preservado, ADM preservada, com classificação funcional grau IV. Observa-se importante limitação na mobilidade, com dificuldade para subir e descer escadas, além de deambulação prejudicada, caracterizada por passos curtos e lentificados.
+
+Paciente utiliza andador para locomoção fora do domicílio, evidenciando redução da independência funcional e risco aumentado de quedas.
+
+Sugere-se acompanhamento fisioterapêutico com foco em fortalecimento muscular de MMII, treino de marcha, melhora do equilíbrio e condicionamento funcional, respeitando as limitações clínicas associadas, 2x na semana.	2.0	Aline Giseli Olimpio Donoso	03/269110-F	Nível 2	Mauá	Região A	True	Sincronizado	ATIVO	16
+2026-04-08 10:09:09.055000	nathalyc295@gmail.com	Jessica Alves da Silva	1994-04-06 00:00:00	38299859832.0			Rua das adalias 125, jardim primavera- Bloco 7A Ap4	11997898489.0	jessica_js.alves@hotmail.com	11953046251.0	https://drive.google.com/open?id=1MM0lpf2vyGa_MLI-rAJ3_9WhC86GL0P6			Segunda e quarta às 9:20.
+Diagnóstico clínico PC
+Déficit de equilíbrio 
+Diminuição de Adm joelho em flexão 
+Caminha com bengala	2.0	Nathaly dos Santos Cordeiro Toledo	03/436173-F	Nível 3	Mauá	Região A	True	Sincronizado	ATIVO	
+2026-04-08 10:46:54.067000	nathalyc295@gmail.com	Maria dos Anjos dos Santos	1947-10-09 00:00:00	14017398812.0	Celia Valadao Torres		Rua vitória régia 137 jardim primavera	19996635443.0		19996635443.0	https://drive.google.com/open?id=1E6T6_m7KXsoq1G5HJlWDGb238VmATLrs			Segunda e quarta 10:20 
+Paciente com déficit de equilíbrio dinâmico 
+Utiliza bengala de quatro apoios para caminhar 
+1 avaliação TUG teste 29s	2.0	Nathaly dos Santos Cordeiro Toledo	03/436173-F	Nível 1	Mauá	Região A	True	Sincronizado	PAUSA	
+2026-04-10 15:55:31.500000	aline_donoso2@hotmail.com	Herminio Apolonio dos Santos	1938-04-23 00:00:00	21577838815.0	Elisabeth apolonio dos santos toledo	03858307858	Rua pompeu buzzeto 56 boa esperança	11968496490.0	bethast@hotmail.con	11968496490.0	https://drive.google.com/open?id=1cQhybaVEGaJ1lrCUgZd3pnLeZSzEqtBc			Hermínio Apolônio dos Santos 
+87 anos - 23/04/1938
+Viúvo a mais de 4 anos, 3 filhos
+Elisabeth / Isabel / Adilson
+Nascido em Bahia - Andarai (Itaberaba) 
+Trabalhava de Carvão/ Arrancava Toco / Ferreiro por 32 anos 
+
+Mora Sozinho - Faz comida/ 
+
+DM - HAS - Marca Passo - Síndrome de Osinifilia  - Ácido Úrico Elevado - Asma Próstata Sopro no coração - (Mirtasapina) - Tirou um Rim / Hérnia Ignal / Marca Passo / Leucemia (2009) / 
+
+Nega Fumo
+Nega Bebida 
+
+HMA: 
+Algia 9/10 Joelho E - as dores pioram no período da noite, quando anda um pouco, ainda desce à rua, mas não sobe mais na rua
+Dentro de casa o joelho não dói. Dor de agulha já fez muitas infiltrações, fez caminhada e hidroginástica por 20anos. 
+
+Algia ao estender o joelho e dificuldade para deambular	1.0	Larissa dos Santos Bergo	03/341992-F	Nível 1	Mauá	Região A	True	Sincronizado	ATIVO	
+2026-04-13 08:59:57.043000	nathalyc295@gmail.com	Vilson Bozzato	1949-05-16 00:00:00	50193066815.0	Monica Coguetto Bozzato	19607475844.0	Rua Santa Cecília 371 Bairro Matriz- Mauá Ap21 2 andar	11986492789.0		11999496549.0	https://drive.google.com/open?id=1WcnRwNkgREVM-2gCIeSpBbf8gakXOn3W	https://drive.google.com/open?id=1VS0SyXVRgp5nPYHcApV1Vs8FU66lqVHK		Paciente realiza tratamento 2x na semana, segunda e quarta. 
+Doença de Parkinson 
+Artrose de joelho bilateral 
+Quadro álgico joelho E 
+Encurtamento de isquiotibiais 
+Déficit de equilíbrio e propriocepção	2.0	Nathaly dos Santos Cordeiro Toledo	03/436173-F	Nível 3	Mauá	Região A	True	Sincronizado	ATIVO	
+2026-04-15 17:25:25.330000	maryna.goy16@gmail.com	Maria Valdina Borges Granjeiro	1954-03-19 00:00:00	22408211832.0	José Alves Granjeiro	65601017891.0	Rua Vinicius de Moraes, 260 - Jardim Feital Mauá	11981859386.0		11981859386.0				M.V.B.G.  72 anos, sexo F, DN:19/03/1954
+Mãe de três filhos (Sulivan, Suellen e Suliene), casada com José Alves Granjeiro.
+Aposentada da empresa de cerâmica de SCS. Escolaridade 2greu.
+
+HD: Demência precoce
+DP: HAS | Alt. Cardiaca | Trigliceres alto
+Medicamentos: Quetiapina 25mg, Respiridona 2mg, Ruvastatina 20mg, Furosemida 40mg, Loratadina 10mg e Losartana 50mg.
+
+HP: Paciente era praticante de atividade física, mas parou aos poucos e perdeu o interesse, a voz começou a alterar, e teve epsódios de raiva, apresenta fadiga facilmente. Iniciou com perca de localização geográfica e caminhadas noturnas.
+
+Tinha interesse em danças, forró, Bolero, Valsa e Roberto Carlos.
+
+Avaliação da queixa: Paciente entende comando simples, apresnta função cognitiva lenta ainda realiza algumas AVD`S (Depedendete para: Higiene pessoal, alimentação (preparo), Veste roupa com auxilio)
+
+Paciente não apresenta algia e se mantém funcional.	1.0	Larissa dos Santos Bergo	03/341992-F	Nível 1	Mauá	Região A	True	Sincronizado	ATIVO	
+2026-04-16 18:00:35.521000	fernandapinattifisio@gmail.com	Edith Emilia Sitta Battistioli	1943-05-20 00:00:00	94374058834.0	Renata (filha)		R. Brasílio Machado, 533 - ap 71a - Centro, São Bernardo do Campo - SP, 09715-140, Brasil	11973106324.0	renabatis@gmail.com	11969048358.0	https://drive.google.com/open?id=1eAIWdSRyqcxT0-mkrxu-a1tRm21Dg9fk, https://drive.google.com/open?id=1O2iE2kNPza5Ql_mnmGVgWOewZcvXEA32, https://drive.google.com/open?id=1Ys97qg1Ip4xFuXN9ne8XbZ20V5cgwj_j			PARECER DA AVALIAÇÃO FISIOTERAPÊUTICA
+
+A avaliação fisioterapêutica da Sra. Edith foi conduzida de forma abrangente, contemplando aspectos físicos, funcionais, emocionais e contextuais, permitindo uma compreensão global do seu estado de saúde atual.
+
+Durante o atendimento, a paciente mostrou-se colaborativa, com boa capacidade de comunicação, embora com presença de componente emocional relevante, evidenciado por momentos de sensibilidade ao abordar aspectos pessoais e do seu histórico recente. Esse fator foi considerado durante toda a condução da avaliação, respeitando seu ritmo e promovendo um ambiente acolhedor e seguro.
+
+Foram investigadas as principais queixas, histórico clínico e funcional, bem como realizado levantamento detalhado das condições de mobilidade, equilíbrio, dor e capacidade para atividades de vida diária. Observa-se que, apesar de manter certo nível de independência funcional, a paciente apresenta sinais de descondicionamento físico, alterações de equilíbrio e queixas dolorosas recorrentes, associados também a fatores emocionais e comportamentais.
+
+A avaliação evidenciou a importância de uma abordagem terapêutica integrada, considerando não apenas a reabilitação musculoesquelética, mas também o suporte ao condicionamento global, à segurança na mobilidade e ao bem-estar emocional.
+
+Como proposta inicial de intervenção, foi sugerido acompanhamento fisioterapêutico com frequência de duas sessões semanais, preferencialmente no período da manhã, conforme previamente alinhado e validado com a paciente, visando melhor adesão e aproveitamento terapêutico.
+
+No que se refere ao contexto socioeconômico e ambiental, a paciente encontra-se inserida em estrutura familiar de suporte, residindo atualmente com a filha em ambiente domiciliar organizado e com boas condições gerais. Observa-se presença de rede de apoio ativa e preocupação familiar com sua segurança, especialmente no que diz respeito à prevenção de riscos e manutenção da autonomia. O contexto habitacional atual mostra-se mais favorável à sua condição funcional quando comparado ao anterior, sobretudo pela redução de barreiras arquitetônicas.
+
+De forma geral, a paciente apresenta potencial de evolução funcional com intervenção fisioterapêutica direcionada, sendo recomendada a continuidade do acompanhamento com plano terapêutico individualizado, focado na melhora da qualidade de vida, autonomia e prevenção de declínio funcional.	2.0	Fernanda Lou Manoel Pinatti	03/432371-F	Nível 2	São Bernardo do Campo	Região B	True	Sincronizado	ATIVO	
+2026-05-21 09:07:08.844000	maryna.goy16@gmail.com	Margarida de Fátima Santos Aquino	1953-12-01 00:00:00	087.322.238-54			Rua Amaro Correia, 61 - Jd. Luzitano	11964109804.0		11964109804.0				AVALIAÇÃO 21/05/2026 -  62 anos - casada Seu Paulo 6 filhos - 5 Partos Normais e 1 Cesárea; 13 Netos e 3 Bisnetos; PC aos 4anos de idade - HAS Controlada - NEGA DM - Colesterol Controlada - Sem Alt. Cardíaca  - Cirurgia no Pé - Faz uso de Tênis ortopédico; HMA : Dor quando movimenta para fazer faxina e não consegue subir escadas. Massagem alivia as dores fez e aliviou aurículoterapia. Paciente apresenta pseudo Romberg vestibular? Propriocepção? Em costuras mais altas apresenta desequilíbrio posterior, imperativa de para vertebrados do lado esquerdo, diferença de massa muscular entre membros inferiores	1.0	Marina Silva Batista	03/277681-F	Nível 1	Mauá	Região A	True	Sincronizado	PAUSA
+2026-05-22 18:09:50.057000	aline_donoso2@hotmail.com	Lenir Ribeiro	1953-09-08 00:00:00	60613254872.0	Maria de Lourdes Ribeiro		Rua pompeu buzzeto n 5 boa esperança	4516-2639		45162639.0	https://drive.google.com/open?id=1Dun3BXO9aqFYXScj_J257A9bbMQX7YMV			Realizada avaliação fisioterapêutica. Paciente acamada, acompanhada pela irmã Lourdes. Encontra-se em estado de leve confusão mental, pouco comunicativa e com baixa colaboração durante a avaliação. Paciente não mantém controle de tronco para sedestação, sendo possível apenas com auxílio. Apresenta limitação de amplitude de movimento em ombro esquerdo, referindo dor durante a mobilização, principalmente no movimento de abdução. Observa-se fraqueza muscular em membros inferiores, grau III, com incapacidade de realizar movimentos ativos eficazes, apresentando apenas arrasto de membros no leito. Não há presença de edema em membros inferiores. Paciente apresenta resistência aos exercícios ativos assistidos, sendo necessária a realização de mobilizações predominantemente passivas durante a maior parte do atendimento. Aline Giseli Olimpio Donoso crefito 3/269110-F	2.0	Aline Giseli Olimpio Donoso	269110-F	Nível 1	Mauá	Região A	True	Sincronizado	ATIVO
+2026-04-06 16:05:09.658000	maryna.goy16@gmail.com	Severina Rosa Ramos de Sena	1950-06-17 00:00:00	14004735866.0	Andrea Ramos de Sena Oliveira	14057464832.0	Rua Miguel Agnello, 525	11951431051‬		11949800528.0				Sexo. FEM, 74anos, 4 filhos
+Trabalhou como doméstica por 20anos (conseguiu se aposentar) | Auxílio doméstico do Esposo Guilherme
+
+- Algia em MMII, artrose nos joelho  e depressão
+- Sedentária 
+- 86Kg | 1,60m  Pré diabética (glifage), HAS nega, colesterol (Sinvastatina), depressão (manipulado), artrose, hérnias de disco na lombar, 3 cesárias, cirurgia do MID (paciente não soube explicar)- HMA: No início de Dezembro paciente relata 2 quedas no mesmo dia e não anda mais, desde a data, faz uso de cadeira de rodas e cadeira de banho, foi no UPA E encaminharam para o Nardini, fez uma ressonância e uma consulta particular, deu duas hérnias de disco, ficou internada, mas não fizeram nada (só com dipirona e tramol) -Exames: RNM (foto)
+- A enfermeira indicou fazer fisioterapiaExame físico: 
+PA 130x90mmhg 
+FC 76bpm
+AUSCULTA: MV+ S/RA
+
+FM 3 em MMII
+Sensibilidade alterada para movimentos de falanges  
+
+QFP: Voltar a andar em casa, com dispositivo de apoio	2.0	Marina Silva Batista	03/277681-F	Nível 1	Mauá	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Rubens Biondi	1939-11-15 00:00:00	094.183.268-68			Rua Guido Montegia, 129	11950585718.0		11950585718.0				AVALIAÇÃO 22/10/2024 - HMA: Algia em Coluna lombar, Paciente relata que desde os 30anos de idade trata com acumpultura. Piorou após a COVID-19, nã se locomovia muito, mas foi quando começou usar a bengala, após um cansaço há dois meses atrás ficou internado e fez cateterismo, quando retornou percebeu que a algia na coluna tinha exacerbado. Paciente apresenta uma Escoliose importante com convexidade para a E. dificuldade de deambulação, edema importante em MMII e tronco.	2.0	Aline Giseli Olimpio Donoso	03/269110-F	Nível 3	Mauá	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Creusa Borges da Costa	1958-02-24 00:00:00	29353230845.0	Mônica Borges da Costa		Rua Severino Zacarelli, 267 b Vila Real - Mauá	11940388109.0	Mônicacosta132130@gmail.com	11961634237.0				AVALIAÇÃO 05/19/2023 - HMA: Paciente encontra-se acamada após AVC. Apresenta Hemiparesia a D com predominio braquial e caráter distal incompleta. Paciente assume e mantém SD, e OT com Auxilio. Oriento familia quanto aos cuidados e a paciente quando a independência no leito. Finalizo sem intercorrências.	2.0	Danielle de Souza Moreno	03/317206-F	Nível 1	Mauá	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Izabel da Silva Carvalho	1932-11-21 00:00:00	52836991534.0	Valda Carvalho da Silva		Rua Jacinto Martins Garcia, 33	11956042620.0	Valdacv2020@gamail.com	11956042620.0				AVALIAÇÃO 13/08/2024 - HMA: Paciente trabalhou muito tempo na roça, teve 18 filhos, todos de parto normal, foi casada por 70 anos, é viúva do seu Arlindo a mais de 10 anos. Apresentou queda da própria altura há 3 meses, apresenta escape de urina e faz uso de fralda geriátrica. Paciente apresenta algia em joelho E, com uma artrose importante e escoliose em coluna lombar	2.0	Danielle de Souza Moreno	03/317206-F	Nível 1	Mauá	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Maria Do Carmo Araújo Braga	1957-06-06 00:00:00	072.685.268-65	Regina Araújo Braga Rodrigues		Av. Barão de Mauá, 6100	11913412293.0		11913412293.0				AVALIAÇÃO 18/06/2022 - HD: CANVAS	1.0	Marina Silva Batista	03/277681-F	Valor Social	Mauá	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Sirlene Aparecida Maschio	1968-06-23 00:00:00	11327000865.0			Rua Dorival Hércolis Gola Júnior, 81 - Pilar Velho / Ribeirão Pires	11957726929.0	florisdamanha@gmail.com	11957726929.0				AVALIAÇÃO 28/01/2026 - HD: Artrose de Quadril D	2.0	Marina Silva Batista	03/277681-F	Nível 1	Ribeirão Pires	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Antônio Querino de Lima	1944-10-25 00:00:00	13525018487.0	Valdir Querino de Lima Sobrinho	26996894832.0	Rua João Moreira Filho, 21 A	11987841735.0	Valdir.querino2017@gmail.com	11987841735.0				AVALIAÇÃO 18/08/2025 - HD: AVC	2.0	Marina Silva Batista	03/277681-F	Valor Social	Mauá	Região A	True	Sincronizado	ATIVO	
+	maryna.goy16@gmail.com	Leticia Cavalcante da Silva			Ruth Cavalcante da Silva		Rua Finamore, 15A - CEP:09341-020	11981285603.0		11981285603.0				AVALIAÇÃO 16/12/2024 - HD: Sequela de miningite bacteriana	1.0	Marina Silva Batista	03/277681-F	Valor Social	Mauá	Região A	False		ATIVO	
+	maryna.goy16@gmail.com	Felipe Augusto Sanchez													2.0	Marina Silva Batista	03/277681-F	Valor Social	Mauá	Região A	False		ATIVO	
+
+=== PLANILHA: Pagamentos ===
+Nome Paciente / Responsável	Celular	Email	CPF/CNPJ Paciente	Valor do Ciclo	Data de Vencimento	Descrição	Profissional Parceiro	Wallet ID	Valor 1 de Repasse	Ciclo	Soma do Mês:	Faturamento Larsana
+Manoel Francisco de Aragão	11997620923	elza.matioli@hotmail.com	61776521820	1040	2026-05-01 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Aline Giseli Olimpio Donoso	992fda75-d3a8-44be-bf12-be29b246ceb6	628.0	CICLO 1	0	0
+Herminio Apolonio dos Santos	11968496490	bethast@hotmail.con	21577838815	400	2026-05-13 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 4 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Larissa dos Santos Bergo	00978185-4af7-40f2-afb4-c9aa73cd052e	280	CICLO 4
+Jessica Alves da Silva	11997898489	jessica_js.alves@hotmail.com	38299859832	1200	2026-05-11 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Nathaly dos Santos Cordeiro Toledo	1fd5d7fc-9409-4347-a4a5-52e84e7da878	840	CICLO 24
+Vilson Bozzato	11986492789		50193066815	1200	2026-05-15 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Nathaly dos Santos Cordeiro Toledo	1fd5d7fc-9409-4347-a4a5-52e84e7da878	840	CICLO 5
+Severina Rosa Ramos de Sena	11951431051‬		14004735866	800	2026-05-11 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Marina Silva Batista	79dfcd2b-54ac-42d9-847e-990af8696987	380	CICLO 1
+Rubens Biondi	11950585718		094.183.268-68	1200	2026-05-01 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Aline Giseli Olimpio Donoso	992fda75-d3a8-44be-bf12-be29b246ceb6	840	CICLO 12
+Edith Emilia Sitta Battistioli	11973106324	renabatis@gmail.com	94374058834	1200	2026-05-14 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Fernanda Lou Manoel Pinatti	8a52caaf-2bf0-4f48-9d23-37ab6ac2f971	620	CICLO 1
+Manoel Francisco de Aragão	11997620923	elza.matioli@hotmail.com	61776521820	1040	2026-05-01 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Aline Giseli Olimpio Donoso	992fda75-d3a8-44be-bf12-be29b246ceb6	628.0	CICLO 1
+Severina Rosa Ramos de Sena	11951431051‬		14004735866	800	2026-05-11 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Marina Silva Batista	79dfcd2b-54ac-42d9-847e-990af8696987	380	CICLO 1
+Manoel Francisco de Aragão	11997620923	elza.matioli@hotmail.com	61776521820	1040	2026-05-01 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Aline Giseli Olimpio Donoso	992fda75-d3a8-44be-bf12-be29b246ceb6	628.0	CICLO 1
+Manoel Francisco de Aragão	11997620923	elza.matioli@hotmail.com	61776521820	910.0	2026-05-30 00:00:00	O valor descrito neste recibo refere-se ao ciclo de 8 atendimentos realizados, prestados por profissional parceiro, incluindo os custos operacionais, administrativos e de intermediação necessários para viabilização do serviço por meio da plataforma.
+
+A composição do valor contempla a organização, suporte, curadoria de profissionais e toda a gestão envolvida, assegurando qualidade, segurança e eficiência na condução dos atendimentos ao longo do período contratado.	Aline Giseli Olimpio Donoso	992fda75-d3a8-44be-bf12-be29b246ceb6	637	CICLO 2
+
+=== PLANILHA: ClientesAsaas ===
+Nome Cliente	CPF	Endereço Completo	Celular/WhatsAPP	Email
+Manoel Francisco de Aragão	61776521820.0	Rua deputado antonio silva da cunha bueno n 60 itapark	#VALUE!	elza.matioli@hotmail.com
+Jessica Alves da Silva	38299859832.0	Rua das adalias 125, jardim primavera- Bloco 7A Ap4	#VALUE!	jessica_js.alves@hotmail.com
+Maria dos Anjos dos Santos	14017398812.0	Rua vitória régia 137 jardim primavera	#VALUE!	
+Severina Rosa Ramos de Sena	14004735866.0	Rua Miguel Agnello, 525	11951431051‬	
+Herminio Apolonio dos Santos	21577838815.0	Rua pompeu buzzeto 56 boa esperança	#VALUE!	bethast@hotmail.con
+Vilson Bozzato	50193066815.0	Rua Santa Cecília 371 Bairro Matriz- Mauá Ap21 2 andar	11986492789.0	
+Maria Valdina Borges Granjeiro	22408211832.0	Rua Vinicius de Moraes, 260 - Jardim Feital Mauá	#VALUE!	
+Edith Emilia Sitta Battistioli	94374058834.0	R. Brasílio Machado, 533 - ap 71a - Centro, São Bernardo do Campo - SP, 09715-140, Brasil	11973106324.0	renabatis@gmail.com
+Rubens Biondi	094.183.268-68	Rua Guido Montegia, 129	11950585718.0	
+Izabel da Silva Carvalho	52836991534.0	Rua Jacinto Martins Garcia, 33	11956042620.0	Valdacv2020@gmail.com
+Creusa Borges da Costa	29353230845.0	Rua Severino Zacarelli, 267 b Vila Real - Mauá	11940388109.0	Mônicacosta132130@gmail.com
+Margarida de Fátima Santos Aquino	087.322.238-54	Rua Amaro Correia, 61 - Jd. Luzitano	11964109804.0	
+Maria Do Carmo Araújo Braga	072.685.268-65	Av. Barão de Mauá, 6100	11913412293.0	
+Sirlene Aparecida Maschio	11327000865.0	Rua Dorival Hércolis Gola Júnior, 81 - Pilar Velho / Ribeirão Pires	11957726929.0	florisdamanha@gmail.com
+Antônio Querino de Lima	13525018487.0	Rua João Moreira Filho, 21 A	11987841735.0	Valdir.querino2017@gmail.com
+Lenir Ribeiro	60613254872.0	Rua pompeu buzzeto n 5 boa esperança	114516-2639	
+
+=== PLANILHA: Valores ===
+Regiões - Níveis	Nivel 1	Nivel 2	Nivel 3
+REGIÃO A	100.0	130.0	150.0
+REGIÃO B	130.0	150.0	170.0
+REGIÃO C	150.0	180.0	200.0
+Legenda:
+REGIÃO A: Mauá, Ribeirão Pires, Rio Grande da Serra e Diadema
+REGIÃO B: Santo André e São Bernardo do Campo
+REGIÃO C: São Caetano e São Paulo (Capital)

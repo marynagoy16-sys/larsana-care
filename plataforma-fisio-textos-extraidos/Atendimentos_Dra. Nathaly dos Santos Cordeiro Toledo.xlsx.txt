@@ -1,0 +1,57 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Atendimentos\Dra. Nathaly dos Santos Cordeiro Toledo.xlsx ===
+=== EXTRAÍDO EM: 2026-06-05T00:52:35 ===
+
+=== PLANILHA: Vilson Bozzato ===
+					Nível do Paciente		Cidade - Região
+					Nível 3		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-08 00:00:00	Ciclo 15	Paciente em BEG, realizado exercícios em sedestação na cadeira, mobilização passiva de joelho, flexão e extensão de joelho com resistência, abdução de ombros, durante a sessão o paciente relatou que estava precisando ir ao banheiro, aparentou estar com dor de barriga, pediu para encerrar a sessão 15 minutos antes			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-13 00:00:00	Ciclo 15	Paciente em BEG, realizado 10 minutos de bicicleta+adução de ombros com magic circle, flexão de tronco em sedestação, FM do foot core e MMII com caneleira de 3 kilos.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-16 00:00:00	Ciclo 15	Paciente em BEG, realizado 10 minutos de bicicleta+ abdução de ombros com thera band, FM de oblíquos e reto abdominal, marcha estacionária, flexão e extensão de ombros com halter e  thera band, flexão e extensão de joelhos.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+20/04/0206	Ciclo 15	Paciente relatou dor no joelho E ao acordar, realizado us, alongamento com foco em MMII, mobilidade de joelho, calcanhar e quadril, flexão e extensão de joelhos com fitball e theraband.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-22 00:00:00	Ciclo 15	Paciente relatou melhora no joelho e está sentindo apenas dor leve, realizado US, FM com foco em isquiotibiais, quadríceps, glúteos e foot core, 10 minutos de bicicleta.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-27 00:00:00	Ciclo 15	Paciente em BEG, realizado 10 min de bicicleta, flexão e extensão de joelhos com fitball e caneleira de 3kg, marcha estacionária em sedestação, FM do foot core, flexão plantar em posição OT.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-29 00:00:00	Ciclo 15	Paciente em BEG, realizado 10 minutos de bicicleta+abdução de ombros com thera band, flexão e extensão de joelhos, legpress adaptado com step, rotação e flexão de tronco.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-04 00:00:00	Ciclo 15	Paciente em BEG, realizado 10 minutos de bicicleta+adução de ombros com magic circle, flexão de tronco, FM global de MMII.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+Data: 10/05/2026		Pagamento Ciclo 15:  R$840					
+2026-05-06 00:00:00	Ciclo 16	Paciente em BEG, exercícios realizados para FM de abdômen e paravertebrais, foot core, mobilidade de quadril e joelhos.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-13 00:00:00	Ciclo 16	Paciente em BEG, realizado 10 minutos de bicicleta+FM de ombro com halter de 1kg, abdução, adução e flexão de quadril com thera band e overball, FM de isquiotibiais com fitball, flexão de tronco.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-20 00:00:00	Ciclo 16	Paciente em BEG, realizado 10 minutos de bicicleta+extensão de ombros com thera band, FM do footcore, flexão de quadril com caneleira de 3kg, flexão e inclinação lateral de tronco, mobilidade de quadril em abdução com step, FM isquiotibiais.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-21 00:00:00	Ciclo 16	Paciente em BEG, realizado 10 minutos de bicicleta+adução de ombros com magic circle, rotação de tronco em sedestação, abdução e adução de quadril com overball e theraband, extensão de coluna com fitball, FM de oblíquos+US joelho E.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-25 00:00:00	Ciclo 16				Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-28 00:00:00	Ciclo 16				Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-06-02 00:00:00	Ciclo 16				Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-06-04 00:00:00	Ciclo 16				Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+Data: 10/06/2026		Pagamento Ciclo 16:  R$840					
+	Ciclo 17
+	Ciclo 17
+	Ciclo 17
+	Ciclo 17
+	Ciclo 17
+	Ciclo 17
+	Ciclo 17
+	Ciclo 17
+Data:		Pagamento Ciclo 17:  R$840					
+
+=== PLANILHA: Jessica Alves da Silva ===
+					Nível do Paciente		Cidade - Região
+					Nível 3		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-03-18 00:00:00	Ciclo 23	Paciente relatou desconforto em região de trapézio superior e pernas, musculatura encontrava-se rígida devido a tensão, a mesma disse que havia passado por um forte episódio de estresse. Realizado ventosaterapia estática e dinâmica+ liberação miofascial manual.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-03-20 00:00:00	Ciclo 23	Paciente em BEG, realizado 10 min de ciclo ergômetro, exercícios de mobilidade e alongamento com foco em MMII, agachamento, prancha dinâmica com estabilização das pernas feita pela terapeuta, fortalecimento muscular global de MMSS.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-03-23 00:00:00	Ciclo 23	Paciente em BEG, exercícios realizados no jump, agachamento, descarga de peso de um membro para o outro, deslocamento lateral, em posição ortostática no chão realizou rotação de tronco com magic circle+ adução de ombros, FM região dorsal.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+25/03/0206	Ciclo 23	Paciente em BEG, FM foot core e power house, abdução e adução de quadril com overball e theraband, inclinação lateral de tronco, treino de marcha com barreira apoiando na terapeuta.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-03-30 00:00:00	Ciclo 23	Paciente em BEG, realizado alongamento global, exercícios de mobilidade com foco em MMII, FM core,  trotação de tronco com magic circle  em posição OT, ciclo ergômetro por 10 minutos.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-01 00:00:00	Ciclo 23	Paciente em BEG, exercícios realizados no colchonete, ponte, flexão de quadril com joelhos estendidos unilateral e bilateral, flexão de coluna com magic circle, adução de quadril, agachamento.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-06 00:00:00	Ciclo 23	Paciente em BEG, realizado alongamento e mobilidade passiva focada em MMII, liberação miofascial+ ventosa dinâmica.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-08 00:00:00	Ciclo 23	Paciente em BEG, realizado 10 minutos de ciclo ergômetro, exercícios no jump para estabilidade de MMII, equilíbrio e propriocepção, agachamento, treino de marcha com barreira.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+Data: 11/04/2026		Pagamento Ciclo 23:  R$800					
+2026-04-15 00:00:00	Ciclo 24	Paciente relatou dores no corpo pois andou muito no final de semana, realizada liberação miofascial com ventosas+mobilidade e alongamento passivo.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-20 00:00:00	Ciclo 24	Paciente em BEG, realizado exercícios passivos e ativos para mobilidade e alongamento de MMII, FM do core e foot core.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-22 00:00:00	Ciclo 24	Paciente em BEG, exercícios realizados no jump para estabilidade articular de MMII, equilíbrio e propriocepção, FM de MMSS.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-27 00:00:00	Ciclo 24	Paciente em BEG, realizada liberação miofascial em MMII, mobilização passiva de joelhos, 10 min de ciclo ergômetro e FM foot core.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-29 00:00:00	Ciclo 24	Paciente em BEG, realizada mobilização passiva de joelhos, ponte, 10 minutos de ciclo ergômetro, agachamento com overball estabilizando joelhos (paciente conseguiu agachar sem apoio, flexão de tronco, flexão e abdução de ombros com thera band.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-06 00:00:00	Ciclo 24	Paciente relatou dor no corpo pois caminhou muito no final de semana, realizada liberação miofascial+ ventosa+ alongamento passivo.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-08 00:00:00	Ciclo 24	Paciente em BEG, realizado mobilidade e alongamento com foco em MMII, exercícios de equilíbrio e propriocepção, FM com foco em MMII.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-13 00:00:00	Ciclo 24	Paciente em BEG, realizado 10 minutos de ciclo ergômetro, flexão e inclinação lateral de tronco, flexão de quadril em sedestação, agachamento, mobilidade ativa e passiva de MMII.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+Data: 13/05/2026		Pagamento Ciclo 23:  R$840 (Pagamento realizado via Crédito, cofirmado, mas não disponível)					

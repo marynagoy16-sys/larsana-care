@@ -1,0 +1,99 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Atendimentos\Dra. Aline Giseli Olimpio Donoso.xlsx ===
+=== EXTRAÍDO EM: 2026-06-05T00:53:16 ===
+
+=== PLANILHA: Manoel Francisco de Aragão ===
+					Nível do Paciente		Cidade - Região
+					Nível 2		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-06 00:00:00	Ciclo 1	Avaliação: Paciente com histórico de Erisipela em ambos os membros inferiores (MMII) há aproximadamente 9 meses, apresentando quadro associado de fraqueza muscular em MMII. Possui comorbidades relevantes, incluindo doença renal crônica e Insuficiência Cardíaca Congestiva, estando em acompanhamento com nefrologista e cardiologista. Faz uso de sonda vesical de demora devido a quadro prostático. Ao exame, apresenta estado mental preservado, ADM preservada, com classificação funcional grau IV. Observa-se importante limitação na mobilidade, com dificuldade para subir e descer escadas, além de deambulação prejudicada, caracterizada por passos curtos e lentificados. Paciente utiliza andador para locomoção fora do domicílio, evidenciando redução da independência funcional e risco aumentado de quedas. Sugere-se acompanhamento fisioterapêutico com foco em fortalecimento muscular de MMII, treino de marcha, melhora do equilíbrio e condicionamento funcional, respeitando as limitações clínicas associadas, 2x na semana.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-10 00:00:00	Ciclo 1	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores após internação prolongada. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores com auxílio de mini band e bola, além de exercícios de equilíbrio. Finalizo com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-13 00:00:00	Ciclo 1	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores após internação prolongada. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores com auxílio de mini band e bola, além de exercícios de mobilidade. Finalizo com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-17 00:00:00	Ciclo 1	Realizado atendimento domiciliar. Foram realizados exercícios de fortalecimento de membros inferiores com auxílio de faixa elástica, fortalecimento da coluna vertebral e de membros superiores e treino de marcha com cones. Atendimento finalizado com alongamentos			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-20 00:00:00	Ciclo 1	Realizado atendimento domiciliar. Foram realizados exercícios de fortalecimento de membros inferiores com auxílio de bola, treino funcional de subir e descer escadas e treino de marcha. Atendimento finalizado com alongamentos.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-24 00:00:00	Ciclo 1	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores após internação prolongada. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores e treino de marcha com os cones, além de exercícios de equilíbrio. Finalizo com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-27 00:00:00	Ciclo 1	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores após internação prolongada. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores na escada, treino de subir e descer e exercícios de mobilidade. Finalizo com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-01 00:00:00	Ciclo 1				Dra. Aline Giseli Olimpio Donoso 269110-F		
+Data: 01/05/2026		Pagamento Ciclo 1: R$628					
+2026-05-04 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores com auxílio de mini band, 10 min de ciclo ergométrico e exercícios de mobilidade de MMII. Finalizo com alongamentos globais. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-08 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores em ortostatismo com auxilio de caneleira de 1 kg e exercícios de mobilidade da coluna vertebral. Finalizo com alongamentos globais. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-11 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores em DD e DL com auxilio de caneleira de 1 kg e exercícios de mobilidade da coluna vertebral. Finalizo com alongamentos globais. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-15 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores em ortostatismo, exercícios de equilíbrio e propriocepçao. Finalizo com alongamentos globais. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-18 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores em ortostatismo com auxilio de caneleira de 1 kg, treino de marcha e mobilidade global. Finalizo com alongamentos globais. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-20 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores em ortostatismo com auxilio de theraband e bola e exercícios de mobilidade da coluna vertebral e MMSS. Finalizo com alongamentos globais. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-22 00:00:00	Ciclo 2	Realizado atendimento domiciliar com objetivo de fortalecimento de membros inferiores. Paciente sem queixas álgicas no momento. Foram realizados exercícios de fortalecimento para membros inferiores em ortostatismo e em sedestação com auxilio de theraband e caneleira de 1 kg e exercícios de equilíbrio com foco na melhora da marcha. Finalizo com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-25 00:00:00	Intercorrência	INTERNAÇÃO			Dra. Aline Giseli Olimpio Donoso 269110-F		
+Data:		Pagamento Ciclo 2: R$637					
+
+=== PLANILHA: Rubens Biondi ===
+					Nível do Paciente		Cidade - Região
+					Nível 3		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-02 00:00:00	Ciclo 11				Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-07 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros inferiores, além de alongamentos globais. Aplicada auriculoterapia nos pontos correspondentes à dor referida pelo paciente. Utilizada bola como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-14 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros inferiores, além de alongamentos globais. Aplicada auriculoterapia nos pontos correspondentes à dor referida pelo paciente. Utilizada mini band como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-17 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Foram realizados exercícios de fortalecimento de membros inferiores com auxílio da faixa elástica, fortalecimento da coluna vertebral e de membros superiores e treino de marcha com equilíbrio nos cones. Finalizado com massagem por 15 min.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-22 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Foram realizados exercícios de mobilidade de coluna lombar com auxílio de bastão e treino de marcha com equilíbrio nos cones e mini band. Finalizado com massagem por 15 min.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-24 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de mobilidade em DD, além de alongamentos globais. Utilizada bola como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-28 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros inferiores, além de alongamentos globais. Aplicada auriculoterapia nos pontos correspondentes à dor referida pelo paciente. Utilizada mini band como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-30 00:00:00	Ciclo 11	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros inferiores, além de alongamentos globais. Aplicada auriculoterapia nos pontos correspondentes à dor referida pelo paciente. Utilizada mini band como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.	 Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+Data: 04/05/2026		Pagamento Ciclo 12: R$840					
+2026-05-05 00:00:00	Ciclo 12	Realizado atendimento domiciliar. Foram realizados exercícios de mobilidade de coluna lombar com auxílio de bastão e treino de marcha com equilíbrio nos cones e mini band. Finalizado com massagem por 15 min. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-08 00:00:00	Ciclo 12	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de mobilidade em DD, além de alongamentos globais. Utilizada bola como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar. Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-12 00:00:00	Ciclo 12	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros inferiores, além de alongamentos globais. Aplicada auriculoterapia nos pontos correspondentes à dor referida pelo paciente. Utilizada mini band como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.	 Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-15 00:00:00	Ciclo 12	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros superiores, além de alongamentos globais. Utilizada bola como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.	 Dra. Aline Giseli Olimpio Donoso 269110-F			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-20 00:00:00	Ciclo 12	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de membros inferiores em DD, além de alongamentos globais. Aplicada auriculoterapia nos pontos correspondentes à dor referida pelo paciente. Utilizada theraband como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-22 00:00:00	Ciclo 12	Realizado atendimento domiciliar. Paciente queixa-se de dor intensa em coluna lombar. Foram realizados exercícios de fortalecimento da coluna vertebral e de mobilidade em sedestação, além de alongamentos globais. Utilizada bola e bastão como recurso auxiliar durante os exercícios. Finalizo com massagem relaxante em coluna lombar.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-26 00:00:00	Ciclo 12				Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-28 00:00:00	Ciclo 12				Dra. Aline Giseli Olimpio Donoso 269110-F		
+Data:		Pagamento Ciclo 12: R$840					
+	Ciclo 13						
+	Ciclo 13						
+	Ciclo 13						
+	Ciclo 13						
+	Ciclo 13						
+	Ciclo 13						
+	Ciclo 13						
+	Ciclo 13						
+Data:		Pagamento Ciclo 13: R$840					
+
+=== PLANILHA: Lenir Ribeiro ===
+					Nível do Paciente		Cidade - Região
+					Nível 1		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-06 00:00:00	Ciclo 3	Realizado atendimento domiciliar. Paciente encontrado no leito em decúbito dorsal. Foram realizados exercícios ativos-assistidos de membros superiores e membros inferiores, além de alongamentos globais. Realizada sedestação à beira do leito. Em posição sentada, realizados exercícios para fortalecimento da coluna vertebral.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-13 00:00:00	Ciclo 3	Realizado atendimento domiciliar. Paciente encontrado no leito em decúbito dorsal. Foram realizados exercícios ativos-assistidos de fortalecimento para membros superiores e membros inferiores, além de alongamentos globais. Realizada sedestação à beira do leito.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-20 00:00:00	Ciclo 3	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com auxílio de faixa elástica e bola. Em seguida, realizada sedestação em cadeira de rodas e treino de ortostatismo com apoio bilateral. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-04-27 00:00:00	Ciclo 3	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com auxílio de faixa elástica e bola. Em seguida, realizada sedestação em cadeira de rodas e treino de ortostatismo com apoio bilateral. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+Data: 08/05/2026		Pagamento Ciclo 3: R$280					
+2026-05-04 00:00:00	Ciclo 4	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com auxílio da bola. Em seguida, realizada sedestação em cadeira de rodas e treino de ortostatismo com apoio bilateral. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-08 00:00:00	Ciclo 4	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com auxílio de mini band. Em seguida, realizada sedestação em cadeira de rodas e treino de ortostatismo com apoio bilateral. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-11 00:00:00	Ciclo 4	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com auxílio de faixa elástica e bola. Em seguida, realizada sedestação em cadeira de rodas e treino de ortostatismo com apoio bilateral e treino de equilíbrio. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-15 00:00:00	Ciclo 4	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com peso de 1 kilo, exercicios ativos assistidos de membros inferiores. Em seguida, realizada sedestação a beira leito com treino de controle de tronco. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-18 00:00:00	Ciclo 4	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com peso de 1 kilo, exercicios ativos assistidos de membros inferiores em sedestação na cadeira de rodas e treino de ortostatismo. Atendimento finalizado com alongamentos globais.vb			Dra. Aline Giseli Olimpio Donoso 269110-F		
+2026-05-22 00:00:00	Ciclo 4	Realizado atendimento domiciliar. Paciente encontrada em decúbito dorsal no leito. Foram realizados exercícios ativos-assistidos de membros superiores com bola, exercicios ativos assistidos de membros inferiores. Em seguida, realizada sedestação a beira leito com treino de controle de tronco. Atendimento finalizado com alongamentos globais.			Dra. Aline Giseli Olimpio Donoso 269110-F		
+	Ciclo 4				Dra. Aline Giseli Olimpio Donoso 269110-F		
+	Ciclo 4				Dra. Aline Giseli Olimpio Donoso 269110-F		
+Data:		Pagamento Ciclo 4: R$560					
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+
+=== PLANILHA: Hermínio Apolônio dos Santos ===
+					Nível do Paciente		Cidade - Região
+					Nível 1		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-23 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-02 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-08 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-13 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+Data: 15/05/2026		Pagamento Ciclo 1: R$280					
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+Data:		Pagamento Ciclo 2: R$280					

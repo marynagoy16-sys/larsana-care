@@ -1,0 +1,69 @@
+mai. 25, 2026
+Call Comercial - Dra. Marina | Sagitta 
+convidado Samuel Alves Elias Macedo maryna.goy16@gmail.com
+Anexos Call Comercial - Dra. Marina | Sagitta 
+
+
+Resumo
+Reunião definiu automação para gestão de fisioterapia domiciliar via desenvolvimento de software proprietário e sistema financeiro.
+
+Modelo Operacional e Automação
+O sistema automatizará agendamentos e prontuários para profissionalizar a intermediação de serviços de fisioterapia domiciliar. A transição migrará a operação manual atual para uma plataforma digital integrada.
+
+Gestão Financeira e Regras
+A implementação utilizará pagamentos automatizados via divisão de valores e precificação regionalizada. Regras de negócio como limites de carga horária garantem conformidade com órgãos reguladores.
+
+Viabilidade e Escopo Desenvolvimento
+Foi decidido o desenvolvimento de um sistema proprietário com investimento estimado entre 45000 e 50000 reais. O foco inicial será a interface para profissionais, com prazos estabelecidos para entrega.
+
+O que achou deste resumo? Sim ou Não é útil?
+
+
+Próximas etapas
+[Marina Batista] Compartilhar Tabela: Enviar a tabela contendo os níveis de pacientes e valores de repasse para os parceiros.
+[Marina Batista] Enviar Contrato: Disponibilizar o documento que detalha a relação de trabalho com os profissionais parceiros.
+[Samuel Alves, Elias Macedo] Elaborar Proposta: Desenvolver o escopo e o orçamento baseados no modelo de negócios discutido.
+[Marina Batista] Enviar CNPJ: Encaminhar o CNPJ para os desenvolvedores garantindo a confidencialidade das ideias apresentadas.
+[Elias Macedo] Apresentar Proposta Comercial: Enviar a proposta detalhada com valores entre 45 e 50 mil reais. Incluir o cronograma de entrega e estratégia de lançamento.
+[Elias Macedo, Samuel Alves] Definir Estrutura de Pagamento: Conversar com o setor financeiro para estruturar o parcelamento do investimento. Formalizar as condições de pagamento do projeto.
+[Elias Macedo] Criar Cronograma de Implementação: Elaborar o plano de implementação do sistema. Priorizar o desenvolvimento do aplicativo para profissionais conforme solicitado.
+[O grupo] Definir Estratégia de Publicação: Analisar a melhor categoria para o cadastro do aplicativo nas lojas de aplicativos. Garantir a conformidade com as regras da Apple e Google.
+[Marina Batista] Enviar Tabela de Preços: Disponibilizar a tabela de valores regionais em arquivo PDF. Detalhar as classificações de níveis de paciente para o cálculo do ecossistema.
+[Marina Batista] Enviar Arquivos: Encaminhar arquivos como politica de privacidade e tabelas via e-mail para o Samuel.
+[Marina Batista] Compartilhar Banco Dados: Conceder acesso de leitor a base de dados de pacientes e fisioterapeutas para a equipe.
+[Samuel Alves] Encaminhar Arquivos: Repassar todo material recebido da cliente para o Elias.
+[O grupo] Apresentar Proposta: Agendar e realizar reuniao na quarta-feira para demonstrar o projeto.
+
+
+Detalhes
+Introdução e Contexto do Projeto: Samuel Alves, Elias Macedo e Larsana Care iniciaram a reunião discutindo a proposta de um aplicativo voltado para fisioterapia domiciliar, comparado a um modelo de "Uber" para a área da saúde. O objetivo central é criar uma plataforma onde a empresa administre o agendamento e o financeiro, conectando fisioterapeutas a pacientes, com a empresa retendo uma porcentagem como taxa de intermediação.
+Estrutura das Interfaces: Larsana Care descreveu a necessidade de três interfaces principais: uma para o administrador (gestão de agenda e pagamentos), uma para os fisioterapeutas parceiros e uma futura interface para os pacientes. A operação foca estritamente em atendimentos domiciliares, permitindo expansões futuras para outros serviços, como assistência odontológica e cuidadores.
+Cadastro e Agendamento: Para a interface dos fisioterapeutas, Larsana Care ressaltou a exigência de cadastro com antecedentes criminais e certificados de especialidade. O agendamento deve ser baseado em "ciclos de atendimento" (por exemplo, 8 sessões) em vez de meses fixos, garantindo que o pagamento ocorra ao final de cada ciclo, com a obrigatoriedade de pagamento antecipado pelo paciente para assegurar a continuidade do tratamento.
+Gestão de Prontuários e Conformidade: Foi identificada a necessidade de registrar a evolução clínica dos pacientes no sistema para cumprir exigências do Crefito. Larsana Care sugeriu o uso da assinatura digital via GOV para validar os relatórios técnicos ao final de cada ciclo, eliminando custos com certificações anuais e mantendo os prontuários prontos para auditorias.
+Flexibilidade e Vínculo Empregatício: Discutiu-se a autonomia dos profissionais na definição de seus horários de atendimento, um aspecto crucial para evitar a caracterização de vínculo empregatício CLT. Elias Macedo esclareceu que, embora não se deva controlar os horários de trabalho, é possível gerenciar a oferta de oportunidades e implementar pausas obrigatórias (como o descanso de 8 horas entre jornadas) para seguir normas regulatórias.
+Limites de Carga Horária: Larsana Care propôs um limite de 30 horas semanais de atendimento por profissional, alinhado às normas do Crefito. Elias Macedo reforçou que essas regras de negócio, incluindo limites de pacientes diários, poderão ser configuradas de forma personalizada no sistema, permitindo que a administração controle a disponibilidade e, se desejado, implemente check-in e check-out para métricas de tempo.
+Experiência e Operação Atual: Samuel Alves citou um case de sucesso anterior, "Minha Faxina", que utilizava lógica similar para gestão de horários e restrições. Larsana Care destacou que, apesar de já possuir um modelo operacional validado com CNPJ, 10 fisioterapeutas e 9 pacientes ativos, a operação atual é manual (baseada em planilhas e Google Agenda), sendo necessária a migração para um sistema automatizado.
+Automação Financeira e Splits: Marina Batista explicou o uso atual de ferramentas como Pluga e Asaas para o split de pagamentos entre a empresa e os fisioterapeutas. O sistema deve integrar essa funcionalidade, automatizando repasses e considerando variáveis contratuais, como a diferença de comissão entre o primeiro ciclo de atendimento e os subsequentes, além de remunerações específicas para avaliações não concluídas.
+Precificação Regionalizada: Foi discutida a complexidade da precificação, que varia conforme a região (ex: Mauá, Santo André, São Caetano) e o nível de dependência do paciente. O sistema deve ser capaz de gerenciar essa variação de preços e manter uma tabela de valores organizada para garantir a sustentabilidade financeira da intermediação.
+Formalização e Contratos: Marina Batista detalhou que a empresa atua com intermediação de serviços, com emissão de recibos separados para pacientes e fisioterapeutas quando solicitado. A adesão aos termos de uso ocorre via assinaturas digitais (Google Forms/GOV), simplificando o processo legal sem a necessidade de contratos físicos complexos.
+Modelo de Desenvolvimento e Suporte: Samuel Alves esclareceu que a empresa desenvolve software proprietário com 3 meses de garantia, ao contrário de modelos de licenciamento que prendem o cliente a pagamentos recorrentes sem a posse do sistema. Após o desenvolvimento, a manutenção opcional está disponível mediante suporte mensal.
+Foco Estratégico e Escalabilidade: Marina Batista enfatizou a necessidade de consolidar o ecossistema de gestão para organizar a operação atual e permitir a expansão para outras regiões. O foco imediato é a automação da gestão que já ocorre manualmente.
+Hierarquia e Retenção de Profissionais: Foi debatido um modelo de remuneração variável para retenção, onde novos profissionais recebem 70%, subindo para 75% e 80% conforme o tempo de casa. Profissionais PJ e especialistas podem ingressar na categoria "ouro" (80%), com demandas direcionadas especificamente por perfil e proximidade.
+Automação Financeira Integrada: Samuel Alves confirmou que a criação de contas no Asaas será automatizada dentro do fluxo do aplicativo, garantindo que o split de valores ocorra automaticamente e evitando problemas tributários na intermediação.
+Interface e Avaliações (NPS): Marina Batista solicitou uma interface inspirada na experiência do Uber, onde profissionais visualizam demandas no mapa. Ficou acordada a implementação de um sistema de avaliação mútua (NPS) entre pacientes e profissionais ao final dos ciclos de tratamento para garantir a qualidade do serviço.
+Proposta Financeira e Próximos Passos: Elias Macedo estimou o investimento total para o desenvolvimento dos dois aplicativos e do sistema de gestão entre R$ 45.000 e R$ 50.000, com possibilidade de parcelamento e entregas proporcionais. Marina Batista considerou o valor viável frente ao retorno esperado e o grupo concordou em prosseguir com a formalização da proposta comercial.
+Escopo do Sistema de Gestão: O projeto consiste no desenvolvimento de um sistema interno para gerenciamento de uma clínica, abrangendo documentação detalhada para diferentes perfis de usuários, como administradores, profissionais e pacientes, e não apenas um aplicativo simples ou uma startup genérica.
+Autonomia de Acesso e Gestão: Marina Batista solicita que o sistema ofereça níveis de acesso distintos, com logins separados para as áreas administrativa, financeira e de gestão, visando autonomia operacional. Samuel Alves confirma que o sistema contará com dashboards específicos para essas funções, permitindo que a administração da clínica delegue acessos sem depender constantemente dos desenvolvedores.
+Investimento e Visão de Negócio: Elias Macedo menciona um investimento inicial estimado entre R$ 45.000 e R$ 50.000. A equipe reforça a importância de considerar o projeto como uma empresa em fase de amadurecimento, focando em parcerias de longo prazo independentemente do tamanho do investimento inicial.
+Comprometimento com o Sucesso: Marina Batista enfatiza a natureza crítica do investimento e a necessidade de que o projeto tenha sucesso, comprometendo-se com a gestão adequada da ferramenta. Elias Macedo assume a responsabilidade pela condução do projeto, garantindo o acompanhamento do início ao fim.
+Priorização do Desenvolvimento: Elias Macedo estabelece que a prioridade inicial será a conclusão do aplicativo voltado para os profissionais. O desenvolvimento do aplicativo para o cliente final será realizado posteriormente, após o sistema atingir um volume específico de usuários, conforme o cronograma de implementação.
+Cronograma do Sistema Web: Elias Macedo apresenta uma previsão de aproximadamente 45 dias úteis para a conclusão e entrega do sistema web de gerenciamento.
+Desafios na Publicação de Aplicativos: A equipe discute os potenciais atrasos decorrentes do processo de revisão das lojas Apple e Google, especialmente para aplicativos categorizados na área da saúde, que exigem maior rigor na aprovação.
+Estratégia de Categoria nas Lojas: Samuel Alves sugere a categoria "Saúde e Bem-estar" para evitar o banimento da conta. Marina Batista destaca que a Larsana atua com intermediação de serviços, e a equipe buscará a melhor estratégia de classificação junto aos desenvolvedores para garantir a conformidade nas lojas de aplicativos.
+Formalização da Proposta e Finanças: Elias Macedo coordenará com o setor financeiro e a equipe de desenvolvimento para apresentar uma proposta detalhada até o final da semana, incluindo parcelamentos, cronogramas e prazos definitivos.
+Transferência de Documentação e Dados: Marina Batista disponibilizará documentos como política de privacidade e a base de dados atual, formada por formulários de pacientes e profissionais, para que a equipe possa integrá-los à nova plataforma.
+Origem da Indicação: A conexão entre as partes ocorreu por meio de uma recomendação de Vander, profissional da empresa Tem Saúde, que atestou a confiança no trabalho da empresa de Elias Macedo e Samuel Alves.
+
+
+Revise as anotações do Gemini para checar se estão corretas. Confira dicas e saiba como o Gemini faz anotações
+Como está a qualidade de destas observações? Responda a uma breve pesquisa para nos dar seu feedback, incluindo o quanto as observações foram úteis para o que você precisa.

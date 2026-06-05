@@ -1,0 +1,35 @@
+version: "3.8"
+
+# LarsanaCare — frontend (React + nginx)
+#
+# Pré-requisitos:
+#   1. Imagem publicada: sagittadigital/larsana-care-frontend:latest
+#      (build com VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no Dockerfile)
+#   2. Rede externa sagitta + Traefik com certresolver letsencryptresolver
+#
+# Deploy:
+#   docker stack deploy -c docker/stack.yml larsana-care
+
+services:
+  larsana_care_frontend:
+    image: sagittadigital/larsana-care-frontend:latest
+    networks:
+      - sagitta
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=sagitta"
+        - "traefik.http.routers.larsana-care.rule=Host(`larsana.sagittadigital.com.br`)"
+        - "traefik.http.routers.larsana-care.entrypoints=websecure"
+        - "traefik.http.routers.larsana-care.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.larsana-care.service=larsana-care-svc"
+        - "traefik.http.services.larsana-care-svc.loadbalancer.server.port=80"
+
+networks:
+  sagitta:
+    external: true
+    name: sagitta

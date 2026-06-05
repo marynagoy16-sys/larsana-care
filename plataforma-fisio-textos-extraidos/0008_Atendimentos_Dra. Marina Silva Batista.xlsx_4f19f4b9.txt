@@ -1,0 +1,103 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Atendimentos\Dra. Marina Silva Batista.xlsx ===
+=== EXTRAÍDO EM: 2026-06-05T00:53:16 ===
+
+=== PLANILHA: Severina Rosa Ramos de Sena ===
+					Nível do Paciente		Cidade - Região
+					Nível 1		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-05-19 00:00:00	Ciclo 2	Encontro paciente em BEG. No leito com algia (8/10) em MID realizo breve avaliação; Realizo exercício ativo assistido com bola pequena em pé para ganho de propriocepção + tripliceflexão de MI + solicito troca de decúbito com flexão de MI correspondente. finalizo sem intercorrências (paciente relata que a algia permanece 8/10).			Dra. Marina Silva Batista 277681-F		
+2026-05-22 00:00:00	Ciclo 2	Encontro paciente em BEG. No leito com algia (8/10) em MID; Realizo exercício ativo assistido tripliceflexão de MI + solicito troca de decúbito com flexão de MI correspondente. finalizo sem intercorrências (paciente relata que a algia permanece 8/10).			Dra. Marina Silva Batista 277681-F		
+2026-05-25 00:00:00	Ciclo 2	Encontro paciente em BEG. No leito com algia (8/10) em MID; Dry needlying em pontos gatilhos de MID + liberacão miofascial pontal em MID (paciente relata melhora da algia de 6/10). Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-28 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-01 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-03 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-08 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-10 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+Data: 15/06/2026		Pagamento Ciclo 2:  R$800					
+
+=== PLANILHA: Sirlene Aparecida Maschio ===
+					Nível do Paciente		Cidade - Região
+					Nível 1		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-05-11 00:00:00	Ciclo 2	Encontro paciente em BEG. Com algia em região de lombar irradiando para MID (9/10)  - Realizo Massagem relaxante em lombar e quadril D + alongamento de piriforme + exercício para apoio em MID (de SD p/ OT com MID para trás em relação ao esquerdo. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-19 00:00:00	Ciclo 2	Encontro paciente em BEG. Com algia em região de lombar irradiando para MID (9/10)  - Realizo Massagem relaxante em lombar e quadril D + exercícios ativo para consciência de contração abdominl + tripliceflexão com MMII alternando + FM ativo de ABM com respiração. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-22 00:00:00	Ciclo 2	Encontro paciente em BEG. Relata que houve melhora na algisa da lombar (4/10) , mas ainda relata algia em quadril D - Realizo Massagem relaxante em quadril D + exercícios ativo para consciência de contração abdominal + FM de ABM com MMII apoiados em bola suíça + rotação de MMII na bola suíça com leve resistência do terapeuta. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-27 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-05-28 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-01 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-03 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+2026-06-08 00:00:00	Ciclo 2				Dra. Marina Silva Batista 277681-F		
+Data: 15/06/2026		Pagamento Ciclo 2:  R$800					
+
+=== PLANILHA: Maria Do Carmo Araújo Braga ===
+					Nível do Paciente		Cidade - Região
+					VALOR SOCIAL		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-05-19 00:00:00	Ciclo 7	Encontro paciente em BEG. Realizo breve avaliação + exercícios em SD de FM de MMII com adução de bolinha + exercícios de ganho de equilíbrio em tronco com rotação de cabeça e olhar fixo + alcance de MMSS laterais. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-27 00:00:00	Ciclo 7				Dra. Marina Silva Batista 277681-F		
+2026-06-03 00:00:00	Ciclo 7				Dra. Marina Silva Batista 277681-F		
+Data: 05/06/2026		Pagamento Ciclo 7:  R$225					
+
+=== PLANILHA: Jessica Alves da Silva ===
+					Nível do Paciente		Cidade - Região
+					Nível 3		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-03-18 00:00:00	Ciclo 23	Paciente relatou desconforto em região de trapézio superior e pernas, musculatura encontrava-se rígida devido a tensão, a mesma disse que havia passado por um forte episódio de estresse. Realizado ventosaterapia estática e dinâmica+ liberação miofascial manual.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-03-20 00:00:00	Ciclo 23	Paciente em BEG, realizado 10 min de ciclo ergômetro, exercícios de mobilidade e alongamento com foco em MMII, agachamento, prancha dinâmica com estabilização das pernas feita pela terapeuta, fortalecimento muscular global de MMSS.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-03-23 00:00:00	Ciclo 23	Paciente em BEG, exercícios realizados no jump, agachamento, descarga de peso de um membro para o outro, deslocamento lateral, em posição ortostática no chão realizou rotação de tronco com magic circle+ adução de ombros, FM região dorsal.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+25/03/0206	Ciclo 23	Paciente em BEG, FM foot core e power house, abdução e adução de quadril com overball e theraband, inclinação lateral de tronco, treino de marcha com barreira apoiando na terapeuta.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-03-30 00:00:00	Ciclo 23	Paciente em BEG, realizado alongamento global, exercícios de mobilidade com foco em MMII, FM core,  trotação de tronco com magic circle  em posição OT, ciclo ergômetro por 10 minutos.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-01 00:00:00	Ciclo 23	Paciente em BEG, exercícios realizados no colchonete, ponte, flexão de quadril com joelhos estendidos unilateral e bilateral, flexão de coluna com magic circle, adução de quadril, agachamento.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-06 00:00:00	Ciclo 23	Paciente em BEG, realizado alongamento e mobilidade passiva focada em MMII, liberação miofascial+ ventosa dinâmica.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-08 00:00:00	Ciclo 23	Paciente em BEG, realizado 10 minutos de ciclo ergômetro, exercícios no jump para estabilidade de MMII, equilíbrio e propriocepção, agachamento, treino de marcha com barreira.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+Data: 11/04/2026		Pagamento Ciclo 23:  R$800					
+2026-04-15 00:00:00	Ciclo 24	Paciente relatou dores no corpo pois andou muito no final de semana, realizada liberação miofascial com ventosas+mobilidade e alongamento passivo.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-20 00:00:00	Ciclo 24	Paciente em BEG, realizado exercícios passivos e ativos para mobilidade e alongamento de MMII, FM do core e foot core.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-22 00:00:00	Ciclo 24	Paciente em BEG, exercícios realizados no jump para estabilidade articular de MMII, equilíbrio e propriocepção, FM de MMSS.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-27 00:00:00	Ciclo 24	Paciente em BEG, realizada liberação miofascial em MMII, mobilização passiva de joelhos, 10 min de ciclo ergômetro e FM foot core.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-04-29 00:00:00	Ciclo 24	Paciente em BEG, realizada mobilização passiva de joelhos, ponte, 10 minutos de ciclo ergômetro, agachamento com overball estabilizando joelhos (paciente conseguiu agachar sem apoio, flexão de tronco, flexão e abdução de ombros com thera band.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-06 00:00:00	Ciclo 24	Paciente relatou dor no corpo pois caminhou muito no final de semana, realizada liberação miofascial+ ventosa+ alongamento passivo.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-08 00:00:00	Ciclo 24	Paciente em BEG, realizado mobilidade e alongamento com foco em MMII, exercícios de equilíbrio e propriocepção, FM com foco em MMII.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+2026-05-13 00:00:00	Ciclo 24	Paciente em BEG, realizado 10 minutos de ciclo ergômetro, flexão e inclinação lateral de tronco, flexão de quadril em sedestação, agachamento, mobilidade ativa e passiva de MMII.			Dra. Nathaly dos Santos Cordeiro Toledo 3/436173
+Data: 13/05/2026		Pagamento Ciclo 24:  R$840 (Pagamento realizado via Crédito, cofirmado, mas não disponível)					
+2026-05-19 00:00:00	Ciclo 25	Encontro paciente em BEG. Realizo uma reavaliação simples; Seguido de alongamento passivo de MMII e MMSS com sequência de estalo da coluna dorsal e finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-21 00:00:00	Ciclo 25	Encontro paciente em BEG. Realizo exercícios em DD: Ponte isométrica por 10sec + ponte com apoio de MMII em step + ajoelhada paciente realiza alcance lateral + OT paciente realiza exercício de alcance dinâmico frontal e lateral c/ carga e s/ carga. finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-26 00:00:00	Ciclo 25	Encontro paciente em BEG. Realizo exercícios de FM de MMII s/ carga (elevação frontal e lateral) + OT com um MI apoioado no STEP paciente realiza alcance frontal com MS oposo ao MI apoiado no STEP. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-28 00:00:00	Ciclo 25				Dra. Marina Silva Batista 277681-F		
+2026-06-02 00:00:00	Ciclo 25				Dra. Marina Silva Batista 277681-F		
+2026-06-04 00:00:00	Ciclo 25				Dra. Marina Silva Batista 277681-F		
+2026-06-09 00:00:00	Ciclo 25				Dra. Marina Silva Batista 277681-F		
+2026-06-11 00:00:00	Ciclo 25				Dra. Marina Silva Batista 277681-F		
+Data: 11/06/2026		Pagamento Ciclo 25:  R$1200					
+
+=== PLANILHA: Antônio Querino de Lima  ===
+					Nível do Paciente		Cidade - Região
+					VALOR SOCIAL		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-05-11 00:00:00	Ciclo 5	Encontro paciente em BEG. Realizo breve avaliação + alongamento passivo de MMSS e coluna lombar e dorsal. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-13 00:00:00	Ciclo 5	Encontro paciente em BEG. Realizo alongamento de MMII e marcha com apoio de fisioterapeuta de curta distância (paciente apresenta grave desequilíbrio) em SD paciente realiza exercício de agachamento com auxílio de cadeira 3x. retorno ao leito com apoio e percebe-se melhora do equilibrio. finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-20 00:00:00	Ciclo 5	Encontro paciente em BEG. Realizo exercícios ativo de MMII Ponte 3x6+ sedestação beira leito com apoio 3x + em SD realiza Flexão de tronco para FM de musculos do abdomem. Finalizo sem ntercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-22 00:00:00	Ciclo 5	Encontro paciente em BEG. Realizo exercícios artivos de MMII com bola suíça, de tripilceflexão de MMII + elevação de MMII + solicito SD beira leito (realizo auxilio) tranferência para SD no outro leito, realizo alongamento de MMII + Alongamento de MSD. Retorno com auxilio do filho ao leito finalizo sem inetrcorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-25 00:00:00	Ciclo 5	Encontro Paciente em BEG. Realizo exercício ativo assistido de MID e atico de MIE (elevação frontal s/ carga) solicito sedestação beira-leito em seguida de OT. Paciente com auxílio realiza marcha até janela onde permanece por 15min realizo alongemanto de MSD + exercício ativo de agachamento (alcance frontal com cone). Retrono ao leito com auxilio do finlho, finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-05-27 00:00:00	Ciclo 5				Dra. Marina Silva Batista 277681-F		
+2026-06-01 00:00:00	Ciclo 5				Dra. Marina Silva Batista 277681-F		
+2026-06-04 00:00:00	Ciclo 5				Dra. Marina Silva Batista 277681-F		
+Data: 07/06/2026		Pagamento Ciclo 5:  R$600					
+
+=== PLANILHA: Leticia de Carvalho ===
+Leticia Filha da RUTH					Nível do Paciente		Cidade - Região
+					VALOR SOCIAL		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-05-13 00:00:00	Ciclo 00	Encontro paciente em BEG. Realizo breve avaliação + conversa com familiares			Dra. Marina Silva Batista 277681-F		
+2026-05-19 00:00:00	Ciclo 00	Encontro paciente em BEG. Realizo exercícios ativo de equilibrio em OT com OA + OF + agachamento ate cócoras para mobilidade e força + exercícios de ativos de MMII. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+2026-06-26 00:00:00	Ciclo 00	Encontro paciente em BEG. Paciente relata queda posterior. Realizo exercícios ativo de equilibrio em OT com a função de colocar e tirar a blusa de frio. com evolução para semi-tandem. Finalizo sem intercorrências.			Dra. Marina Silva Batista 277681-F		
+	Ciclo 00				Dra. Marina Silva Batista 277681-F		
+
+=== PLANILHA: Felipe Augusto Sanchez ===
+Felipe Augusto de Sanchez					Nível do Paciente		Cidade - Região
+					VALOR SOCIAL		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-05-13 00:00:00	Ciclo 00				Dra. Marina Silva Batista 277681-F		
+2026-05-19 00:00:00	Ciclo 00				Dra. Marina Silva Batista 277681-F		
+2026-06-26 00:00:00	Ciclo 00				Dra. Marina Silva Batista 277681-F		
+	Ciclo 00				Dra. Marina Silva Batista 277681-F		

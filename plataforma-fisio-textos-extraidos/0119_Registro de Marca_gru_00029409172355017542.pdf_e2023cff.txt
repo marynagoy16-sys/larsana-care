@@ -1,0 +1,99 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Registro de Marca\gru_00029409172355017542.pdf ===
+=== EXTRAÍDO EM: 2026-06-05T00:53:48 ===
+
+--- Página 1 ---
+A data de vencimento não prevalece sobre o prazo legal.
+O pagamento deve ser efetuado antes do protocolo.
+Órgãos públicos que utilizam o sistemas SIAFI devem utilizar o número da GRU no campo
+Número de Referência na emissão do pagamento.
+Serviço: 389 - Pedido de registro de marca (com especificação pré-aprovada) - valor por
+classe
+ 00190.00009 02940.917236 55017.542170 7 14300000044000
+Recibo do pagador
+Nome do Pagador / CPF / CNPJ / Endereço
+MARINA SILVA BATISTA, CPF/CNPJ: 38927340892
+RUA LUÍS VIOLA, MAUÁ, SP, CEP: 9330100
+Nosso-Número
+29409172355017542
+Nr. Documento
+29409172355017542
+Data de Vencimento
+28/04/2026
+(=) Valor Pago
+Nome do Beneficiário/CPF/CNPJ/Endereço
+INSTITUTO NACIONAL DA PROPRIEDADE INDUST CPF/CNPJ: 42.521.088/0001-37
+RUA MAIRINK VEIGA, 9 24 ANDAR ED WHITE MARTINS - CENTRO, RIO DE JANEIRO - RJ, CEP 20090-910
+Agencia/Código do Beneficiário Autenticação Mecânica
+Local de Pagamento
+PAGÁVEL EM QUALQUER BANCO ATÉ O VENCIMENTO
+Data Vencimento
+28/04/2026
+Nome do Beneficiário/CPF/CNPJ
+INSTITUTO NACIONAL DA PROPRIEDADE INDUST CPF/CNPJ: 42.521.088/0001-37
+Agência / Código do Beneficiário
+2234-9/333028-1
+Data do Documento
+30/03/2026
+Nr. Documento
+29409172355017542
+Espécie DOC
+DS
+Aceite
+N
+Data do processamento
+30/03/2026
+Nosso-Número
+29409172355017542
+Uso do Banco Carteira Espécie
+R$
+Quantidade x Valor (=) Valor documento
+R$ 440,00
+(-) Desconto / Abatimento
+(+) Juros/Multa
+(=) Valor Cobrado
+Nome do Pagador / CPF / CNPJ / Endereço
+Código de Baixa
+Sacador/Avalista Autenticação mecânica
+001-9
+R$ 440,00
+Valor Documento
+001-9 00190.00009 02940.917236 55017.542170 7 14300000044000
+Ficha de compensação
+2234-9/333028-1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 29409172355017542
+ 
+ 
+ 
+ 
+ 
+ 
+Informações de Responsabilidade do Beneficiário
+ 
+ 
+MARINA SILVA BATISTA, CPF/CNPJ: 38927340892
+RUA LUÍS VIOLA, MAUÁ, SP, CEP: 9330100
+-
+ 
+ 
+ Sacador/Avalista
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+17
+Pague via Pix com o QrCode ao lado

@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@9..40,400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * LarsanaCare / DEL — cores da logo
+ * #F4F6F1  fundo claro
+ * #17310A  verde escuro (texto, destaques, CTAs)
+ */
+:root {
+  --shell-gap: 1rem;
+  --sidebar-width: 19.5rem;
+  --sidebar-width-collapsed: 5rem;
+  --sidebar-width-mobile: 23.4rem;
+  --sidebar-radius: 1.25rem;
+  --sidebar-collapsed-item-size: 2.5rem;
+  --sidebar-scrollbar-width: 5px;
+  --sidebar-collapse-btn-size: 1.75rem;
+
+  --brand-light: 80 23% 95.5%;
+  --brand-dark: 100 66% 11.6%;
+
+  --background: var(--brand-light);
+  --foreground: var(--brand-dark);
+  --card: 0 0% 100%;
+  --card-foreground: var(--brand-dark);
+  --popover: 0 0% 100%;
+  --popover-foreground: var(--brand-dark);
+
+  --primary: var(--brand-dark);
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 80 18% 92%;
+  --secondary-foreground: var(--brand-dark);
+  --muted: 80 16% 93%;
+  --muted-foreground: 100 25% 32%;
+  --accent: 80 18% 92%;
+  --accent-foreground: var(--brand-dark);
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 80 14% 86%;
+  --input: 80 16% 93%;
+  --ring: var(--brand-dark);
+
+  --brand-primary-dark: 100 66% 9%;
+
+  --nav-icon: var(--brand-dark);
+  --nav-icon-muted: 100 25% 32%;
+  --nav-active-bg: 95 48% 88%;
+  --nav-active-fg: var(--brand-dark);
+  --nav-hover-bg: 80 20% 94%;
+}
+
+.dark {
+  /* Fundos neutros — verde só em CTAs e destaques */
+  --background: 0 0% 5%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 9%;
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 95%;
+
+  --primary: var(--brand-light);
+  --primary-foreground: var(--brand-dark);
+
+  --secondary: 0 0% 13%;
+  --secondary-foreground: 0 0% 95%;
+  --muted: 0 0% 13%;
+  --muted-foreground: 0 0% 58%;
+  --accent: 0 0% 13%;
+  --accent-foreground: 0 0% 95%;
+
+  --destructive: 0 62% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 0 0% 16%;
+  --input: 0 0% 13%;
+  --ring: var(--brand-light);
+
+  --brand-primary-dark: 80 20% 88%;
+
+  --nav-icon: 80 16% 72%;
+  --nav-icon-muted: 0 0% 50%;
+  --nav-active-bg: 0 0% 11%;
+  --nav-active-fg: 0 0% 94%;
+  --nav-hover-bg: 0 0% 8%;
+}
+
+@theme {
+  --font-sans: 'Inter', 'DM Sans', system-ui, sans-serif;
+  --font-display: 'DM Sans', 'Inter', system-ui, sans-serif;
+
+  --color-brand-light: hsl(var(--brand-light));
+  --color-brand-dark: hsl(var(--brand-dark));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-brand-primary-dark: hsl(var(--brand-primary-dark));
+  --color-nav-icon: hsl(var(--nav-icon));
+  --color-nav-icon-muted: hsl(var(--nav-icon-muted));
+  --color-nav-active-bg: hsl(var(--nav-active-bg));
+  --color-nav-active-fg: hsl(var(--nav-active-fg));
+  --color-nav-hover-bg: hsl(var(--nav-hover-bg));
+
+  --animate-slide-in-left: slide-in-left 0.2s ease-out;
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+
+.scrollbar-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--brand-dark) / 0.14) transparent;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 10px;
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--brand-dark) / 0.14);
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  min-height: 3rem;
+  transition: background-color 0.25s ease;
+}
+
+.scrollbar-sidebar:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--brand-dark) / 0.26);
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--brand-dark) / 0.4);
+}
+
+.scrollbar-sidebar::-webkit-scrollbar-thumb:active {
+  background-color: hsl(var(--brand-dark) / 0.5);
+}
+
+.dark .scrollbar-sidebar {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.28) transparent;
+}
+
+.dark .scrollbar-sidebar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.22);
+}
+
+.dark .scrollbar-sidebar:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.38);
+}
+
+.dark .scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.52);
+}
+
+.shell-content-x {
+  padding-left: var(--shell-gap);
+  padding-right: var(--shell-gap);
+}
+
+.shell-content-y-top {
+  padding-top: var(--shell-gap);
+}
+
+.shell-content-y-bottom {
+  padding-bottom: var(--shell-gap);
+}
+
+.sidebar-inset {
+  padding: 0.75rem 0.625rem;
+}
+
+.sidebar-nav-shell {
+  min-height: 0;
+  margin-right: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.2s ease-out;
+}

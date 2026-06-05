@@ -1,0 +1,15 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Material de Apoio\Controle de Atendimentos.pdf ===
+=== EXTRAÍDO EM: 2026-06-05T00:53:47 ===
+
+--- Página 1 ---
+D A T A  A T T
+C I C L O
+A S S .  P A C I E N T E /  R E S P O N S Á V E L
+A S S .  F I S I O T E R A P E U T A
+N o m e : _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+D a t a  d e  N a s c i m e n t o :  _ _ _ _ _ / _ _ _ _ _ / _ _ _ _ _  T e l e f o n e :  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+E n d e r e ç o : _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+R e s p o n s á v e l : _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C o n t r o l e  d e  A t e n d i m e n t o s
+ L A R S A N A
+c a r e

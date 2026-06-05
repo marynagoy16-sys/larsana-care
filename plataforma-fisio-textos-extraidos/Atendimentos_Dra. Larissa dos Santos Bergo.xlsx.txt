@@ -1,0 +1,37 @@
+=== ARQUIVO ORIGINAL: c:\projetos\Larsana Care\plataforma fisio\Atendimentos\Dra. Larissa dos Santos Bergo.xlsx ===
+=== EXTRAÍDO EM: 2026-06-05T00:52:35 ===
+
+=== PLANILHA: Hermínio Apolônio dos Santos ===
+					Nível do Paciente		Cidade - Região
+					Nível 1		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-23 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-02 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-08 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-13 00:00:00	Ciclo 4				Dra. Larissa dos Santos Bergo 341992-F		
+Data: 15/05/2026		Pagamento Ciclo 1: R$280					
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+	Ciclo 5						
+Data:		Pagamento Ciclo 2: R$280					
+
+=== PLANILHA: Maria Valdina Borges Granjeiro ===
+					Nível do Paciente		Cidade - Região
+					Nível 2		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		
+2026-04-23 00:00:00	Ciclo 10				Dra. Larissa dos Santos Bergo 341992-F		
+2026-04-30 00:00:00	Ciclo 10				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-07 00:00:00	Ciclo 10				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-14 00:00:00	Ciclo 10				Dra. Larissa dos Santos Bergo 341992-F		
+Data: 19/05/2026		Pagamento Ciclo 1: R$280					
+2026-05-21 00:00:00	Ciclo 11				Dra. Larissa dos Santos Bergo 341992-F		
+2026-05-28 00:00:00	Ciclo 11				Dra. Larissa dos Santos Bergo 341992-F		
+2026-06-04 00:00:00	Ciclo 11				Dra. Larissa dos Santos Bergo 341992-F		
+2026-06-11 00:00:00	Ciclo 11				Dra. Larissa dos Santos Bergo 341992-F		
+Data:		Pagamento Ciclo 1: R$280					
+
+=== PLANILHA: RESERVADO PACIENTE NOVO ===
+					Nível do Paciente		Cidade - Região
+					Nível 2		Região A
+Data	Ciclo	Evolução			Fisioterapeuta (Nome e CREFITO)		

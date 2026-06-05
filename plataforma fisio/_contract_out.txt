@@ -1,0 +1,8 @@
+﻿python : C:\Users\Joßs Silva\AppData\Local\Programs\Python\Python312\python.exe: can't open file 
+'c:\\projetos\\Larsana Care\\_analyze_contract.py': [Errno 2] No such file or directory
+No C:\Users\Joás Silva\AppData\Local\Temp\ps-script-aedb2779-eef2-4004-8eee-fb5d3e110cf0.ps1:73 caractere:1
++ python "c:\projetos\Larsana Care\_analyze_contract.py" 2>&1 | Out-Fil ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\Joßs S...le or directory:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
