@@ -6,9 +6,21 @@ export const dashboardKeys = {
 }
 
 export async function fetchDashboardKpis() {
-  const { data, error } = await supabase.from('dashboard_kpis').select('*').single()
-  if (error) throw error
-  return data
+  const [kpisRes, countRes] = await Promise.all([
+    supabase.from('dashboard_kpis').select('*').single(),
+    supabase.from('professionals')
+      .select('*', { count: 'exact', head: true })
+      .eq('profession', 'FISIO')
+      .eq('credentialing_status', 'ativo')
+  ])
+
+  if (kpisRes.error) throw kpisRes.error
+  if (countRes.error) throw countRes.error
+
+  return {
+    ...kpisRes.data,
+    fisioterapeutas_ativos: countRes.count ?? 0,
+  }
 }
 
 export function useDashboardKpis() {

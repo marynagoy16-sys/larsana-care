@@ -8,6 +8,7 @@ import {
   RefreshCw,
   MoreHorizontal,
   ChevronRight,
+  Stethoscope,
 } from 'lucide-react'
 import { AnalyticsStatCard } from '@/components/dashboard/AnalyticsStatCard'
 import { DashboardLineChart } from '@/components/dashboard/DashboardLineChart'
@@ -94,12 +95,18 @@ export function DashboardPage() {
       ) : (
       <CascadeReveal className="space-y-6">
       <CascadeItem>
-      <div className={cn('grid grid-cols-2 lg:grid-cols-4 gap-4 items-stretch transition-opacity', isRefreshing && 'opacity-60')}>
+      <div className={cn('grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch transition-opacity', isRefreshing && 'opacity-60')}>
         <AnalyticsStatCard
           label="Pacientes ativos"
           value={kpis?.pacientes_ativos ?? 0}
           icon={Users}
           href="/admin/pacientes"
+        />
+        <AnalyticsStatCard
+          label="Fisioterapeutas ativos"
+          value={kpis?.fisioterapeutas_ativos ?? 0}
+          icon={Stethoscope}
+          href="/admin/profissionais"
         />
         <AnalyticsStatCard
           label="Ciclos abertos"

@@ -110,10 +110,10 @@ export function CyclesPage() {
   const [open, setOpen] = useState(false)
   const schema = z.object({
     patient_id: z.string().uuid('Selecione um paciente'),
-    session_count: z.coerce.number().refine((v) => v === 4 || v === 8, 'Use 4 ou 8 sessões'),
+    session_count: z.coerce.number().refine((v) => v === 4 || v === 8 || v === 12, 'Use 4, 8 ou 12 sessões'),
     assigned_professional_id: z.string().uuid('Selecione um profissional').optional().or(z.literal('')),
   })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) as never, defaultValues: { patient_id: '', session_count: 4, assigned_professional_id: '' } })
+  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) as never, defaultValues: { patient_id: '', session_count: 8, assigned_professional_id: '' } })
   const create = useCrudMutation({
     mutationFn: (v: z.infer<typeof schema>) => careCyclesService.create({
       patient_id: v.patient_id,
@@ -168,7 +168,20 @@ export function CyclesPage() {
               </FormItem>
             )} />
             <FormField control={form.control} name="session_count" render={({ field }) => (
-              <FormItem><FormLabel>Sessões (4 ou 8)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem>
+                <FormLabel>Quantidade de sessões</FormLabel>
+                <Select onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="4">4 sessões</SelectItem>
+                    <SelectItem value="8">8 sessões</SelectItem>
+                    <SelectItem value="12">12 sessões</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
             )} />
             <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} />
           </form>

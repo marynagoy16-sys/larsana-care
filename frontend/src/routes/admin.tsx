@@ -31,7 +31,7 @@ const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then((m) 
 const AssessmentsPage = lazyAdmin('AssessmentsPage')
 const AssessmentDetailPage = lazyAdmin('AssessmentDetailPage')
 const CyclesPage = lazyAdmin('CyclesPage')
-const CycleDetailPage = lazyAdmin('CycleDetailPage')
+const CycleDetailPage = lazy(() => import('@/pages/admin/cycles/CycleDetailPage').then((m) => ({ default: m.CycleDetailPage })))
 const MedicalRecordsPage = lazyAdmin('MedicalRecordsPage')
 const MedicalRecordPatientPage = lazyAdmin('MedicalRecordPatientPage')
 const CredenciamentoPage = lazyAdmin('CredenciamentoPage')
@@ -62,7 +62,6 @@ const AuditPage = lazyAdmin('AuditPage')
 const SupportPage = lazyAdmin('SupportPage')
 const SettingsPage = lazyAdmin('SettingsPage')
 const ProfessionalDetailPage = lazyAdmin('ProfessionalDetailPage')
-const SessionsPage = lazyAdmin('SessionsPage')
 const TreatmentPausesPage = lazyAdmin('TreatmentPausesPage')
 const NpsReportPage = lazyAdmin('NpsReportPage')
 
@@ -81,7 +80,6 @@ export const adminRoutes: RouteObject[] = [
       { path: 'ciclos', element: staffRoute(<CyclesPage />, operacaoRoles) },
       { path: 'ciclos/novo', element: staffRoute(<CyclesPage />, operacaoRoles) },
       { path: 'ciclos/:id', element: staffRoute(<CycleDetailPage />, operacaoRoles) },
-      { path: 'sessoes', element: staffRoute(<SessionsPage />, operacaoRoles) },
       { path: 'pausas', element: staffRoute(<TreatmentPausesPage />, operacaoRoles) },
       { path: 'prontuarios', element: staffRoute(<MedicalRecordsPage />, operacaoRoles) },
       { path: 'prontuarios/:pacienteId', element: staffRoute(<MedicalRecordPatientPage />, operacaoRoles) },

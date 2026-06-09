@@ -65,7 +65,6 @@ export const adminNavSections: NavSection[] = [
       { label: 'Pacientes', href: '/admin/pacientes', icon: Users, roles: ['admin', 'gestao'] },
       { label: 'Avaliações', href: '/admin/avaliacoes', icon: ClipboardList, roles: ['admin', 'gestao'] },
       { label: 'Ciclos', href: '/admin/ciclos', icon: Calendar, roles: ['admin', 'gestao'] },
-      { label: 'Sessões', href: '/admin/sessoes', icon: Clock, roles: ['admin', 'gestao'] },
       { label: 'Pausas', href: '/admin/pausas', icon: Timer, roles: ['admin', 'gestao'] },
       { label: 'Prontuários', href: '/admin/prontuarios', icon: Stethoscope, roles: ['admin', 'gestao'] },
       { label: 'Profissionais', href: '/admin/profissionais', icon: UserCheck, roles: ['admin', 'gestao'] },
