@@ -198,10 +198,11 @@ BEGIN
 
   -- ===== CARE CYCLES AND SESSIONS SEED =====
   -- Clean up to make seed rerun safe
+  DELETE FROM public.medical_records WHERE cycle_id IN ('e1000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000002', 'e1000000-0000-4000-8000-000000000003');
   DELETE FROM public.care_sessions WHERE cycle_id IN ('e1000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000002', 'e1000000-0000-4000-8000-000000000003');
   DELETE FROM public.care_cycles WHERE id IN ('e1000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000002', 'e1000000-0000-4000-8000-000000000003');
 
-  -- 1. Active Cycle (8 sessions, 5 realized, 1 missed, 2 scheduled)
+  -- 1. Active Cycle (8 sessions, 4 realized, 1 missed, 3 scheduled)
   INSERT INTO public.care_cycles (
     id, patient_id, cycle_number, session_count, assigned_professional_id,
     pricing_version_id, region_id, patient_level, session_unit_price_cents,
@@ -213,17 +214,17 @@ BEGIN
   );
 
   INSERT INTO public.care_sessions (
-    cycle_id, session_number, status, professional_id, is_assessment_session,
+    id, cycle_id, session_number, status, professional_id, is_assessment_session,
     scheduled_at, check_in_at, check_out_at
   ) VALUES
-    ('e1000000-0000-4000-8000-000000000001', 1, 'realizada', v_professional_id, true, now() - interval '9 days', now() - interval '9 days' + interval '9 hours', now() - interval '9 days' + interval '10 hours'),
-    ('e1000000-0000-4000-8000-000000000001', 2, 'realizada', v_professional_id, false, now() - interval '7 days', now() - interval '7 days' + interval '9 hours', now() - interval '7 days' + interval '10 hours'),
-    ('e1000000-0000-4000-8000-000000000001', 3, 'falta', v_professional_id, false, now() - interval '5 days', null, null),
-    ('e1000000-0000-4000-8000-000000000001', 4, 'realizada', v_professional_id, false, now() - interval '3 days', now() - interval '3 days' + interval '9 hours', now() - interval '3 days' + interval '10 hours'),
-    ('e1000000-0000-4000-8000-000000000001', 5, 'realizada', v_professional_id, false, now() - interval '1 days', now() - interval '1 days' + interval '9 hours', now() - interval '1 days' + interval '10 hours'),
-    ('e1000000-0000-4000-8000-000000000001', 6, 'prevista', v_professional_id, false, now() + interval '1 days', null, null),
-    ('e1000000-0000-4000-8000-000000000001', 7, 'prevista', v_professional_id, false, now() + interval '3 days', null, null),
-    ('e1000000-0000-4000-8000-000000000001', 8, 'prevista', v_professional_id, false, now() + interval '5 days', null, null);
+    ('e2000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000001', 1, 'realizada', v_professional_id, true, now() - interval '9 days', now() - interval '9 days' + interval '9 hours', now() - interval '9 days' + interval '10 hours'),
+    ('e2000000-0000-4000-8000-000000000002', 'e1000000-0000-4000-8000-000000000001', 2, 'realizada', v_professional_id, false, now() - interval '7 days', now() - interval '7 days' + interval '9 hours', now() - interval '7 days' + interval '10 hours'),
+    ('e2000000-0000-4000-8000-000000000003', 'e1000000-0000-4000-8000-000000000001', 3, 'falta', v_professional_id, false, now() - interval '5 days', null, null),
+    ('e2000000-0000-4000-8000-000000000004', 'e1000000-0000-4000-8000-000000000001', 4, 'realizada', v_professional_id, false, now() - interval '3 days', now() - interval '3 days' + interval '9 hours', now() - interval '3 days' + interval '10 hours'),
+    ('e2000000-0000-4000-8000-000000000005', 'e1000000-0000-4000-8000-000000000001', 5, 'realizada', v_professional_id, false, now() - interval '1 days', now() - interval '1 days' + interval '9 hours', now() - interval '1 days' + interval '10 hours'),
+    ('e2000000-0000-4000-8000-000000000006', 'e1000000-0000-4000-8000-000000000001', 6, 'prevista', v_professional_id, false, now() + interval '1 days', null, null),
+    ('e2000000-0000-4000-8000-000000000007', 'e1000000-0000-4000-8000-000000000001', 7, 'prevista', v_professional_id, false, now() + interval '3 days', null, null),
+    ('e2000000-0000-4000-8000-000000000008', 'e1000000-0000-4000-8000-000000000001', 8, 'prevista', v_professional_id, false, now() + interval '5 days', null, null);
 
   -- 2. Completed Cycle (4 sessions, all realized)
   INSERT INTO public.care_cycles (
@@ -237,13 +238,13 @@ BEGIN
   );
 
   INSERT INTO public.care_sessions (
-    cycle_id, session_number, status, professional_id, is_assessment_session,
+    id, cycle_id, session_number, status, professional_id, is_assessment_session,
     scheduled_at, check_in_at, check_out_at
   ) VALUES
-    ('e1000000-0000-4000-8000-000000000002', 1, 'realizada', v_professional_id, false, now() - interval '24 days', now() - interval '24 days' + interval '10 hours', now() - interval '24 days' + interval '11 hours'),
-    ('e1000000-0000-4000-8000-000000000002', 2, 'realizada', v_professional_id, false, now() - interval '22 days', now() - interval '22 days' + interval '10 hours', now() - interval '22 days' + interval '11 hours'),
-    ('e1000000-0000-4000-8000-000000000002', 3, 'realizada', v_professional_id, false, now() - interval '20 days', now() - interval '20 days' + interval '10 hours', now() - interval '20 days' + interval '11 hours'),
-    ('e1000000-0000-4000-8000-000000000002', 4, 'realizada', v_professional_id, false, now() - interval '18 days', now() - interval '18 days' + interval '10 hours', now() - interval '18 days' + interval '11 hours');
+    ('e2000000-0000-4000-8000-000000000011', 'e1000000-0000-4000-8000-000000000002', 1, 'realizada', v_professional_id, false, now() - interval '24 days', now() - interval '24 days' + interval '10 hours', now() - interval '24 days' + interval '11 hours'),
+    ('e2000000-0000-4000-8000-000000000012', 'e1000000-0000-4000-8000-000000000002', 2, 'realizada', v_professional_id, false, now() - interval '22 days', now() - interval '22 days' + interval '10 hours', now() - interval '22 days' + interval '11 hours'),
+    ('e2000000-0000-4000-8000-000000000013', 'e1000000-0000-4000-8000-000000000002', 3, 'realizada', v_professional_id, false, now() - interval '20 days', now() - interval '20 days' + interval '10 hours', now() - interval '20 days' + interval '11 hours'),
+    ('e2000000-0000-4000-8000-000000000014', 'e1000000-0000-4000-8000-000000000002', 4, 'realizada', v_professional_id, false, now() - interval '18 days', now() - interval '18 days' + interval '10 hours', now() - interval '18 days' + interval '11 hours');
 
   -- 3. Pending Payment Cycle (12 sessions, all scheduled)
   INSERT INTO public.care_cycles (
@@ -271,6 +272,68 @@ BEGIN
     ('e1000000-0000-4000-8000-000000000003', 10, 'prevista', v_professional_id, false, now() + interval '20 days'),
     ('e1000000-0000-4000-8000-000000000003', 11, 'prevista', v_professional_id, false, now() + interval '22 days'),
     ('e1000000-0000-4000-8000-000000000003', 12, 'prevista', v_professional_id, false, now() + interval '24 days');
+
+  -- Evoluções clínicas para sessões concluídas (tela de detalhe do ciclo)
+  INSERT INTO public.medical_records (
+    id, patient_id, session_id, cycle_id, professional_id,
+    crefito_number, record_type, content_richtext, recorded_at
+  ) VALUES
+    (
+      'f1000000-0000-4000-8000-000000000001', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000001', 'e1000000-0000-4000-8000-000000000001', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p><strong>Avaliação inicial.</strong> Paciente idoso, deambula com auxílio de andador. Queixa principal: redução de amplitude em ombro direito e dor leve (EVA 3/10) ao elevar o membro.</p><p>Plano: mobilização passiva e ativa assistida, alongamento e fortalecimento progressivo de MMSS.</p>',
+      now() - interval '9 days' + interval '10 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000002', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000002', 'e1000000-0000-4000-8000-000000000001', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p>Sessão de mobilização articular e exercícios ativos assistidos. Paciente colaborativo, tolerou bem os exercícios. Dor referida EVA 2/10 ao final.</p>',
+      now() - interval '7 days' + interval '10 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000003', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000004', 'e1000000-0000-4000-8000-000000000001', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p>Retomada após falta na sessão anterior. Ganho de amplitude observado em flexão de ombro (aprox. 10°). Mantido plano de fortalecimento e orientações domiciliares.</p>',
+      now() - interval '3 days' + interval '10 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000004', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000005', 'e1000000-0000-4000-8000-000000000001', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p>Exercícios funcionais para atividades de vida diária. Paciente executa elevação frontal com carga mínima (0,5 kg). Sem queixas álgicas significativas.</p>',
+      now() - interval '1 days' + interval '10 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000011', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000011', 'e1000000-0000-4000-8000-000000000002', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p>Início do ciclo encerrado. Avaliação funcional baseline registrada. Objetivo: manutenção de autonomia e prevenção de quedas.</p>',
+      now() - interval '24 days' + interval '11 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000012', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000012', 'e1000000-0000-4000-8000-000000000002', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p>Treino de equilíbrio estático e transferências cama-cadeira. Boa adesão às orientações.</p>',
+      now() - interval '22 days' + interval '11 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000013', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000013', 'e1000000-0000-4000-8000-000000000002', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p>Progressão de carga nos exercícios de MMII. Marcha estável com supervisão.</p>',
+      now() - interval '20 days' + interval '11 hours'
+    ),
+    (
+      'f1000000-0000-4000-8000-000000000014', v_patient_record_id,
+      'e2000000-0000-4000-8000-000000000014', 'e1000000-0000-4000-8000-000000000002', v_professional_id,
+      '000000-F', 'evolucao',
+      '<p><strong>Alta do ciclo.</strong> Objetivos terapêuticos atingidos. Paciente orientado quanto à continuidade dos exercícios domiciliares e sinais de alerta.</p>',
+      now() - interval '18 days' + interval '11 hours'
+    );
 
 END;
 $$;

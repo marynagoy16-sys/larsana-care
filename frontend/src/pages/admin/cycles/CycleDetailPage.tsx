@@ -8,33 +8,46 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle2,
+  ChevronDown,
   Clock,
   CreditCard,
+  PenLine,
   Plus,
   User,
   AlertTriangle,
   RefreshCw,
+  Circle,
+  Activity,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AnalyticsStatCard } from '@/components/dashboard/AnalyticsStatCard'
 import { CrudModal } from '@/components/crud/CrudModal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { ProfessionalSearchField } from '@/components/forms/ProfessionalSearchField'
 import { FormActions } from '@/components/crud/FormActions'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
-import { formatCurrency, formatDate } from '@/lib/formatters'
-import { cycleStatusLabels, paymentStatusLabels } from '@/constants/labels'
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters'
+import { cycleStatusLabels, paymentStatusLabels, ppClassLabels } from '@/constants/labels'
 import { careSessionsService } from '@/services/index'
+import { sanitizeRichText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
 import { requiredString } from '@/schemas/common'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+interface MedicalRecordSummary {
+  id: string
+  content_richtext: string | null
+  crefito_number: string
+  recorded_at: string
+  professionals: { full_name: string } | null
+}
 
 interface Session {
   id: string
@@ -42,6 +55,7 @@ interface Session {
   scheduled_at: string | null
   status: string
   professional_id: string
+  medical_records: MedicalRecordSummary[] | MedicalRecordSummary | null
 }
 
 interface CycleDetail {
@@ -57,34 +71,66 @@ interface CycleDetail {
   patient_id: string
   assigned_professional_id: string
   patients: { full_name: string } | null
-  professionals: { full_name: string; crefito_number: string | null; pp_class: string | null } | null
+  professionals: {
+    full_name: string
+    pp_class: string | null
+    professional_councils: { council_type: string; registration_number: string }[] | { council_type: string; registration_number: string } | null
+  } | null
   care_sessions: Session[]
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+interface SessionSlot {
+  number: number
+  session: Session | null
+}
 
-const SESSION_STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; color: string }> = {
-  realizada: { label: 'Realizada', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400' },
-  prevista:  { label: 'Prevista',  icon: Clock,         color: 'text-muted-foreground' },
-  faltou:    { label: 'Faltou',    icon: AlertTriangle, color: 'text-amber-500' },
-  cancelada: { label: 'Cancelada', icon: AlertTriangle, color: 'text-destructive' },
+const SESSION_STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; color: string; badge: string }> = {
+  realizada: {
+    label: 'Concluída',
+    icon: CheckCircle2,
+    color: 'text-emerald-600 dark:text-emerald-400',
+    badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+  },
+  prevista: {
+    label: 'Pendente',
+    icon: Clock,
+    color: 'text-muted-foreground',
+    badge: 'bg-muted text-muted-foreground',
+  },
+  remarcada: {
+    label: 'Remarcada',
+    icon: RefreshCw,
+    color: 'text-blue-600 dark:text-blue-400',
+    badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
+  },
+  falta: {
+    label: 'Falta',
+    icon: AlertTriangle,
+    color: 'text-amber-600 dark:text-amber-400',
+    badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  },
+  intercorrencia: {
+    label: 'Intercorrência',
+    icon: AlertTriangle,
+    color: 'text-destructive',
+    badge: 'bg-destructive/10 text-destructive',
+  },
 }
 
 const CYCLE_STATUS_COLORS: Record<string, string> = {
-  ativo:     'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  rascunho:  'bg-muted text-muted-foreground',
+  ativo: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+  rascunho: 'bg-muted text-muted-foreground',
   encerrado: 'bg-secondary text-secondary-foreground',
-  pausado:   'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500',
+  aguardando_pagamento: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500',
+  cancelado: 'bg-destructive/10 text-destructive',
 }
 
 const PAYMENT_STATUS_COLORS: Record<string, string> = {
-  pago:         'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  pendente:     'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500',
-  parcial:      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  inadimplente: 'bg-destructive/10 text-destructive',
+  pago: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+  pendente: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500',
+  vencido: 'bg-destructive/10 text-destructive',
+  cancelado: 'bg-muted text-muted-foreground',
 }
-
-// ─── Query ────────────────────────────────────────────────────────────────────
 
 async function fetchCycleDetail(id: string): Promise<CycleDetail> {
   const { data, error } = await supabase
@@ -94,9 +140,17 @@ async function fetchCycleDetail(id: string): Promise<CycleDetail> {
       total_amount_cents, session_unit_price_cents,
       started_at, created_at, patient_id, assigned_professional_id,
       patients ( full_name ),
-      professionals ( full_name, crefito_number, pp_class ),
+      professionals (
+        full_name,
+        pp_class,
+        professional_councils ( council_type, registration_number )
+      ),
       care_sessions (
-        id, session_number, scheduled_at, status, professional_id
+        id, session_number, scheduled_at, status, professional_id,
+        medical_records (
+          id, content_richtext, crefito_number, recorded_at,
+          professionals ( full_name )
+        )
       )
     `)
     .eq('id', id)
@@ -107,122 +161,268 @@ async function fetchCycleDetail(id: string): Promise<CycleDetail> {
   return data as unknown as CycleDetail
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+function normalizeMedicalRecords(
+  records: MedicalRecordSummary[] | MedicalRecordSummary | null | undefined,
+): MedicalRecordSummary[] {
+  if (!records) return []
+  return Array.isArray(records) ? records : [records]
+}
+
+function getProfessionalCrefito(
+  professional: CycleDetail['professionals'],
+): string | null {
+  const councils = professional?.professional_councils
+  if (!councils) return null
+  const list = Array.isArray(councils) ? councils : [councils]
+  return list.find((c) => c.council_type === 'CREFITO')?.registration_number ?? null
+}
+
+function buildSessionSlots(cycle: CycleDetail): SessionSlot[] {
+  const sessionsByNumber = new Map(
+    (cycle.care_sessions ?? []).map((session) => [session.session_number, session]),
+  )
+
+  return Array.from({ length: cycle.session_count }, (_, index) => ({
+    number: index + 1,
+    session: sessionsByNumber.get(index + 1) ?? null,
+  }))
+}
 
 function ProgressCard({ done, total }: { done: number; total: number }) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
   const remaining = total - done
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Progresso</p>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-3">
-        <p className="font-display text-3xl font-bold tabular-nums">
-          {done} <span className="text-muted-foreground font-normal text-xl">/ {total}</span>
-        </p>
-        {/* progress bar */}
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {remaining > 0 ? `${remaining} sessões restantes` : 'Ciclo completo 🎉'}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
 
-function PaymentCard({ amountCents, paymentStatus }: { amountCents: number; paymentStatus: string }) {
-  const colorClass = PAYMENT_STATUS_COLORS[paymentStatus] ?? 'bg-muted text-muted-foreground'
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <CreditCard size={12} /> Pagamento
-        </p>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-3">
-        <p className="font-display text-3xl font-bold tabular-nums">{formatCurrency(amountCents)}</p>
-        <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold', colorClass)}>
-          {paymentStatusLabels[paymentStatus] ?? paymentStatus}
-        </span>
-      </CardContent>
-    </Card>
-  )
-}
-
-function ProfessionalCard({
-  professional,
-  ppPercent,
-  amountCents,
-  sessionCount,
-}: {
-  professional: CycleDetail['professionals']
-  ppPercent?: number
-  amountCents: number
-  sessionCount: number
-}) {
-  if (!professional) return null
-  const ppAmount = ppPercent ? Math.round((amountCents * ppPercent) / 100) : null
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-          <User size={12} /> Profissional
-        </p>
-      </CardHeader>
-      <CardContent className="pt-0 space-y-1">
-        <p className="font-semibold text-base leading-tight">{professional.full_name}</p>
-        {professional.crefito_number && (
-          <p className="text-xs text-muted-foreground">CREFITO {professional.crefito_number}</p>
-        )}
-        {professional.pp_class && (
-          <Badge variant="secondary" className="mt-1">Classe {professional.pp_class}</Badge>
-        )}
-        {ppAmount && (
-          <p className="text-xs text-primary font-medium pt-1">
-            {formatCurrency(ppAmount)} · repasse após {sessionCount}/{sessionCount} sessões
+    <AnalyticsStatCard
+      label="Progresso"
+      icon={Activity}
+      value={`${done} / ${total}`}
+      showLinkIcon={false}
+      footer={
+        <>
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {remaining > 0
+              ? `${remaining} sessão${remaining === 1 ? '' : 'ões'} restante${remaining === 1 ? '' : 's'}`
+              : 'Ciclo completo'}
           </p>
-        )}
-      </CardContent>
-    </Card>
+        </>
+      }
+    />
   )
 }
 
-function SessionCard({ session, index }: { session: Session; index: number }) {
-  const cfg = SESSION_STATUS_CONFIG[session.status] ?? SESSION_STATUS_CONFIG.prevista
-  const StatusIcon = cfg.icon
-  const isDone = session.status === 'realizada'
+function PaymentCard({
+  amountCents,
+  unitPriceCents,
+  paymentStatus,
+}: {
+  amountCents: number
+  unitPriceCents: number
+  paymentStatus: string
+}) {
+  const colorClass = PAYMENT_STATUS_COLORS[paymentStatus] ?? 'bg-muted text-muted-foreground'
 
   return (
-    <div
-      className={cn(
-        'flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center transition-colors min-w-[72px]',
-        isDone
-          ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800/40 dark:bg-emerald-900/10'
-          : 'border-border bg-card',
+    <AnalyticsStatCard
+      label="Pagamento"
+      icon={CreditCard}
+      value={formatCurrency(amountCents)}
+      showLinkIcon={false}
+      footer={
+        <>
+          <p className="text-xs text-muted-foreground">
+            Valor por sessão:{' '}
+            <span className="font-medium text-foreground">{formatCurrency(unitPriceCents)}</span>
+          </p>
+          <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium', colorClass)}>
+            {paymentStatusLabels[paymentStatus] ?? paymentStatus}
+          </span>
+        </>
+      }
+    />
+  )
+}
+
+function ProfessionalCard({ professional }: { professional: CycleDetail['professionals'] }) {
+  const crefitoNumber = professional ? getProfessionalCrefito(professional) : null
+
+  return (
+    <AnalyticsStatCard
+      label="Profissional"
+      icon={User}
+      value={professional?.full_name ?? 'Não alocado'}
+      showLinkIcon={false}
+      valueClassName={cn(
+        professional && 'text-lg sm:text-xl truncate proportional-nums',
+        !professional && 'text-base sm:text-lg text-muted-foreground font-semibold',
       )}
-    >
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        Sessão {index + 1}
-      </p>
-      {session.scheduled_at ? (
-        <p className="text-sm font-bold tabular-nums leading-tight">
-          {formatDate(session.scheduled_at)}
-        </p>
-      ) : (
-        <p className="text-xs text-muted-foreground italic">—</p>
-      )}
-      <StatusIcon size={16} className={cn('mt-0.5', cfg.color)} />
+      footer={
+        professional ? (
+          <>
+            {crefitoNumber && (
+              <p className="text-xs text-muted-foreground">CREFITO {crefitoNumber}</p>
+            )}
+            {professional.pp_class && (
+              <Badge variant="secondary">{ppClassLabels[professional.pp_class] ?? professional.pp_class}</Badge>
+            )}
+          </>
+        ) : undefined
+      }
+    />
+  )
+}
+
+function RecordSignature({ record }: { record: MedicalRecordSummary }) {
+  const professionalName = record.professionals?.full_name ?? 'Profissional'
+
+  return (
+    <div className="rounded-lg border border-border bg-background p-4 space-y-1">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <PenLine size={12} />
+        Assinatura do profissional
+      </div>
+      <p className="font-semibold text-sm pt-1">{professionalName}</p>
+      <p className="text-xs text-muted-foreground">CREFITO {record.crefito_number}</p>
+      <p className="text-xs text-muted-foreground">Registrado em {formatDateTime(record.recorded_at)}</p>
     </div>
   )
 }
 
-// ─── Add Session Modal ─────────────────────────────────────────────────────────
+function SessionScheduleItem({
+  slot,
+  expanded,
+  onToggle,
+}: {
+  slot: SessionSlot
+  expanded: boolean
+  onToggle: () => void
+}) {
+  const { session, number } = slot
+  const status = session?.status ?? 'prevista'
+  const cfg = SESSION_STATUS_CONFIG[status] ?? SESSION_STATUS_CONFIG.prevista
+  const StatusIcon = cfg.icon
+  const isDone = status === 'realizada'
+  const records = normalizeMedicalRecords(session?.medical_records)
+  const primaryRecord = records[0] ?? null
+  const canExpand = isDone
+
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <button
+        type="button"
+        onClick={canExpand ? onToggle : undefined}
+        disabled={!canExpand}
+        className={cn(
+          'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+          canExpand && 'hover:bg-muted/30 cursor-pointer',
+          !canExpand && 'cursor-default',
+        )}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/60 text-xs font-bold">
+          {number}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">Sessão {number}</p>
+          <p className="text-xs text-muted-foreground tabular-nums">
+            {session?.scheduled_at ? formatDate(session.scheduled_at) : 'Data a definir'}
+          </p>
+        </div>
+
+        <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium shrink-0', cfg.badge)}>
+          <StatusIcon size={12} className={cfg.color} />
+          {cfg.label}
+        </span>
+
+        {canExpand ? (
+          <ChevronDown
+            size={16}
+            className={cn('shrink-0 text-muted-foreground transition-transform', expanded && 'rotate-180')}
+          />
+        ) : (
+          <Circle size={8} className="shrink-0 text-muted-foreground/30" />
+        )}
+      </button>
+
+      {expanded && isDone && (
+        <div className="border-t border-border bg-muted/20 px-4 py-4 space-y-4">
+          {primaryRecord?.content_richtext ? (
+            <div
+              className="prose prose-sm max-w-none text-sm text-foreground [&_p]:my-1"
+              dangerouslySetInnerHTML={{ __html: sanitizeRichText(primaryRecord.content_richtext) }}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">Evolução clínica ainda não registrada para esta sessão.</p>
+          )}
+          {primaryRecord && <RecordSignature record={primaryRecord} />}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SessionScheduleSection({
+  cycle,
+  slots,
+  onAddSession,
+}: {
+  cycle: CycleDetail
+  slots: SessionSlot[]
+  onAddSession: () => void
+}) {
+  const [expandedSession, setExpandedSession] = useState<number | null>(null)
+  const sessions = cycle.care_sessions ?? []
+  const canAddSession = sessions.length < cycle.session_count
+
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Calendar size={16} className="text-muted-foreground" />
+          <h3 className="font-semibold text-sm">Cronograma de sessões</h3>
+          <Badge variant="secondary">{cycle.session_count} sessões</Badge>
+        </div>
+        {canAddSession && (
+          <Button size="sm" variant="outline" onClick={onAddSession}>
+            <Plus size={14} className="mr-1.5" />
+            Agendar sessão
+          </Button>
+        )}
+      </div>
+
+      <div className="p-4 space-y-2">
+        {slots.map((slot) => (
+          <SessionScheduleItem
+            key={slot.number}
+            slot={slot}
+            expanded={expandedSession === slot.number}
+            onToggle={() =>
+              setExpandedSession((current) => (current === slot.number ? null : slot.number))
+            }
+          />
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-4 px-5 pb-4 text-xs text-muted-foreground border-t border-border pt-3">
+        {Object.entries(SESSION_STATUS_CONFIG).map(([key, cfg]) => {
+          const Icon = cfg.icon
+          return (
+            <span key={key} className="flex items-center gap-1">
+              <Icon size={12} className={cfg.color} />
+              {cfg.label}
+            </span>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 const addSessionSchema = z.object({
   professional_id: z.string().uuid('Selecione um profissional'),
@@ -299,7 +499,64 @@ function AddSessionModal({
   )
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
+function CycleDetailPageHeader({
+  onBack,
+  cycleNumber,
+  status,
+  patientName,
+  isFetching,
+  loading,
+  notFound,
+}: {
+  onBack: () => void
+  cycleNumber?: number
+  status?: string
+  patientName?: string | null
+  isFetching?: boolean
+  loading?: boolean
+  notFound?: boolean
+}) {
+  const cycleStatusColor = status ? CYCLE_STATUS_COLORS[status] ?? 'bg-muted text-muted-foreground' : ''
+
+  return (
+    <div className="flex items-center justify-between gap-4 flex-wrap min-w-0 flex-1">
+      <div className="flex items-center gap-3 min-w-0">
+        <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+          <ArrowLeft size={20} />
+        </Button>
+        {loading ? (
+          <div className="space-y-1.5 min-w-0">
+            <Skeleton className="h-6 w-28" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        ) : notFound ? (
+          <h1 className="font-display font-bold text-xl lg:text-2xl leading-tight tracking-tight">
+            Ciclo não encontrado
+          </h1>
+        ) : (
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-display font-bold text-xl lg:text-2xl leading-tight tracking-tight">
+                Ciclo #{cycleNumber}
+              </h1>
+              {status && (
+                <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0', cycleStatusColor)}>
+                  {cycleStatusLabels[status] ?? status}
+                </span>
+              )}
+            </div>
+            {patientName && (
+              <p className="text-sm text-muted-foreground mt-0.5 truncate">{patientName}</p>
+            )}
+          </div>
+        )}
+      </div>
+      {isFetching && !loading && (
+        <RefreshCw size={16} className="animate-spin text-muted-foreground shrink-0" />
+      )}
+    </div>
+  )
+}
 
 export function CycleDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -313,145 +570,92 @@ export function CycleDetailPage() {
     placeholderData: (prev) => prev,
   })
 
+  const goBack = () => navigate('/admin/ciclos')
+
   if (isLoading) {
     return (
-      <CrudScrollPageLayout>
-        <DetailPageSkeleton fields={6} />
-      </CrudScrollPageLayout>
+      <>
+        <PageHeader loading>
+          <CycleDetailPageHeader onBack={goBack} loading />
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <DetailPageSkeleton fields={6} />
+        </CrudScrollPageLayout>
+      </>
     )
   }
 
   if (!cycle) {
     return (
-      <CrudScrollPageLayout>
-        <p className="text-muted-foreground p-6">Ciclo não encontrado.</p>
-      </CrudScrollPageLayout>
+      <>
+        <PageHeader>
+          <CycleDetailPageHeader onBack={goBack} notFound />
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <p className="text-muted-foreground p-6">Ciclo não encontrado.</p>
+        </CrudScrollPageLayout>
+      </>
     )
   }
 
   const sessions = cycle.care_sessions ?? []
   const doneSessions = sessions.filter((s) => s.status === 'realizada').length
-  const nextSessionNumber = sessions.length + 1
-  const canAddSession = sessions.length < cycle.session_count
-  const cycleStatusColor = CYCLE_STATUS_COLORS[cycle.status] ?? 'bg-muted text-muted-foreground'
+  const nextSessionNumber = sessions.length > 0
+    ? Math.max(...sessions.map((s) => s.session_number)) + 1
+    : 1
+  const sessionSlots = buildSessionSlots(cycle)
 
   return (
-    <CrudScrollPageLayout>
-      <CascadeReveal className="space-y-5 pb-8">
-        {/* ── Header ── */}
+    <>
+      <PageHeader>
+        <CycleDetailPageHeader
+          onBack={goBack}
+          cycleNumber={cycle.cycle_number}
+          status={cycle.status}
+          patientName={cycle.patients?.full_name}
+          isFetching={isFetching}
+        />
+      </PageHeader>
+
+      <CrudScrollPageLayout>
+        <CascadeReveal className="space-y-5 pb-8">
+          <CascadeItem>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+              <ProgressCard done={doneSessions} total={cycle.session_count} />
+              <PaymentCard
+                amountCents={cycle.total_amount_cents}
+                unitPriceCents={cycle.session_unit_price_cents}
+                paymentStatus={cycle.payment_status}
+              />
+              <ProfessionalCard professional={cycle.professionals} />
+            </div>
+          </CascadeItem>
+
         <CascadeItem>
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/admin/ciclos')}>
-                <ArrowLeft size={20} />
-              </Button>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="font-display text-2xl font-bold">
-                    Ciclo #{cycle.cycle_number}
-                  </h2>
-                  <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold', cycleStatusColor)}>
-                    {cycleStatusLabels[cycle.status] ?? cycle.status}
-                  </span>
+          <SessionScheduleSection
+            cycle={cycle}
+            slots={sessionSlots}
+            onAddSession={() => setAddSessionOpen(true)}
+          />
+        </CascadeItem>
+
+        <CascadeItem>
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-border">
+              <h3 className="text-sm font-semibold">Detalhes do ciclo</h3>
+            </div>
+            <div className="px-5 py-4 space-y-2 text-sm">
+              {[
+                { label: 'Valor por sessão', value: formatCurrency(cycle.session_unit_price_cents) },
+                { label: 'Início', value: cycle.started_at ? formatDate(cycle.started_at) : '—' },
+                { label: 'Abertura', value: formatDate(cycle.created_at) },
+              ].map((row) => (
+                <div key={row.label} className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50 last:border-0">
+                  <span className="text-muted-foreground sm:w-44 shrink-0">{row.label}</span>
+                  <span className="font-medium">{row.value}</span>
                 </div>
-                {cycle.patients && (
-                  <p className="text-sm text-muted-foreground mt-0.5">{cycle.patients.full_name}</p>
-                )}
-              </div>
+              ))}
             </div>
-            {isFetching && !isLoading && (
-              <RefreshCw size={16} className="animate-spin text-muted-foreground" />
-            )}
-          </div>
-        </CascadeItem>
-
-        {/* ── Info cards ── */}
-        <CascadeItem>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <ProgressCard done={doneSessions} total={cycle.session_count} />
-            <PaymentCard amountCents={cycle.total_amount_cents} paymentStatus={cycle.payment_status} />
-            <ProfessionalCard
-              professional={cycle.professionals}
-              amountCents={cycle.total_amount_cents}
-              sessionCount={cycle.session_count}
-            />
-          </div>
-        </CascadeItem>
-
-        {/* ── Session schedule ── */}
-        <CascadeItem>
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-muted-foreground" />
-                <h3 className="font-semibold text-sm">Cronograma de sessões</h3>
-                <Badge variant="secondary">{cycle.session_count} sessões</Badge>
-              </div>
-              {canAddSession && (
-                <Button size="sm" variant="outline" onClick={() => setAddSessionOpen(true)}>
-                  <Plus size={14} className="mr-1.5" />
-                  Agendar sessão
-                </Button>
-              )}
-            </div>
-
-            <div className="p-5">
-              {sessions.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhuma sessão agendada ainda.
-                </p>
-              ) : (
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2">
-                  {sessions.map((session, i) => (
-                    <SessionCard key={session.id} session={session} index={i} />
-                  ))}
-                  {/* placeholder slots */}
-                  {Array.from({ length: cycle.session_count - sessions.length }).map((_, i) => (
-                    <div
-                      key={`placeholder-${i}`}
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-border/60 p-3 text-center opacity-40 min-w-[72px]"
-                    >
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Sessão {sessions.length + i + 1}
-                      </p>
-                      <p className="text-xs text-muted-foreground italic">—</p>
-                      <Clock size={14} className="text-muted-foreground mt-0.5" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Legend */}
-            <div className="flex flex-wrap gap-4 px-5 pb-4 text-xs text-muted-foreground">
-              {Object.entries(SESSION_STATUS_CONFIG).map(([key, cfg]) => {
-                const Icon = cfg.icon
-                return (
-                  <span key={key} className="flex items-center gap-1">
-                    <Icon size={12} className={cfg.color} />
-                    {cfg.label}
-                  </span>
-                )
-              })}
-            </div>
-          </div>
-        </CascadeItem>
-
-        {/* ── Metadata ── */}
-        <CascadeItem>
-          <div className="rounded-xl border border-border bg-card p-5 space-y-2 text-sm">
-            <h3 className="font-semibold text-sm mb-3">Detalhes do ciclo</h3>
-            {[
-              { label: 'Valor por sessão', value: formatCurrency(cycle.session_unit_price_cents) },
-              { label: 'Início', value: cycle.started_at ? formatDate(cycle.started_at) : '—' },
-              { label: 'Abertura', value: formatDate(cycle.created_at) },
-              { label: 'ID', value: cycle.id.slice(0, 8) },
-            ].map((row) => (
-              <div key={row.label} className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50 last:border-0">
-                <span className="text-muted-foreground sm:w-44 shrink-0">{row.label}</span>
-                <span className="font-medium">{row.value}</span>
-              </div>
-            ))}
           </div>
         </CascadeItem>
       </CascadeReveal>
@@ -462,6 +666,7 @@ export function CycleDetailPage() {
         cycleId={cycle.id}
         nextSessionNumber={nextSessionNumber}
       />
-    </CrudScrollPageLayout>
+      </CrudScrollPageLayout>
+    </>
   )
 }

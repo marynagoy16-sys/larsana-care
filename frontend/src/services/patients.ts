@@ -198,6 +198,26 @@ export async function upsertResponsible(
   return data
 }
 
+async function resolveCityRegion(cityId: string) {
+  const { data: city, error } = await supabase
+    .from('cities')
+    .select('id, region_id')
+    .eq('id', cityId)
+    .single()
+  if (error) throw error
+  return { cityId: city.id, regionId: city.region_id }
+}
+
+async function syncPatientGeography(patientId: string, cityId: string) {
+  const geography = await resolveCityRegion(cityId)
+  const { error } = await supabase
+    .from('patients')
+    .update({ city_id: geography.cityId, region_id: geography.regionId })
+    .eq('id', patientId)
+  if (error) throw error
+  return geography
+}
+
 export async function upsertAddress(
   patientId: string,
   values: AddressStepValues & { id?: string },
@@ -222,6 +242,7 @@ export async function upsertAddress(
       .select()
       .single()
     if (error) throw error
+    await syncPatientGeography(patientId, values.city_id)
     return data
   }
 
@@ -231,6 +252,7 @@ export async function upsertAddress(
     .select()
     .single()
   if (error) throw error
+  await syncPatientGeography(patientId, values.city_id)
   return data
 }
 
@@ -239,6 +261,7 @@ export async function createPatientWizard(
   pendingFiles: { file: File; document_type: Tables<'patient_documents'>['document_type'] }[] = [],
 ) {
   const { patient, responsible, address } = values
+  const geography = await resolveCityRegion(address.city_id)
 
   const { data: createdPatient, error: patientError } = await supabase
     .from('patients')
@@ -248,10 +271,11 @@ export async function createPatientWizard(
       birth_date: patient.birth_date,
       patient_level: patient.patient_level,
       care_status: patient.care_status,
-      region_id: patient.region_id,
-      city_id: patient.city_id,
+      region_id: geography.regionId,
+      city_id: geography.cityId,
       allocated_professional_id: patient.allocated_professional_id ?? null,
       suggested_weekly_frequency: patient.suggested_weekly_frequency ?? null,
+      attendance_period: patient.attendance_period ?? null,
       clinical_summary: patient.clinical_summary ?? null,
       is_valor_social: patient.is_valor_social,
       is_data_complete: true,

@@ -20,6 +20,7 @@ export const patientStepSchema = z.object({
   city_id: z.string().uuid('Selecione a cidade'),
   allocated_professional_id: z.string().uuid().optional().nullable(),
   suggested_weekly_frequency: z.number().min(1).max(7).optional().nullable(),
+  attendance_period: z.enum(['MANHA', 'TARDE', 'NOITE']).optional().nullable(),
   clinical_summary: optionalString,
   is_valor_social: z.boolean().default(false),
 })
@@ -58,6 +59,14 @@ export const patientWizardSchema = z.object({
   responsible: responsibleStepSchema,
   address: addressStepSchema,
   documents: z.array(documentItemSchema).optional().default([]),
+}).superRefine((data, ctx) => {
+  if (data.patient.city_id !== data.address.city_id) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'A cidade do paciente deve ser a mesma do endereço',
+      path: ['address', 'city_id'],
+    })
+  }
 })
 
 export type PatientStepValues = z.infer<typeof patientStepSchema>

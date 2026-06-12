@@ -13,7 +13,7 @@ interface GenericDetailPageProps {
   backPath: string
   queryKey: readonly unknown[]
   queryFn: (id: string) => Promise<Record<string, unknown> | object>
-  fields: { key: string; label: string; format?: 'date' | 'datetime' | 'currency' }[]
+  fields: { key: string; label: string; format?: 'date' | 'datetime' | 'currency'; enumLabels?: Record<string, string> }[]
 }
 
 export function GenericDetailPage({ title, backPath, queryKey, queryFn, fields }: GenericDetailPageProps) {
@@ -43,9 +43,10 @@ export function GenericDetailPage({ title, backPath, queryKey, queryFn, fields }
   }
 
   const record = data as Record<string, unknown>
-  const formatValue = (key: string, format?: string) => {
+  const formatValue = (key: string, format?: string, enumLabels?: Record<string, string>) => {
     const val = record[key]
     if (val == null) return '—'
+    if (enumLabels) return enumLabels[String(val)] ?? String(val)
     if (format === 'date') return formatDate(String(val))
     if (format === 'datetime') return formatDateTime(String(val))
     if (format === 'currency') return formatCurrency(Number(val))
@@ -73,7 +74,7 @@ export function GenericDetailPage({ title, backPath, queryKey, queryFn, fields }
             {fields.map((f) => (
               <div key={f.key} className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50 last:border-0">
                 <span className="text-muted-foreground sm:w-40 shrink-0">{f.label}</span>
-                <span className="font-medium">{formatValue(f.key, f.format)}</span>
+                <span className="font-medium">{formatValue(f.key, f.format, f.enumLabels)}</span>
               </div>
             ))}
           </div>

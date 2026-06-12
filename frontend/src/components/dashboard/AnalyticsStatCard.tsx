@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -11,6 +12,9 @@ export interface AnalyticsStatCardProps {
   trendLabel?: string
   href?: string
   isLoading?: boolean
+  footer?: ReactNode
+  showLinkIcon?: boolean
+  valueClassName?: string
 }
 
 function formatValue(value: number | string): string {
@@ -26,6 +30,9 @@ export function AnalyticsStatCard({
   trendLabel = 'período anterior',
   href,
   isLoading,
+  footer,
+  showLinkIcon = true,
+  valueClassName,
 }: AnalyticsStatCardProps) {
   const trendUp = trend !== undefined && trend >= 0
   const displayValue = isLoading ? '—' : formatValue(value)
@@ -41,17 +48,19 @@ export function AnalyticsStatCard({
           )}
           <span className="text-sm font-medium text-muted-foreground truncate">{label}</span>
         </div>
-        {href ? (
-          <Link to={href} className="shrink-0 text-muted-foreground/50 hover:text-foreground transition-colors" aria-label={`Ver ${label}`}>
-            <ArrowUpRight size={16} />
-          </Link>
-        ) : (
-          <span className="shrink-0 text-muted-foreground/30"><ArrowUpRight size={16} /></span>
+        {showLinkIcon && (
+          href ? (
+            <Link to={href} className="shrink-0 text-muted-foreground/50 hover:text-foreground transition-colors" aria-label={`Ver ${label}`}>
+              <ArrowUpRight size={16} />
+            </Link>
+          ) : (
+            <span className="shrink-0 text-muted-foreground/30"><ArrowUpRight size={16} /></span>
+          )
         )}
       </div>
 
-      <div className="mt-auto">
-        <p className={cn('text-2xl sm:text-[1.75rem] font-bold tabular-nums tracking-tight', isLoading && 'animate-pulse')}>
+      <div className={cn('mt-auto', footer && 'space-y-3')}>
+        <p className={cn('text-2xl sm:text-[1.75rem] font-bold tabular-nums tracking-tight', valueClassName, isLoading && 'animate-pulse')}>
           {displayValue}
         </p>
         {trend !== undefined && !isLoading && (
@@ -63,6 +72,7 @@ export function AnalyticsStatCard({
             <span className="text-muted-foreground"> {trendLabel}</span>
           </p>
         )}
+        {footer}
       </div>
     </div>
   )

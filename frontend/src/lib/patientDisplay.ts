@@ -1,5 +1,5 @@
 import { differenceInYears, parseISO, isValid } from 'date-fns'
-import { patientSexLabels } from '@/constants/labels'
+import { attendancePeriodLabels, patientSexLabels } from '@/constants/labels'
 
 export function formatPatientAbbreviation(fullName: string | null | undefined): string {
   const parts = (fullName ?? '').trim().split(/\s+/).filter(Boolean)
@@ -33,26 +33,7 @@ export function resolveDiagnosticHypothesis(
   return firstLine.length > 80 ? `${firstLine.slice(0, 77)}…` : firstLine
 }
 
-export function resolveAttendancePeriod(
-  attendancePeriod: string | null | undefined,
-  suggestedWeeklyFrequency: number | null | undefined,
-): string {
-  const period = attendancePeriod?.trim()
-  if (period) return period
-  if (suggestedWeeklyFrequency != null && suggestedWeeklyFrequency > 0) {
-    const sessions = Number.isInteger(suggestedWeeklyFrequency)
-      ? String(suggestedWeeklyFrequency)
-      : suggestedWeeklyFrequency.toLocaleString('pt-BR', { maximumFractionDigits: 1 })
-    return `${sessions}x/semana`
-  }
-  return '—'
-}
-
-export function resolveLatestAssessmentStatus(
-  assessments: Array<{ status: string; created_at: string }> | null | undefined,
-): string | null {
-  if (!assessments?.length) return null
-  return [...assessments].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  )[0]?.status ?? null
+export function formatAttendancePeriod(value: string | null | undefined): string {
+  if (!value) return '—'
+  return attendancePeriodLabels[value] ?? value
 }

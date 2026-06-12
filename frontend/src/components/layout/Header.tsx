@@ -7,6 +7,7 @@ import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { COMING_SOON_BADGE } from '@/config/navigation'
+import { usePageHeader } from '@/contexts/PageHeaderContext'
 
 interface HeaderProps {
   pageTitle: string
@@ -21,9 +22,11 @@ export function Header({
   showSearch = true,
   horizontalNav,
 }: HeaderProps) {
+  const { header } = usePageHeader()
+
   return (
     <header className="flex items-center justify-between gap-4 pb-4 lg:pb-5 pt-0">
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         {onMenuClick && (
           <Button
             variant="ghost"
@@ -35,9 +38,13 @@ export function Header({
             <Menu size={22} />
           </Button>
         )}
-        <h1 className="font-display font-bold text-2xl lg:text-[1.75rem] leading-tight tracking-tight truncate min-w-0">
-          {pageTitle}
-        </h1>
+        {header?.content ?? (
+          pageTitle ? (
+            <h1 className="font-display font-bold text-2xl lg:text-[1.75rem] leading-tight tracking-tight truncate min-w-0">
+              {pageTitle}
+            </h1>
+          ) : null
+        )}
       </div>
 
       {horizontalNav && horizontalNav.length > 0 && (

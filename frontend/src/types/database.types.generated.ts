@@ -873,6 +873,7 @@ export type Database = {
           address_id: string | null
           assigned_professional_id: string | null
           created_at: string
+          demand_type: Database["public"]["Enums"]["demand_type"]
           id: string
           notes: string | null
           patient_id: string
@@ -885,6 +886,7 @@ export type Database = {
           address_id?: string | null
           assigned_professional_id?: string | null
           created_at?: string
+          demand_type?: Database["public"]["Enums"]["demand_type"]
           id?: string
           notes?: string | null
           patient_id: string
@@ -897,6 +899,7 @@ export type Database = {
           address_id?: string | null
           assigned_professional_id?: string | null
           created_at?: string
+          demand_type?: Database["public"]["Enums"]["demand_type"]
           id?: string
           notes?: string | null
           patient_id?: string
@@ -1951,7 +1954,7 @@ export type Database = {
           cpf: string | null
           created_at: string
           diagnostic_hypothesis: string | null
-          attendance_period: string | null
+          attendance_period: Database["public"]["Enums"]["patient_attendance_period"] | null
           full_name: string
           id: string
           is_data_complete: boolean
@@ -1975,7 +1978,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           diagnostic_hypothesis?: string | null
-          attendance_period?: string | null
+          attendance_period?: Database["public"]["Enums"]["patient_attendance_period"] | null
           full_name: string
           id?: string
           is_data_complete?: boolean
@@ -1999,7 +2002,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           diagnostic_hypothesis?: string | null
-          attendance_period?: string | null
+          attendance_period?: Database["public"]["Enums"]["patient_attendance_period"] | null
           full_name?: string
           id?: string
           is_data_complete?: boolean
@@ -3085,7 +3088,7 @@ export type Database = {
       patients_pp: {
         Row: {
           allocated_professional_id: string | null
-          attendance_period: string | null
+          attendance_period: Database["public"]["Enums"]["patient_attendance_period"] | null
           birth_date: string | null
           care_status: Database["public"]["Enums"]["patient_care_status"] | null
           city_id: string | null
@@ -3326,6 +3329,7 @@ export type Database = {
         | "cancelado"
       demand_response_type: "accepted" | "declined"
       demand_status: "aberta" | "alocada" | "cancelada"
+      demand_type: "avaliacao" | "continuidade"
       family_response: "SIM" | "NAO"
       legal_term_type:
         | "TERMO_ADESAO"
@@ -3347,6 +3351,7 @@ export type Database = {
         | "geral"
       nps_rated_entity_type: "professional" | "patient" | "platform"
       nps_rater_type: "paciente" | "pp"
+      patient_attendance_period: "MANHA" | "TARDE" | "NOITE"
       patient_care_status: "ATIVO" | "PAUSA"
       patient_document_type: "RG" | "LAUDO" | "EXAME" | "OUTRO"
       patient_level: "N1" | "N2" | "N3" | "VALOR_SOCIAL"
@@ -3550,6 +3555,7 @@ export const Constants = {
       ],
       demand_response_type: ["accepted", "declined"],
       demand_status: ["aberta", "alocada", "cancelada"],
+      demand_type: ["avaliacao", "continuidade"],
       family_response: ["SIM", "NAO"],
       legal_term_type: [
         "TERMO_ADESAO",
@@ -3573,6 +3579,7 @@ export const Constants = {
       ],
       nps_rated_entity_type: ["professional", "patient", "platform"],
       nps_rater_type: ["paciente", "pp"],
+      patient_attendance_period: ["MANHA", "TARDE", "NOITE"],
       patient_care_status: ["ATIVO", "PAUSA"],
       patient_document_type: ["RG", "LAUDO", "EXAME", "OUTRO"],
       patient_level: ["N1", "N2", "N3", "VALOR_SOCIAL"],

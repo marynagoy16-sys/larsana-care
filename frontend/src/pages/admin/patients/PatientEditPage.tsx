@@ -9,11 +9,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormActions } from '@/components/crud/FormActions'
 import { MaskedInput } from '@/components/forms/MaskedInput'
+import { CityRegionFields } from '@/components/forms/CityRegionFields'
 import { patientStepSchema, type PatientStepValues } from '@/schemas/patient'
 import { usePatient } from '@/hooks/queries/usePatients'
 import { useUpdatePatient } from '@/hooks/mutations/usePatientMutations'
-import { useRegions, useCities } from '@/hooks/queries/useRegions'
-import { careStatusLabels, patientLevelLabels } from '@/constants/labels'
+import { careStatusLabels, patientLevelLabels, attendancePeriodLabels } from '@/constants/labels'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 
 export function PatientEditPage() {
@@ -21,7 +21,6 @@ export function PatientEditPage() {
   const navigate = useNavigate()
   const { data: patient, isLoading } = usePatient(id)
   const updatePatient = useUpdatePatient()
-  const { data: regions = [] } = useRegions()
 
   const form = useForm<PatientStepValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,13 +33,14 @@ export function PatientEditPage() {
       care_status: 'ATIVO',
       region_id: '',
       city_id: '',
+      attendance_period: null,
       clinical_summary: '',
       is_valor_social: false,
     },
   })
 
   const regionId = form.watch('region_id')
-  const { data: cities = [] } = useCities(regionId || undefined)
+  const cityId = form.watch('city_id')
 
   useEffect(() => {
     if (!patient) return
@@ -54,6 +54,7 @@ export function PatientEditPage() {
       city_id: patient.city_id ?? '',
       allocated_professional_id: patient.allocated_professional_id,
       suggested_weekly_frequency: patient.suggested_weekly_frequency,
+      attendance_period: patient.attendance_period ?? null,
       clinical_summary: patient.clinical_summary ?? '',
       is_valor_social: patient.is_valor_social,
     })
@@ -131,25 +132,37 @@ export function PatientEditPage() {
               </FormItem>
             )} />
           </div>
-          <FormField control={form.control} name="region_id" render={({ field }) => (
+          <FormField control={form.control} name="city_id" render={() => (
             <FormItem>
-              <FormLabel>Região</FormLabel>
-              <Select onValueChange={(v) => { field.onChange(v); form.setValue('city_id', '') }} value={field.value}>
-                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                <SelectContent>
-                  {regions.map((r) => <SelectItem key={r.id} value={r.id}>{r.code} — {r.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <CityRegionFields
+                cityId={cityId}
+                regionId={regionId}
+                onCityChange={(nextCityId, nextRegionId) => {
+                  form.setValue('city_id', nextCityId, { shouldValidate: true, shouldDirty: true })
+                  form.setValue('region_id', nextRegionId, { shouldValidate: true, shouldDirty: true })
+                }}
+              />
               <FormMessage />
             </FormItem>
           )} />
-          <FormField control={form.control} name="city_id" render={({ field }) => (
+          <FormField control={form.control} name="region_id" render={() => (
+            <FormItem className="hidden">
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="attendance_period" render={({ field }) => (
             <FormItem>
-              <FormLabel>Cidade</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={!regionId}>
-                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+              <FormLabel>Período de atendimento</FormLabel>
+              <Select
+                onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                value={field.value ?? '__none__'}
+              >
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                 <SelectContent>
-                  {cities.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  <SelectItem value="__none__">Não informado</SelectItem>
+                  {Object.entries(attendancePeriodLabels).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -1,12 +1,11 @@
 import { supabase } from '@/lib/supabase'
 import type { CrudRow } from '@/lib/createCrudService'
 import {
+  formatAttendancePeriod,
   formatPatientAbbreviation,
   formatPatientAge,
   formatPatientSex,
-  resolveAttendancePeriod,
   resolveDiagnosticHypothesis,
-  resolveLatestAssessmentStatus,
 } from '@/lib/patientDisplay'
 
 type DemandPatientJoin = {
@@ -16,16 +15,14 @@ type DemandPatientJoin = {
   diagnostic_hypothesis: string | null
   attendance_period: string | null
   clinical_summary: string | null
-  suggested_weekly_frequency: number | null
-  initial_assessments: Array<{ status: string; created_at: string }> | null
 }
 
 export type DemandListItem = CrudRow & {
+  demand_type: 'avaliacao' | 'continuidade'
   patient_abbreviation: string
   patient_sex: string
   patient_age: string
   diagnostic_hypothesis: string
-  assessment_status: string | null
   attendance_period: string
 }
 
@@ -37,21 +34,16 @@ const DEMAND_LIST_SELECT = `
     sex,
     diagnostic_hypothesis,
     attendance_period,
-    clinical_summary,
-    suggested_weekly_frequency,
-    initial_assessments (
-      status,
-      created_at
-    )
+    clinical_summary
   )
 `
 
 function mapDemandRow(row: CrudRow & { patients: DemandPatientJoin | null }): DemandListItem {
   const patient = row.patients
-  const assessmentStatus = resolveLatestAssessmentStatus(patient?.initial_assessments)
 
   return {
     ...row,
+    demand_type: (row.demand_type as DemandListItem['demand_type']) ?? 'avaliacao',
     patient_abbreviation: formatPatientAbbreviation(patient?.full_name),
     patient_sex: formatPatientSex(patient?.sex),
     patient_age: formatPatientAge(patient?.birth_date),
@@ -59,11 +51,7 @@ function mapDemandRow(row: CrudRow & { patients: DemandPatientJoin | null }): De
       patient?.diagnostic_hypothesis,
       patient?.clinical_summary,
     ),
-    assessment_status: assessmentStatus,
-    attendance_period: resolveAttendancePeriod(
-      patient?.attendance_period,
-      patient?.suggested_weekly_frequency,
-    ),
+    attendance_period: formatAttendancePeriod(patient?.attendance_period),
   }
 }
 

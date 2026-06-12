@@ -9,10 +9,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MaskedInput } from '@/components/forms/MaskedInput'
+import { CityRegionFields } from '@/components/forms/CityRegionFields'
 import { patientWizardSchema, type PatientWizardValues } from '@/schemas/patient'
 import { useCreatePatient } from '@/hooks/mutations/usePatientMutations'
-import { useRegions, useCities } from '@/hooks/queries/useRegions'
-import { careStatusLabels, patientDocumentTypeLabels, patientLevelLabels } from '@/constants/labels'
+import { useAllCities, useRegions } from '@/hooks/queries/useRegions'
+import { careStatusLabels, patientDocumentTypeLabels, patientLevelLabels, attendancePeriodLabels } from '@/constants/labels'
 import {
   CREATE_FORM_STEPS,
   JOURNEY_STAGES,
@@ -33,6 +34,7 @@ const defaultValues: PatientWizardValues = {
     city_id: '',
     allocated_professional_id: null,
     suggested_weekly_frequency: 2,
+    attendance_period: null,
     clinical_summary: '',
     is_valor_social: false,
   },
@@ -79,6 +81,7 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
   const [docType, setDocType] = useState<Tables<'patient_documents'>['document_type']>('OUTRO')
   const createPatient = useCreatePatient()
   const { data: regions = [] } = useRegions()
+  const { data: allCities = [] } = useAllCities()
 
   const form = useForm<PatientWizardValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,10 +91,16 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
   })
 
   const regionId = form.watch('patient.region_id')
+  const patientCityId = form.watch('patient.city_id')
   const patientName = form.watch('patient.full_name')
   const responsibleEmail = form.watch('responsible.email')
   const responsiblePhone = form.watch('responsible.phone')
-  const { data: cities = [] } = useCities(regionId || undefined)
+
+  const syncCitySelection = (cityId: string, nextRegionId: string) => {
+    form.setValue('patient.city_id', cityId, { shouldValidate: true, shouldDirty: true })
+    form.setValue('patient.region_id', nextRegionId, { shouldValidate: true, shouldDirty: true })
+    form.setValue('address.city_id', cityId, { shouldValidate: true, shouldDirty: true })
+  }
 
   const stepIndex = CREATE_FORM_STEPS.findIndex((s) => s.id === step)
 
@@ -135,7 +144,7 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
   }
 
   const selectedRegion = regions.find((r) => r.id === regionId)
-  const selectedCity = cities.find((c) => c.id === form.watch('patient.city_id'))
+  const selectedCity = allCities.find((c) => c.id === patientCityId)
 
   return (
     <Form {...form}>
@@ -308,25 +317,34 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
                     </FormItem>
                   )} />
                 </div>
-                <FormField control={form.control} name="patient.region_id" render={({ field }) => (
+                <FormField control={form.control} name="patient.city_id" render={() => (
                   <FormItem>
-                    <FormLabel>Região</FormLabel>
-                    <Select onValueChange={(v) => { field.onChange(v); form.setValue('patient.city_id', ''); form.setValue('address.city_id', '') }} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        {regions.map((r) => <SelectItem key={r.id} value={r.id}>{r.code} — {r.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <CityRegionFields
+                      cityId={patientCityId}
+                      regionId={regionId}
+                      onCityChange={syncCitySelection}
+                    />
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="patient.city_id" render={({ field }) => (
+                <FormField control={form.control} name="patient.region_id" render={() => (
+                  <FormItem className="hidden">
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="patient.attendance_period" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cidade</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!regionId}>
+                    <FormLabel>Período de atendimento</FormLabel>
+                    <Select
+                      onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                      value={field.value ?? '__none__'}
+                    >
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                       <SelectContent>
-                        {cities.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        <SelectItem value="__none__">Não informado</SelectItem>
+                        {Object.entries(attendancePeriodLabels).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>{v}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -359,6 +377,16 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
             {step === 'address' && (
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold">Endereço</h4>
+                <FormField control={form.control} name="address.city_id" render={() => (
+                  <FormItem>
+                    <CityRegionFields
+                      cityId={form.watch('address.city_id') || patientCityId}
+                      regionId={regionId}
+                      onCityChange={syncCitySelection}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )} />
                 <FormField control={form.control} name="address.postal_code" render={({ field }) => (
                   <FormItem><FormLabel>CEP</FormLabel><FormControl><MaskedInput mask="cep" value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
                 )} />
@@ -375,18 +403,6 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
                 </div>
                 <FormField control={form.control} name="address.neighborhood" render={({ field }) => (
                   <FormItem><FormLabel>Bairro</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="address.city_id" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cidade</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!regionId}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        {cities.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
                 )} />
               </div>
             )}

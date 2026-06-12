@@ -1,7 +1,9 @@
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
+import type { SearchOption } from '@/services/entitySearch'
 
 type City = Database['public']['Tables']['cities']['Row']
+type Region = Database['public']['Tables']['regions']['Row']
 type Neighborhood = Database['public']['Tables']['neighborhoods']['Row']
 
 export async function listRegions() {
@@ -16,6 +18,40 @@ export async function listCities(regionId?: string) {
   const { data, error } = await query
   if (error) throw error
   return data ?? []
+}
+
+function normalizeCitySearch(value: string) {
+  return value.trim().toLocaleLowerCase('pt-BR')
+}
+
+export function syncCityRegion(
+  cityId: string,
+  cities: Pick<City, 'id' | 'region_id'>[],
+): { cityId: string; regionId: string } | null {
+  const city = cities.find((item) => item.id === cityId)
+  if (!city) return null
+  return { cityId: city.id, regionId: city.region_id }
+}
+
+export async function searchCities(query: string, cities?: City[]): Promise<SearchOption[]> {
+  const allCities = cities ?? await listCities()
+  const normalizedQuery = normalizeCitySearch(query)
+  const filtered = normalizedQuery
+    ? allCities.filter((city) => normalizeCitySearch(city.name).includes(normalizedQuery))
+    : allCities
+
+  return filtered.slice(0, 25).map((city) => ({
+    id: city.id,
+    label: city.name,
+    subtitle: city.state,
+  }))
+}
+
+export async function getCitySearchOption(id: string): Promise<SearchOption | null> {
+  const { data, error } = await supabase.from('cities').select('id, name, state').eq('id', id).maybeSingle()
+  if (error) throw error
+  if (!data) return null
+  return { id: data.id, label: data.name, subtitle: data.state }
 }
 
 export async function listNeighborhoods(cityId: string) {
@@ -170,8 +206,11 @@ function normalizeName(value: string) {
   return value.trim().toLocaleLowerCase('pt-BR')
 }
 
+export type { City, Region }
+
 export const regionsQueryKeys = {
   regions: ['regions'] as const,
+  allCities: ['cities', 'all'] as const,
   cities: (regionId?: string) => ['cities', regionId ?? 'all'] as const,
   geography: (regionId: string) => ['region_geography', regionId] as const,
   spNeighborhoods: (municipalityId: string) => ['sp_neighborhoods', municipalityId] as const,

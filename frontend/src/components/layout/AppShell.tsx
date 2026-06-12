@@ -21,6 +21,7 @@ import { DataLayer } from '@/components/layout/DataLayer'
 import { DataLayerFooter } from '@/components/layout/DataLayerFooter'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { PageFooterProvider } from '@/contexts/PageFooterContext'
+import { PageHeaderProvider } from '@/contexts/PageHeaderContext'
 import type { UserRole } from '@/types/auth'
 
 export type LayoutVariant = 'admin' | 'profissional' | 'paciente'
@@ -78,8 +79,9 @@ export function AppShell({ variant }: AppShellProps) {
       )}
 
       <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden">
-        <PageFooterProvider>
-          <DataLayer reserveBottomNav={showBottomNav}>
+        <PageHeaderProvider>
+          <PageFooterProvider>
+            <DataLayer reserveBottomNav={showBottomNav}>
             <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar">
               <div className="shell-content-x shell-content-y-top">
                 <Header
@@ -97,8 +99,9 @@ export function AppShell({ variant }: AppShellProps) {
             </div>
 
             <DataLayerFooter />
-          </DataLayer>
-        </PageFooterProvider>
+            </DataLayer>
+          </PageFooterProvider>
+        </PageHeaderProvider>
       </div>
 
       {variant === 'profissional' && <BottomNav items={profBottom} fabIndex={2} />}

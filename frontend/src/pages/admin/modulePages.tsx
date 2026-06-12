@@ -17,7 +17,7 @@ import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters'
-import { assessmentStatusLabels, cycleStatusLabels, paymentStatusLabels } from '@/constants/labels'
+import { assessmentStatusLabels, cycleStatusLabels, paymentStatusLabels, demandTypeLabels } from '@/constants/labels'
 import {
   initialAssessmentsService,
   careCyclesService,
@@ -41,6 +41,8 @@ import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { professionalsService } from '@/services/index'
 import { Button } from '@/components/ui/button'
 import { demandListColumns } from '@/components/demands/demandListColumns'
+import { CycleSessionsProgress } from '@/components/cycles/CycleSessionsProgress'
+import { listCareCycles } from '@/services/cycles'
 
 const qk = {
   assessments: ['initial_assessments'] as const,
@@ -136,13 +138,25 @@ export function CyclesPage() {
       <EntityListPage
         title="Ciclos de tratamento"
         queryKey={qk.cycles}
-        queryFn={() => careCyclesService.list('id, cycle_number, session_count, status, payment_status, created_at')}
+        queryFn={() => listCareCycles()}
         onCreate={() => setOpen(true)}
         createLabel="Abrir ciclo"
         onRowClick={(r) => navigate(`/admin/ciclos/${r.id}`)}
         columns={[
           { key: 'cycle', header: 'Ciclo', cell: (r) => `#${String(r.cycle_number)}` },
-          { key: 'sessions', header: 'Sessões', cell: (r) => String(r.session_count) },
+          {
+            key: 'patient',
+            header: 'Paciente',
+            mobilePrimary: true,
+            cell: (r) => <span className="font-medium">{r.patient_name}</span>,
+          },
+          {
+            key: 'sessions',
+            header: 'Sessões',
+            cell: (r) => (
+              <CycleSessionsProgress done={r.completed_sessions} total={Number(r.session_count)} />
+            ),
+          },
           { key: 'status', header: 'Status', cell: (r) => cycleStatusLabels[String(r.status)] ?? String(r.status) },
           { key: 'payment', header: 'Pagamento', cell: (r) => paymentStatusLabels[String(r.payment_status)] ?? String(r.payment_status) },
         ]}
@@ -326,7 +340,19 @@ export function DemandsPage() {
 }
 
 export function DemandDetailPage() {
-  return <GenericDetailPage title="Demanda" backPath="/admin/demandas" queryKey={qk.demands} queryFn={(id) => demandsService.getById(id)} fields={[{ key: 'status', label: 'Status' }, { key: 'required_profession', label: 'Profissão' }]} />
+  return (
+    <GenericDetailPage
+      title="Demanda"
+      backPath="/admin/demandas"
+      queryKey={qk.demands}
+      queryFn={(id) => demandsService.getById(id)}
+      fields={[
+        { key: 'demand_type', label: 'Tipo de demanda', enumLabels: demandTypeLabels },
+        { key: 'status', label: 'Status' },
+        { key: 'required_profession', label: 'Profissão' },
+      ]}
+    />
+  )
 }
 
 export function ChargesPage() {

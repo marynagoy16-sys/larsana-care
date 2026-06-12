@@ -11,6 +11,8 @@ export const transfersService = createCrudService('transfers')
 export const transferQueueService = createCrudService('transfer_queue')
 export { demandsService } from '@/services/demands'
 export type { DemandListItem } from '@/services/demands'
+export { listCareCycles } from '@/services/cycles'
+export type { CycleListItem } from '@/services/cycles'
 export const demandResponsesService = createCrudService('demand_responses')
 export const profilesService = createCrudService('profiles')
 export const internalExpensesService = createCrudService('internal_expenses')

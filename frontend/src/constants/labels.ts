@@ -63,3 +63,19 @@ export const assessmentStatusLabels: Record<string, string> = {
   respondida_nao: 'Respondida NÃO',
   vencida: 'Vencida',
 }
+
+export const demandTypeLabels: Record<string, string> = {
+  avaliacao: 'Avaliação',
+  continuidade: 'Continuidade',
+}
+
+export const demandTypeDescriptions: Record<string, string> = {
+  avaliacao: 'Primeiro contato com o paciente',
+  continuidade: 'Paciente já em tratamento que precisa de troca de profissional ou continuação do atendimento',
+}
+
+export const attendancePeriodLabels: Record<string, string> = {
+  MANHA: 'Manhã',
+  TARDE: 'Tarde',
+  NOITE: 'Noite',
+}

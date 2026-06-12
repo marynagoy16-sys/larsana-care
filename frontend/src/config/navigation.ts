@@ -244,6 +244,9 @@ export const routeTitles: Record<string, string> = {
 }
 
 export function getPageTitle(pathname: string): string {
+  if (/^\/admin\/ciclos\/[^/]+$/.test(pathname) && pathname !== '/admin/ciclos/novo') {
+    return ''
+  }
   if (routeTitles[pathname]) return routeTitles[pathname]
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length >= 2) {
