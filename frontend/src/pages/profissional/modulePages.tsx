@@ -16,6 +16,7 @@ import { formatCurrency, formatDateTime } from '@/lib/formatters'
 import { careSessionsService, medicalRecordsService, transfersService, demandsService, demandResponsesService, initialAssessmentsService, notificationsService } from '@/services/index'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { supabase } from '@/lib/supabase'
+import { demandListColumns } from '@/components/demands/demandListColumns'
 
 export function PPAgendaPage() {
   const navigate = useNavigate()
@@ -41,7 +42,7 @@ export function PPDemandsPage() {
   return (
     <EntityListPage title="Demandas" queryKey={['pp', 'demands']} queryFn={() => demandsService.list()}
       onRowClick={(r) => navigate(`/profissional/demandas/${r.id}`)}
-      columns={[{ key: 'status', header: 'Status', cell: (r) => String(r.status) }, { key: 'prof', header: 'Profissão', cell: (r) => String(r.required_profession) }]} />
+      columns={demandListColumns} />
   )
 }
 

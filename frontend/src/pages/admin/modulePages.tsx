@@ -40,6 +40,7 @@ import { supabase } from '@/lib/supabase'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { professionalsService } from '@/services/index'
 import { Button } from '@/components/ui/button'
+import { demandListColumns } from '@/components/demands/demandListColumns'
 
 const qk = {
   assessments: ['initial_assessments'] as const,
@@ -278,7 +279,7 @@ export function DemandsPage() {
     <>
       <EntityListPage title="Demandas" queryKey={qk.demands} queryFn={() => demandsService.list()} onCreate={() => setOpen(true)}
         onRowClick={(r) => navigate(`/admin/demandas/${r.id}`)}
-        columns={[{ key: 'status', header: 'Status', cell: (r) => String(r.status) }, { key: 'prof', header: 'Profissão', cell: (r) => String(r.required_profession) }]} />
+        columns={demandListColumns} />
       <CrudModal open={open} onOpenChange={setOpen} title="Nova demanda">
         <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
           <FormField control={form.control} name="patient_id" render={({ field }) => (

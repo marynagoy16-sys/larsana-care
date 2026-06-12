@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import {
   Users,
   Calendar,
-  ClipboardList,
   Receipt,
   RefreshCw,
   MoreHorizontal,
@@ -95,7 +94,7 @@ export function DashboardPage() {
       ) : (
       <CascadeReveal className="space-y-6">
       <CascadeItem>
-      <div className={cn('grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch transition-opacity', isRefreshing && 'opacity-60')}>
+      <div className={cn('grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch transition-opacity', isRefreshing && 'opacity-60')}>
         <AnalyticsStatCard
           label="Pacientes ativos"
           value={kpis?.pacientes_ativos ?? 0}
@@ -119,12 +118,6 @@ export function DashboardPage() {
           value={formatCurrency(paidRevenue)}
           icon={Receipt}
           trend={revenueTrend}
-        />
-        <AnalyticsStatCard
-          label="Avaliações em análise"
-          value={kpis?.avaliacoes_em_analise ?? 0}
-          icon={ClipboardList}
-          href="/admin/avaliacoes"
         />
       </div>
       </CascadeItem>

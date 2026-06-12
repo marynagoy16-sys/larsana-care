@@ -192,8 +192,8 @@ export function DashboardPageSkeleton() {
         </div>
         <Skeleton className="h-10 w-44 shrink-0 rounded-md" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-4">
             <div className="flex gap-2">
               <Skeleton className="h-10 w-10 rounded-full" />

@@ -9,7 +9,8 @@ export const medicalRecordsService = createCrudService('medical_records')
 export const chargesService = createCrudService('charges')
 export const transfersService = createCrudService('transfers')
 export const transferQueueService = createCrudService('transfer_queue')
-export const demandsService = createCrudService('demands')
+export { demandsService } from '@/services/demands'
+export type { DemandListItem } from '@/services/demands'
 export const demandResponsesService = createCrudService('demand_responses')
 export const profilesService = createCrudService('profiles')
 export const internalExpensesService = createCrudService('internal_expenses')

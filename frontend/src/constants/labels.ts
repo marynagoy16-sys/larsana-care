@@ -10,6 +10,12 @@ export const patientLevelLabels: Record<string, string> = {
   VALOR_SOCIAL: 'Valor social',
 }
 
+export const patientSexLabels: Record<string, string> = {
+  M: 'M',
+  F: 'F',
+  OUTRO: 'Outro',
+}
+
 export const ppClassLabels: Record<string, string> = {
   BRONZE: 'Bronze',
   PRATA: 'Prata',
