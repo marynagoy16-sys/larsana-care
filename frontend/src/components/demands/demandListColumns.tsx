@@ -1,5 +1,5 @@
 import type { DataTableColumn } from '@/components/crud/DataTable'
-import { demandTypeDescriptions, demandTypeLabels } from '@/constants/labels'
+import { demandTypeDescriptions, demandTypeLabels, demandStatusLabels } from '@/constants/labels'
 import type { DemandListItem } from '@/services/demands'
 import { cn } from '@/lib/utils'
 
@@ -67,7 +67,7 @@ export const demandListColumns: DataTableColumn<DemandListItem>[] = [
   {
     key: 'status',
     header: 'Status',
-    cell: (r) => String(r.status),
+    cell: (r) => demandStatusLabels[String(r.status)] ?? String(r.status),
   },
   {
     key: 'prof',

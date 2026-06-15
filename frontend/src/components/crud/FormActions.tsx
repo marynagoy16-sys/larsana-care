@@ -5,6 +5,7 @@ interface FormActionsProps {
   isSubmitting?: boolean
   submitLabel?: string
   cancelLabel?: string
+  form?: string
 }
 
 export function FormActions({
@@ -12,13 +13,14 @@ export function FormActions({
   isSubmitting,
   submitLabel = 'Salvar',
   cancelLabel = 'Cancelar',
+  form,
 }: FormActionsProps) {
   return (
     <div className="flex justify-end gap-2">
       <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
         {cancelLabel}
       </Button>
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" form={form} disabled={isSubmitting}>
         {isSubmitting ? 'Salvando...' : submitLabel}
       </Button>
     </div>

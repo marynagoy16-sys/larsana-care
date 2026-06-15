@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { AlertTriangle, ArrowLeft, ClipboardList, Clock, Search } from 'lucide-react'
 import { EntityListPage } from '@/components/crud/EntityListPage'
 import { CrudModal } from '@/components/crud/CrudModal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -16,8 +18,14 @@ import { RegionSelectField } from '@/components/forms/RegionSelectField'
 import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
+import {
+  buildAssessmentWorkflowStats,
+  formatAssessmentProposalSummary,
+  formatFamilyDeadline,
+  formatFamilyResponse,
+} from '@/lib/assessmentListDisplay'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters'
-import { assessmentStatusLabels, cycleStatusLabels, paymentStatusLabels, demandTypeLabels } from '@/constants/labels'
+import { assessmentStatusLabels, cycleStatusLabels, paymentStatusLabels } from '@/constants/labels'
 import {
   initialAssessmentsService,
   careCyclesService,
@@ -38,10 +46,17 @@ import {
 import { edgeFunctions } from '@/services/edgeFunctions'
 import { supabase } from '@/lib/supabase'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
+import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
+import { PageHeader } from '@/components/layout/PageHeader'
+import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
+import { AssessmentProposalSummary } from '@/components/assessments/AssessmentProposalSummary'
+import { AssessmentSendProposalCard } from '@/components/assessments/AssessmentSendProposalCard'
 import { professionalsService } from '@/services/index'
 import { Button } from '@/components/ui/button'
 import { demandListColumns } from '@/components/demands/demandListColumns'
 import { CycleSessionsProgress } from '@/components/cycles/CycleSessionsProgress'
+import { estimateAssessmentProposalTotalCents } from '@/services/assessmentProposal'
 import { listCareCycles } from '@/services/cycles'
 
 const qk = {
@@ -74,37 +89,328 @@ const REPORT_CATALOG = [
   { id: 'repasses-aging', name: 'Aging repasses', description: 'Repasses pendentes por tempo de espera', path: '/admin/relatorios/repasses-aging' },
 ] as const
 
+type AdminAssessmentRow = {
+  id: string
+  status: string
+  created_at: string
+  patient_id: string
+  proposed_session_count: number
+  proposed_patient_level: string
+  proposed_weekly_frequency: number
+  proposal_sent_at: string | null
+  response_deadline_at: string | null
+  family_response: string | null
+  patients?: { full_name: string } | null
+  evaluator?: { full_name: string } | null
+}
+
+async function listAdminAssessments(): Promise<{ data: AdminAssessmentRow[]; count: number }> {
+  const { data, error } = await supabase
+    .from('initial_assessments')
+    .select(
+      `id, status, created_at, patient_id,
+      proposed_session_count, proposed_patient_level, proposed_weekly_frequency,
+      proposal_sent_at, response_deadline_at, family_response,
+      patients ( full_name ),
+      evaluator:professionals!initial_assessments_evaluator_professional_id_fkey ( full_name )`,
+    )
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  const rows = (data ?? []) as AdminAssessmentRow[]
+  return { data: rows, count: rows.length }
+}
+
 export function AssessmentsPage() {
   const navigate = useNavigate()
+  const [rows, setRows] = useState<AdminAssessmentRow[]>([])
+
+  const stats = useMemo(() => {
+    const { total, awaitingSend, inReview, expired } = buildAssessmentWorkflowStats(rows)
+    return [
+      {
+        label: 'Total',
+        value: total,
+        icon: ClipboardList,
+        footer: 'Avaliações iniciais',
+      },
+      {
+        label: 'Aguardando envio',
+        value: awaitingSend,
+        icon: Clock,
+        footer: 'Proposta ainda não enviada',
+      },
+      {
+        label: 'Em análise',
+        value: inReview,
+        icon: Search,
+        footer: 'Família analisando a proposta',
+      },
+      {
+        label: 'Vencidas',
+        value: expired,
+        icon: AlertTriangle,
+        footer: 'Sem resposta no prazo',
+      },
+    ]
+  }, [rows])
+
   return (
     <EntityListPage
       title="Avaliações iniciais"
+      description="Fila de propostas pendentes e vencidas"
       queryKey={qk.assessments}
-      queryFn={() => initialAssessmentsService.list('id, status, created_at, patient_id')}
+      queryFn={async () => {
+        const result = await listAdminAssessments()
+        setRows(result.data)
+        return result
+      }}
+      stats={stats}
+      statsColumns={4}
+      searchPlaceholder="Pesquisar avaliações..."
       onRowClick={(r) => navigate(`/admin/avaliacoes/${r.id}`)}
       columns={[
-        { key: 'id', header: 'ID', cell: (r) => String(r.id).slice(0, 8) },
-        { key: 'status', header: 'Status', cell: (r) => assessmentStatusLabels[String(r.status)] ?? String(r.status) },
-        { key: 'date', header: 'Criado em', cell: (r) => formatDateTime(String(r.created_at)) },
+        {
+          key: 'patient',
+          header: 'Paciente',
+          mobilePrimary: true,
+          cell: (r) => (
+            <span className="font-medium">{r.patients?.full_name ?? 'Paciente'}</span>
+          ),
+        },
+        {
+          key: 'professional',
+          header: 'Profissional',
+          cell: (r) => r.evaluator?.full_name ?? '—',
+        },
+        {
+          key: 'status',
+          header: 'Status',
+          mobileBadge: true,
+          cell: (r) => assessmentStatusLabels[r.status] ?? r.status,
+        },
+        {
+          key: 'proposal',
+          header: 'Proposta',
+          mobileSubtitle: true,
+          cell: (r) => (
+            <span className="text-muted-foreground">{formatAssessmentProposalSummary(r)}</span>
+          ),
+        },
+        {
+          key: 'deadline',
+          header: 'Prazo família',
+          mobileMeta: true,
+          cell: (r) => formatFamilyDeadline(r),
+        },
+        {
+          key: 'response',
+          header: 'Resposta',
+          mobileMeta: true,
+          cell: (r) => formatFamilyResponse(r.family_response),
+        },
+        {
+          key: 'proposal_sent_at',
+          header: 'Proposta enviada em',
+          mobileHidden: true,
+          cell: (r) => (r.proposal_sent_at ? formatDateTime(r.proposal_sent_at) : '—'),
+        },
+        {
+          key: 'created_at',
+          header: 'Avaliado em',
+          mobileMeta: true,
+          cell: (r) => formatDate(r.created_at),
+        },
       ]}
     />
   )
 }
 
 export function AssessmentDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const goBack = () => navigate('/admin/avaliacoes')
+  const { data, isLoading } = useQuery({
+    queryKey: [...qk.assessments, id],
+    queryFn: () =>
+      initialAssessmentsService.getById(
+        id!,
+        '*, patients ( full_name )',
+      ),
+    enabled: !!id,
+  })
+
+  const record = data as Record<string, unknown> | undefined
+  const patientName =
+    (record?.patients as { full_name?: string } | null | undefined)?.full_name ?? 'Paciente'
+
+  const { data: totalAmountCents } = useQuery({
+    queryKey: [
+      ...qk.assessments,
+      id,
+      'proposal_total',
+      record?.patient_id,
+      record?.proposed_patient_level,
+      record?.proposed_session_count,
+    ],
+    queryFn: () =>
+      estimateAssessmentProposalTotalCents({
+        patientId: String(record!.patient_id),
+        patientLevel: String(record!.proposed_patient_level),
+        sessionCount: Number(record!.proposed_session_count),
+      }),
+    enabled:
+      !!record?.patient_id
+      && !!record?.proposed_patient_level
+      && record?.proposed_session_count != null,
+  })
+
+  if (isLoading) {
+    return (
+      <>
+        <PageHeader loading>
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+              <ArrowLeft size={20} />
+            </Button>
+            <span className="font-display font-bold text-xl lg:text-2xl">Avaliação</span>
+          </div>
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <DetailPageSkeleton fields={8} />
+        </CrudScrollPageLayout>
+      </>
+    )
+  }
+
+  if (!data) {
+    return (
+      <>
+        <PageHeader>
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+              <ArrowLeft size={20} />
+            </Button>
+          </div>
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <p className="text-muted-foreground">Registro não encontrado.</p>
+        </CrudScrollPageLayout>
+      </>
+    )
+  }
+
+  const hasProposal = record!.primary_diagnosis != null
+  const assessmentRecord = record!
+
   return (
-    <GenericDetailPage
-      title="Avaliação"
-      backPath="/admin/avaliacoes"
-      queryKey={qk.assessments}
-      queryFn={(id) => initialAssessmentsService.getById(id)}
-      fields={[
-        { key: 'status', label: 'Status' },
-        { key: 'clinical_content', label: 'Conteúdo clínico' },
-        { key: 'family_response', label: 'Resposta família' },
-        { key: 'created_at', label: 'Criado em', format: 'datetime' },
-      ]}
-    />
+    <>
+      <PageHeader>
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+            <ArrowLeft size={20} />
+          </Button>
+          <h1 className="font-display font-bold text-xl lg:text-2xl truncate min-w-0">{patientName}</h1>
+        </div>
+      </PageHeader>
+
+      <CrudScrollPageLayout>
+      <CascadeReveal className="space-y-6">
+        {assessmentRecord.status === 'avaliacao_feita' && hasProposal && (
+          <CascadeItem>
+            <AssessmentSendProposalCard
+              assessment={{
+                id: String(assessmentRecord.id),
+                patient_id: String(assessmentRecord.patient_id),
+                status: String(assessmentRecord.status),
+                proposed_session_count: Number(assessmentRecord.proposed_session_count),
+                proposed_patient_level: String(assessmentRecord.proposed_patient_level),
+                proposed_weekly_frequency: Number(assessmentRecord.proposed_weekly_frequency),
+              }}
+              patientName={patientName}
+              totalAmountCents={totalAmountCents}
+              queryKeys={[qk.assessments, [...qk.assessments, id], ['pp', 'assessments']]}
+            />
+          </CascadeItem>
+        )}
+
+        {hasProposal && (
+          <CascadeItem>
+            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-border">
+                <h3 className="font-semibold text-sm">Proposta clínica</h3>
+                {Boolean(assessmentRecord.crefito_number) && (
+                  <p className="text-xs text-muted-foreground mt-0.5">CREFITO {String(assessmentRecord.crefito_number)}</p>
+                )}
+              </div>
+              <div className="p-5">
+                <AssessmentProposalSummary
+                  data={{
+                    suggested_weekly_frequency: assessmentRecord.suggested_weekly_frequency as number | null,
+                    proposed_weekly_frequency: Number(assessmentRecord.proposed_weekly_frequency),
+                    proposed_session_count: Number(assessmentRecord.proposed_session_count),
+                    suggested_patient_level: String(assessmentRecord.suggested_patient_level),
+                    proposed_patient_level: String(assessmentRecord.proposed_patient_level),
+                    patient_level_change_reason: assessmentRecord.patient_level_change_reason as string | null,
+                    primary_diagnosis: String(assessmentRecord.primary_diagnosis),
+                    comorbidities: assessmentRecord.comorbidities as string | null,
+                    mobility: String(assessmentRecord.mobility),
+                    clinical_content: assessmentRecord.clinical_content as string | null,
+                  }}
+                />
+              </div>
+            </div>
+          </CascadeItem>
+        )}
+
+        {!hasProposal && Boolean(assessmentRecord.clinical_content) && (
+          <CascadeItem>
+            <div className="rounded-xl border border-border bg-card p-5 text-sm whitespace-pre-wrap">
+              <p className="font-semibold mb-2">Conteúdo clínico</p>
+              {String(assessmentRecord.clinical_content)}
+            </div>
+          </CascadeItem>
+        )}
+
+        <CascadeItem>
+          <div className="rounded-xl border border-border bg-card p-5 space-y-3 text-sm">
+            <div className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50">
+              <span className="text-muted-foreground sm:w-40 shrink-0">Status</span>
+              <span className="font-medium">
+                {assessmentStatusLabels[String(assessmentRecord.status)] ?? String(assessmentRecord.status)}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50">
+              <span className="text-muted-foreground sm:w-40 shrink-0">Resposta família</span>
+              <span className="font-medium">{String(assessmentRecord.family_response ?? '—')}</span>
+            </div>
+            {Boolean(assessmentRecord.proposal_sent_at) && (
+              <div className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50">
+                <span className="text-muted-foreground sm:w-40 shrink-0">Proposta enviada em</span>
+                <span className="font-medium">{formatDateTime(String(assessmentRecord.proposal_sent_at))}</span>
+              </div>
+            )}
+            {Boolean(assessmentRecord.response_deadline_at) && (
+              <div className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50">
+                <span className="text-muted-foreground sm:w-40 shrink-0">Prazo resposta</span>
+                <span className="font-medium">{formatDateTime(String(assessmentRecord.response_deadline_at))}</span>
+              </div>
+            )}
+            {Boolean(assessmentRecord.responded_at) && (
+              <div className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50">
+                <span className="text-muted-foreground sm:w-40 shrink-0">Respondido em</span>
+                <span className="font-medium">{formatDateTime(String(assessmentRecord.responded_at))}</span>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row sm:gap-4 py-1">
+              <span className="text-muted-foreground sm:w-40 shrink-0">Criado em</span>
+              <span className="font-medium">{formatDateTime(String(assessmentRecord.created_at))}</span>
+            </div>
+          </div>
+        </CascadeItem>
+      </CascadeReveal>
+    </CrudScrollPageLayout>
+    </>
   )
 }
 
@@ -336,22 +642,6 @@ export function DemandsPage() {
         </form></Form>
       </CrudModal>
     </>
-  )
-}
-
-export function DemandDetailPage() {
-  return (
-    <GenericDetailPage
-      title="Demanda"
-      backPath="/admin/demandas"
-      queryKey={qk.demands}
-      queryFn={(id) => demandsService.getById(id)}
-      fields={[
-        { key: 'demand_type', label: 'Tipo de demanda', enumLabels: demandTypeLabels },
-        { key: 'status', label: 'Status' },
-        { key: 'required_profession', label: 'Profissão' },
-      ]}
-    />
   )
 }
 

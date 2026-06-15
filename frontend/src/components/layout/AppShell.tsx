@@ -13,14 +13,15 @@ import {
   pacienteHeaderNav,
   profissionalBottomNav,
   profissionalNavSections,
+  type NavItem,
 } from '@/config/navigation'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
 import { Header } from '@/components/layout/Header'
 import { DataLayer } from '@/components/layout/DataLayer'
 import { DataLayerFooter } from '@/components/layout/DataLayerFooter'
-import { BottomNav } from '@/components/layout/BottomNav'
-import { PageFooterProvider } from '@/contexts/PageFooterContext'
+import { ShellBottomNav } from '@/components/layout/ShellBottomNav'
+import { PageFooterProvider, usePageFooter } from '@/contexts/PageFooterContext'
 import { PageHeaderProvider } from '@/contexts/PageHeaderContext'
 import type { UserRole } from '@/types/auth'
 
@@ -34,6 +35,55 @@ const subtitles: Record<LayoutVariant, string> = {
   admin: 'Admin',
   profissional: 'Profissional',
   paciente: 'Paciente',
+}
+
+function AppShellContent({
+  variant,
+  hasSidebar,
+  pageTitle,
+  setSidebarOpen,
+  profBottom,
+  pacBottom,
+  pacHeader,
+  showBottomNav,
+}: {
+  variant: LayoutVariant
+  hasSidebar: boolean
+  pageTitle: string
+  setSidebarOpen: (open: boolean) => void
+  profBottom: NavItem[]
+  pacBottom: NavItem[]
+  pacHeader: NavItem[]
+  showBottomNav: boolean
+}) {
+  const { suppressBottomNav } = usePageFooter()
+
+  return (
+    <>
+      <DataLayer reserveBottomNav={showBottomNav && !suppressBottomNav}>
+        <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar">
+          <div className="shell-content-x shell-content-y-top">
+            <Header
+              pageTitle={pageTitle}
+              onMenuClick={hasSidebar ? () => setSidebarOpen(true) : undefined}
+              showSearch={variant !== 'paciente'}
+              horizontalNav={variant === 'paciente' ? pacHeader : undefined}
+            />
+          </div>
+          <main className="shell-content-x shell-content-y-bottom w-full min-w-0">
+            <Suspense fallback={<PageSkeleton />}>
+              <Outlet />
+            </Suspense>
+          </main>
+        </div>
+
+        <DataLayerFooter />
+      </DataLayer>
+
+      {variant === 'profissional' && <ShellBottomNav items={profBottom} fabIndex={2} />}
+      {variant === 'paciente' && <ShellBottomNav items={pacBottom} />}
+    </>
+  )
 }
 
 export function AppShell({ variant }: AppShellProps) {
@@ -81,31 +131,19 @@ export function AppShell({ variant }: AppShellProps) {
       <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden">
         <PageHeaderProvider>
           <PageFooterProvider>
-            <DataLayer reserveBottomNav={showBottomNav}>
-            <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar">
-              <div className="shell-content-x shell-content-y-top">
-                <Header
-                  pageTitle={pageTitle}
-                  onMenuClick={hasSidebar ? () => setSidebarOpen(true) : undefined}
-                  showSearch={variant !== 'paciente'}
-                  horizontalNav={variant === 'paciente' ? pacHeader : undefined}
-                />
-              </div>
-              <main className="shell-content-x shell-content-y-bottom w-full min-w-0">
-                <Suspense fallback={<PageSkeleton />}>
-                  <Outlet />
-                </Suspense>
-              </main>
-            </div>
-
-            <DataLayerFooter />
-            </DataLayer>
+            <AppShellContent
+              variant={variant}
+              hasSidebar={hasSidebar}
+              pageTitle={pageTitle}
+              setSidebarOpen={setSidebarOpen}
+              profBottom={profBottom}
+              pacBottom={pacBottom}
+              pacHeader={pacHeader}
+              showBottomNav={showBottomNav}
+            />
           </PageFooterProvider>
         </PageHeaderProvider>
       </div>
-
-      {variant === 'profissional' && <BottomNav items={profBottom} fabIndex={2} />}
-      {variant === 'paciente' && <BottomNav items={pacBottom} />}
     </div>
   )
 }

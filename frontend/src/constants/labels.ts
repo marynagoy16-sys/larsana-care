@@ -10,6 +10,18 @@ export const patientLevelLabels: Record<string, string> = {
   VALOR_SOCIAL: 'Valor social',
 }
 
+export const weeklyFrequencyLabels: Record<number, string> = {
+  1: '1x por semana',
+  2: '2x por semana',
+  3: '3x por semana',
+}
+
+export const proposedSessionCountLabels: Record<number, string> = {
+  4: '4 sessões',
+  8: '8 sessões',
+  12: '12 sessões',
+}
+
 export const patientSexLabels: Record<string, string> = {
   M: 'M',
   F: 'F',
@@ -72,6 +84,20 @@ export const demandTypeLabels: Record<string, string> = {
 export const demandTypeDescriptions: Record<string, string> = {
   avaliacao: 'Primeiro contato com o paciente',
   continuidade: 'Paciente já em tratamento que precisa de troca de profissional ou continuação do atendimento',
+}
+
+export const demandStatusLabels: Record<string, string> = {
+  aberta: 'Aberta',
+  alocada: 'Alocada',
+  cancelada: 'Cancelada',
+}
+
+export const professionTypeLabels: Record<string, string> = {
+  FISIO: 'Fisioterapia',
+  NUTI: 'Nutrição',
+  MED: 'Medicina',
+  CUID: 'Cuidador',
+  FONO: 'Fonoaudiologia',
 }
 
 export const attendancePeriodLabels: Record<string, string> = {

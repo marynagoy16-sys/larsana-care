@@ -13,7 +13,7 @@ import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
-import { careSessionsService, medicalRecordsService, transfersService, demandsService, demandResponsesService, initialAssessmentsService, notificationsService } from '@/services/index'
+import { careSessionsService, medicalRecordsService, transfersService, demandsService, notificationsService } from '@/services/index'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { supabase } from '@/lib/supabase'
 import { demandListColumns } from '@/components/demands/demandListColumns'
@@ -40,37 +40,9 @@ export function PPSessionDetailPage() {
 export function PPDemandsPage() {
   const navigate = useNavigate()
   return (
-    <EntityListPage title="Demandas" queryKey={['pp', 'demands']} queryFn={() => demandsService.list()}
+    <EntityListPage title="Demandas" queryKey={['pp', 'demands']} queryFn={() => demandsService.listOpenForPp()}
       onRowClick={(r) => navigate(`/profissional/demandas/${r.id}`)}
       columns={demandListColumns} />
-  )
-}
-
-export function PPDemandDetailPage() {
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const schema = z.object({ response: z.enum(['accepted', 'declined']), decline_reason: z.string().optional() })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { response: 'accepted' } })
-  const id = window.location.pathname.split('/').pop() ?? ''
-  const create = useCrudMutation({
-    mutationFn: (v: z.infer<typeof schema>) => demandResponsesService.create({ ...v, demand_id: id, professional_id: '' }),
-    queryKey: ['pp', 'demand_responses'],
-    onSuccess: () => { navigate('/profissional/demandas') },
-  })
-  return (
-    <>
-      <GenericDetailPage title="Demanda" backPath="/profissional/demandas" queryKey={['pp', 'demands']} queryFn={(i) => demandsService.getById(i)}
-        fields={[{ key: 'status', label: 'Status' }, { key: 'required_profession', label: 'Profissão' }]} />
-      <div className="px-6 pb-6"><button className="text-sm text-primary" onClick={() => setOpen(true)}>Responder demanda</button></div>
-      <CrudDrawer open={open} onOpenChange={setOpen} title="Responder demanda">
-        <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-          <FormField control={form.control} name="decline_reason" render={({ field }) => (
-            <FormItem><FormLabel>Motivo (se recusar)</FormLabel><FormControl><Textarea {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
-          )} />
-          <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} submitLabel="Enviar" />
-        </form></Form>
-      </CrudDrawer>
-    </>
   )
 }
 
@@ -138,41 +110,10 @@ export function PPRepasseDetailPage() {
     fields={[{ key: 'pp_transfer_amount_cents', label: 'Valor', format: 'currency' }, { key: 'status', label: 'Status' }]} />
 }
 
-export function PPPacientesPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage title="Meus pacientes" queryKey={['pp', 'patients']} queryFn={async () => {
-      const { data, error } = await supabase.from('patients_pp').select('*')
-      if (error) throw error
-      return { data: (data ?? []) as (Record<string, unknown> & { id: string })[], count: data?.length ?? 0 }
-    }}
-      onRowClick={(r) => navigate(`/profissional/pacientes/${r.id}`)}
-      columns={[{ key: 'name', header: 'Nome', cell: (r) => String(r.full_name) }, { key: 'status', header: 'Status', cell: (r) => String(r.care_status) }]} />
-  )
-}
-
-export function PPPacienteDetailPage() {
-  return <GenericDetailPage title="Paciente" backPath="/profissional/pacientes" queryKey={['pp', 'patients']} queryFn={async (id) => {
-    const { data, error } = await supabase.from('patients_pp').select('*').eq('id', id).single()
-    if (error) throw error
-    return data as Record<string, unknown>
-  }}
-    fields={[{ key: 'full_name', label: 'Nome' }, { key: 'care_status', label: 'Status' }]} />
-}
-
-export function PPAvaliacoesPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage title="Avaliações" queryKey={['pp', 'assessments']} queryFn={() => initialAssessmentsService.list()}
-      onRowClick={(r) => navigate(`/profissional/avaliacoes/${r.id}`)}
-      columns={[{ key: 'status', header: 'Status', cell: (r) => String(r.status) }]} />
-  )
-}
-
-export function PPAvaliacaoDetailPage() {
-  return <GenericDetailPage title="Avaliação" backPath="/profissional/avaliacoes" queryKey={['pp', 'assessments']} queryFn={(id) => initialAssessmentsService.getById(id)}
-    fields={[{ key: 'status', label: 'Status' }, { key: 'clinical_content', label: 'Conteúdo' }]} />
-}
+export { PPPacientesPage } from '@/pages/profissional/patients/PPPacientesPage'
+export { PPPacienteDetailPage } from '@/pages/profissional/patients/PPPacienteDetailPage'
+export { PPAvaliacoesPage } from '@/pages/profissional/assessments/PPAvaliacoesPage'
+export { PPAvaliacaoDetailPage } from '@/pages/profissional/assessments/PPAvaliacaoDetailPage'
 
 export function PPCredenciamentoPage() {
   const [step, setStep] = useState(0)

@@ -244,7 +244,22 @@ export const routeTitles: Record<string, string> = {
 }
 
 export function getPageTitle(pathname: string): string {
+  if (pathname === '/paciente' || pathname === '/paciente/notificacoes' || pathname === '/paciente/proposta') {
+    return ''
+  }
   if (/^\/admin\/ciclos\/[^/]+$/.test(pathname) && pathname !== '/admin/ciclos/novo') {
+    return ''
+  }
+  if (/^\/admin\/demandas\/[^/]+$/.test(pathname)) {
+    return ''
+  }
+  if (/^\/admin\/avaliacoes\/[^/]+$/.test(pathname)) {
+    return ''
+  }
+  if (/^\/profissional\/demandas\/[^/]+$/.test(pathname)) {
+    return ''
+  }
+  if (/^\/profissional\/avaliacoes\/[^/]+$/.test(pathname)) {
     return ''
   }
   if (routeTitles[pathname]) return routeTitles[pathname]

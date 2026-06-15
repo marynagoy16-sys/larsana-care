@@ -16,25 +16,9 @@ import { npsSurveysService } from '@/services/index'
 import { requiredString, phoneSchema, emailSchema } from '@/schemas/common'
 import { MaskedInput } from '@/components/forms/MaskedInput'
 
-export function PacienteHomePage() {
-  return (
-    <EntityListPage
-      title="Início"
-      description="Resumo dos seus ciclos de tratamento"
-      queryKey={['paciente', 'home']}
-      queryFn={async () => {
-        const { data, error } = await supabase.from('care_cycles').select('id, cycle_number, status, session_count')
-        if (error) throw error
-        return { data: data ?? [], count: data?.length ?? 0 }
-      }}
-      columns={[
-        { key: 'cycle', header: 'Ciclo', cell: (r) => `#${String(r.cycle_number)}` },
-        { key: 'sessions', header: 'Sessões', cell: (r) => String(r.session_count) },
-        { key: 'status', header: 'Status', cell: (r) => String(r.status) },
-      ]}
-    />
-  )
-}
+export { PacienteHomePage } from '@/pages/paciente/PacienteHomePage'
+export { PacientePropostaPage } from '@/pages/paciente/PacientePropostaPage'
+export { PacientePagamentoDetailPage } from '@/pages/paciente/PacientePagamentoDetailPage'
 
 export function PacienteTratamentoPage() {
   const navigate = useNavigate()
@@ -72,38 +56,6 @@ export function PacientePagamentosPage() {
         { key: 'status', header: 'Status', cell: (r) => String(r.payment_status) },
         { key: 'due', header: 'Vencimento', cell: (r) => formatDate(String(r.due_date)) },
       ]} />
-  )
-}
-
-export function PacientePagamentoDetailPage() {
-  return <GenericDetailPage title="Pagamento" backPath="/paciente/pagamentos" queryKey={['paciente', 'charges']} queryFn={async (id) => {
-    const { data, error } = await supabase.from('charges_patient').select('*').eq('id', id).single()
-    if (error) throw error
-    return data as Record<string, unknown>
-  }}
-    fields={[{ key: 'amount_cents', label: 'Valor', format: 'currency' }, { key: 'payment_status', label: 'Status' }]} />
-}
-
-export function PacientePropostaPage() {
-  const [open] = useState(true)
-  const schema = z.object({ family_response: z.enum(['SIM', 'NAO'] as const) })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { family_response: 'SIM' } })
-  const navigate = useNavigate()
-  const submit = useCrudMutation({
-    mutationFn: async (v: z.infer<typeof schema>) => {
-      const { error } = await supabase.from('initial_assessments').update({ family_response: v.family_response }).limit(1)
-      if (error) throw error
-    },
-    queryKey: ['paciente', 'assessments'],
-    onSuccess: () => navigate('/paciente'),
-  })
-  return (
-    <CrudModal open={open} onOpenChange={(o) => !o && navigate('/paciente')} title="Proposta de tratamento">
-      <p className="text-sm text-muted-foreground mb-4">Aceita iniciar o tratamento domiciliar?</p>
-      <Form {...form}><form onSubmit={form.handleSubmit((v) => submit.mutate(v))}>
-        <FormActions onCancel={() => navigate('/paciente')} isSubmitting={submit.isPending} submitLabel="Confirmar SIM" />
-      </form></Form>
-    </CrudModal>
   )
 }
 

@@ -1050,21 +1050,31 @@ export type Database = {
       initial_assessments: {
         Row: {
           clinical_content: string | null
+          comorbidities: string | null
           created_at: string
           crefito_number: string
           evaluator_professional_id: string
           family_response: Database["public"]["Enums"]["family_response"] | null
           id: string
+          mobility: string
           patient_id: string
+          patient_level_change_reason: string | null
+          primary_diagnosis: string
           proposal_sent_at: string | null
+          proposed_patient_level: Database["public"]["Enums"]["patient_level"]
+          proposed_session_count: number
+          proposed_weekly_frequency: number
           responded_at: string | null
           responded_by_user_id: string | null
           response_deadline_at: string | null
           status: Database["public"]["Enums"]["assessment_status"]
+          suggested_patient_level: Database["public"]["Enums"]["patient_level"]
+          suggested_weekly_frequency: number | null
           updated_at: string
         }
         Insert: {
           clinical_content?: string | null
+          comorbidities?: string | null
           created_at?: string
           crefito_number: string
           evaluator_professional_id: string
@@ -1072,16 +1082,25 @@ export type Database = {
             | Database["public"]["Enums"]["family_response"]
             | null
           id?: string
+          mobility: string
           patient_id: string
+          patient_level_change_reason?: string | null
+          primary_diagnosis: string
           proposal_sent_at?: string | null
+          proposed_patient_level: Database["public"]["Enums"]["patient_level"]
+          proposed_session_count: number
+          proposed_weekly_frequency: number
           responded_at?: string | null
           responded_by_user_id?: string | null
           response_deadline_at?: string | null
           status?: Database["public"]["Enums"]["assessment_status"]
+          suggested_patient_level: Database["public"]["Enums"]["patient_level"]
+          suggested_weekly_frequency?: number | null
           updated_at?: string
         }
         Update: {
           clinical_content?: string | null
+          comorbidities?: string | null
           created_at?: string
           crefito_number?: string
           evaluator_professional_id?: string
@@ -1089,12 +1108,20 @@ export type Database = {
             | Database["public"]["Enums"]["family_response"]
             | null
           id?: string
+          mobility?: string
           patient_id?: string
+          patient_level_change_reason?: string | null
+          primary_diagnosis?: string
           proposal_sent_at?: string | null
+          proposed_patient_level?: Database["public"]["Enums"]["patient_level"]
+          proposed_session_count?: number
+          proposed_weekly_frequency?: number
           responded_at?: string | null
           responded_by_user_id?: string | null
           response_deadline_at?: string | null
           status?: Database["public"]["Enums"]["assessment_status"]
+          suggested_patient_level?: Database["public"]["Enums"]["patient_level"]
+          suggested_weekly_frequency?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -3228,6 +3255,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_demand: {
+        Args: { p_demand_id: string }
+        Returns: Json
+      }
       auth_user_id: { Args: never; Returns: string }
       calculate_transfer_amount: {
         Args: { p_cycle_id: string }
@@ -3245,6 +3276,18 @@ export type Database = {
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      estimate_assessment_proposal_total_cents: {
+        Args: {
+          p_patient_id: string
+          p_patient_level: Database["public"]["Enums"]["patient_level"]
+          p_session_count: number
+        }
+        Returns: number
+      }
+      send_assessment_proposal: {
+        Args: { p_assessment_id: string }
+        Returns: Json
       }
       generate_contract_number: {
         Args: { p_profession: Database["public"]["Enums"]["profession_type"] }

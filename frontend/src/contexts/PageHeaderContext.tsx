@@ -70,8 +70,11 @@ export function PageHeaderRegistrar({
 
   useLayoutEffect(() => {
     registerHeader({ content: children, loading })
+  }, [children, loading, registerHeader])
+
+  useEffect(() => {
     return unregisterHeader
-  }, [children, loading, registerHeader, unregisterHeader])
+  }, [unregisterHeader])
 
   return null
 }

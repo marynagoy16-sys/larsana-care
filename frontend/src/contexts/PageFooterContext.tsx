@@ -17,14 +17,17 @@ interface PageFooterState {
 
 interface PageFooterContextValue {
   footer: PageFooterState | null
+  suppressBottomNav: boolean
   registerFooter: (state: PageFooterState) => void
   unregisterFooter: () => void
+  setSuppressBottomNav: (suppress: boolean) => void
 }
 
 const PageFooterContext = createContext<PageFooterContextValue | null>(null)
 
 export function PageFooterProvider({ children }: { children: ReactNode }) {
   const [footer, setFooter] = useState<PageFooterState | null>(null)
+  const [suppressBottomNav, setSuppressBottomNav] = useState(false)
   const location = useLocation()
 
   const registerFooter = useCallback((state: PageFooterState) => {
@@ -37,11 +40,12 @@ export function PageFooterProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setFooter(null)
+    setSuppressBottomNav(false)
   }, [location.pathname])
 
   const value = useMemo(
-    () => ({ footer, registerFooter, unregisterFooter }),
-    [footer, registerFooter, unregisterFooter],
+    () => ({ footer, suppressBottomNav, registerFooter, unregisterFooter, setSuppressBottomNav }),
+    [footer, suppressBottomNav, registerFooter, unregisterFooter],
   )
 
   return (
@@ -57,6 +61,15 @@ export function usePageFooter() {
     throw new Error('usePageFooter must be used within PageFooterProvider')
   }
   return ctx
+}
+
+export function useSuppressBottomNav(suppress: boolean) {
+  const { setSuppressBottomNav } = usePageFooter()
+
+  useLayoutEffect(() => {
+    setSuppressBottomNav(suppress)
+    return () => setSuppressBottomNav(false)
+  }, [suppress, setSuppressBottomNav])
 }
 
 export function PageFooterRegistrar({

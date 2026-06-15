@@ -20,15 +20,25 @@ function lazyPP(exportName: keyof typeof import('@/pages/profissional/modulePage
 const PPAgendaPage = lazyPP('PPAgendaPage')
 const PPSessionDetailPage = lazyPP('PPSessionDetailPage')
 const PPDemandsPage = lazyPP('PPDemandsPage')
-const PPDemandDetailPage = lazyPP('PPDemandDetailPage')
+const PPDemandDetailPage = lazy(() =>
+  import('@/pages/profissional/demands/PPDemandDetailPage').then((m) => ({ default: m.PPDemandDetailPage })),
+)
 const PPEvolucoesPage = lazyPP('PPEvolucoesPage')
 const PPEvolucaoNovaPage = lazyPP('PPEvolucaoNovaPage')
 const PPRepassesPage = lazyPP('PPRepassesPage')
 const PPRepasseDetailPage = lazyPP('PPRepasseDetailPage')
-const PPPacientesPage = lazyPP('PPPacientesPage')
-const PPPacienteDetailPage = lazyPP('PPPacienteDetailPage')
-const PPAvaliacoesPage = lazyPP('PPAvaliacoesPage')
-const PPAvaliacaoDetailPage = lazyPP('PPAvaliacaoDetailPage')
+const PPPacientesPage = lazy(() =>
+  import('@/pages/profissional/patients/PPPacientesPage').then((m) => ({ default: m.PPPacientesPage })),
+)
+const PPPacienteDetailPage = lazy(() =>
+  import('@/pages/profissional/patients/PPPacienteDetailPage').then((m) => ({ default: m.PPPacienteDetailPage })),
+)
+const PPAvaliacoesPage = lazy(() =>
+  import('@/pages/profissional/assessments/PPAvaliacoesPage').then((m) => ({ default: m.PPAvaliacoesPage })),
+)
+const PPAvaliacaoDetailPage = lazy(() =>
+  import('@/pages/profissional/assessments/PPAvaliacaoDetailPage').then((m) => ({ default: m.PPAvaliacaoDetailPage })),
+)
 const PPCredenciamentoPage = lazyPP('PPCredenciamentoPage')
 const PPPerfilPage = lazyPP('PPPerfilPage')
 const PPSimuladorPage = lazyPP('PPSimuladorPage')

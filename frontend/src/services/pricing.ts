@@ -41,6 +41,16 @@ export async function listPricingVersions() {
   return data ?? []
 }
 
+export async function getActivePricingVersion() {
+  const { data, error } = await supabase
+    .from('pricing_matrix_versions')
+    .select('*')
+    .eq('is_active', true)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
 export async function getPricingVersion(id: string) {
   const { data, error } = await supabase.from('pricing_matrix_versions').select('*').eq('id', id).single()
   if (error) throw error

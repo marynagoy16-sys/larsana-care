@@ -19,6 +19,15 @@ DECLARE
   v_paciente_id uuid := 'c1000000-0000-4000-8000-000000000005';
   v_professional_id uuid := 'd1000000-0000-4000-8000-000000000001';
   v_patient_record_id uuid := 'd1000000-0000-4000-8000-000000000002';
+  v_avaliacao_patient_1 uuid := 'd1000000-0000-4000-8000-000000000003';
+  v_avaliacao_patient_2 uuid := 'd1000000-0000-4000-8000-000000000004';
+  v_avaliacao_patient_3 uuid := 'd1000000-0000-4000-8000-000000000005';
+  v_avaliacao_addr_1 uuid := 'd2000000-0000-4000-8000-000000000001';
+  v_avaliacao_addr_2 uuid := 'd2000000-0000-4000-8000-000000000002';
+  v_avaliacao_addr_3 uuid := 'd2000000-0000-4000-8000-000000000003';
+  v_avaliacao_demand_1 uuid := 'f2000000-0000-4000-8000-000000000001';
+  v_avaliacao_demand_2 uuid := 'f2000000-0000-4000-8000-000000000002';
+  v_avaliacao_demand_3 uuid := 'f2000000-0000-4000-8000-000000000003';
   v_maua_city_id uuid;
   v_region_a_id uuid := 'a0000000-0000-4000-8000-000000000001';
 BEGIN
@@ -333,6 +342,215 @@ BEGIN
       '000000-F', 'evolucao',
       '<p><strong>Alta do ciclo.</strong> Objetivos terapêuticos atingidos. Paciente orientado quanto à continuidade dos exercícios domiciliares e sinais de alerta.</p>',
       now() - interval '18 days' + interval '11 hours'
+    );
+
+  -- ===== DEMANDAS TIPO AVALIAÇÃO (pacientes novos, sem ciclo nem PP alocado) =====
+  DELETE FROM public.demand_responses
+  WHERE demand_id IN (v_avaliacao_demand_1, v_avaliacao_demand_2, v_avaliacao_demand_3);
+  DELETE FROM public.demands
+  WHERE id IN (v_avaliacao_demand_1, v_avaliacao_demand_2, v_avaliacao_demand_3);
+  DELETE FROM public.patient_addresses
+  WHERE patient_id IN (v_avaliacao_patient_1, v_avaliacao_patient_2, v_avaliacao_patient_3);
+  DELETE FROM public.patients
+  WHERE id IN (v_avaliacao_patient_1, v_avaliacao_patient_2, v_avaliacao_patient_3);
+
+  INSERT INTO public.patients (
+    id, full_name, cpf, birth_date, sex, care_status, patient_level,
+    region_id, city_id, diagnostic_hypothesis, attendance_period,
+    suggested_weekly_frequency, clinical_summary, is_data_complete
+  ) VALUES
+    (
+      v_avaliacao_patient_1,
+      'Severina Ribeiro',
+      '33333333333',
+      '1948-03-12',
+      'F',
+      'ATIVO',
+      'N1',
+      v_region_a_id,
+      v_maua_city_id,
+      'AVC isquêmico — reabilitação motora',
+      'MANHA',
+      1,
+      'Paciente pós-AVC com hemiparesia à direita. Família solicita fisioterapia domiciliar em turno da manhã.',
+      true
+    ),
+    (
+      v_avaliacao_patient_2,
+      'Carlos Mendes',
+      '44444444444',
+      '1962-07-20',
+      'M',
+      'ATIVO',
+      'N1',
+      v_region_a_id,
+      v_maua_city_id,
+      'Fratura de fêmur — pós-operatório',
+      'MANHA',
+      2,
+      'Recuperação funcional após cirurgia ortopédica. Preferência por atendimentos 2x por semana.',
+      true
+    ),
+    (
+      v_avaliacao_patient_3,
+      'Lucia Ferreira',
+      '55555555555',
+      '1955-11-08',
+      'F',
+      'ATIVO',
+      'N1',
+      v_region_a_id,
+      v_maua_city_id,
+      'Desnutrição geriátrica',
+      'TARDE',
+      3,
+      'Acompanhamento nutricional domiciliar. Avaliação inicial para plano alimentar personalizado.',
+      true
+    );
+
+  INSERT INTO public.patient_addresses (
+    id, patient_id, full_address, street, number, neighborhood, city_id, postal_code, is_primary
+  ) VALUES
+    (
+      v_avaliacao_addr_1,
+      v_avaliacao_patient_1,
+      'Rua Esperança, 245 - Bairro Esperança - Mauá/SP',
+      'Rua Esperança',
+      '245',
+      'Bairro Esperança',
+      v_maua_city_id,
+      '09370420',
+      true
+    ),
+    (
+      v_avaliacao_addr_2,
+      v_avaliacao_patient_2,
+      'Av. Boa Esperança, 88 - Pq. Boa Esperança - Mauá/SP',
+      'Av. Boa Esperança',
+      '88',
+      'Pq. Boa Esperança',
+      v_maua_city_id,
+      '09380110',
+      true
+    ),
+    (
+      v_avaliacao_addr_3,
+      v_avaliacao_patient_3,
+      'Rua das Palmeiras, 512 - Jd Primavera - Mauá/SP',
+      'Rua das Palmeiras',
+      '512',
+      'Jd Primavera',
+      v_maua_city_id,
+      '09390200',
+      true
+    );
+
+  INSERT INTO public.demands (
+    id, patient_id, address_id, required_profession, region_id, status, notes
+  ) VALUES
+    (
+      v_avaliacao_demand_1,
+      v_avaliacao_patient_1,
+      v_avaliacao_addr_1,
+      'FISIO',
+      v_region_a_id,
+      'aberta',
+      'Primeira avaliação fisioterapêutica — turno manhã, Região A N1.'
+    ),
+    (
+      v_avaliacao_demand_2,
+      v_avaliacao_patient_2,
+      v_avaliacao_addr_2,
+      'FISIO',
+      v_region_a_id,
+      'aberta',
+      'Avaliação inicial pós-cirúrgica — 2x por semana após aceite.'
+    ),
+    (
+      v_avaliacao_demand_3,
+      v_avaliacao_patient_3,
+      v_avaliacao_addr_3,
+      'NUTI',
+      v_region_a_id,
+      'aberta',
+      'Avaliação nutricional domiciliar — turno tarde.'
+    );
+
+  -- Portal: responsável de Carlos Mendes (fluxo avaliação)
+  INSERT INTO auth.users (
+    id, instance_id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at,
+    confirmation_token, email_change, email_change_token_new, recovery_token
+  ) VALUES (
+    'c1000000-0000-4000-8000-000000000006',
+    '00000000-0000-0000-0000-000000000000',
+    'authenticated',
+    'authenticated',
+    'carlos.mendes@larsanacare.com.br',
+    extensions.crypt('LarsanaCare2026!', extensions.gen_salt('bf')),
+    now(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name":"Ana Mendes","primary_role":"paciente"}'::jsonb,
+    now(),
+    now(),
+    '', '', '', ''
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id,
+    last_sign_in_at, created_at, updated_at
+  ) VALUES (
+    'c1000000-0000-4000-8000-000000000006',
+    'c1000000-0000-4000-8000-000000000006',
+    '{"sub":"c1000000-0000-4000-8000-000000000006","email":"carlos.mendes@larsanacare.com.br"}'::jsonb,
+    'email',
+    'c1000000-0000-4000-8000-000000000006',
+    now(), now(), now()
+  )
+  ON CONFLICT DO NOTHING;
+
+  INSERT INTO public.profiles (id, email, full_name, primary_role)
+  VALUES (
+    'c1000000-0000-4000-8000-000000000006',
+    'carlos.mendes@larsanacare.com.br',
+    'Ana Mendes',
+    'paciente'
+  )
+  ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.patient_responsibles
+    WHERE patient_id = v_avaliacao_patient_2
+      AND user_id = 'c1000000-0000-4000-8000-000000000006'
+  ) THEN
+    INSERT INTO public.patient_responsibles (
+      patient_id, user_id, full_name, cpf, phone, email, is_primary
+    ) VALUES (
+      v_avaliacao_patient_2,
+      'c1000000-0000-4000-8000-000000000006',
+      'Ana Mendes',
+      '66666666666',
+      '11977776666',
+      'carlos.mendes@larsanacare.com.br',
+      true
+    );
+  END IF;
+
+  INSERT INTO public.digital_acceptances (acceptor_role, acceptor_user_id, patient_id, term_id, ip_address)
+  SELECT
+    'paciente'::public.user_role,
+    'c1000000-0000-4000-8000-000000000006',
+    v_avaliacao_patient_2,
+    lt.id,
+    '127.0.0.1'::inet
+  FROM public.legal_terms lt
+  WHERE lt.is_current = true
+    AND lt.term_type IN ('TERMO_ADESAO', 'DIRETRIZES', 'LGPD')
+    AND NOT EXISTS (
+      SELECT 1 FROM public.digital_acceptances da
+      WHERE da.patient_id = v_avaliacao_patient_2 AND da.term_id = lt.id
     );
 
 END;
