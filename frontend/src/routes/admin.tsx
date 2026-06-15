@@ -64,6 +64,33 @@ const SettingsPage = lazyAdmin('SettingsPage')
 const ProfessionalDetailPage = lazyAdmin('ProfessionalDetailPage')
 const TreatmentPausesPage = lazyAdmin('TreatmentPausesPage')
 const NpsReportPage = lazyAdmin('NpsReportPage')
+const AcademyAdminDashboardPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyAdminDashboardPage').then((m) => ({ default: m.AcademyAdminDashboardPage })),
+)
+const AcademyCoursesPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyCoursesPage').then((m) => ({ default: m.AcademyCoursesPage })),
+)
+const AcademyCourseDetailPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyCourseDetailPage').then((m) => ({ default: m.AcademyCourseDetailPage })),
+)
+const AcademyEnrollmentsPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyEnrollmentsPage').then((m) => ({ default: m.AcademyEnrollmentsPage })),
+)
+const AcademyConfigPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyConfigPage').then((m) => ({ default: m.AcademyConfigPage })),
+)
+const AcademyExemptionsPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyExemptionsPage').then((m) => ({ default: m.AcademyExemptionsPage })),
+)
+const AcademyConfigHistoryPage = lazy(() =>
+  import('@/pages/admin/academy/AcademyConfigHistoryPage').then((m) => ({ default: m.AcademyConfigHistoryPage })),
+)
+const LarsanaPillAdminPage = lazy(() =>
+  import('@/pages/admin/academy/LarsanaPillAdminPage').then((m) => ({ default: m.LarsanaPillAdminPage })),
+)
+const LarsanaPillCategoryDetailPage = lazy(() =>
+  import('@/pages/admin/academy/LarsanaPillCategoryDetailPage').then((m) => ({ default: m.LarsanaPillCategoryDetailPage })),
+)
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -107,6 +134,15 @@ export const adminRoutes: RouteObject[] = [
       { path: 'config/regioes', element: staffRoute(<RegionsConfigPage />, operacaoRoles) },
       { path: 'config/usuarios', element: staffRoute(<UsersConfigPage />, adminOnly) },
       { path: 'config/auditoria', element: staffRoute(<AuditPage />, ['admin', 'gestao']) },
+      { path: 'academy', element: staffRoute(<AcademyAdminDashboardPage />, operacaoRoles) },
+      { path: 'academy/cursos', element: staffRoute(<AcademyCoursesPage />, operacaoRoles) },
+      { path: 'academy/cursos/:id', element: staffRoute(<AcademyCourseDetailPage />, operacaoRoles) },
+      { path: 'academy/matriculas', element: staffRoute(<AcademyEnrollmentsPage />, operacaoRoles) },
+      { path: 'academy/config', element: staffRoute(<AcademyConfigPage />, adminOnly) },
+      { path: 'academy/config/excecoes', element: staffRoute(<AcademyExemptionsPage />, adminOnly) },
+      { path: 'academy/config/historico', element: staffRoute(<AcademyConfigHistoryPage />, adminOnly) },
+      { path: 'larsanapill', element: staffRoute(<LarsanaPillAdminPage />, operacaoRoles) },
+      { path: 'larsanapill/categorias/:id', element: staffRoute(<LarsanaPillCategoryDetailPage />, operacaoRoles) },
       { path: 'suporte', element: staffRoute(<SupportPage />, adminOnly) },
       { path: 'configuracoes', element: staffRoute(<SettingsPage />) },
     ],

@@ -26,6 +26,10 @@ export interface ContractPdfPayload {
   contract_id: string
 }
 
+export interface AcademyCertificatePayload {
+  enrollment_id: string
+}
+
 export const edgeFunctions = {
   createCharge: (payload: CreateChargePayload) =>
     invoke<{ charge_id: string }>('create-charge', payload),
@@ -35,6 +39,9 @@ export const edgeFunctions = {
 
   generateContractPdf: (payload: ContractPdfPayload) =>
     invoke<{ storage_path: string }>('generate-contract-pdf', payload),
+
+  generateAcademyCertificate: (payload: AcademyCertificatePayload) =>
+    invoke<{ storage_path: string }>('generate-academy-certificate', payload),
 
   transferWallet: (payload: TransferWalletPayload) =>
     invoke<{ status: string }>('transfer-wallet', payload),

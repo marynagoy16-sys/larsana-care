@@ -14,6 +14,481 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_certificates: {
+        Row: {
+          enrollment_id: string
+          id: string
+          issued_at: string
+          storage_path: string | null
+        }
+        Insert: {
+          enrollment_id: string
+          id?: string
+          issued_at?: string
+          storage_path?: string | null
+        }
+        Update: {
+          enrollment_id?: string
+          id?: string
+          issued_at?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_certificates_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: true
+            referencedRelation: "academy_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_courses: {
+        Row: {
+          audience: Database["public"]["Enums"]["academy_audience"]
+          created_at: string
+          description: string | null
+          estimated_minutes: number | null
+          id: string
+          is_mandatory: boolean
+          is_published: boolean
+          profession: Database["public"]["Enums"]["profession_type"] | null
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Database["public"]["Enums"]["academy_audience"]
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          is_mandatory?: boolean
+          is_published?: boolean
+          profession?: Database["public"]["Enums"]["profession_type"] | null
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["academy_audience"]
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          is_mandatory?: boolean
+          is_published?: boolean
+          profession?: Database["public"]["Enums"]["profession_type"] | null
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      academy_enrollments: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          enrolled_at: string
+          id: string
+          professional_id: string
+          status: Database["public"]["Enums"]["academy_enrollment_status"]
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          enrolled_at?: string
+          id?: string
+          professional_id: string
+          status?: Database["public"]["Enums"]["academy_enrollment_status"]
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          enrolled_at?: string
+          id?: string
+          professional_id?: string
+          status?: Database["public"]["Enums"]["academy_enrollment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_enrollments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_gate_rules: {
+        Row: {
+          block_message: string | null
+          course_id: string | null
+          effective_from: string | null
+          effective_until: string | null
+          gate_target: Database["public"]["Enums"]["academy_gate_target"]
+          id: string
+          is_enabled: boolean
+          required_lesson_ids: string[]
+          required_module_ids: string[]
+          requirement_type: Database["public"]["Enums"]["academy_requirement_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          block_message?: string | null
+          course_id?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
+          gate_target: Database["public"]["Enums"]["academy_gate_target"]
+          id?: string
+          is_enabled?: boolean
+          required_lesson_ids?: string[]
+          required_module_ids?: string[]
+          requirement_type?: Database["public"]["Enums"]["academy_requirement_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          block_message?: string | null
+          course_id?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
+          gate_target?: Database["public"]["Enums"]["academy_gate_target"]
+          id?: string
+          is_enabled?: boolean
+          required_lesson_ids?: string[]
+          required_module_ids?: string[]
+          requirement_type?: Database["public"]["Enums"]["academy_requirement_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_gate_rules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_gate_rules_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_gate_rules_log: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          gate_target: Database["public"]["Enums"]["academy_gate_target"] | null
+          id: string
+          new_config: Json
+          preset: Database["public"]["Enums"]["academy_gate_preset"] | null
+          previous_config: Json | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          gate_target?:
+            | Database["public"]["Enums"]["academy_gate_target"]
+            | null
+          id?: string
+          new_config: Json
+          preset?: Database["public"]["Enums"]["academy_gate_preset"] | null
+          previous_config?: Json | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          gate_target?:
+            | Database["public"]["Enums"]["academy_gate_target"]
+            | null
+          id?: string
+          new_config?: Json
+          preset?: Database["public"]["Enums"]["academy_gate_preset"] | null
+          previous_config?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_gate_rules_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_lesson_materials: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          sort_order: number
+          storage_path: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          sort_order?: number
+          storage_path: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          sort_order?: number
+          storage_path?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_lesson_materials_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "academy_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          enrollment_id: string
+          id: string
+          last_position_seconds: number
+          lesson_id: string
+          progress_percent: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          enrollment_id: string
+          id?: string
+          last_position_seconds?: number
+          lesson_id: string
+          progress_percent?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          enrollment_id?: string
+          id?: string
+          last_position_seconds?: number
+          lesson_id?: string
+          progress_percent?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_lesson_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "academy_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "academy_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_lessons: {
+        Row: {
+          content: string | null
+          content_type: Database["public"]["Enums"]["academy_content_type"]
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          id: string
+          is_published: boolean
+          metadata: Json
+          module_id: string
+          slug: string
+          sort_order: number
+          storage_path: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          content_type?: Database["public"]["Enums"]["academy_content_type"]
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          module_id: string
+          slug: string
+          sort_order?: number
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          content_type?: Database["public"]["Enums"]["academy_content_type"]
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          module_id?: string
+          slug?: string
+          sort_order?: number
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "academy_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_modules: {
+        Row: {
+          code: string
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          code: string
+          course_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          code?: string
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_platform_settings: {
+        Row: {
+          academy_enabled: boolean
+          active_preset: Database["public"]["Enums"]["academy_gate_preset"]
+          gates_master_enabled: boolean
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          academy_enabled?: boolean
+          active_preset?: Database["public"]["Enums"]["academy_gate_preset"]
+          gates_master_enabled?: boolean
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          academy_enabled?: boolean
+          active_preset?: Database["public"]["Enums"]["academy_gate_preset"]
+          gates_master_enabled?: boolean
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_platform_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_quiz_responses: {
+        Row: {
+          answers: Json
+          id: string
+          lesson_id: string
+          passed: boolean
+          professional_id: string
+          score: number | null
+          submitted_at: string
+        }
+        Insert: {
+          answers?: Json
+          id?: string
+          lesson_id: string
+          passed?: boolean
+          professional_id: string
+          score?: number | null
+          submitted_at?: string
+        }
+        Update: {
+          answers?: Json
+          id?: string
+          lesson_id?: string
+          passed?: boolean
+          professional_id?: string
+          score?: number | null
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_quiz_responses_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "academy_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_quiz_responses_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asaas_customers: {
         Row: {
           asaas_customer_id: string
@@ -1196,6 +1671,280 @@ export type Database = {
           },
         ]
       }
+      larsanapill_categories: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      larsanapill_content_progress: {
+        Row: {
+          completed_at: string | null
+          content_id: string
+          id: string
+          patient_id: string
+          progress_percent: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content_id: string
+          id?: string
+          patient_id: string
+          progress_percent?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          content_id?: string
+          id?: string
+          patient_id?: string
+          progress_percent?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "larsanapill_content_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "larsanapill_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "larsanapill_content_progress_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "larsanapill_content_progress_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      larsanapill_contents: {
+        Row: {
+          category_id: string
+          content: string | null
+          content_type: Database["public"]["Enums"]["academy_content_type"]
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          id: string
+          is_published: boolean
+          metadata: Json
+          slug: string
+          sort_order: number
+          storage_path: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          content?: string | null
+          content_type?: Database["public"]["Enums"]["academy_content_type"]
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          slug: string
+          sort_order?: number
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          content?: string | null
+          content_type?: Database["public"]["Enums"]["academy_content_type"]
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          slug?: string
+          sort_order?: number
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "larsanapill_contents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "larsanapill_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      larsanapill_plan_progress: {
+        Row: {
+          completed_at: string
+          day_index: number
+          id: string
+          patient_id: string
+          plan_id: string
+        }
+        Insert: {
+          completed_at?: string
+          day_index: number
+          id?: string
+          patient_id: string
+          plan_id: string
+        }
+        Update: {
+          completed_at?: string
+          day_index?: number
+          id?: string
+          patient_id?: string
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "larsanapill_plan_progress_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "larsanapill_plan_progress_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "larsanapill_plan_progress_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "larsanapill_weekly_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      larsanapill_weekly_plan_days: {
+        Row: {
+          content_id: string | null
+          day_index: number
+          id: string
+          instructions: string | null
+          plan_id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          content_id?: string | null
+          day_index: number
+          id?: string
+          instructions?: string | null
+          plan_id: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          content_id?: string | null
+          day_index?: number
+          id?: string
+          instructions?: string | null
+          plan_id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "larsanapill_weekly_plan_days_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "larsanapill_contents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "larsanapill_weekly_plan_days_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "larsanapill_weekly_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      larsanapill_weekly_plans: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          metadata: Json
+          minutes_per_session: number
+          sessions_per_week: number
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          minutes_per_session?: number
+          sessions_per_week?: number
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          metadata?: Json
+          minutes_per_session?: number
+          sessions_per_week?: number
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
       legal_terms: {
         Row: {
           content: string | null
@@ -1515,59 +2264,6 @@ export type Database = {
             columns: ["sp_neighborhood_id"]
             isOneToOne: false
             referencedRelation: "sp_neighborhoods"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sp_municipalities: {
-        Row: {
-          created_at: string
-          ibge_code: number
-          id: string
-          name: string
-          state: string
-        }
-        Insert: {
-          created_at?: string
-          ibge_code: number
-          id?: string
-          name: string
-          state?: string
-        }
-        Update: {
-          created_at?: string
-          ibge_code?: number
-          id?: string
-          name?: string
-          state?: string
-        }
-        Relationships: []
-      }
-      sp_neighborhoods: {
-        Row: {
-          created_at: string
-          id: string
-          municipality_id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          municipality_id: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          municipality_id?: string
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sp_neighborhoods_municipality_id_fkey"
-            columns: ["municipality_id"]
-            isOneToOne: false
-            referencedRelation: "sp_municipalities"
             referencedColumns: ["id"]
           },
         ]
@@ -1977,6 +2673,9 @@ export type Database = {
         Row: {
           allocated_professional_id: string | null
           asaas_customer_id: string | null
+          attendance_period:
+            | Database["public"]["Enums"]["patient_attendance_period"]
+            | null
           birth_date: string | null
           care_status: Database["public"]["Enums"]["patient_care_status"]
           city_id: string | null
@@ -1984,7 +2683,6 @@ export type Database = {
           cpf: string | null
           created_at: string
           diagnostic_hypothesis: string | null
-          attendance_period: Database["public"]["Enums"]["patient_attendance_period"] | null
           full_name: string
           id: string
           is_data_complete: boolean
@@ -2001,6 +2699,9 @@ export type Database = {
         Insert: {
           allocated_professional_id?: string | null
           asaas_customer_id?: string | null
+          attendance_period?:
+            | Database["public"]["Enums"]["patient_attendance_period"]
+            | null
           birth_date?: string | null
           care_status?: Database["public"]["Enums"]["patient_care_status"]
           city_id?: string | null
@@ -2008,7 +2709,6 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           diagnostic_hypothesis?: string | null
-          attendance_period?: Database["public"]["Enums"]["patient_attendance_period"] | null
           full_name: string
           id?: string
           is_data_complete?: boolean
@@ -2025,6 +2725,9 @@ export type Database = {
         Update: {
           allocated_professional_id?: string | null
           asaas_customer_id?: string | null
+          attendance_period?:
+            | Database["public"]["Enums"]["patient_attendance_period"]
+            | null
           birth_date?: string | null
           care_status?: Database["public"]["Enums"]["patient_care_status"]
           city_id?: string | null
@@ -2032,7 +2735,6 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           diagnostic_hypothesis?: string | null
-          attendance_period?: Database["public"]["Enums"]["patient_attendance_period"] | null
           full_name?: string
           id?: string
           is_data_complete?: boolean
@@ -2109,6 +2811,55 @@ export type Database = {
           processed_at?: string | null
         }
         Relationships: []
+      }
+      pp_academy_exemptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          gate_target: Database["public"]["Enums"]["academy_gate_target"] | null
+          granted_by: string | null
+          id: string
+          professional_id: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          gate_target?:
+            | Database["public"]["Enums"]["academy_gate_target"]
+            | null
+          granted_by?: string | null
+          id?: string
+          professional_id: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          gate_target?:
+            | Database["public"]["Enums"]["academy_gate_target"]
+            | null
+          granted_by?: string | null
+          id?: string
+          professional_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pp_academy_exemptions_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pp_academy_exemptions_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pricing_matrix_entries: {
         Row: {
@@ -2602,9 +3353,63 @@ export type Database = {
         }
         Relationships: []
       }
+      sp_municipalities: {
+        Row: {
+          created_at: string
+          ibge_code: number
+          id: string
+          name: string
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          ibge_code: number
+          id?: string
+          name: string
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          ibge_code?: number
+          id?: string
+          name?: string
+          state?: string
+        }
+        Relationships: []
+      }
+      sp_neighborhoods: {
+        Row: {
+          created_at: string
+          id: string
+          municipality_id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          municipality_id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          municipality_id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sp_neighborhoods_municipality_id_fkey"
+            columns: ["municipality_id"]
+            isOneToOne: false
+            referencedRelation: "sp_municipalities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_profiles: {
         Row: {
           can_approve_credenciamento: boolean
+          can_manage_academy: boolean
           can_manage_pricing: boolean
           can_manage_users: boolean
           can_release_transfer: boolean
@@ -2616,6 +3421,7 @@ export type Database = {
         }
         Insert: {
           can_approve_credenciamento?: boolean
+          can_manage_academy?: boolean
           can_manage_pricing?: boolean
           can_manage_users?: boolean
           can_release_transfer?: boolean
@@ -2627,6 +3433,7 @@ export type Database = {
         }
         Update: {
           can_approve_credenciamento?: boolean
+          can_manage_academy?: boolean
           can_manage_pricing?: boolean
           can_manage_users?: boolean
           can_release_transfer?: boolean
@@ -3118,7 +3925,9 @@ export type Database = {
       patients_pp: {
         Row: {
           allocated_professional_id: string | null
-          attendance_period: Database["public"]["Enums"]["patient_attendance_period"] | null
+          attendance_period:
+            | Database["public"]["Enums"]["patient_attendance_period"]
+            | null
           birth_date: string | null
           care_status: Database["public"]["Enums"]["patient_care_status"] | null
           city_id: string | null
@@ -3135,6 +3944,9 @@ export type Database = {
         }
         Insert: {
           allocated_professional_id?: string | null
+          attendance_period?:
+            | Database["public"]["Enums"]["patient_attendance_period"]
+            | null
           birth_date?: string | null
           care_status?:
             | Database["public"]["Enums"]["patient_care_status"]
@@ -3142,15 +3954,20 @@ export type Database = {
           city_id?: string | null
           clinical_summary?: string | null
           created_at?: string | null
+          diagnostic_hypothesis?: string | null
           full_name?: string | null
           id?: string | null
           last_session_at?: string | null
           patient_level?: Database["public"]["Enums"]["patient_level"] | null
           region_id?: string | null
+          sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
         }
         Update: {
           allocated_professional_id?: string | null
+          attendance_period?:
+            | Database["public"]["Enums"]["patient_attendance_period"]
+            | null
           birth_date?: string | null
           care_status?:
             | Database["public"]["Enums"]["patient_care_status"]
@@ -3158,11 +3975,13 @@ export type Database = {
           city_id?: string | null
           clinical_summary?: string | null
           created_at?: string | null
+          diagnostic_hypothesis?: string | null
           full_name?: string | null
           id?: string | null
           last_session_at?: string | null
           patient_level?: Database["public"]["Enums"]["patient_level"] | null
           region_id?: string | null
+          sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
         }
         Relationships: [
@@ -3262,6 +4081,10 @@ export type Database = {
         Args: { p_demand_id: string }
         Returns: Json
       }
+      add_business_days_from_date: {
+        Args: { p_days: number; p_start: string }
+        Returns: string
+      }
       auth_user_id: { Args: never; Returns: string }
       calculate_transfer_amount: {
         Args: { p_cycle_id: string }
@@ -3350,8 +4173,45 @@ export type Database = {
         Args: { p_roles: Database["public"]["Enums"]["user_role"][] }
         Returns: boolean
       }
+      pp_can_view_open_demand_patient: {
+        Args: { p_patient_id: string }
+        Returns: boolean
+      }
+      pp_passes_academy_gate: {
+        Args: {
+          p_gate_target: Database["public"]["Enums"]["academy_gate_target"]
+        }
+        Returns: boolean
+      }
+      resolve_demand_type: {
+        Args: { p_patient_id: string }
+        Returns: Database["public"]["Enums"]["demand_type"]
+      }
     }
     Enums: {
+      academy_audience: "pp" | "paciente"
+      academy_content_type:
+        | "video"
+        | "pdf"
+        | "richtext"
+        | "quiz"
+        | "exercise_steps"
+        | "ebook"
+      academy_enrollment_status: "not_started" | "in_progress" | "completed"
+      academy_gate_preset:
+        | "optional"
+        | "soft_m1m3"
+        | "full_m1m5"
+        | "demands_m5_only"
+        | "credenciamento_m5"
+        | "phil_onboarding"
+        | "custom"
+      academy_gate_target:
+        | "demands"
+        | "credenciamento_ativo"
+        | "paciente_p1"
+        | "paciente_pagamento"
+      academy_requirement_type: "full_course" | "modules" | "lessons" | "none"
       alert_severity: "info" | "warning" | "critical"
       alert_type:
         | "cobranca_vencida"
@@ -3359,6 +4219,7 @@ export type Database = {
         | "prontuario_incompleto_24h"
         | "avaliacao_sem_resposta_5d"
         | "nps_baixo_consecutivo"
+        | "demanda_alocada"
       assessment_status:
         | "avaliacao_feita"
         | "proposta_enviada"
@@ -3411,6 +4272,8 @@ export type Database = {
         | "nps"
         | "credenciamento"
         | "geral"
+        | "academy_reminder"
+        | "academy_course_completed"
       nps_rated_entity_type: "professional" | "patient" | "platform"
       nps_rater_type: "paciente" | "pp"
       patient_attendance_period: "MANHA" | "TARDE" | "NOITE"
@@ -3573,6 +4436,32 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      academy_audience: ["pp", "paciente"],
+      academy_content_type: [
+        "video",
+        "pdf",
+        "richtext",
+        "quiz",
+        "exercise_steps",
+        "ebook",
+      ],
+      academy_enrollment_status: ["not_started", "in_progress", "completed"],
+      academy_gate_preset: [
+        "optional",
+        "soft_m1m3",
+        "full_m1m5",
+        "demands_m5_only",
+        "credenciamento_m5",
+        "phil_onboarding",
+        "custom",
+      ],
+      academy_gate_target: [
+        "demands",
+        "credenciamento_ativo",
+        "paciente_p1",
+        "paciente_pagamento",
+      ],
+      academy_requirement_type: ["full_course", "modules", "lessons", "none"],
       alert_severity: ["info", "warning", "critical"],
       alert_type: [
         "cobranca_vencida",
@@ -3580,6 +4469,7 @@ export const Constants = {
         "prontuario_incompleto_24h",
         "avaliacao_sem_resposta_5d",
         "nps_baixo_consecutivo",
+        "demanda_alocada",
       ],
       assessment_status: [
         "avaliacao_feita",
@@ -3638,6 +4528,8 @@ export const Constants = {
         "nps",
         "credenciamento",
         "geral",
+        "academy_reminder",
+        "academy_course_completed",
       ],
       nps_rated_entity_type: ["professional", "patient", "platform"],
       nps_rater_type: ["paciente", "pp"],

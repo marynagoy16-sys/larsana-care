@@ -23,13 +23,28 @@ export function createCrudService(table: TableName) {
     },
 
     async create(values: Record<string, unknown>) {
-      const { data, error } = await supabase.from(table).insert(values as never).select().single()
+      // Academy tables expand Database union past TS recursion limit — use loose client for writes
+      const client = supabase as unknown as {
+        from: (name: string) => {
+          insert: (v: Record<string, unknown>) => { select: () => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } }
+        }
+      }
+      const { data, error } = await client.from(table as string).insert(values).select().single()
       if (error) throw error
       return data as unknown as CrudRow
     },
 
     async update(id: string, values: Record<string, unknown>) {
-      const { data, error } = await supabase.from(table).update(values as never).eq('id', id).select().single()
+      const client = supabase as unknown as {
+        from: (name: string) => {
+          update: (v: Record<string, unknown>) => {
+            eq: (col: string, val: string) => {
+              select: () => { single: () => Promise<{ data: unknown; error: { message: string } | null }> }
+            }
+          }
+        }
+      }
+      const { data, error } = await client.from(table as string).update(values).eq('id', id).select().single()
       if (error) throw error
       return data as unknown as CrudRow
     },

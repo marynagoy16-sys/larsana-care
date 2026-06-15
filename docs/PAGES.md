@@ -53,6 +53,9 @@ Legenda: ● completo · ◐ parcial / só leitura · ○ sem acesso
 | Auditoria / logs | ● | ◐ | ◐ | ○ | ○ |
 | NPS / qualidade | ● | ○ | ● | ◐ próprio score | ◐ próprias avaliações |
 | Demandas / matching | ● | ○ | ● | ● | ○ |
+| Academy / Formação PP | ● | ○ | ◐ | ● | ○ |
+| LarsanaPill (PHIL) | ● | ○ | ● | ○ | ● |
+| Config gates Academy | ● | ○ | ○ | ○ | ○ |
 
 ---
 
@@ -171,6 +174,14 @@ Estrutura fixa com itens **ocultos por permissão** (não mudar layout entre sub
 | `/admin/credenciamento/:id` | Detalhe credenciamento | Validar e ativar | Documentos, preview LRS-PROF, aprovar/reprovar, Wallet Asaas | Gestão, Admin |
 | `/admin/demandas` | Demandas | Matching geográfico | Mapa/lista oportunidades; status; PP atribuído | Gestão, Admin |
 | `/admin/demandas/:id` | Detalhe demanda | Alocar PP | Paciente, endereço, região, sugestões PP, aceite/recusa | Gestão, Admin |
+| `/admin/academy` | Academy — dashboard | Visão educação | Cursos, matrículas, taxa conclusão, preset ativo | Gestão, Admin |
+| `/admin/academy/cursos` | Cursos Academy | CMS Formação PP | CRUD cursos, módulos, aulas | Gestão, Admin |
+| `/admin/academy/cursos/:id` | Detalhe curso | Edição conteúdo | Módulos M1–M5, upload mídia bucket `academy-content` | Gestão, Admin |
+| `/admin/academy/matriculas` | Matrículas | Progresso por PP | Status in_progress/completed por profissional | Gestão, Admin |
+| `/admin/larsanapill` | LarsanaPill CMS | Conteúdo PHIL | Categorias P1–P6, vídeos, ebooks, exercícios | Gestão, Admin |
+| `/admin/academy/config` | Config gates | Super Admin | Presets, master switch, preview impacto | **Admin only** |
+| `/admin/academy/config/excecoes` | Exceções PP | Grandfathering | Isentar PP de gate específico ou todos | **Admin only** |
+| `/admin/academy/config/historico` | Audit log gates | Compliance | Histórico `academy_gate_rules_log` | **Admin only** |
 
 ---
 
@@ -287,6 +298,12 @@ Padrão **2 + FAB + 2** (conforme design system).
 | `/profissional/cartao` | Cartão de visita | Apresentação ao paciente | Nome, CREFITO, contato Larsana |
 | `/profissional/perfil` | Perfil | Conta | Dados, bancários, notificações, classe B/P/O, horas/semana |
 | `/profissional/notificacoes` | Notificações | Centro in-app | Resposta família, repasse liberado, alerta prontuário |
+| `/profissional/academy` | Academy — hub | Formação PP | Progresso M1–M5, continue de onde parou, banner gate demandas |
+| `/profissional/academy/modulos/:moduleId` | Módulo | Trilha por módulo | Lista de aulas, status conclusão |
+| `/profissional/academy/aulas/:lessonId` | Aula | Player | Vídeo, PDF, quiz, exercícios; marcar concluída |
+| `/profissional/academy/certificados` | Certificados | Emissão pós-conclusão | PDF certificado Formação PP |
+
+**Gate demandas:** PP sem trilha exigida (config admin) é redirecionado de `/profissional/demandas/*` para `/profissional/academy`. Agenda, evolução e repasses **nunca** são bloqueados.
 
 **Dados que o PP NÃO vê:** valor integral do ciclo cobrado do paciente; margem Larsana; dados de outros PP; área admin.
 
@@ -303,7 +320,7 @@ Padrão **2 + FAB + 2** (conforme design system).
 Header horizontal simplificado (sem sidebar densa):
 
 ```
-Início · Pagamentos · Meu tratamento · Documentos · Ajuda · Conta
+Início · Pagamentos · Meu tratamento · LarsanaPill · Documentos · Ajuda · Conta
 ```
 
 ### 6.2 Bottom nav mobile (5 itens)
@@ -322,7 +339,7 @@ Início · Pagamentos · Meu tratamento · Documentos · Ajuda · Conta
 
 | Rota | Página | Objetivo | Dados exibidos (escopo paciente) |
 |------|--------|----------|----------------------------------|
-| `/paciente` | Início / Timeline | Visão do tratamento | PP atual, ciclo nº, próximas sessões, status pagamento, banner proposta pendente |
+| `/paciente` | Início / Timeline | Visão do tratamento | PP atual, ciclo nº, próximas sessões, status pagamento, banner proposta pendente, **card LarsanaPill** |
 | `/paciente/tratamento` | Meu tratamento | Plano em andamento | Ciclo 4/8 sessões, realizadas vs previstas, pausa — **sem evolução clínica** |
 | `/paciente/tratamento/ciclo/:id` | Detalhe ciclo | Acompanhar sessões | Datas, status (realizada/falta/remarcada), nome PP |
 | `/paciente/pagamentos` | Pagamentos | Pagar ciclo antecipado | Valor do ciclo, PIX/boleto Asaas, vencimento, status |
@@ -333,6 +350,9 @@ Início · Pagamentos · Meu tratamento · Documentos · Ajuda · Conta
 | `/paciente/nps/:cicloId` | NPS fim de ciclo | Avaliar cuidado | Escala 0–10 + comentário (24h pós última sessão) |
 | `/paciente/conta` | Conta | Dados responsável | Nome, telefone, e-mail, endereço (edição com validação gestão) |
 | `/paciente/ajuda` | Ajuda | Suporte família | FAQ, contato Larsana, como pagar |
+| `/paciente/larsanapill` | LarsanaPill — hub | Educação complementar | Chips P1–P6, planos semanais, conteúdo recomendado |
+| `/paciente/larsanapill/categoria/:slug` | Categoria PHIL | Lista por tema | Vídeos, ebooks, exercícios guiados |
+| `/paciente/larsanapill/conteudo/:id` | Player conteúdo | Consumo | Vídeo/PDF/exercício com timer; progresso salvo |
 | `/paciente/notificacoes` | Notificações | Alertas | Cobrança, proposta, sessão amanhã |
 
 **Dados que o paciente NÃO vê:** prontuário/evolução clínica; repasses ao PP; dados de outros pacientes; painel admin.

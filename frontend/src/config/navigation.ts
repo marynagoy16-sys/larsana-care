@@ -27,6 +27,8 @@ import {
   Clock,
   Star,
   Timer,
+  GraduationCap,
+  Pill,
 } from 'lucide-react'
 import type { UserRole } from '@/types/auth'
 
@@ -70,6 +72,8 @@ export const adminNavSections: NavSection[] = [
       { label: 'Profissionais', href: '/admin/profissionais', icon: UserCheck, roles: ['admin', 'gestao'] },
       { label: 'Credenciamento', href: '/admin/credenciamento', icon: Shield, roles: ['admin', 'gestao'] },
       { label: 'Demandas', href: '/admin/demandas', icon: MapPin, roles: ['admin', 'gestao'] },
+      { label: 'Academy', href: '/admin/academy', icon: GraduationCap, roles: ['admin', 'gestao'] },
+      { label: 'LarsanaPill', href: '/admin/larsanapill', icon: Pill, roles: ['admin', 'gestao'] },
     ],
   },
   {
@@ -120,6 +124,14 @@ export const profissionalNavSections: NavSection[] = [
     ],
   },
   {
+    title: 'Formação',
+    icon: GraduationCap,
+    items: [
+      { label: 'Academy', href: '/profissional/academy', icon: GraduationCap, roles: ['pp'] },
+      { label: 'Certificados', href: '/profissional/academy/certificados', icon: FileCheck, roles: ['pp'] },
+    ],
+  },
+  {
     title: 'Clínico',
     icon: ClipboardList,
     items: [
@@ -160,6 +172,7 @@ export const pacienteHeaderNav: NavItem[] = [
   { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'] },
   { label: 'Pagamentos', href: '/paciente/pagamentos', icon: CreditCard, roles: ['paciente'] },
   { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
+  { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
   { label: 'Documentos', href: '/paciente/documentos', icon: FileText, roles: ['paciente'] },
   { label: 'Ajuda', href: '/paciente/ajuda', icon: HelpCircle, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
@@ -201,6 +214,12 @@ export const routeTitles: Record<string, string> = {
   '/admin/profissionais': 'Profissionais',
   '/admin/credenciamento': 'Credenciamento',
   '/admin/demandas': 'Demandas',
+  '/admin/academy': 'Academy',
+  '/admin/academy/cursos': 'Cursos Academy',
+  '/admin/academy/matriculas': 'Matrículas Academy',
+  '/admin/academy/config': 'Configuração Academy',
+  '/admin/larsanapill': 'LarsanaPill',
+  '/admin/larsanapill/categorias/:id': 'Categoria LarsanaPill',
   '/admin/cobrancas': 'Cobranças',
   '/admin/repasses': 'Repasses',
   '/admin/caixa': 'Caixa',
@@ -232,6 +251,8 @@ export const routeTitles: Record<string, string> = {
   '/profissional/cartao': 'Cartão de visita',
   '/profissional/perfil': 'Perfil',
   '/profissional/notificacoes': 'Notificações',
+  '/profissional/academy': 'Academy',
+  '/profissional/academy/certificados': 'Certificados',
   '/paciente': 'Início',
   '/paciente/tratamento': 'Meu tratamento',
   '/paciente/pagamentos': 'Pagamentos',
@@ -240,6 +261,7 @@ export const routeTitles: Record<string, string> = {
   '/paciente/aceite-inicial': 'Aceite inicial',
   '/paciente/conta': 'Conta',
   '/paciente/ajuda': 'Ajuda',
+  '/paciente/larsanapill': 'LarsanaPill',
   '/paciente/notificacoes': 'Notificações',
 }
 

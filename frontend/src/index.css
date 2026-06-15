@@ -237,3 +237,18 @@ body {
   touch-action: pan-y;
 }
 
+.pb-content-lesson-scroll {
+  padding-bottom: 4.5rem;
+}
+
+.content-fixed-footer {
+  position: fixed;
+  bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .content-fixed-footer {
+    position: sticky;
+  }
+}
+

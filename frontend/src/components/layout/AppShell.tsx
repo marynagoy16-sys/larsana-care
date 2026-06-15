@@ -23,6 +23,7 @@ import { DataLayerFooter } from '@/components/layout/DataLayerFooter'
 import { ShellBottomNav } from '@/components/layout/ShellBottomNav'
 import { PageFooterProvider, usePageFooter } from '@/contexts/PageFooterContext'
 import { PageHeaderProvider } from '@/contexts/PageHeaderContext'
+import { ImmersiveLayoutProvider, useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import type { UserRole } from '@/types/auth'
 
 export type LayoutVariant = 'admin' | 'profissional' | 'paciente'
@@ -57,20 +58,36 @@ function AppShellContent({
   showBottomNav: boolean
 }) {
   const { suppressBottomNav } = usePageFooter()
+  const { immersive } = useImmersiveLayout()
+  const showNav = showBottomNav && !suppressBottomNav
 
   return (
     <>
-      <DataLayer reserveBottomNav={showBottomNav && !suppressBottomNav}>
-        <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar">
-          <div className="shell-content-x shell-content-y-top">
-            <Header
-              pageTitle={pageTitle}
-              onMenuClick={hasSidebar ? () => setSidebarOpen(true) : undefined}
-              showSearch={variant !== 'paciente'}
-              horizontalNav={variant === 'paciente' ? pacHeader : undefined}
-            />
-          </div>
-          <main className="shell-content-x shell-content-y-bottom w-full min-w-0">
+      <DataLayer reserveBottomNav={showNav}>
+        <div
+          className={
+            immersive
+              ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
+              : 'flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar'
+          }
+        >
+          {!immersive && (
+            <div className="shell-content-x shell-content-y-top">
+              <Header
+                pageTitle={pageTitle}
+                onMenuClick={hasSidebar ? () => setSidebarOpen(true) : undefined}
+                showSearch={variant !== 'paciente'}
+                horizontalNav={variant === 'paciente' ? pacHeader : undefined}
+              />
+            </div>
+          )}
+          <main
+            className={
+              immersive
+                ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
+                : 'shell-content-x shell-content-y-bottom w-full min-w-0'
+            }
+          >
             <Suspense fallback={<PageSkeleton />}>
               <Outlet />
             </Suspense>
@@ -80,13 +97,22 @@ function AppShellContent({
         <DataLayerFooter />
       </DataLayer>
 
-      {variant === 'profissional' && <ShellBottomNav items={profBottom} fabIndex={2} />}
-      {variant === 'paciente' && <ShellBottomNav items={pacBottom} />}
+      {variant === 'profissional' && showNav && <ShellBottomNav items={profBottom} fabIndex={2} />}
+      {variant === 'paciente' && showNav && <ShellBottomNav items={pacBottom} />}
     </>
   )
 }
 
 export function AppShell({ variant }: AppShellProps) {
+  return (
+    <ImmersiveLayoutProvider>
+      <AppShellInner variant={variant} />
+    </ImmersiveLayoutProvider>
+  )
+}
+
+function AppShellInner({ variant }: AppShellProps) {
+  const { immersive } = useImmersiveLayout()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { collapsed: sidebarCollapsed, toggle: toggleSidebarCollapse } = useSidebarCollapsed()
   const { role } = useAuth()
@@ -105,7 +131,7 @@ export function AppShell({ variant }: AppShellProps) {
   const hasSidebar = variant === 'admin' || variant === 'profissional'
   const sections = variant === 'admin' ? adminSections : profSections
   const topItems = variant === 'admin' ? adminTopItems : undefined
-  const showBottomNav = variant === 'profissional' || variant === 'paciente'
+  const showBottomNav = (variant === 'profissional' || variant === 'paciente') && !immersive
 
   return (
     <div className="flex h-dvh min-h-0 overflow-hidden bg-background">

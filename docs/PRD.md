@@ -626,7 +626,36 @@ Todos os perfis autenticam na **mesma aplicação web** (`app.larsanacare.com.br
 
 ---
 
-## 15. Glossário
+## 15. Addendum — Módulo Academy (extensão pós-V1)
+
+O **Academy** é uma extensão do ecossistema Larsana Care alinhada à vertical **Saúde e Educação** da DELUMA. Não substitui o escopo operacional do PRD v1.1; complementa a plataforma com capacitação de PP e educação do paciente.
+
+### 15.1 Escopo
+
+| Produto | Público | Objetivo |
+|---------|---------|----------|
+| **Formação PP** | Profissional Parceiro | Capacitar PP para operar na plataforma (trilha M1–M5) |
+| **LarsanaPill / PHIL** | Paciente / Responsável | Orientações domiciliares, exercícios guiados, ebooks (P1–P6) |
+| **CMS + Config** | Admin / Gestão | Publicar conteúdo; Super Admin configura gates operacionais |
+
+### 15.2 Gates configuráveis
+
+Gates controlam **captação de novos casos**, não o atendimento em andamento:
+
+- **Default:** gate `demands` ativo exigindo M1+M2+M3
+- **Nunca bloqueados:** agenda, evolução clínica, repasses
+- **Configuração:** `/admin/academy/config` (somente role `admin`)
+- **Grandfathering:** PP credenciado pré-Academy isento via `pp_academy_exemptions`
+
+Documentação detalhada: `docs/ACADEMY.md` e `docs/PAGES.md` (rotas Academy).
+
+### 15.3 Paridade web
+
+Formação PP e LarsanaPill estão disponíveis na **web** nesta fase. Apps nativos podem consumir as mesmas APIs em versão futura.
+
+---
+
+## 16. Glossário
 
 | Termo | Definição |
 |-------|-----------|
@@ -638,3 +667,6 @@ Todos os perfis autenticam na **mesma aplicação web** (`app.larsanacare.com.br
 | **Wallet ID** | Identificador Asaas para repasse ao PP |
 | **Portal Web** | Área da aplicação web destinada a PP ou Paciente (fora da área admin) |
 | **Paridade** | Mesma funcionalidade disponível na web e no app nativo do mesmo perfil |
+| **Academy** | Módulo de educação: Formação PP (LMS) + LarsanaPill (PHIL) |
+| **LarsanaPill** | Conteúdo educacional para pacientes — complemento ao tratamento presencial |
+| **Gate Academy** | Regra configurável que condiciona acesso a demandas (ou outros alvos) à conclusão da trilha |

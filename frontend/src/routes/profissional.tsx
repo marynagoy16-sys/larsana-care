@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
+import { RequireAcademyGate } from '@/routes/guards/RequireAcademyGate'
 import { AppShell } from '@/components/layout/AppShell'
 
 function ppRoute(element: React.ReactNode) {
@@ -44,6 +45,12 @@ const PPPerfilPage = lazyPP('PPPerfilPage')
 const PPSimuladorPage = lazyPP('PPSimuladorPage')
 const PPCartaoPage = lazyPP('PPCartaoPage')
 const PPNotificacoesPage = lazyPP('PPNotificacoesPage')
+const AcademyHubPage = lazy(() => import('@/pages/profissional/academy/AcademyHubPage').then((m) => ({ default: m.AcademyHubPage })))
+const AcademyModulePage = lazy(() => import('@/pages/profissional/academy/AcademyModulePage').then((m) => ({ default: m.AcademyModulePage })))
+const AcademyLessonPage = lazy(() => import('@/pages/profissional/academy/AcademyLessonPage').then((m) => ({ default: m.AcademyLessonPage })))
+const AcademyCertificatesPage = lazy(() =>
+  import('@/pages/profissional/academy/AcademyCertificatesPage').then((m) => ({ default: m.AcademyCertificatesPage })),
+)
 
 export const profissionalRoutes: RouteObject[] = [
   {
@@ -53,8 +60,8 @@ export const profissionalRoutes: RouteObject[] = [
       { index: true, element: <Navigate to="/profissional/agenda" replace /> },
       { path: 'agenda', element: ppRoute(<PPAgendaPage />) },
       { path: 'agenda/:sessaoId', element: ppRoute(<PPSessionDetailPage />) },
-      { path: 'demandas', element: ppRoute(<PPDemandsPage />) },
-      { path: 'demandas/:id', element: ppRoute(<PPDemandDetailPage />) },
+      { path: 'demandas', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandsPage /></RequireAcademyGate>) },
+      { path: 'demandas/:id', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandDetailPage /></RequireAcademyGate>) },
       { path: 'evolucoes', element: ppRoute(<PPEvolucoesPage />) },
       { path: 'evolucao/nova', element: ppRoute(<PPEvolucaoNovaPage />) },
       { path: 'evolucao/:id', element: ppRoute(<PPEvolucoesPage />) },
@@ -70,6 +77,10 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'cartao', element: ppRoute(<PPCartaoPage />) },
       { path: 'perfil', element: ppRoute(<PPPerfilPage />) },
       { path: 'notificacoes', element: ppRoute(<PPNotificacoesPage />) },
+      { path: 'academy', element: ppRoute(<AcademyHubPage />) },
+      { path: 'academy/modulos/:moduleId', element: ppRoute(<AcademyModulePage />) },
+      { path: 'academy/aulas/:lessonId', element: ppRoute(<AcademyLessonPage />) },
+      { path: 'academy/certificados', element: ppRoute(<AcademyCertificatesPage />) },
     ],
   },
 ]
