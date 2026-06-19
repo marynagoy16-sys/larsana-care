@@ -58,21 +58,22 @@ function AppShellContent({
   showBottomNav: boolean
 }) {
   const { suppressBottomNav } = usePageFooter()
-  const { immersive } = useImmersiveLayout()
+  const { immersive, fixedMain } = useImmersiveLayout()
   const showNav = showBottomNav && !suppressBottomNav
+  const lockScroll = immersive || fixedMain
 
   return (
     <>
       <DataLayer reserveBottomNav={showNav}>
         <div
           className={
-            immersive
+            lockScroll
               ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
               : 'flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar'
           }
         >
           {!immersive && (
-            <div className="shell-content-x shell-content-y-top">
+            <div className="shell-content-x shell-content-y-top shrink-0">
               <Header
                 pageTitle={pageTitle}
                 onMenuClick={hasSidebar ? () => setSidebarOpen(true) : undefined}
@@ -83,8 +84,8 @@ function AppShellContent({
           )}
           <main
             className={
-              immersive
-                ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
+              lockScroll
+                ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden w-full'
                 : 'shell-content-x shell-content-y-bottom w-full min-w-0'
             }
           >

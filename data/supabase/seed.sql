@@ -28,6 +28,11 @@ DECLARE
   v_avaliacao_demand_1 uuid := 'f2000000-0000-4000-8000-000000000001';
   v_avaliacao_demand_2 uuid := 'f2000000-0000-4000-8000-000000000002';
   v_avaliacao_demand_3 uuid := 'f2000000-0000-4000-8000-000000000003';
+  v_patient_evol_maria uuid := 'd1000000-0000-4000-8000-000000000010';
+  v_patient_evol_joao uuid := 'd1000000-0000-4000-8000-000000000011';
+  v_cycle_evol_maria uuid := 'e1000000-0000-4000-8000-000000000010';
+  v_cycle_evol_joao uuid := 'e1000000-0000-4000-8000-000000000011';
+  v_pricing_v1 uuid := 'b0000000-0000-4000-8000-000000000001';
   v_maua_city_id uuid;
   v_region_a_id uuid := 'a0000000-0000-4000-8000-000000000001';
 BEGIN
@@ -110,31 +115,66 @@ BEGIN
 
   -- Professional PP demo
   INSERT INTO public.professionals (
-    id, user_id, full_name, cpf_cnpj, person_type, email, phone,
+    id, user_id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address,
     pp_class, profession, specialty, credentialing_status,
     flag_encaminhado, flag_assinado, asaas_wallet_id, is_active
   ) VALUES (
     v_professional_id,
     v_pp_id,
     'Profissional Parceiro Demo',
-    '00000000000',
+    '52998224725',
     'PF',
+    '1985-03-18',
     'parceiro@larsanacare.com.br',
     '11999990000',
+    'Rua das Palmeiras, 120 - Centro, Mauá - SP, CEP 09310-000',
     'BRONZE',
     'FISIO',
-    'Geriatria',
+    'Geriatria e reabilitação',
     'ativo',
     true,
     true,
     '00000000-0000-4000-8000-000000000099',
     true
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    birth_date = EXCLUDED.birth_date,
+    address = EXCLUDED.address,
+    cpf_cnpj = EXCLUDED.cpf_cnpj,
+    specialty = EXCLUDED.specialty;
 
   INSERT INTO public.professional_councils (professional_id, council_type, registration_number)
-  VALUES (v_professional_id, 'CREFITO', '000000-F')
-  ON CONFLICT (professional_id, council_type) DO NOTHING;
+  VALUES (v_professional_id, 'CREFITO', '269110-F')
+  ON CONFLICT (professional_id, council_type) DO UPDATE SET registration_number = EXCLUDED.registration_number;
+
+  INSERT INTO public.professional_bank_accounts (
+    professional_id, bank_code, bank_name, agency, account_number,
+    account_type, pix_key, holder_name, holder_document
+  ) VALUES (
+    v_professional_id, '341', 'Itaú Unibanco', '1234', '56789-0',
+    'corrente', 'parceiro@larsanacare.com.br', 'Profissional Parceiro Demo', '52998224725'
+  )
+  ON CONFLICT (professional_id) DO NOTHING;
+
+  DELETE FROM public.professional_documents
+  WHERE professional_id = v_professional_id
+    AND document_type IN ('RG_CNH', 'COUNCIL_CARD', 'CRIMINAL_BACKGROUND', 'CERTIFICATE');
+
+  INSERT INTO public.professional_documents (professional_id, document_type, file_name) VALUES
+    (v_professional_id, 'RG_CNH', 'rg-parceiro-demo.pdf'),
+    (v_professional_id, 'COUNCIL_CARD', 'crefito-269110-f.pdf'),
+    (v_professional_id, 'CRIMINAL_BACKGROUND', 'antecedentes-criminais.pdf'),
+    (v_professional_id, 'CERTIFICATE', 'certificado-geriatria.pdf');
+
+  INSERT INTO public.contracts (id, professional_id, contract_number, status, signed_at)
+  VALUES (
+    'e1000000-0000-4000-8000-000000000001',
+    v_professional_id,
+    'LRS-PROF.FISIO-2026-0001',
+    'aprovado',
+    now() - interval '30 days'
+  )
+  ON CONFLICT (id) DO NOTHING;
 
   -- Patient demo
   INSERT INTO public.patients (
@@ -551,6 +591,94 @@ BEGIN
     AND NOT EXISTS (
       SELECT 1 FROM public.digital_acceptances da
       WHERE da.patient_id = v_avaliacao_patient_2 AND da.term_id = lt.id
+    );
+
+  -- ===== EVOLUÇÕES PENDENTES (sessões realizadas sem registro) =====
+  INSERT INTO public.patients (
+    id, full_name, cpf, birth_date, sex, care_status, patient_level,
+    region_id, city_id, allocated_professional_id,
+    suggested_weekly_frequency, attendance_period, clinical_summary, is_data_complete
+  ) VALUES
+    (
+      v_patient_evol_maria, 'Maria Helena Costa', '66666666666', '1952-05-14', 'F', 'ATIVO', 'N2',
+      v_region_a_id, v_maua_city_id, v_professional_id, 2, 'MANHA',
+      'Reabilitação pós-artroplastia de quadril. Deambula com bengala.', true
+    ),
+    (
+      v_patient_evol_joao, 'João Pereira Santos', '77777777777', '1945-11-03', 'M', 'ATIVO', 'N1',
+      v_region_a_id, v_maua_city_id, v_professional_id, 1, 'TARDE',
+      'Parkinson em estágio inicial. Queixa de rigidez em MMSS.', true
+    )
+  ON CONFLICT (id) DO UPDATE SET allocated_professional_id = EXCLUDED.allocated_professional_id;
+
+  DELETE FROM public.patient_addresses WHERE patient_id IN (v_patient_evol_maria, v_patient_evol_joao);
+  INSERT INTO public.patient_addresses (patient_id, full_address, street, number, neighborhood, city_id, postal_code, is_primary)
+  VALUES
+    (v_patient_evol_maria, 'Rua Ipiranga, 45 - Vila Bocaina, Mauá/SP', 'Rua Ipiranga', '45', 'Vila Bocaina', v_maua_city_id, '09350000', true),
+    (v_patient_evol_joao, 'Av. Papa João XXIII, 890 - Centro, Mauá/SP', 'Av. Papa João XXIII', '890', 'Centro', v_maua_city_id, '09370000', true);
+
+  INSERT INTO public.digital_acceptances (acceptor_role, acceptor_user_id, patient_id, term_id, ip_address)
+  SELECT
+    'paciente'::public.user_role,
+    v_paciente_id,
+    p.patient_id,
+    lt.id,
+    '127.0.0.1'::inet
+  FROM (VALUES (v_patient_evol_maria), (v_patient_evol_joao)) AS p(patient_id)
+  CROSS JOIN public.legal_terms lt
+  WHERE lt.is_current = true
+    AND lt.term_type IN ('TERMO_ADESAO', 'DIRETRIZES', 'LGPD')
+    AND NOT EXISTS (
+      SELECT 1 FROM public.digital_acceptances da
+      WHERE da.patient_id = p.patient_id AND da.term_id = lt.id
+    );
+
+  DELETE FROM public.medical_records WHERE session_id IN (
+    'e3000000-0000-4000-8000-000000000001',
+    'e3000000-0000-4000-8000-000000000002',
+    'e3000000-0000-4000-8000-000000000003'
+  );
+  DELETE FROM public.care_sessions WHERE id IN (
+    'e3000000-0000-4000-8000-000000000001',
+    'e3000000-0000-4000-8000-000000000002',
+    'e3000000-0000-4000-8000-000000000003'
+  );
+  DELETE FROM public.care_cycles WHERE id IN (v_cycle_evol_maria, v_cycle_evol_joao);
+
+  INSERT INTO public.care_cycles (
+    id, patient_id, cycle_number, session_count, assigned_professional_id,
+    pricing_version_id, region_id, patient_level, session_unit_price_cents,
+    total_amount_cents, status, payment_status, started_at, created_at
+  ) VALUES
+    (
+      v_cycle_evol_maria, v_patient_evol_maria, 1, 8, v_professional_id,
+      v_pricing_v1, v_region_a_id, 'N2', 13000, 104000,
+      'ativo', 'pago', now() - interval '14 days', now() - interval '14 days'
+    ),
+    (
+      v_cycle_evol_joao, v_patient_evol_joao, 1, 4, v_professional_id,
+      v_pricing_v1, v_region_a_id, 'N1', 13000, 52000,
+      'ativo', 'pago', now() - interval '7 days', now() - interval '7 days'
+    );
+
+  INSERT INTO public.care_sessions (
+    id, cycle_id, session_number, status, professional_id, is_assessment_session,
+    scheduled_at, check_in_at, check_out_at, updated_at
+  ) VALUES
+    (
+      'e3000000-0000-4000-8000-000000000001', v_cycle_evol_maria, 1, 'realizada', v_professional_id, true,
+      now() - interval '2 days 2 hours', now() - interval '2 days 2 hours',
+      now() - interval '2 days 1 hour', now() - interval '2 days 1 hour'
+    ),
+    (
+      'e3000000-0000-4000-8000-000000000002', v_cycle_evol_maria, 2, 'realizada', v_professional_id, false,
+      now() - interval '30 hours', now() - interval '30 hours',
+      now() - interval '29 hours', now() - interval '29 hours'
+    ),
+    (
+      'e3000000-0000-4000-8000-000000000003', v_cycle_evol_joao, 1, 'realizada', v_professional_id, true,
+      now() - interval '10 hours', now() - interval '10 hours',
+      now() - interval '9 hours', now() - interval '9 hours'
     );
 
 END;

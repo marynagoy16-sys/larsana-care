@@ -14,6 +14,12 @@ import { requiredString } from '@/schemas/common'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
 import { careSessionsService, medicalRecordsService, transfersService, demandsService, notificationsService } from '@/services/index'
+import {
+  listPendingEvolutionsForPp,
+  pendingEvolutionDeadlineLabel,
+  ppEvolutionsQueryKeys,
+  type PendingEvolutionRow,
+} from '@/services/ppEvolutions'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { supabase } from '@/lib/supabase'
 import { demandListColumns } from '@/components/demands/demandListColumns'
@@ -47,9 +53,48 @@ export function PPDemandsPage() {
 }
 
 export function PPEvolucoesPage() {
+  const navigate = useNavigate()
   return (
-    <EntityListPage title="Evoluções pendentes" queryKey={['pp', 'records']} queryFn={() => medicalRecordsService.list()}
-      columns={[{ key: 'type', header: 'Tipo', cell: (r) => String(r.record_type) }, { key: 'date', header: 'Data', cell: (r) => formatDateTime(String(r.created_at)) }]} />
+    <EntityListPage
+      title="Evoluções pendentes"
+      description="Sessões realizadas aguardando registro clínico (prazo 24h)"
+      queryKey={ppEvolutionsQueryKeys.pending}
+      queryFn={listPendingEvolutionsForPp}
+      onRowClick={(r) => navigate(`/profissional/evolucao/nova?session=${r.id}`)}
+      columns={[
+        {
+          key: 'patient',
+          header: 'Paciente',
+          cell: (r) => {
+            const row = r as unknown as PendingEvolutionRow
+            return row.care_cycles?.patients?.full_name ?? '—'
+          },
+        },
+        {
+          key: 'session',
+          header: 'Sessão',
+          cell: (r) => {
+            const row = r as unknown as PendingEvolutionRow
+            const cycle = row.care_cycles?.cycle_number
+            return cycle != null ? `Ciclo ${cycle} · Sessão #${row.session_number}` : `#${row.session_number}`
+          },
+        },
+        {
+          key: 'date',
+          header: 'Realizada em',
+          cell: (r) => {
+            const row = r as unknown as PendingEvolutionRow
+            const ref = row.check_out_at ?? row.scheduled_at
+            return ref ? formatDateTime(ref) : '—'
+          },
+        },
+        {
+          key: 'deadline',
+          header: 'Prazo',
+          cell: (r) => pendingEvolutionDeadlineLabel(r as unknown as PendingEvolutionRow),
+        },
+      ]}
+    />
   )
 }
 
@@ -114,31 +159,7 @@ export { PPPacientesPage } from '@/pages/profissional/patients/PPPacientesPage'
 export { PPPacienteDetailPage } from '@/pages/profissional/patients/PPPacienteDetailPage'
 export { PPAvaliacoesPage } from '@/pages/profissional/assessments/PPAvaliacoesPage'
 export { PPAvaliacaoDetailPage } from '@/pages/profissional/assessments/PPAvaliacaoDetailPage'
-
-export function PPCredenciamentoPage() {
-  const [step, setStep] = useState(0)
-  const steps = ['Dados', 'Conselho', 'Documentos', 'Banco', 'Contrato']
-  return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <div>
-        <h2 className="font-display text-2xl font-bold">Credenciamento</h2>
-        <p className="text-muted-foreground">Complete seu cadastro para ativar a conta.</p>
-      </div>
-      <div className="flex gap-2 flex-wrap">
-        {steps.map((s, i) => (
-          <span key={s} className={`text-xs px-2 py-1 rounded-full ${i === step ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{s}</span>
-        ))}
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Etapa atual: <strong>{steps[step]}</strong>. Preencha os dados no seu perfil e envie documentos pelo painel.
-      </p>
-      <div className="flex justify-between">
-        <button type="button" className="text-sm text-muted-foreground" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>Voltar</button>
-        <button type="button" className="text-sm text-primary" disabled={step === steps.length - 1} onClick={() => setStep((s) => s + 1)}>Próximo</button>
-      </div>
-    </div>
-  )
-}
+export { PPCredenciamentoPage } from '@/pages/profissional/credentialing/PPCredenciamentoPage'
 
 export function PPPerfilPage() {
   return (

@@ -3,13 +3,20 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 interface ImmersiveLayoutContextValue {
   immersive: boolean
   setImmersive: (value: boolean) => void
+  /** Mantém o header; trava a altura da área principal (scroll fica na página). */
+  fixedMain: boolean
+  setFixedMain: (value: boolean) => void
 }
 
 const ImmersiveLayoutContext = createContext<ImmersiveLayoutContextValue | null>(null)
 
 export function ImmersiveLayoutProvider({ children }: { children: ReactNode }) {
   const [immersive, setImmersive] = useState(false)
-  const value = useMemo(() => ({ immersive, setImmersive }), [immersive])
+  const [fixedMain, setFixedMain] = useState(false)
+  const value = useMemo(
+    () => ({ immersive, setImmersive, fixedMain, setFixedMain }),
+    [immersive, fixedMain],
+  )
   return <ImmersiveLayoutContext.Provider value={value}>{children}</ImmersiveLayoutContext.Provider>
 }
 

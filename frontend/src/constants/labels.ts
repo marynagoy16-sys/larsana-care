@@ -100,6 +100,25 @@ export const professionTypeLabels: Record<string, string> = {
   FONO: 'Fonoaudiologia',
 }
 
+export const personTypeLabels: Record<string, string> = {
+  PF: 'Pessoa física',
+  PJ: 'Pessoa jurídica',
+}
+
+export const councilTypeLabels: Record<string, string> = {
+  CREFITO: 'CREFITO',
+  COREN: 'COREN',
+}
+
+export const professionalDocumentTypeLabels: Record<string, string> = {
+  RG_CNH: 'RG ou CNH',
+  COUNCIL_CARD: 'Carteirinha do conselho',
+  CRIMINAL_BACKGROUND: 'Antecedentes criminais',
+  CERTIFICATE: 'Certificado / especialização',
+  SIGNED_CONTRACT_PDF: 'Contrato assinado',
+  VISIT_CARD_PHOTO: 'Foto cartão de visita',
+}
+
 export const attendancePeriodLabels: Record<string, string> = {
   MANHA: 'Manhã',
   TARDE: 'Tarde',
