@@ -39,6 +39,7 @@ interface DataTableMobileCardsProps<T> {
   rowActions?: MobileRowAction<T>[]
   getRowId?: (row: T) => string
   getAvatarLabel?: (row: T) => string
+  variant?: 'default' | 'compact'
 }
 
 function resolveColumn<T>(columns: MobileColumn<T>[], flag: keyof MobileColumn<T>) {
@@ -65,6 +66,7 @@ export function DataTableMobileCards<T>({
   rowActions,
   getRowId,
   getAvatarLabel,
+  variant = 'default',
 }: DataTableMobileCardsProps<T>) {
   const primaryCol = resolveColumn(columns, 'mobilePrimary') ?? columns.find((c) => !c.mobileHidden) ?? columns[0]
   const subtitleCol = resolveColumn(columns, 'mobileSubtitle')
@@ -72,11 +74,83 @@ export function DataTableMobileCards<T>({
   const metaCols = columns.filter((c) => c.mobileMeta && !c.mobileHidden)
 
   return (
-    <div className="space-y-2.5 md:hidden">
+    <div className={cn('md:hidden', variant === 'compact' ? 'space-y-2' : 'space-y-2.5')}>
       {data.map((row) => {
         const rowId = getRowId?.(row) ?? getRowKey(row)
         const isSelected = selectedIds?.has(rowId)
         const avatarText = getAvatarLabel?.(row) ?? (primaryCol ? String(primaryCol.cell(row)).replace(/<[^>]*>/g, '') : '')
+
+        if (variant === 'compact') {
+          return (
+            <div
+              key={getRowKey(row)}
+              role={onRowClick ? 'button' : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
+              onClick={() => onRowClick?.(row)}
+              onKeyDown={(e) => {
+                if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  onRowClick(row)
+                }
+              }}
+              className={cn(
+                'flex items-center gap-3 rounded-xl border bg-card px-4 py-3 transition-colors',
+                onRowClick && 'cursor-pointer active:bg-muted/40',
+                isSelected ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border',
+              )}
+            >
+              {selectable && onToggle && (
+                <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                  <Checkbox checked={!!isSelected} onCheckedChange={() => onToggle(rowId)} />
+                </div>
+              )}
+
+              <Avatar className="h-10 w-10 shrink-0 border border-border">
+                <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
+                  {getInitials(avatarText)}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="min-w-0 flex-1">
+                {primaryCol && (
+                  <div className="truncate text-sm font-medium text-foreground">{primaryCol.cell(row)}</div>
+                )}
+                {subtitleCol && (
+                  <p className="truncate text-xs text-muted-foreground">{subtitleCol.cell(row)}</p>
+                )}
+              </div>
+
+              {badgeCol && (
+                <div className="shrink-0 text-sm font-medium tabular-nums text-muted-foreground">
+                  {badgeCol.cell(row)}
+                </div>
+              )}
+
+              {rowActions && rowActions.length > 0 && (
+                <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {rowActions.map((action) => (
+                        <DropdownMenuItem
+                          key={action.label}
+                          className={action.variant === 'destructive' ? 'text-destructive focus:text-destructive' : undefined}
+                          onClick={() => action.onClick(row)}
+                        >
+                          {action.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          )
+        }
 
         return (
           <div

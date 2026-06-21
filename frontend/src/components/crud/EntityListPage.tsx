@@ -32,15 +32,20 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   onDelete?: (id: string) => Promise<void>
   deleteQueryKey?: readonly unknown[]
   toolbar?: ReactNode
+  beforeTable?: ReactNode
   searchable?: boolean
   searchPlaceholder?: string
   headerExtra?: ReactNode
   stats?: StatCardItem[]
   showStats?: boolean
+  showToolbar?: boolean
   statsColumns?: 2 | 3 | 4
   pageSizeDefault?: number
   emptyMessage?: string
   exportFileName?: string
+  mobileVariant?: 'default' | 'compact'
+  getMobileAvatarLabel?: (row: T) => string
+  showPagination?: boolean
 }
 
 function filterRows<T extends Record<string, unknown>>(rows: T[], query: string) {
@@ -64,15 +69,20 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   onDelete,
   deleteQueryKey,
   toolbar,
+  beforeTable,
   searchable = true,
   searchPlaceholder,
   headerExtra,
   stats,
   showStats = true,
+  showToolbar = true,
   statsColumns = 4,
   pageSizeDefault = 10,
   emptyMessage,
   exportFileName,
+  mobileVariant,
+  getMobileAvatarLabel,
+  showPagination = true,
 }: EntityListPageProps<T>) {
   const [deleteTarget, setDeleteTarget] = useState<T | null>(null)
   const [search, setSearch] = useState('')
@@ -98,7 +108,9 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   }, [allRows, search, searchable])
 
   const listTotal = filteredRows.length
-  const pageData = filteredRows.slice(page * pageSize, (page + 1) * pageSize)
+  const pageData = showPagination
+    ? filteredRows.slice(page * pageSize, (page + 1) * pageSize)
+    : filteredRows
   const isInitialLoad = isLoading && !data
   const isTableRefreshing = isFetching && !isLoading
 
@@ -189,21 +201,25 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
             </CascadeItem>
           )}
 
-          <CascadeItem>
-            {toolbar ?? (
-              <ListToolbar
-                search={searchable ? search : undefined}
-                onSearchChange={searchable ? (v) => { setSearch(v); setPage(0) } : undefined}
-                searchPlaceholder={searchPlaceholder ?? `Pesquisar em ${title.toLowerCase()}...`}
-                onExport={handleExport}
-                onRefresh={() => refetch()}
-                onAdd={onCreate}
-                addLabel={createLabel}
-                isRefreshing={isFetching}
-                trailing={headerExtra}
-              />
-            )}
-          </CascadeItem>
+          {(toolbar != null || showToolbar) && (
+            <CascadeItem>
+              {toolbar ?? (
+                <ListToolbar
+                  search={searchable ? search : undefined}
+                  onSearchChange={searchable ? (v) => { setSearch(v); setPage(0) } : undefined}
+                  searchPlaceholder={searchPlaceholder ?? `Pesquisar em ${title.toLowerCase()}...`}
+                  onExport={handleExport}
+                  onRefresh={() => refetch()}
+                  onAdd={onCreate}
+                  addLabel={createLabel}
+                  isRefreshing={isFetching}
+                  trailing={headerExtra}
+                />
+              )}
+            </CascadeItem>
+          )}
+
+          {beforeTable ? <CascadeItem>{beforeTable}</CascadeItem> : null}
 
           <CascadeItem>
             <div
@@ -222,6 +238,8 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
                   mobilePrimary: col.key === primaryCol?.key,
                 }))}
                 emptyMessage={emptyMessage}
+                mobileVariant={mobileVariant}
+                getMobileAvatarLabel={getMobileAvatarLabel}
               />
             </div>
           </CascadeItem>
@@ -230,20 +248,22 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
 
     </CrudListPageLayout>
 
-    <PageFooter loading={isInitialLoad}>
-      {isInitialLoad ? (
-        <PaginationSkeleton />
-      ) : (
-        <TablePagination
-          page={page}
-          pageSize={pageSize}
-          total={listTotal}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => { setPageSize(size); setPage(0) }}
-          stickyFooter
-        />
-      )}
-    </PageFooter>
+    {showPagination && (
+      <PageFooter loading={isInitialLoad}>
+        {isInitialLoad ? (
+          <PaginationSkeleton />
+        ) : (
+          <TablePagination
+            page={page}
+            pageSize={pageSize}
+            total={listTotal}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(0) }}
+            stickyFooter
+          />
+        )}
+      </PageFooter>
+    )}
 
       {canDelete && onDelete && (
         <DeleteConfirmDialog

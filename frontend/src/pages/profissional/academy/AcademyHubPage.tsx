@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { BookOpen, GraduationCap, Shield } from 'lucide-react'
 import { AcademyGateBanner } from '@/components/academy/AcademyGateBanner'
 import { ContentBannerCarousel } from '@/components/content-experience/ContentBannerCarousel'
 import { ContentFloatingToolbar } from '@/components/content-experience/ContentFloatingToolbar'
@@ -11,34 +10,8 @@ import { ContentHubToolbarSpacer } from '@/components/content-experience/Content
 import { ContentLessonCard } from '@/components/content-experience/ContentLessonCard'
 import { ContentProgressBanner } from '@/components/content-experience/ContentProgressBanner'
 import { ContentSection } from '@/components/content-experience/ContentSection'
+import { ACADEMY_SLIDES } from '@/constants/academySlides'
 import { getContinueLessonId, getCoursePlayerContext, getDemandsGateRule, getPublishedCourses, getProfessionalId, checkPpPassesGate } from '@/services/academy'
-
-const ACADEMY_SLIDES = [
-  {
-    id: 'formation',
-    eyebrow: 'Larsana Academy',
-    title: 'Formação do Profissional Parceiro',
-    subtitle: 'Capacitação para operar na plataforma Larsana Care com segurança e qualidade.',
-    icon: GraduationCap,
-    className: 'bg-primary text-primary-foreground',
-  },
-  {
-    id: 'modules',
-    eyebrow: 'Trilha M1–M5',
-    title: 'Módulos progressivos',
-    subtitle: 'Conclua os módulos obrigatórios para liberar demandas e credenciamento.',
-    icon: BookOpen,
-    className: 'bg-muted text-foreground border',
-  },
-  {
-    id: 'gates',
-    eyebrow: 'Requisitos',
-    title: 'Gates configuráveis',
-    subtitle: 'O administrador define quais módulos são exigidos para cada funcionalidade.',
-    icon: Shield,
-    className: 'bg-secondary text-secondary-foreground',
-  },
-]
 
 function matchesSearch(text: string | null | undefined, query: string) {
   if (!query.trim()) return true

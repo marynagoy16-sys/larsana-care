@@ -1,6 +1,8 @@
 -- Demandas tipo avaliação para ambiente de demonstração
 -- Aplicar: node data/supabase/scripts/apply-sql-remote.mjs data/supabase/populate-demands-avaliacao.sql
 -- Ou incluído em `supabase db reset` via seed.sql
+--
+-- Idempotente: não remove pacientes (podem ter ciclos/sessões de outros seeds).
 
 DO $$
 DECLARE
@@ -24,12 +26,9 @@ BEGIN
 
   DELETE FROM public.demand_responses
   WHERE demand_id IN (v_avaliacao_demand_1, v_avaliacao_demand_2, v_avaliacao_demand_3);
+
   DELETE FROM public.demands
   WHERE id IN (v_avaliacao_demand_1, v_avaliacao_demand_2, v_avaliacao_demand_3);
-  DELETE FROM public.patient_addresses
-  WHERE patient_id IN (v_avaliacao_patient_1, v_avaliacao_patient_2, v_avaliacao_patient_3);
-  DELETE FROM public.patients
-  WHERE id IN (v_avaliacao_patient_1, v_avaliacao_patient_2, v_avaliacao_patient_3);
 
   INSERT INTO public.patients (
     id, full_name, cpf, birth_date, sex, care_status, patient_level,
@@ -83,10 +82,26 @@ BEGIN
       3,
       'Acompanhamento nutricional domiciliar. Avaliação inicial para plano alimentar personalizado.',
       true
-    );
+    )
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = EXCLUDED.full_name,
+    cpf = EXCLUDED.cpf,
+    birth_date = EXCLUDED.birth_date,
+    sex = EXCLUDED.sex,
+    care_status = EXCLUDED.care_status,
+    patient_level = EXCLUDED.patient_level,
+    region_id = EXCLUDED.region_id,
+    city_id = EXCLUDED.city_id,
+    diagnostic_hypothesis = EXCLUDED.diagnostic_hypothesis,
+    attendance_period = EXCLUDED.attendance_period,
+    suggested_weekly_frequency = EXCLUDED.suggested_weekly_frequency,
+    clinical_summary = EXCLUDED.clinical_summary,
+    is_data_complete = EXCLUDED.is_data_complete,
+    updated_at = now();
 
   INSERT INTO public.patient_addresses (
-    id, patient_id, full_address, street, number, neighborhood, city_id, postal_code, is_primary
+    id, patient_id, full_address, street, number, neighborhood, city_id, postal_code, is_primary,
+    latitude, longitude
   ) VALUES
     (
       v_avaliacao_addr_1,
@@ -97,7 +112,9 @@ BEGIN
       'Bairro Esperança',
       v_maua_city_id,
       '09370420',
-      true
+      true,
+      -23.6754,
+      -46.4498
     ),
     (
       v_avaliacao_addr_2,
@@ -108,7 +125,9 @@ BEGIN
       'Pq. Boa Esperança',
       v_maua_city_id,
       '09380110',
-      true
+      true,
+      -23.6821,
+      -46.4685
     ),
     (
       v_avaliacao_addr_3,
@@ -119,8 +138,22 @@ BEGIN
       'Jd Primavera',
       v_maua_city_id,
       '09390200',
-      true
-    );
+      true,
+      -23.6586,
+      -46.4417
+    )
+  ON CONFLICT (id) DO UPDATE SET
+    patient_id = EXCLUDED.patient_id,
+    full_address = EXCLUDED.full_address,
+    street = EXCLUDED.street,
+    number = EXCLUDED.number,
+    neighborhood = EXCLUDED.neighborhood,
+    city_id = EXCLUDED.city_id,
+    postal_code = EXCLUDED.postal_code,
+    is_primary = EXCLUDED.is_primary,
+    latitude = EXCLUDED.latitude,
+    longitude = EXCLUDED.longitude,
+    updated_at = now();
 
   INSERT INTO public.demands (
     id, patient_id, address_id, required_profession, region_id, status, notes
@@ -151,9 +184,17 @@ BEGIN
       v_region_a_id,
       'aberta',
       'Avaliação nutricional domiciliar — turno tarde.'
-    );
+    )
+  ON CONFLICT (id) DO UPDATE SET
+    patient_id = EXCLUDED.patient_id,
+    address_id = EXCLUDED.address_id,
+    required_profession = EXCLUDED.required_profession,
+    region_id = EXCLUDED.region_id,
+    status = EXCLUDED.status,
+    notes = EXCLUDED.notes,
+    updated_at = now();
 
-  RAISE NOTICE 'Demandas avaliação criadas: %, %, %',
+  RAISE NOTICE 'Demandas avaliação criadas/atualizadas: %, %, %',
     v_avaliacao_demand_1, v_avaliacao_demand_2, v_avaliacao_demand_3;
 END;
 $$;

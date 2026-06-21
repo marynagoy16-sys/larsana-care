@@ -10,9 +10,9 @@
  */
 :root {
   --shell-gap: 1rem;
-  --sidebar-width: 19.5rem;
+  --sidebar-width: 17.5rem;
   --sidebar-width-collapsed: 5rem;
-  --sidebar-width-mobile: 23.4rem;
+  --sidebar-width-mobile: 21rem;
   --sidebar-radius: 1.25rem;
   --sidebar-collapsed-item-size: 2.5rem;
   --sidebar-scrollbar-width: 5px;
@@ -250,5 +250,77 @@ body {
   .content-fixed-footer {
     position: sticky;
   }
+}
+
+.demand-map-pin-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.demand-map-pin {
+  position: relative;
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 0 auto;
+  border-radius: 9999px 9999px 9999px 0;
+  background: var(--pin-color, #17310a);
+  border: 3px solid #fff;
+  transform: rotate(-45deg);
+  box-shadow:
+    0 4px 12px rgb(0 0 0 / 0.35),
+    0 0 0 1px rgb(0 0 0 / 0.18);
+}
+
+.demand-map-pin--selected {
+  width: 32px;
+  height: 32px;
+  border-width: 3.5px;
+  box-shadow:
+    0 0 0 4px rgb(23 49 10 / 0.22),
+    0 6px 16px rgb(0 0 0 / 0.38),
+    0 0 0 1px rgb(0 0 0 / 0.2);
+}
+
+.demand-map-origin {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: rgb(23 49 10 / 0.15);
+  border: 2px solid rgb(23 49 10 / 0.35);
+}
+
+.demand-map-origin__core {
+  position: absolute;
+  inset: 5px;
+  display: block;
+  border-radius: 9999px;
+  background: #17310a;
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+}
+
+.leaflet-container {
+  font: inherit;
+  z-index: 0;
+}
+
+.demand-map-popup {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 9rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.demand-map-popup strong {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.demand-map-popup span {
+  color: hsl(var(--muted-foreground));
 }
 

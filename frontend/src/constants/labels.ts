@@ -119,6 +119,14 @@ export const professionalDocumentTypeLabels: Record<string, string> = {
   VISIT_CARD_PHOTO: 'Foto cartão de visita',
 }
 
+export const sessionStatusLabels: Record<string, string> = {
+  prevista: 'Agendada',
+  realizada: 'Concluída',
+  remarcada: 'Remarcada',
+  falta: 'Falta',
+  intercorrencia: 'Intercorrência',
+}
+
 export const attendancePeriodLabels: Record<string, string> = {
   MANHA: 'Manhã',
   TARDE: 'Tarde',

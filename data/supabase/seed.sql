@@ -271,8 +271,8 @@ BEGIN
     ('e2000000-0000-4000-8000-000000000003', 'e1000000-0000-4000-8000-000000000001', 3, 'falta', v_professional_id, false, now() - interval '5 days', null, null),
     ('e2000000-0000-4000-8000-000000000004', 'e1000000-0000-4000-8000-000000000001', 4, 'realizada', v_professional_id, false, now() - interval '3 days', now() - interval '3 days' + interval '9 hours', now() - interval '3 days' + interval '10 hours'),
     ('e2000000-0000-4000-8000-000000000005', 'e1000000-0000-4000-8000-000000000001', 5, 'realizada', v_professional_id, false, now() - interval '1 days', now() - interval '1 days' + interval '9 hours', now() - interval '1 days' + interval '10 hours'),
-    ('e2000000-0000-4000-8000-000000000006', 'e1000000-0000-4000-8000-000000000001', 6, 'prevista', v_professional_id, false, now() + interval '1 days', null, null),
-    ('e2000000-0000-4000-8000-000000000007', 'e1000000-0000-4000-8000-000000000001', 7, 'prevista', v_professional_id, false, now() + interval '3 days', null, null),
+    ('e2000000-0000-4000-8000-000000000006', 'e1000000-0000-4000-8000-000000000001', 6, 'prevista', v_professional_id, false, date_trunc('day', now()) + interval '9 hours', null, null),
+    ('e2000000-0000-4000-8000-000000000007', 'e1000000-0000-4000-8000-000000000001', 7, 'prevista', v_professional_id, false, date_trunc('day', now()) + interval '14 hours', null, null),
     ('e2000000-0000-4000-8000-000000000008', 'e1000000-0000-4000-8000-000000000001', 8, 'prevista', v_professional_id, false, now() + interval '5 days', null, null);
 
   -- 2. Completed Cycle (4 sessions, all realized)

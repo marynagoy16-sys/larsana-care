@@ -1,9 +1,9 @@
 import { lazy } from 'react'
-import { Navigate } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
 import { RequireAcademyGate } from '@/routes/guards/RequireAcademyGate'
+import { ProfissionalEntryRedirect } from '@/routes/ProfissionalEntryRedirect'
 import { AppShell } from '@/components/layout/AppShell'
 
 function ppRoute(element: React.ReactNode) {
@@ -19,6 +19,7 @@ function lazyPP(exportName: keyof typeof import('@/pages/profissional/modulePage
 }
 
 const PPAgendaPage = lazyPP('PPAgendaPage')
+const PPHomePage = lazyPP('PPHomePage')
 const PPSessionDetailPage = lazyPP('PPSessionDetailPage')
 const PPDemandsPage = lazyPP('PPDemandsPage')
 const PPDemandDetailPage = lazy(() =>
@@ -57,9 +58,10 @@ export const profissionalRoutes: RouteObject[] = [
     path: '/profissional',
     element: ppRoute(<AppShell variant="profissional" />),
     children: [
-      { index: true, element: <Navigate to="/profissional/agenda" replace /> },
+      { index: true, element: <ProfissionalEntryRedirect /> },
+      { path: 'inicio', element: ppRoute(<PPHomePage />) },
       { path: 'agenda', element: ppRoute(<PPAgendaPage />) },
-      { path: 'agenda/:sessaoId', element: ppRoute(<PPSessionDetailPage />) },
+      { path: 'agenda/:id', element: ppRoute(<PPSessionDetailPage />) },
       { path: 'demandas', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandsPage /></RequireAcademyGate>) },
       { path: 'demandas/:id', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandDetailPage /></RequireAcademyGate>) },
       { path: 'evolucoes', element: ppRoute(<PPEvolucoesPage />) },

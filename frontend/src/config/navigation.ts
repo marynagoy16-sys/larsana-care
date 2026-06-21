@@ -119,6 +119,7 @@ export const profissionalNavSections: NavSection[] = [
     title: 'Hoje',
     icon: Calendar,
     items: [
+      { label: 'Início', href: '/profissional/inicio', icon: Home, roles: ['pp'], end: true },
       { label: 'Agenda', href: '/profissional/agenda', icon: Calendar, roles: ['pp'] },
       { label: 'Demandas', href: '/profissional/demandas', icon: MapPin, roles: ['pp'] },
     ],
@@ -161,7 +162,7 @@ export const profissionalNavSections: NavSection[] = [
 ]
 
 export const profissionalBottomNav: NavItem[] = [
-  { label: 'Agenda', href: '/profissional/agenda', icon: Calendar, roles: ['pp'] },
+  { label: 'Início', href: '/profissional/inicio', icon: Home, roles: ['pp'], end: true },
   { label: 'Demandas', href: '/profissional/demandas', icon: MapPin, roles: ['pp'] },
   { label: 'Evolução', href: '/profissional/evolucao/nova', icon: ClipboardPlus, roles: ['pp'] },
   { label: 'Repasses', href: '/profissional/repasses', icon: Wallet, roles: ['pp'] },
@@ -238,6 +239,7 @@ export const routeTitles: Record<string, string> = {
   '/admin/config/auditoria': 'Auditoria',
   '/admin/suporte': 'Suporte',
   '/admin/configuracoes': 'Configurações',
+  '/profissional/inicio': 'Início',
   '/profissional/agenda': 'Agenda',
   '/profissional/demandas': 'Demandas',
   '/profissional/evolucoes': 'Evoluções pendentes',
@@ -266,7 +268,12 @@ export const routeTitles: Record<string, string> = {
 }
 
 export function getPageTitle(pathname: string): string {
-  if (pathname === '/paciente' || pathname === '/paciente/notificacoes' || pathname === '/paciente/proposta') {
+  if (
+    pathname === '/paciente' ||
+    pathname === '/paciente/notificacoes' ||
+    pathname === '/paciente/proposta' ||
+    pathname === '/profissional/inicio'
+  ) {
     return ''
   }
   if (/^\/admin\/ciclos\/[^/]+$/.test(pathname) && pathname !== '/admin/ciclos/novo') {

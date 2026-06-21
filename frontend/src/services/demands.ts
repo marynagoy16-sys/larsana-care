@@ -15,6 +15,14 @@ type DemandPatientJoin = {
   diagnostic_hypothesis: string | null
   attendance_period: string | null
   clinical_summary: string | null
+  patient_level: string | null
+}
+
+type DemandAddressJoin = {
+  full_address: string
+  neighborhood: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 export type DemandListItem = CrudRow & {
@@ -22,8 +30,13 @@ export type DemandListItem = CrudRow & {
   patient_abbreviation: string
   patient_sex: string
   patient_age: string
+  patient_level: string | null
   diagnostic_hypothesis: string
   attendance_period: string
+  location_lat: number | null
+  location_lng: number | null
+  location_address: string | null
+  location_neighborhood: string | null
 }
 
 type DemandPatientDetail = {
@@ -120,12 +133,25 @@ const DEMAND_LIST_SELECT = `
     sex,
     diagnostic_hypothesis,
     attendance_period,
-    clinical_summary
+    clinical_summary,
+    patient_level
+  ),
+  patient_addresses (
+    full_address,
+    neighborhood,
+    latitude,
+    longitude
   )
 `
 
-function mapDemandRow(row: CrudRow & { patients: DemandPatientJoin | null }): DemandListItem {
+function mapDemandRow(
+  row: CrudRow & {
+    patients: DemandPatientJoin | null
+    patient_addresses: DemandAddressJoin | null
+  },
+): DemandListItem {
   const patient = row.patients
+  const address = row.patient_addresses
 
   return {
     ...row,
@@ -133,11 +159,16 @@ function mapDemandRow(row: CrudRow & { patients: DemandPatientJoin | null }): De
     patient_abbreviation: formatPatientAbbreviation(patient?.full_name),
     patient_sex: formatPatientSex(patient?.sex),
     patient_age: formatPatientAge(patient?.birth_date),
+    patient_level: patient?.patient_level ?? null,
     diagnostic_hypothesis: resolveDiagnosticHypothesis(
       patient?.diagnostic_hypothesis,
       patient?.clinical_summary,
     ),
     attendance_period: formatAttendancePeriod(patient?.attendance_period),
+    location_lat: address?.latitude ?? null,
+    location_lng: address?.longitude ?? null,
+    location_address: address?.full_address ?? null,
+    location_neighborhood: address?.neighborhood ?? null,
   }
 }
 
@@ -151,7 +182,9 @@ export const demandsService = {
 
     if (error) throw error
 
-    const rows = (data ?? []) as unknown as Array<CrudRow & { patients: DemandPatientJoin | null }>
+    const rows = (data ?? []) as unknown as Array<
+      CrudRow & { patients: DemandPatientJoin | null; patient_addresses: DemandAddressJoin | null }
+    >
     const mapped = rows.map(mapDemandRow)
 
     return { data: mapped, count: mapped.length }
@@ -171,7 +204,9 @@ export const demandsService = {
 
     if (error) throw error
 
-    const rows = (data ?? []) as unknown as Array<CrudRow & { patients: DemandPatientJoin | null }>
+    const rows = (data ?? []) as unknown as Array<
+      CrudRow & { patients: DemandPatientJoin | null; patient_addresses: DemandAddressJoin | null }
+    >
     const mapped = rows.map(mapDemandRow)
 
     return { data: mapped, count: mapped.length }

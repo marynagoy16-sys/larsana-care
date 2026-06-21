@@ -22,6 +22,8 @@ interface DataTableProps<T extends Record<string, unknown>> {
   emptyMessage?: string
   onRowClick?: (row: T) => void
   getRowKey: (row: T) => string
+  mobileVariant?: 'default' | 'compact'
+  getMobileAvatarLabel?: (row: T) => string
 }
 
 export function DataTable<T extends Record<string, unknown>>({
@@ -31,6 +33,8 @@ export function DataTable<T extends Record<string, unknown>>({
   emptyMessage = 'Nenhum registro encontrado.',
   onRowClick,
   getRowKey,
+  mobileVariant = 'default',
+  getMobileAvatarLabel,
 }: DataTableProps<T>) {
   if (isLoading) {
     return <CrudTableSkeleton columns={columns.length} />
@@ -51,6 +55,8 @@ export function DataTable<T extends Record<string, unknown>>({
         data={data}
         getRowKey={getRowKey}
         onRowClick={onRowClick}
+        variant={mobileVariant}
+        getAvatarLabel={getMobileAvatarLabel}
       />
 
       <div className="hidden md:block rounded-xl border border-border">

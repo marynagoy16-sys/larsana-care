@@ -13,7 +13,7 @@ import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
-import { careSessionsService, medicalRecordsService, transfersService, demandsService, notificationsService } from '@/services/index'
+import { medicalRecordsService, transfersService, notificationsService } from '@/services/index'
 import {
   listPendingEvolutionsForPp,
   pendingEvolutionDeadlineLabel,
@@ -22,35 +22,12 @@ import {
 } from '@/services/ppEvolutions'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { supabase } from '@/lib/supabase'
-import { demandListColumns } from '@/components/demands/demandListColumns'
 
-export function PPAgendaPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage title="Agenda" queryKey={['pp', 'sessions']} queryFn={() => careSessionsService.list('id, scheduled_at, status, session_number')}
-      onRowClick={(r) => navigate(`/profissional/agenda/${r.id}`)}
-      columns={[
-        { key: 'num', header: 'Sessão', cell: (r) => `#${r.session_number}` },
-        { key: 'date', header: 'Data', cell: (r) => formatDateTime(String(r.scheduled_at)) },
-        { key: 'status', header: 'Status', cell: (r) => String(r.status) },
-      ]}
-    />
-  )
-}
+export { PPAgendaPage } from '@/pages/profissional/agenda/PPAgendaPage'
+export { PPHomePage } from '@/pages/profissional/home/PPHomePage'
+export { PPSessionDetailPage } from '@/pages/profissional/agenda/PPSessionDetailPage'
 
-export function PPSessionDetailPage() {
-  return <GenericDetailPage title="Sessão" backPath="/profissional/agenda" queryKey={['pp', 'sessions']} queryFn={(id) => careSessionsService.getById(id)}
-    fields={[{ key: 'session_number', label: 'Número' }, { key: 'status', label: 'Status' }, { key: 'scheduled_at', label: 'Agendado', format: 'datetime' }]} />
-}
-
-export function PPDemandsPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage title="Demandas" queryKey={['pp', 'demands']} queryFn={() => demandsService.listOpenForPp()}
-      onRowClick={(r) => navigate(`/profissional/demandas/${r.id}`)}
-      columns={demandListColumns} />
-  )
-}
+export { PPDemandsPage } from '@/pages/profissional/demands/PPDemandsPage'
 
 export function PPEvolucoesPage() {
   const navigate = useNavigate()
