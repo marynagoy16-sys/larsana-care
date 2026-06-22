@@ -1,4 +1,4 @@
-export interface MedicalRecordListRow {
+export interface MedicalRecordListRow extends Record<string, unknown> {
   id: string
   record_type: string
   created_at: string

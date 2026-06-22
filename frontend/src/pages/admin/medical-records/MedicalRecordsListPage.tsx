@@ -81,12 +81,13 @@ export function MedicalRecordsListPage() {
         title="Prontuários"
         description="Painel de conformidade CREFITO"
         queryKey={['medical_records']}
-        queryFn={() =>
-          medicalRecordsService.list(MEDICAL_RECORDS_SELECT, {
+        queryFn={async () => {
+          const result = await medicalRecordsService.list(MEDICAL_RECORDS_SELECT, {
             column: 'recorded_at',
             ascending: false,
-          }) as Promise<{ data: MedicalRecordListRow[]; count: number }>
-        }
+          })
+          return { data: result.data as MedicalRecordListRow[], count: result.count }
+        }}
         onRowClick={(r) => navigate(`/admin/prontuarios/${r.id}`)}
         columns={columns}
         buildStats={buildStats}

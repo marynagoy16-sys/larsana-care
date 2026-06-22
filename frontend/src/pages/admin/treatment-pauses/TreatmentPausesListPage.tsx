@@ -118,12 +118,13 @@ export function TreatmentPausesListPage() {
         title="Pausas de tratamento"
         description="Suspensões temporárias sem apagar histórico"
         queryKey={['treatment_pauses']}
-        queryFn={() =>
-          treatmentPausesService.list(PAUSES_SELECT, {
+        queryFn={async () => {
+          const result = await treatmentPausesService.list(PAUSES_SELECT, {
             column: 'paused_at',
             ascending: false,
-          }) as Promise<{ data: TreatmentPauseListRow[]; count: number }>
-        }
+          })
+          return { data: result.data as TreatmentPauseListRow[], count: result.count }
+        }}
         onRowClick={(r) => navigate(`/admin/pausas/${r.id}`)}
         columns={columns}
         buildStats={buildStats}

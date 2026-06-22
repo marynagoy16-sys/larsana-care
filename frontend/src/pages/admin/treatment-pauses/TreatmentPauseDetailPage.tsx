@@ -11,6 +11,7 @@ import {
   formatPauseDuration,
   getTreatmentPauseStatusLabel,
   isTreatmentPauseActive,
+  type TreatmentPauseListRow,
 } from '@/lib/treatmentPausesDisplay'
 import { formatDateTime } from '@/lib/formatters'
 import { careStatusLabels } from '@/constants/labels'
@@ -30,7 +31,10 @@ export function TreatmentPauseDetailPage() {
 
   const { data: pause, isLoading } = useQuery({
     queryKey: ['treatment_pauses', id],
-    queryFn: () => treatmentPausesService.getById(id!, PAUSE_DETAIL_SELECT),
+    queryFn: async () => {
+      const row = await treatmentPausesService.getById(id!, PAUSE_DETAIL_SELECT)
+      return row as unknown as TreatmentPauseListRow | null
+    },
     enabled: !!id,
   })
 
@@ -155,7 +159,7 @@ export function TreatmentPauseDetailPage() {
                 Motivo da pausa
               </div>
               <p className="text-sm whitespace-pre-wrap">
-                {pause.reason?.trim() || 'Motivo não informado.'}
+                {String(pause.reason ?? '').trim() || 'Motivo não informado.'}
               </p>
             </div>
           </CascadeItem>

@@ -10,7 +10,6 @@ import { CrudModal } from '@/components/crud/CrudModal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PatientSearchField } from '@/components/forms/PatientSearchField'
 import { ProfessionalSearchField } from '@/components/forms/ProfessionalSearchField'
 import { CycleSearchField } from '@/components/forms/CycleSearchField'
@@ -24,7 +23,7 @@ import {
   formatFamilyResponse,
 } from '@/lib/assessmentListDisplay'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters'
-import { assessmentStatusLabels, cycleStatusLabels, medicalRecordTypeLabels, paymentStatusLabels } from '@/constants/labels'
+import { assessmentStatusLabels, medicalRecordTypeLabels, paymentStatusLabels } from '@/constants/labels'
 import {
   initialAssessmentsService,
   careCyclesService,

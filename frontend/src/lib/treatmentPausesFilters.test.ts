@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { matchesTreatmentPausesFilters, type TreatmentPausesListFilters } from '@/lib/treatmentPausesFilters'
+import { matchesTreatmentPausesFilters } from '@/lib/treatmentPausesFilters'
 import type { TreatmentPauseListRow } from '@/lib/treatmentPausesDisplay'
 
 const baseRow: TreatmentPauseListRow = {

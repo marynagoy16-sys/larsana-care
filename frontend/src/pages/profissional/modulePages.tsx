@@ -129,7 +129,7 @@ export function PPEvolucaoNovaPage() {
       return medicalRecordsService.create({
         patient_id: v.patient_id,
         content_richtext: sanitizeRichText(v.content_richtext),
-        crefito_number: v.crefito_number,
+        crefito_number: v.crefto_number,
         record_type: 'evolucao' as const,
         professional_id: professional.id,
         session_id: sessionContext?.sessionId ?? null,

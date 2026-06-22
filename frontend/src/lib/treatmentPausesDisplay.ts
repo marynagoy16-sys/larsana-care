@@ -1,4 +1,4 @@
-export interface TreatmentPauseListRow {
+export interface TreatmentPauseListRow extends Record<string, unknown> {
   id: string
   patient_id: string
   paused_at: string
