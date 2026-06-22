@@ -17,34 +17,48 @@ export function CredentialingStepper({
 }: Props) {
   if (variant === 'sidebar') {
     return (
-      <nav aria-label="Etapas do credenciamento" className="space-y-1">
+      <nav aria-label="Etapas do credenciamento" className="flex flex-col">
         {CREDENTIALING_STEPS.map((step, index) => {
           const isActive = step.id === currentStep
           const isDone = completion[step.id]
+          const isLast = index === CREDENTIALING_STEPS.length - 1
+
           return (
-            <button
-              key={step.id}
-              type="button"
-              onClick={() => onStepClick?.(step.id)}
-              className={cn(
-                'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                isActive && 'bg-primary text-primary-foreground shadow-sm',
-                !isActive && isDone && 'bg-primary/10 text-primary hover:bg-primary/15',
-                !isActive && !isDone && 'text-muted-foreground hover:bg-muted',
-              )}
-            >
-              <span
+            <div key={step.id} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                <span
+                  className={cn(
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                    isActive && 'bg-primary text-primary-foreground shadow-sm',
+                    !isActive && isDone && 'bg-primary/20 text-primary',
+                    !isActive && !isDone && 'bg-muted text-muted-foreground',
+                  )}
+                >
+                  {isDone ? <Check className="h-3.5 w-3.5" aria-hidden /> : index + 1}
+                </span>
+                {!isLast && (
+                  <div
+                    className={cn(
+                      'my-1 w-0.5 flex-1 min-h-3 rounded-full',
+                      isDone ? 'bg-primary/50' : 'bg-border',
+                    )}
+                    aria-hidden
+                  />
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => onStepClick?.(step.id)}
                 className={cn(
-                  'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
-                  isActive && 'bg-primary-foreground/20 text-primary-foreground',
-                  !isActive && isDone && 'bg-primary/20 text-primary',
-                  !isActive && !isDone && 'bg-muted text-muted-foreground',
+                  'mb-3 flex flex-1 items-center rounded-lg px-2 py-1.5 text-left text-sm transition-colors',
+                  isActive && 'bg-primary/10 font-medium text-primary',
+                  !isActive && isDone && 'text-primary hover:bg-primary/5',
+                  !isActive && !isDone && 'text-muted-foreground hover:bg-muted',
                 )}
               >
-                {isDone && !isActive ? <Check className="h-3.5 w-3.5" /> : index + 1}
-              </span>
-              <span className="font-medium">{step.label}</span>
-            </button>
+                {step.label}
+              </button>
+            </div>
           )
         })}
       </nav>
@@ -52,28 +66,46 @@ export function CredentialingStepper({
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {CREDENTIALING_STEPS.map((step) => {
+    <nav aria-label="Etapas do credenciamento" className="flex items-center overflow-x-auto pb-0.5">
+      {CREDENTIALING_STEPS.map((step, index) => {
         const isActive = step.id === currentStep
         const isDone = completion[step.id]
+        const isLast = index === CREDENTIALING_STEPS.length - 1
+
         return (
-          <button
-            key={step.id}
-            type="button"
-            onClick={() => onStepClick?.(step.id)}
-            className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-              isActive && 'bg-primary text-primary-foreground',
-              !isActive && isDone && 'bg-primary/15 text-primary',
-              !isActive && !isDone && 'bg-muted text-muted-foreground',
-              onStepClick ? 'cursor-pointer hover:opacity-90' : 'cursor-default',
+          <div key={step.id} className="flex shrink-0 items-center">
+            <button
+              type="button"
+              onClick={() => onStepClick?.(step.id)}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                isActive && 'bg-primary text-primary-foreground shadow-sm',
+                !isActive && isDone && 'bg-primary/15 text-primary',
+                !isActive && !isDone && 'bg-muted text-muted-foreground',
+                onStepClick ? 'cursor-pointer hover:opacity-90' : 'cursor-default',
+              )}
+            >
+              {isDone && (
+                <Check
+                  className={cn('h-3 w-3 shrink-0', isActive ? 'text-primary-foreground' : 'text-primary')}
+                  aria-hidden
+                />
+              )}
+              {step.label}
+            </button>
+            {!isLast && (
+              <div
+                className={cn(
+                  'mx-1.5 h-0.5 w-4 shrink-0 rounded-full sm:w-6',
+                  isDone ? 'bg-primary/50' : 'bg-border',
+                )}
+                aria-hidden
+              />
             )}
-          >
-            {step.label}
-          </button>
+          </div>
         )
       })}
-    </div>
+    </nav>
   )
 }
 

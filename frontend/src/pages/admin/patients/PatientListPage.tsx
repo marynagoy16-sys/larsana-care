@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Users, Activity, FileWarning, UserX } from 'lucide-react'
 import { toast } from 'sonner'
 import { StatsCardRow } from '@/components/crud/list-page/StatsCardRow'
@@ -58,7 +58,6 @@ function StatusCell({ status }: { status: string }) {
 
 export function PatientListPage() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState(0)
@@ -67,7 +66,6 @@ export function PatientListPage() {
   const [sortBy, setSortBy] = useState<'full_name' | 'created_at'>('created_at')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [createOpen, setCreateOpen] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [previewId, setPreviewId] = useState<string | null>(null)
@@ -79,12 +77,6 @@ export function PatientListPage() {
     }, 300)
     return () => clearTimeout(t)
   }, [search])
-
-  useEffect(() => {
-    if (location.pathname.endsWith('/novo')) {
-      setCreateOpen(true)
-    }
-  }, [location.pathname])
 
   const queryFilters = useMemo(() => ({
     search: debouncedSearch || undefined,
@@ -224,8 +216,6 @@ export function PatientListPage() {
                 onExport={handleExport}
                 onRefresh={() => refetch()}
                 onSettings={() => toast.info('Configurações em breve')}
-                onAdd={() => setCreateOpen(true)}
-                addLabel="Adicionar"
                 isRefreshing={isFetching}
               />
             </CascadeItem>
@@ -334,24 +324,6 @@ export function PatientListPage() {
         onOpenChange={setFilterOpen}
         filters={filters}
         onApply={(f) => { setFilters(f); setPage(0) }}
-      />
-
-      <PatientPreviewDrawer
-        mode="create"
-        open={createOpen}
-        onOpenChange={(open) => {
-          setCreateOpen(open)
-          if (!open && location.pathname.endsWith('/novo')) {
-            navigate('/admin/pacientes', { replace: true })
-          }
-        }}
-        onCreated={(id) => {
-          setCreateOpen(false)
-          if (location.pathname.endsWith('/novo')) {
-            navigate('/admin/pacientes', { replace: true })
-          }
-          setPreviewId(id)
-        }}
       />
 
       <PatientPreviewDrawer

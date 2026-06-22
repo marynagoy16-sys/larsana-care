@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase'
+import { sanitizeStorageFileName } from '@/lib/sanitize'
+import { mapSupabaseError } from '@/lib/supabase-errors'
 import {
   PP_LEGAL_TERM_TYPES,
   type CredentialingSnapshot,
@@ -11,7 +13,7 @@ import type {
 } from '@/schemas/credentialing'
 import type { Tables, TablesInsert } from '@/types/database'
 
-const PROFESSIONAL_DOCS_BUCKET = 'professional-documents'
+export const PROFESSIONAL_DOCS_BUCKET = 'professional-documents'
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
 
@@ -68,7 +70,7 @@ export async function loadCredentialingSnapshot(): Promise<CredentialingSnapshot
       .maybeSingle(),
     supabase
       .from('professional_documents')
-      .select('id, document_type, file_name')
+      .select('id, document_type, file_name, storage_path, source_url')
       .eq('professional_id', professional.id),
     supabase
       .from('digital_acceptances')
@@ -169,11 +171,12 @@ export async function uploadProfessionalDocument(
   }
 
   const professionalId = await requireProfessionalId()
-  const storagePath = `${professionalId}/${documentType}-${Date.now()}-${file.name}`
+  const safeFileName = sanitizeStorageFileName(file.name)
+  const storagePath = `${professionalId}/${documentType}-${Date.now()}-${safeFileName}`
 
   const { error: uploadError } = await supabase.storage
     .from(PROFESSIONAL_DOCS_BUCKET)
-    .upload(storagePath, file, { upsert: true })
+    .upload(storagePath, file, { upsert: true, contentType: file.type })
 
   if (uploadError) throw uploadError
 
@@ -245,7 +248,7 @@ export async function loadPpLegalTermsForContrato() {
 
 export async function acceptContratoAndSubmit() {
   const { data, error } = await supabase.rpc('submit_pp_credentialing' as never)
-  if (error) throw error
+  if (error) throw new Error(mapSupabaseError(error))
 
   const result = data as { contract_number?: string } | null
   return { contractNumber: result?.contract_number ?? null }

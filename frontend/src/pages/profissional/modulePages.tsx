@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,11 +16,14 @@ import { sanitizeRichText } from '@/lib/sanitize'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
 import { medicalRecordsService, transfersService, notificationsService } from '@/services/index'
 import {
+  getEvolutionSessionContext,
   listPendingEvolutionsForPp,
   pendingEvolutionDeadlineLabel,
   ppEvolutionsQueryKeys,
   type PendingEvolutionRow,
 } from '@/services/ppEvolutions'
+import { getCurrentProfessional } from '@/services/professionals'
+import { getPPProfessionalCrefito } from '@/services/ppPatients'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 import { supabase } from '@/lib/supabase'
 
@@ -75,8 +79,12 @@ export function PPEvolucoesPage() {
   )
 }
 
+const PP_EVOLUTION_FORM_ID = 'pp-evolution-form'
+
 export function PPEvolucaoNovaPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const sessionId = searchParams.get('session') ?? undefined
   const [open] = useState(true)
   const schema = z.object({
     patient_id: z.string().uuid('Selecione um paciente'),
@@ -84,36 +92,107 @@ export function PPEvolucaoNovaPage() {
     crefto_number: requiredString('CREFITO'),
   })
   const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { patient_id: '', content_richtext: '', crefto_number: '' } })
+
+  const { data: sessionContext } = useQuery({
+    queryKey: [...ppEvolutionsQueryKeys.pending, 'session', sessionId],
+    queryFn: () => getEvolutionSessionContext(sessionId!),
+    enabled: !!sessionId,
+  })
+
+  const { data: professional } = useQuery({
+    queryKey: ['pp', 'current_professional'],
+    queryFn: getCurrentProfessional,
+  })
+
+  const { data: defaultCrefito } = useQuery({
+    queryKey: ['pp', 'crefito'],
+    queryFn: getPPProfessionalCrefito,
+  })
+
+  useEffect(() => {
+    if (sessionContext) {
+      form.reset({
+        patient_id: sessionContext.patientId,
+        content_richtext: '',
+        crefto_number: defaultCrefito ?? '',
+      })
+      return
+    }
+    if (defaultCrefito && !form.getValues('crefto_number')) {
+      form.setValue('crefto_number', defaultCrefito)
+    }
+  }, [sessionContext, defaultCrefito, form])
+
   const create = useCrudMutation({
-    mutationFn: (v: z.infer<typeof schema>) => medicalRecordsService.create({
-      ...v,
-      content_richtext: sanitizeRichText(v.content_richtext),
-      record_type: 'evolucao' as const,
-      professional_id: '',
-    }),
-    queryKey: ['pp', 'records'],
+    mutationFn: async (v: z.infer<typeof schema>) => {
+      if (!professional?.id) throw new Error('Profissional não encontrado')
+      return medicalRecordsService.create({
+        patient_id: v.patient_id,
+        content_richtext: sanitizeRichText(v.content_richtext),
+        crefito_number: v.crefito_number,
+        record_type: 'evolucao' as const,
+        professional_id: professional.id,
+        session_id: sessionContext?.sessionId ?? null,
+        cycle_id: sessionContext?.cycleId ?? null,
+      })
+    },
+    queryKey: ['pp'],
     onSuccess: () => navigate('/profissional/evolucoes'),
   })
+
   return (
-    <CrudDrawer open={open} onOpenChange={(o) => !o && navigate('/profissional/evolucoes')} title="Nova evolução" size="lg">
-      <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-        <FormField control={form.control} name="patient_id" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Paciente</FormLabel>
-            <FormControl>
-              <PatientSearchField value={field.value} onChange={field.onChange} showCreate={false} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
-        <FormField control={form.control} name="content_richtext" render={({ field }) => (
-          <FormItem><FormLabel>Evolução clínica</FormLabel><FormControl><Textarea rows={8} {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="crefto_number" render={({ field }) => (
-          <FormItem><FormLabel>CREFITO</FormLabel><FormControl><Textarea rows={1} {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormActions onCancel={() => navigate('/profissional/evolucoes')} isSubmitting={create.isPending} />
-      </form></Form>
+    <CrudDrawer
+      open={open}
+      onOpenChange={(o) => !o && navigate('/profissional/evolucoes')}
+      title="Nova evolução"
+      size="lg"
+      footer={
+        <FormActions
+          form={PP_EVOLUTION_FORM_ID}
+          onCancel={() => navigate('/profissional/evolucoes')}
+          isSubmitting={create.isPending}
+        />
+      }
+    >
+      <Form {...form}>
+        <form
+          id={PP_EVOLUTION_FORM_ID}
+          onSubmit={form.handleSubmit((v) => create.mutate(v))}
+          className="space-y-4"
+        >
+          <FormField control={form.control} name="patient_id" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Paciente</FormLabel>
+              {sessionContext ? (
+                <>
+                  <input type="hidden" {...field} />
+                  <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+                    <p className="font-medium">{sessionContext.patientName}</p>
+                    <p className="text-muted-foreground mt-0.5">
+                      Ciclo {sessionContext.cycleNumber} · Sessão #{sessionContext.sessionNumber}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <FormControl>
+                  <PatientSearchField
+                    value={field.value}
+                    onChange={field.onChange}
+                    showCreate={false}
+                  />
+                </FormControl>
+              )}
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="content_richtext" render={({ field }) => (
+            <FormItem><FormLabel>Evolução clínica</FormLabel><FormControl><Textarea rows={8} {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="crefto_number" render={({ field }) => (
+            <FormItem><FormLabel>CREFITO</FormLabel><FormControl><Textarea rows={1} {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+        </form>
+      </Form>
     </CrudDrawer>
   )
 }

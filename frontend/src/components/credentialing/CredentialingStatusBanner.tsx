@@ -10,9 +10,10 @@ import { cn } from '@/lib/utils'
 type Props = {
   snapshot: CredentialingSnapshot
   compact?: boolean
+  className?: string
 }
 
-export function CredentialingStatusBanner({ snapshot, compact }: Props) {
+export function CredentialingStatusBanner({ snapshot, compact, className }: Props) {
   const status = snapshot.professional.credentialing_status
 
   if (isCredentialingActive(status)) {
@@ -20,10 +21,11 @@ export function CredentialingStatusBanner({ snapshot, compact }: Props) {
       <div
         className={cn(
           'flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5',
-          compact ? 'p-3' : 'p-4',
+          compact ? 'gap-2 px-2.5 py-2' : 'p-4',
+          className,
         )}
       >
-        <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+        <ShieldCheck className={cn('shrink-0 text-primary', compact ? 'h-4 w-4' : 'h-5 w-5')} />
         <div className="min-w-0">
           <p className="text-sm font-medium">Parceiro ativo</p>
           <p className="truncate text-xs text-muted-foreground">
@@ -42,7 +44,8 @@ export function CredentialingStatusBanner({ snapshot, compact }: Props) {
       <div
         className={cn(
           'flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50',
-          compact ? 'p-3' : 'p-4',
+          compact ? 'gap-2 px-2.5 py-2' : 'p-4',
+          className,
         )}
       >
         <Clock className="h-5 w-5 shrink-0 text-amber-700" />

@@ -33,6 +33,10 @@ export type DemandListItem = CrudRow & {
   patient_level: string | null
   diagnostic_hypothesis: string
   attendance_period: string
+  attendance_period_raw: string | null
+  region_id: string | null
+  assigned_professional_id: string | null
+  assigned_professional_name: string | null
   location_lat: number | null
   location_lng: number | null
   location_address: string | null
@@ -141,17 +145,20 @@ const DEMAND_LIST_SELECT = `
     neighborhood,
     latitude,
     longitude
-  )
+  ),
+  professionals ( full_name )
 `
 
 function mapDemandRow(
   row: CrudRow & {
     patients: DemandPatientJoin | null
     patient_addresses: DemandAddressJoin | null
+    professionals: { full_name: string } | null
   },
 ): DemandListItem {
   const patient = row.patients
   const address = row.patient_addresses
+  const professional = row.professionals
 
   return {
     ...row,
@@ -165,6 +172,10 @@ function mapDemandRow(
       patient?.clinical_summary,
     ),
     attendance_period: formatAttendancePeriod(patient?.attendance_period),
+    attendance_period_raw: patient?.attendance_period ?? null,
+    region_id: (row.region_id as string | null) ?? null,
+    assigned_professional_id: (row.assigned_professional_id as string | null) ?? null,
+    assigned_professional_name: professional?.full_name ?? null,
     location_lat: address?.latitude ?? null,
     location_lng: address?.longitude ?? null,
     location_address: address?.full_address ?? null,
@@ -183,7 +194,11 @@ export const demandsService = {
     if (error) throw error
 
     const rows = (data ?? []) as unknown as Array<
-      CrudRow & { patients: DemandPatientJoin | null; patient_addresses: DemandAddressJoin | null }
+      CrudRow & {
+        patients: DemandPatientJoin | null
+        patient_addresses: DemandAddressJoin | null
+        professionals: { full_name: string } | null
+      }
     >
     const mapped = rows.map(mapDemandRow)
 
@@ -205,7 +220,11 @@ export const demandsService = {
     if (error) throw error
 
     const rows = (data ?? []) as unknown as Array<
-      CrudRow & { patients: DemandPatientJoin | null; patient_addresses: DemandAddressJoin | null }
+      CrudRow & {
+        patients: DemandPatientJoin | null
+        patient_addresses: DemandAddressJoin | null
+        professionals: { full_name: string } | null
+      }
     >
     const mapped = rows.map(mapDemandRow)
 

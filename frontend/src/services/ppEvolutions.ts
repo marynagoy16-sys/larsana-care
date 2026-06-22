@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { getCurrentProfessional } from '@/services/professionals'
 
 export type PendingEvolutionRow = {
   id: string
@@ -16,6 +17,51 @@ export type PendingEvolutionRow = {
 
 export const ppEvolutionsQueryKeys = {
   pending: ['pp', 'evolucoes', 'pendentes'] as const,
+}
+
+export type EvolutionSessionContext = {
+  sessionId: string
+  sessionNumber: number
+  cycleId: string
+  cycleNumber: number
+  patientId: string
+  patientName: string
+}
+
+export async function getEvolutionSessionContext(sessionId: string): Promise<EvolutionSessionContext | null> {
+  const professional = await getCurrentProfessional()
+  if (!professional) return null
+
+  const { data, error } = await supabase
+    .from('care_sessions')
+    .select(`
+      id,
+      session_number,
+      cycle_id,
+      care_cycles!inner (
+        cycle_number,
+        patient_id,
+        patients ( full_name )
+      )
+    `)
+    .eq('id', sessionId)
+    .eq('professional_id', professional.id)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) return null
+
+  const cycle = data.care_cycles as PendingEvolutionRow['care_cycles']
+  if (!cycle?.patient_id) return null
+
+  return {
+    sessionId: data.id,
+    sessionNumber: data.session_number,
+    cycleId: data.cycle_id,
+    cycleNumber: cycle.cycle_number,
+    patientId: cycle.patient_id,
+    patientName: cycle.patients?.full_name ?? 'Paciente',
+  }
 }
 
 export async function listPendingEvolutionsForPp() {

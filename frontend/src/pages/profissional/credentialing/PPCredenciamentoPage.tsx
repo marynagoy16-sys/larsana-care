@@ -148,7 +148,11 @@ export function PPCredenciamentoPage() {
   }
 
   const handleContratoSubmit = async (_values: ContratoAcceptValues) => {
-    await submitMutation.mutateAsync()
+    try {
+      await submitMutation.mutateAsync()
+    } catch {
+      // Erro exibido via onError da mutation
+    }
   }
 
   const renderStepContent = () => {
@@ -243,9 +247,9 @@ export function PPCredenciamentoPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col pb-[var(--shell-gap)] pr-[var(--shell-gap)] lg:flex-row">
+    <div className="flex h-full min-h-0 w-full flex-col gap-4 pb-[var(--shell-gap)] pr-[var(--shell-gap)] lg:flex-row">
       {/* Sidebar */}
-      <aside className="flex shrink-0 flex-col gap-4 border-b bg-muted/10 p-4 lg:w-72 lg:border-b-0 lg:border-r lg:p-5">
+      <aside className="flex shrink-0 flex-col gap-4 border-b bg-muted/10 p-4 lg:w-72 lg:border-b-0 lg:p-5">
         <CredentialingStatusBanner snapshot={snapshot} compact />
 
         <div className="lg:hidden">
@@ -271,7 +275,7 @@ export function PPCredenciamentoPage() {
       </aside>
 
       {/* Painel direito — header/footer fixos, corpo scrollável */}
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-card">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <header className="shrink-0 border-b bg-muted/20 px-5 py-4 lg:px-8">
           <CredentialingStepHint step={step} readOnly={readOnly} asTitle />
         </header>

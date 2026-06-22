@@ -7,7 +7,13 @@ type CycleRow = {
   status: string
   payment_status: string
   created_at: string
+  started_at: string | null
+  patient_id: string
+  assigned_professional_id: string
+  region_id: string | null
+  patient_level: string
   patients: { full_name: string } | null
+  professionals: { full_name: string } | null
   care_sessions: Array<{ status: string }> | null
 }
 
@@ -18,7 +24,13 @@ export type CycleListItem = {
   status: string
   payment_status: string
   created_at: string
+  started_at: string | null
+  patient_id: string
+  assigned_professional_id: string
+  region_id: string | null
+  patient_level: string
   patient_name: string
+  professional_name: string
   completed_sessions: number
 }
 
@@ -29,7 +41,13 @@ const CYCLE_LIST_SELECT = `
   status,
   payment_status,
   created_at,
+  started_at,
+  patient_id,
+  assigned_professional_id,
+  region_id,
+  patient_level,
   patients ( full_name ),
+  professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name ),
   care_sessions ( status )
 `
 
@@ -44,7 +62,13 @@ function mapCycleRow(row: CycleRow): CycleListItem {
     status: row.status,
     payment_status: row.payment_status,
     created_at: row.created_at,
+    started_at: row.started_at,
+    patient_id: row.patient_id,
+    assigned_professional_id: row.assigned_professional_id,
+    region_id: row.region_id,
+    patient_level: row.patient_level,
     patient_name: row.patients?.full_name ?? '—',
+    professional_name: row.professionals?.full_name ?? '—',
     completed_sessions,
   }
 }

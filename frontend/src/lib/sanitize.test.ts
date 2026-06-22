@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it } from 'vitest'
-import { digitsOnly, sanitizeCpf, sanitizeEmail, sanitizeRichText, trimText } from '@/lib/sanitize'
+import { digitsOnly, sanitizeCpf, sanitizeEmail, sanitizeRichText, sanitizeStorageFileName, trimText } from '@/lib/sanitize'
 
 describe('sanitize', () => {
   it('remove espaços duplos', () => {
@@ -23,5 +23,11 @@ describe('sanitize', () => {
     const html = '<p>ok</p><script>alert(1)</script>'
     expect(sanitizeRichText(html)).not.toContain('script')
     expect(sanitizeRichText(html)).toContain('ok')
+  })
+
+  it('sanitiza nome de arquivo para storage', () => {
+    expect(
+      sanitizeStorageFileName('E-mail de Sagitta Digital - Entrega do Projeto - Clínica Guedes.pdf'),
+    ).toBe('E-mail-de-Sagitta-Digital-Entrega-do-Projeto-Clinica-Guedes.pdf')
   })
 })

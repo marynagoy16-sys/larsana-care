@@ -132,3 +132,9 @@ export const attendancePeriodLabels: Record<string, string> = {
   TARDE: 'Tarde',
   NOITE: 'Noite',
 }
+
+export const medicalRecordTypeLabels: Record<string, string> = {
+  avaliacao: 'Avaliação',
+  evolucao: 'Evolução',
+  alta: 'Alta',
+}

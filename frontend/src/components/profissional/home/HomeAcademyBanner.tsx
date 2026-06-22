@@ -8,6 +8,7 @@ interface HomeAcademyBannerProps {
   completedLessons: number
   totalLessons: number
   onClick: () => void
+  className?: string
 }
 
 export function HomeAcademyBanner({
@@ -15,6 +16,7 @@ export function HomeAcademyBanner({
   completedLessons,
   totalLessons,
   onClick,
+  className,
 }: HomeAcademyBannerProps) {
   const Icon = slide.icon
   const hasProgress = totalLessons > 0
@@ -25,11 +27,11 @@ export function HomeAcademyBanner({
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-2xl"
+      className={cn('w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-2xl', className)}
     >
       <div
         className={cn(
-          'relative flex min-h-[132px] flex-col justify-center overflow-hidden rounded-2xl px-5 py-5 lg:min-h-[168px] lg:px-8 lg:py-7',
+          'relative flex h-full min-h-[132px] flex-col justify-center overflow-hidden rounded-2xl px-5 py-5 lg:min-h-[168px] lg:px-8 lg:py-7',
           slide.className ?? 'bg-primary text-primary-foreground',
         )}
       >

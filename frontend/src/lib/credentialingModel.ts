@@ -60,7 +60,10 @@ export type CredentialingSnapshot = {
     | 'holder_name'
     | 'holder_document'
   > | null
-  documents: Pick<Tables<'professional_documents'>, 'id' | 'document_type' | 'file_name'>[]
+  documents: Pick<
+    Tables<'professional_documents'>,
+    'id' | 'document_type' | 'file_name' | 'storage_path' | 'source_url'
+  >[]
   acceptedTermTypes: string[]
   contract: Pick<Tables<'contracts'>, 'id' | 'contract_number' | 'status' | 'signed_at'> | null
 }

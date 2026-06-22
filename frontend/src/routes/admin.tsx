@@ -1,6 +1,6 @@
 import { lazy } from 'react'
 import type { ReactNode } from 'react'
-import type { RouteObject } from 'react-router-dom'
+import { Navigate, useParams, type RouteObject } from 'react-router-dom'
 import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
 import { AppShell } from '@/components/layout/AppShell'
@@ -22,7 +22,6 @@ function staffRoute(children: ReactNode, allowed: UserRole[] = staffRoles) {
 const PatientListPage = lazy(() => import('@/pages/admin/patients/PatientListPage').then((m) => ({ default: m.PatientListPage })))
 const PatientDetailPage = lazy(() => import('@/pages/admin/patients/PatientDetailPage').then((m) => ({ default: m.PatientDetailPage })))
 const PatientEditPage = lazy(() => import('@/pages/admin/patients/PatientEditPage').then((m) => ({ default: m.PatientEditPage })))
-const ProfessionalsPage = lazy(() => import('@/pages/admin/ProfessionalsPage').then((m) => ({ default: m.ProfessionalsPage })))
 function lazyAdmin(exportName: keyof typeof import('@/pages/admin/modulePages')) {
   return lazy(() => import('@/pages/admin/modulePages').then((m) => ({ default: m[exportName] })))
 }
@@ -35,9 +34,15 @@ const CycleDetailPage = lazy(() => import('@/pages/admin/cycles/CycleDetailPage'
 const DemandDetailPage = lazy(() => import('@/pages/admin/demands/DemandDetailPage').then((m) => ({ default: m.DemandDetailPage })))
 const MedicalRecordsPage = lazyAdmin('MedicalRecordsPage')
 const MedicalRecordPatientPage = lazyAdmin('MedicalRecordPatientPage')
-const CredenciamentoPage = lazyAdmin('CredenciamentoPage')
-const CredenciamentoDetailPage = lazyAdmin('CredenciamentoDetailPage')
-const DemandsPage = lazyAdmin('DemandsPage')
+const CredenciamentoPage = lazy(() =>
+  import('@/pages/admin/credentialing/CredenciamentoListPage').then((m) => ({ default: m.CredenciamentoListPage })),
+)
+const CredenciamentoDetailPage = lazy(() =>
+  import('@/pages/admin/credentialing/CredenciamentoDetailPage').then((m) => ({ default: m.CredenciamentoDetailPage })),
+)
+const DemandsPage = lazy(() =>
+  import('@/pages/admin/demands/DemandsListPage').then((m) => ({ default: m.DemandsListPage })),
+)
 const ChargesPage = lazyAdmin('ChargesPage')
 const ChargeDetailPage = lazyAdmin('ChargeDetailPage')
 const TransfersPage = lazyAdmin('TransfersPage')
@@ -61,8 +66,8 @@ const UsersConfigPage = lazyAdmin('UsersConfigPage')
 const AuditPage = lazyAdmin('AuditPage')
 const SupportPage = lazyAdmin('SupportPage')
 const SettingsPage = lazyAdmin('SettingsPage')
-const ProfessionalDetailPage = lazyAdmin('ProfessionalDetailPage')
 const TreatmentPausesPage = lazyAdmin('TreatmentPausesPage')
+const TreatmentPauseDetailPage = lazyAdmin('TreatmentPauseDetailPage')
 const NpsReportPage = lazyAdmin('NpsReportPage')
 const AcademyAdminDashboardPage = lazy(() =>
   import('@/pages/admin/academy/AcademyAdminDashboardPage').then((m) => ({ default: m.AcademyAdminDashboardPage })),
@@ -92,6 +97,11 @@ const LarsanaPillCategoryDetailPage = lazy(() =>
   import('@/pages/admin/academy/LarsanaPillCategoryDetailPage').then((m) => ({ default: m.LarsanaPillCategoryDetailPage })),
 )
 
+function LegacyCredenciamentoRedirect() {
+  const { id } = useParams<{ id?: string }>()
+  return <Navigate to={id ? `/admin/profissionais/${id}` : '/admin/profissionais'} replace />
+}
+
 export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
@@ -99,21 +109,22 @@ export const adminRoutes: RouteObject[] = [
     children: [
       { index: true, element: staffRoute(<DashboardPage />) },
       { path: 'pacientes', element: staffRoute(<PatientListPage />, operacaoRoles) },
-      { path: 'pacientes/novo', element: staffRoute(<PatientListPage />, operacaoRoles) },
+      { path: 'pacientes/novo', element: <Navigate to="/admin/pacientes" replace /> },
       { path: 'pacientes/:id', element: staffRoute(<PatientDetailPage />, operacaoRoles) },
       { path: 'pacientes/:id/editar', element: staffRoute(<PatientEditPage />, operacaoRoles) },
       { path: 'avaliacoes', element: staffRoute(<AssessmentsPage />, operacaoRoles) },
       { path: 'avaliacoes/:id', element: staffRoute(<AssessmentDetailPage />, operacaoRoles) },
       { path: 'ciclos', element: staffRoute(<CyclesPage />, operacaoRoles) },
-      { path: 'ciclos/novo', element: staffRoute(<CyclesPage />, operacaoRoles) },
+      { path: 'ciclos/novo', element: <Navigate to="/admin/ciclos" replace /> },
       { path: 'ciclos/:id', element: staffRoute(<CycleDetailPage />, operacaoRoles) },
       { path: 'pausas', element: staffRoute(<TreatmentPausesPage />, operacaoRoles) },
+      { path: 'pausas/:id', element: staffRoute(<TreatmentPauseDetailPage />, operacaoRoles) },
       { path: 'prontuarios', element: staffRoute(<MedicalRecordsPage />, operacaoRoles) },
-      { path: 'prontuarios/:pacienteId', element: staffRoute(<MedicalRecordPatientPage />, operacaoRoles) },
-      { path: 'profissionais', element: staffRoute(<ProfessionalsPage />, operacaoRoles) },
-      { path: 'profissionais/:id', element: staffRoute(<ProfessionalDetailPage />, operacaoRoles) },
-      { path: 'credenciamento', element: staffRoute(<CredenciamentoPage />, operacaoRoles) },
-      { path: 'credenciamento/:id', element: staffRoute(<CredenciamentoDetailPage />, operacaoRoles) },
+      { path: 'prontuarios/:id', element: staffRoute(<MedicalRecordPatientPage />, operacaoRoles) },
+      { path: 'profissionais', element: staffRoute(<CredenciamentoPage />, operacaoRoles) },
+      { path: 'profissionais/:id', element: staffRoute(<CredenciamentoDetailPage />, operacaoRoles) },
+      { path: 'credenciamento', element: staffRoute(<LegacyCredenciamentoRedirect />, operacaoRoles) },
+      { path: 'credenciamento/:id', element: staffRoute(<LegacyCredenciamentoRedirect />, operacaoRoles) },
       { path: 'demandas', element: staffRoute(<DemandsPage />, operacaoRoles) },
       { path: 'demandas/:id', element: staffRoute(<DemandDetailPage />, operacaoRoles) },
       { path: 'cobrancas', element: staffRoute(<ChargesPage />, financeiroRoles) },

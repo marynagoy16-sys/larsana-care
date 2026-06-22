@@ -5,7 +5,6 @@ import { ChevronRight, MapPin } from 'lucide-react'
 import { HomeAcademyBanner } from '@/components/profissional/home/HomeAcademyBanner'
 import { HomeDayKpiRow } from '@/components/profissional/home/HomeDayKpiRow'
 import { HomePendingEvolutionsList } from '@/components/profissional/home/HomePendingEvolutionsList'
-import { HomeDemandsPreview, HomeDemandsSectionHeader } from '@/components/profissional/home/HomeDemandsPreview'
 import { HomeSessionCard } from '@/components/profissional/home/HomeSessionCard'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { CrudListPageSkeleton, PageHeaderSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
@@ -47,7 +46,7 @@ const MAX_TODAY_SESSIONS_DESKTOP = 5
 function HomeGreeting({ firstName, dateLabel }: { firstName: string; dateLabel: string }) {
   return (
     <div className="min-w-0 space-y-0.5">
-      <h1 className="truncate font-display text-2xl font-bold leading-tight tracking-tight lg:text-[1.75rem]">
+      <h1 className="truncate font-display text-xl font-bold leading-tight tracking-tight lg:text-2xl">
         Olá, {firstName}
       </h1>
       <p className="truncate text-sm text-muted-foreground">{dateLabel}</p>
@@ -99,6 +98,33 @@ function describeNearbyDemands(
     title: 'Nenhuma demanda aberta',
     subtitle: 'Novas oportunidades aparecerão aqui',
   }
+}
+
+function HomeOpportunitiesCard({
+  title,
+  subtitle,
+  onClick,
+}: {
+  title: string
+  subtitle: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <MapPin className="h-4 w-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">{title}</p>
+        <p className="text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+    </button>
+  )
 }
 
 export function PPHomePage() {
@@ -210,7 +236,7 @@ export function PPHomePage() {
       </PageHeader>
 
       <CrudScrollPageLayout>
-        <CascadeReveal className="w-full space-y-5 pb-6 lg:space-y-6 lg:pb-8">
+        <CascadeReveal className="w-full space-y-5 pb-6 lg:max-w-none lg:space-y-6 lg:pb-8">
           <CascadeItem className="hidden lg:block">
             <HomeDayKpiRow
               summary={daySummary}
@@ -220,14 +246,9 @@ export function PPHomePage() {
             />
           </CascadeItem>
 
-          <div
-            className={cn(
-              'flex flex-col gap-5',
-              pendingEvolutionsCount > 0 && 'lg:grid lg:grid-cols-[1fr_24rem] xl:grid-cols-[1fr_26rem] lg:items-start lg:gap-6',
-            )}
-          >
-            <div className="flex min-w-0 flex-1 flex-col gap-5">
-              <CascadeItem className="space-y-3">
+          <CascadeItem className="space-y-3">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
+              <div className="min-w-0 space-y-3">
                 <HomeSectionTitle
                   title="Seu dia"
                   action={
@@ -246,12 +267,7 @@ export function PPHomePage() {
                   </div>
                 ) : (
                   <>
-                    <div
-                      className={cn(
-                        'grid gap-2 sm:gap-3',
-                        previewSessions.length > 1 && 'sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
-                      )}
-                    >
+                    <div className="flex flex-col gap-2 sm:gap-3">
                       {previewSessions.map((session, index) => (
                         <HomeSessionCard
                           key={session.id}
@@ -272,49 +288,53 @@ export function PPHomePage() {
                     )}
                   </>
                 )}
-              </CascadeItem>
+              </div>
 
-              <CascadeItem className="space-y-3 lg:hidden">
-                <HomeDemandsSectionHeader />
-                <HomeDemandsPreview
-                  demands={demands}
-                  origin={origin}
-                  onSelectDemand={(id) => navigate(`/profissional/demandas/${id}`)}
-                />
-              </CascadeItem>
+              <div className="hidden min-w-0 flex-col gap-6 lg:flex">
+                {pendingEvolutionsCount > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Evoluções pendentes
+                      </h3>
+                      <Button variant="ghost" size="sm" className="h-auto shrink-0 px-0 text-primary" asChild>
+                        <Link to="/profissional/evolucoes">
+                          Ver todas
+                          <ChevronRight className="ml-0.5 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                    <HomePendingEvolutionsList items={pendingEvolutions} />
+                  </div>
+                )}
 
-              <CascadeItem className="hidden space-y-3 lg:block">
-                <HomeSectionTitle title="Oportunidades" />
-                <button
-                  type="button"
-                  onClick={() => navigate('/profissional/demandas')}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <MapPin className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{opportunitiesCopy.title}</p>
-                    <p className="text-xs text-muted-foreground">{opportunitiesCopy.subtitle}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </button>
-              </CascadeItem>
+                <div className="space-y-3">
+                  <HomeSectionTitle title="Oportunidades" />
+                  <HomeOpportunitiesCard
+                    title={opportunitiesCopy.title}
+                    subtitle={opportunitiesCopy.subtitle}
+                    onClick={() => navigate('/profissional/demandas')}
+                  />
+                </div>
+              </div>
             </div>
+          </CascadeItem>
 
-            {pendingEvolutionsCount > 0 && (
-              <aside className="hidden w-full min-w-0 lg:block">
-                <CascadeItem className="space-y-3">
-                  <div className="flex justify-end">
-                    <Button variant="ghost" size="sm" className="h-auto px-0 text-primary" asChild>
-                      <Link to="/profissional/evolucoes">Ver todas</Link>
-                    </Button>
-                  </div>
-                  <HomePendingEvolutionsList items={pendingEvolutions} />
-                </CascadeItem>
-              </aside>
-            )}
-          </div>
+          <CascadeItem className="space-y-3 lg:hidden">
+            <HomeSectionTitle
+              title="Oportunidades"
+              action={
+                <Button variant="ghost" size="sm" className="h-auto px-0 text-primary" asChild>
+                  <Link to="/profissional/demandas">Ver todas</Link>
+                </Button>
+              }
+            />
+            <HomeOpportunitiesCard
+              title={opportunitiesCopy.title}
+              subtitle={opportunitiesCopy.subtitle}
+              onClick={() => navigate('/profissional/demandas')}
+            />
+          </CascadeItem>
 
           <CascadeItem>
             <HomeAcademyBanner

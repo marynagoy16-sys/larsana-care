@@ -5,6 +5,7 @@ const CODE_MESSAGES: Record<string, string> = {
   '23503': 'Referência inválida. Um dos campos relacionados não existe.',
   '42501': 'Você não tem permissão para esta operação.',
   'PGRST116': 'Registro não encontrado.',
+  'PGRST202': 'Função do banco não disponível. Peça ao administrador para aplicar as migrations pendentes no Supabase.',
   '22P02': 'Formato de dado inválido.',
 }
 

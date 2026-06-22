@@ -36,6 +36,7 @@ supabase/
 | `20260605101500` | Functions e triggers de negócio |
 | `20260605101600` | RLS + Storage buckets |
 | `20260605101700` | Seed V1-2026 (regiões, preços) |
+| `20260615180000` | RPC `submit_pp_credentialing` (envio PP para aprovação) |
 
 ## Usuários de desenvolvimento (`seed.sql`)
 
@@ -59,6 +60,17 @@ supabase gen types typescript --local > src/types/database.types.ts
 
 # Validação local (Docker)
 powershell -ExecutionPolicy Bypass -File supabase/scripts/validate_migrations.ps1
+```
+
+### Projeto remoto (Supabase Cloud)
+
+Se o envio do credenciamento retornar `PGRST202` / função `submit_pp_credentialing` não encontrada, aplique a migration pendente:
+
+1. **SQL Editor** no [dashboard Supabase](https://supabase.com/dashboard/project/kispjnlmklzfhxhtdyvm/sql/new) — cole e execute o conteúdo de `migrations/20260615180000_pp_credentialing_submit.sql`, **ou**
+2. Com `access_token` e `PROJECT_ID` no `.env` (raiz do repo):
+
+```bash
+node data/supabase/scripts/apply-sql-remote.mjs data/supabase/migrations/20260615180000_pp_credentialing_submit.sql
 ```
 
 ## RLS

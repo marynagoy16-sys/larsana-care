@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertTriangle, ArrowLeft, ClipboardList, Clock, Search } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ClipboardList, Clock, PenLine, Search } from 'lucide-react'
 import { EntityListPage } from '@/components/crud/EntityListPage'
 import { CrudModal } from '@/components/crud/CrudModal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PatientSearchField } from '@/components/forms/PatientSearchField'
 import { ProfessionalSearchField } from '@/components/forms/ProfessionalSearchField'
 import { CycleSearchField } from '@/components/forms/CycleSearchField'
-import { RegionSelectField } from '@/components/forms/RegionSelectField'
 import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
@@ -25,16 +24,14 @@ import {
   formatFamilyResponse,
 } from '@/lib/assessmentListDisplay'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters'
-import { assessmentStatusLabels, cycleStatusLabels, paymentStatusLabels } from '@/constants/labels'
+import { assessmentStatusLabels, cycleStatusLabels, medicalRecordTypeLabels, paymentStatusLabels } from '@/constants/labels'
 import {
   initialAssessmentsService,
   careCyclesService,
   careSessionsService,
-  treatmentPausesService,
   medicalRecordsService,
   chargesService,
   transfersService,
-  demandsService,
   internalExpensesService,
   supportTicketsService,
   legalTermsService,
@@ -52,12 +49,11 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { AssessmentProposalSummary } from '@/components/assessments/AssessmentProposalSummary'
 import { AssessmentSendProposalCard } from '@/components/assessments/AssessmentSendProposalCard'
-import { professionalsService } from '@/services/index'
 import { Button } from '@/components/ui/button'
-import { demandListColumns } from '@/components/demands/demandListColumns'
-import { CycleSessionsProgress } from '@/components/cycles/CycleSessionsProgress'
+import { Badge } from '@/components/ui/badge'
 import { estimateAssessmentProposalTotalCents } from '@/services/assessmentProposal'
-import { listCareCycles } from '@/services/cycles'
+import { sanitizeRichText } from '@/lib/sanitize'
+import { cn } from '@/lib/utils'
 
 const qk = {
   assessments: ['initial_assessments'] as const,
@@ -414,103 +410,7 @@ export function AssessmentDetailPage() {
   )
 }
 
-export function CyclesPage() {
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const schema = z.object({
-    patient_id: z.string().uuid('Selecione um paciente'),
-    session_count: z.coerce.number().refine((v) => v === 4 || v === 8 || v === 12, 'Use 4, 8 ou 12 sessões'),
-    assigned_professional_id: z.string().uuid('Selecione um profissional').optional().or(z.literal('')),
-  })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) as never, defaultValues: { patient_id: '', session_count: 8, assigned_professional_id: '' } })
-  const create = useCrudMutation({
-    mutationFn: (v: z.infer<typeof schema>) => careCyclesService.create({
-      patient_id: v.patient_id,
-      session_count: v.session_count,
-      cycle_number: 1,
-      status: 'rascunho',
-      payment_status: 'pendente',
-      patient_level: 'N1',
-      session_unit_price_cents: 0,
-      total_amount_cents: 0,
-      assigned_professional_id: v.assigned_professional_id || null,
-    }),
-    queryKey: qk.cycles,
-    onSuccess: () => { form.reset(); setOpen(false) },
-  })
-
-  return (
-    <>
-      <EntityListPage
-        title="Ciclos de tratamento"
-        queryKey={qk.cycles}
-        queryFn={() => listCareCycles()}
-        onCreate={() => setOpen(true)}
-        createLabel="Abrir ciclo"
-        onRowClick={(r) => navigate(`/admin/ciclos/${r.id}`)}
-        columns={[
-          { key: 'cycle', header: 'Ciclo', cell: (r) => `#${String(r.cycle_number)}` },
-          {
-            key: 'patient',
-            header: 'Paciente',
-            mobilePrimary: true,
-            cell: (r) => <span className="font-medium">{r.patient_name}</span>,
-          },
-          {
-            key: 'sessions',
-            header: 'Sessões',
-            cell: (r) => (
-              <CycleSessionsProgress done={r.completed_sessions} total={Number(r.session_count)} />
-            ),
-          },
-          { key: 'status', header: 'Status', cell: (r) => cycleStatusLabels[String(r.status)] ?? String(r.status) },
-          { key: 'payment', header: 'Pagamento', cell: (r) => paymentStatusLabels[String(r.payment_status)] ?? String(r.payment_status) },
-        ]}
-      />
-      <CrudModal open={open} onOpenChange={setOpen} title="Abrir ciclo">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-            <FormField control={form.control} name="patient_id" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Paciente</FormLabel>
-                <FormControl>
-                  <PatientSearchField value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="assigned_professional_id" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profissional (opcional)</FormLabel>
-                <FormControl>
-                  <ProfessionalSearchField value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="session_count" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quantidade de sessões</FormLabel>
-                <Select onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="4">4 sessões</SelectItem>
-                    <SelectItem value="8">8 sessões</SelectItem>
-                    <SelectItem value="12">12 sessões</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} />
-          </form>
-        </Form>
-      </CrudModal>
-    </>
-  )
-}
+export { CyclesListPage as CyclesPage } from './cycles/CyclesListPage'
 
 export function CycleDetailPage() {
   return (
@@ -525,122 +425,170 @@ export function CycleDetailPage() {
   )
 }
 
-export function MedicalRecordsPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage
-      title="Prontuários"
-      description="Painel de conformidade CREFITO"
-      queryKey={qk.records}
-      queryFn={() => medicalRecordsService.list('id, record_type, created_at, patient_id')}
-      onRowClick={(r) => navigate(`/admin/prontuarios/${r.patient_id}`)}
-      columns={[
-        { key: 'type', header: 'Tipo', cell: (r) => String(r.record_type) },
-        { key: 'date', header: 'Data', cell: (r) => formatDateTime(String(r.created_at)) },
-      ]}
-    />
-  )
-}
+export { MedicalRecordsListPage as MedicalRecordsPage } from './medical-records/MedicalRecordsListPage'
 
 export function MedicalRecordPatientPage() {
-  const { pacienteId } = useParams<{ pacienteId: string }>()
-  return (
-    <GenericDetailPage title="Prontuário do paciente" backPath="/admin/prontuarios" queryKey={[...qk.records, pacienteId ?? '']}
-      queryFn={async () => ({ patient_id: pacienteId })}
-      fields={[{ key: 'patient_id', label: 'Paciente ID' }]}
-    />
-  )
-}
-
-export function CredenciamentoPage() {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  return (
-    <EntityListPage
-      title="Credenciamento"
-      queryKey={['professionals', 'credenciamento']}
-      queryFn={() => professionalsService.list('id, full_name, credentialing_status, profession')}
-      onRowClick={(r) => navigate(`/admin/credenciamento/${r.id}`)}
-      columns={[
-        { key: 'name', header: 'Profissional', cell: (r) => String(r.full_name) },
-        { key: 'status', header: 'Status', cell: (r) => String(r.credentialing_status) },
-      ]}
-    />
-  )
-}
+  const goBack = () => navigate('/admin/prontuarios')
 
-export function CredenciamentoDetailPage() {
-  return (
-    <GenericDetailPage title="Credenciamento" backPath="/admin/credenciamento" queryKey={['professionals']}
-      queryFn={(id) => professionalsService.getById(id)}
-      fields={[
-        { key: 'full_name', label: 'Nome' },
-        { key: 'credentialing_status', label: 'Status' },
-        { key: 'profession', label: 'Profissão' },
-      ]}
-    />
-  )
-}
+  const { data: record, isLoading } = useQuery({
+    queryKey: [...qk.records, id],
+    queryFn: () =>
+      medicalRecordsService.getById(
+        id!,
+        `id, record_type, content_richtext, recorded_at, crefito_number, session_id, cycle_id,
+         patients ( full_name ),
+         professionals ( full_name ),
+         care_sessions ( session_number, scheduled_at ),
+         care_cycles ( cycle_number )`,
+      ),
+    enabled: !!id,
+  })
 
-export function DemandsPage() {
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const schema = z.object({
-    patient_id: z.string().uuid('Selecione um paciente'),
-    required_profession: z.enum(['FISIO', 'NUTI', 'MED', 'CUID', 'FONO']),
-    region_id: z.string().uuid('Selecione uma região'),
+  const { data: versions = [] } = useQuery({
+    queryKey: [...qk.records, id, 'versions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('medical_record_versions')
+        .select('id, content_richtext, edited_at')
+        .eq('medical_record_id', id!)
+        .order('edited_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+    enabled: !!id,
   })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { patient_id: '', required_profession: 'FISIO', region_id: '' } })
-  const create = useCrudMutation({
-    mutationFn: (v: z.infer<typeof schema>) => demandsService.create({ ...v, status: 'aberta' }),
-    queryKey: qk.demands,
-    onSuccess: () => { form.reset(); setOpen(false) },
-  })
+
+  if (isLoading) {
+    return (
+      <>
+        <PageHeader loading>
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+              <ArrowLeft size={20} />
+            </Button>
+            <span className="font-display font-bold text-xl lg:text-2xl">Prontuário</span>
+          </div>
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <DetailPageSkeleton fields={6} />
+        </CrudScrollPageLayout>
+      </>
+    )
+  }
+
+  if (!record) {
+    return (
+      <>
+        <PageHeader>
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+              <ArrowLeft size={20} />
+            </Button>
+          </div>
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <p className="text-muted-foreground">Registro não encontrado.</p>
+        </CrudScrollPageLayout>
+      </>
+    )
+  }
+
+  const patient = record.patients as { full_name?: string } | null
+  const professional = record.professionals as { full_name?: string } | null
+  const session = record.care_sessions as { session_number?: number; scheduled_at?: string } | null
+  const cycle = record.care_cycles as { cycle_number?: number } | null
+  const typeLabel = medicalRecordTypeLabels[String(record.record_type)] ?? String(record.record_type)
+  const content = record.content_richtext ? sanitizeRichText(String(record.content_richtext)) : ''
+
   return (
     <>
-      <EntityListPage title="Demandas" queryKey={qk.demands} queryFn={() => demandsService.list()} onCreate={() => setOpen(true)}
-        onRowClick={(r) => navigate(`/admin/demandas/${r.id}`)}
-        columns={demandListColumns} />
-      <CrudModal open={open} onOpenChange={setOpen} title="Nova demanda">
-        <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-          <FormField control={form.control} name="patient_id" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Paciente</FormLabel>
-              <FormControl>
-                <PatientSearchField value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="required_profession" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profissão requerida</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger><SelectValue placeholder="Selecione a profissão" /></SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="FISIO">Fisioterapia</SelectItem>
-                  <SelectItem value="NUTI">Nutrição</SelectItem>
-                  <SelectItem value="MED">Medicina</SelectItem>
-                  <SelectItem value="CUID">Cuidador</SelectItem>
-                  <SelectItem value="FONO">Fonoaudiologia</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="region_id" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Região</FormLabel>
-              <FormControl>
-                <RegionSelectField value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} />
-        </form></Form>
-      </CrudModal>
+      <PageHeader>
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
+            <ArrowLeft size={20} />
+          </Button>
+          <div className="min-w-0">
+            <h1 className="font-display font-bold text-lg lg:text-xl truncate">
+              {patient?.full_name ?? 'Prontuário'}
+            </h1>
+          </div>
+          <Badge variant="secondary" className="ml-auto shrink-0">{typeLabel}</Badge>
+        </div>
+      </PageHeader>
+      <CrudScrollPageLayout>
+        <CascadeReveal className="space-y-4">
+          <CascadeItem>
+            <div className="rounded-xl border border-border bg-card p-5 grid gap-3 sm:grid-cols-2 text-sm">
+              <div>
+                <p className="text-muted-foreground">Profissional</p>
+                <p className="font-medium">{professional?.full_name ?? '—'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">CREFITO</p>
+                <p className="font-medium">{String(record.crefito_number)}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Registrado em</p>
+                <p className="font-medium">{formatDateTime(String(record.recorded_at))}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Sessão / ciclo</p>
+                <p className="font-medium">
+                  {session?.session_number != null ? `Sessão ${session.session_number}` : '—'}
+                  {cycle?.cycle_number != null ? ` · Ciclo ${cycle.cycle_number}` : ''}
+                </p>
+              </div>
+            </div>
+          </CascadeItem>
+
+          <CascadeItem>
+            <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <PenLine size={12} />
+                Registro clínico
+              </div>
+              {content ? (
+                <div
+                  className="prose prose-sm max-w-none text-sm text-foreground [&_p]:my-1"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">Sem conteúdo registrado.</p>
+              )}
+            </div>
+          </CascadeItem>
+
+          {versions.length > 0 && (
+            <CascadeItem>
+              <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Histórico de edições
+                </p>
+                {versions.map((version) => (
+                  <div
+                    key={String(version.id)}
+                    className={cn('rounded-lg border border-border/60 bg-muted/20 p-4 space-y-2')}
+                  >
+                    <p className="text-xs text-muted-foreground">
+                      {formatDateTime(String(version.edited_at))}
+                    </p>
+                    {version.content_richtext ? (
+                      <div
+                        className="prose prose-sm max-w-none text-sm text-foreground [&_p]:my-1"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeRichText(String(version.content_richtext)),
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </CascadeItem>
+          )}
+        </CascadeReveal>
+      </CrudScrollPageLayout>
     </>
   )
 }
@@ -815,52 +763,8 @@ export function SessionsPage() {
   )
 }
 
-export function TreatmentPausesPage() {
-  const [open, setOpen] = useState(false)
-  const schema = z.object({
-    patient_id: z.string().uuid('Selecione um paciente'),
-    reason: requiredString('Motivo'),
-    paused_at: requiredString('Início'),
-  })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) as never, defaultValues: { patient_id: '', reason: '', paused_at: new Date().toISOString() } })
-  const create = useCrudMutation({
-    mutationFn: (v: z.infer<typeof schema>) => treatmentPausesService.create(v),
-    queryKey: ['treatment_pauses'],
-    onSuccess: () => { form.reset(); setOpen(false) },
-  })
-  return (
-    <>
-      <EntityListPage
-        title="Pausas de tratamento"
-        queryKey={['treatment_pauses']}
-        queryFn={() => treatmentPausesService.list()}
-        onCreate={() => setOpen(true)}
-        columns={[
-          { key: 'reason', header: 'Motivo', cell: (r) => String(r.reason) },
-          { key: 'start', header: 'Início', cell: (r) => formatDateTime(String(r.paused_at)) },
-          { key: 'end', header: 'Retorno', cell: (r) => r.resumed_at ? formatDateTime(String(r.resumed_at)) : '—' },
-        ]}
-      />
-      <CrudModal open={open} onOpenChange={setOpen} title="Registrar pausa">
-        <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-          <FormField control={form.control} name="patient_id" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Paciente</FormLabel>
-              <FormControl>
-                <PatientSearchField value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="reason" render={({ field }) => (
-            <FormItem><FormLabel>Motivo</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-          )} />
-          <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} />
-        </form></Form>
-      </CrudModal>
-    </>
-  )
-}
+export { TreatmentPausesListPage as TreatmentPausesPage } from './treatment-pauses/TreatmentPausesListPage'
+export { TreatmentPauseDetailPage } from './treatment-pauses/TreatmentPauseDetailPage'
 
 export function DelumaExportPage() {
   const [generating, setGenerating] = useState(false)
@@ -1077,9 +981,4 @@ export function SettingsPage() {
       ]}
     />
   )
-}
-
-export function ProfessionalDetailPage() {
-  return <GenericDetailPage title="Profissional" backPath="/admin/profissionais" queryKey={['professionals']} queryFn={(id) => professionalsService.getById(id)}
-    fields={[{ key: 'full_name', label: 'Nome' }, { key: 'profession', label: 'Profissão' }, { key: 'credentialing_status', label: 'Status' }]} />
 }
