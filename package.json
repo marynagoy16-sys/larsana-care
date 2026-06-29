@@ -1,0 +1,21 @@
+{
+  "name": "larsana-care",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=frontend",
+    "dev:mobile": "node scripts/dev-mobile.mjs",
+    "dev:mobile:profissional": "node scripts/dev-mobile.mjs profissional",
+    "dev:mobile:paciente": "node scripts/dev-mobile.mjs paciente",
+    "dev:mobile:financeiro": "node scripts/dev-mobile.mjs financeiro",
+    "typecheck:shared": "npm run typecheck --workspace=@larsana/shared",
+    "typecheck:mobile": "node scripts/typecheck-mobile.mjs",
+    "typecheck:mobile:profissional": "node scripts/typecheck-mobile.mjs profissional",
+    "typecheck:mobile:paciente": "node scripts/typecheck-mobile.mjs paciente",
+    "typecheck:mobile:financeiro": "node scripts/typecheck-mobile.mjs financeiro",
+    "build:web": "npm run build --workspace=frontend"
+  }
+}

@@ -46,9 +46,9 @@ const PPPerfilPage = lazyPP('PPPerfilPage')
 const PPSimuladorPage = lazyPP('PPSimuladorPage')
 const PPCartaoPage = lazyPP('PPCartaoPage')
 const PPNotificacoesPage = lazyPP('PPNotificacoesPage')
+import { AcademyLessonPage } from '@/pages/profissional/academy/AcademyLessonPage'
 const AcademyHubPage = lazy(() => import('@/pages/profissional/academy/AcademyHubPage').then((m) => ({ default: m.AcademyHubPage })))
 const AcademyModulePage = lazy(() => import('@/pages/profissional/academy/AcademyModulePage').then((m) => ({ default: m.AcademyModulePage })))
-const AcademyLessonPage = lazy(() => import('@/pages/profissional/academy/AcademyLessonPage').then((m) => ({ default: m.AcademyLessonPage })))
 const AcademyCertificatesPage = lazy(() =>
   import('@/pages/profissional/academy/AcademyCertificatesPage').then((m) => ({ default: m.AcademyCertificatesPage })),
 )

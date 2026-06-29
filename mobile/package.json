@@ -1,0 +1,12 @@
+{
+  "name": "@larsana/mobile",
+  "private": true,
+  "scripts": {
+    "dev:profissional": "node ../scripts/dev-mobile.mjs profissional",
+    "dev:paciente": "node ../scripts/dev-mobile.mjs paciente",
+    "dev:financeiro": "node ../scripts/dev-mobile.mjs financeiro",
+    "typecheck:profissional": "node ../scripts/typecheck-mobile.mjs profissional",
+    "typecheck:paciente": "node ../scripts/typecheck-mobile.mjs paciente",
+    "typecheck:financeiro": "node ../scripts/typecheck-mobile.mjs financeiro"
+  }
+}
