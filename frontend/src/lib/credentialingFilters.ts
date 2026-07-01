@@ -4,6 +4,7 @@ import type { CredentialingListItem } from '@/services/adminCredentialing'
 export interface CredentialingListFilters {
   status?: string
   pending_review_only?: boolean
+  cardio_review_only?: boolean
   hide_active?: boolean
   profession?: string
   pp_class?: string
@@ -20,6 +21,7 @@ export function countActiveCredentialingFilters(filters: CredentialingListFilter
   let n = 0
   if (filters.status) n++
   if (filters.pending_review_only) n++
+  if (filters.cardio_review_only) n++
   if (filters.hide_active) n++
   if (filters.profession) n++
   if (filters.pp_class) n++
@@ -36,6 +38,9 @@ export function matchesCredentialingFilters(
   filters: CredentialingListFilters,
 ): boolean {
   if (filters.pending_review_only && row.credentialing_status !== 'aguardando_aprovacao') {
+    return false
+  }
+  if (filters.cardio_review_only && row.cardiorrespiratory_habilitation_status !== 'em_analise') {
     return false
   }
   if (filters.hide_active && row.credentialing_status === 'ativo') return false

@@ -1,8 +1,15 @@
 import type { Tables } from '@/types/database'
+import {
+  CARDIORRESPIRATORY_CATEGORY,
+  ppHasCardiorrespiratoryCategory,
+  type CardiorrespiratoryRequestBasis,
+  type PpTechnicalCategory,
+} from '@/lib/ppTechnicalCategories'
 
 /** Etapas do wizard self-service do PP (UI). */
 export const CREDENTIALING_STEPS = [
   { id: 'dados', label: 'Dados' },
+  { id: 'categorias', label: 'Categorias técnicas' },
   { id: 'conselho', label: 'Conselho' },
   { id: 'documentos', label: 'Documentos' },
   { id: 'banco', label: 'Banco' },
@@ -20,6 +27,14 @@ export const REQUIRED_PP_DOCUMENTS = [
 
 export const OPTIONAL_PP_DOCUMENTS = [
   'CERTIFICATE',
+] as const satisfies readonly Tables<'professional_documents'>['document_type'][]
+
+export const CARDIO_HABILITATION_DOCUMENTS = [
+  'CARDIO_CERTIFICATE',
+  'CARDIO_EXPERIENCE_PROOF',
+  'CARDIO_CV',
+  'CARDIO_PROFESSIONAL_DECLARATION',
+  'CARDIO_OTHER',
 ] as const satisfies readonly Tables<'professional_documents'>['document_type'][]
 
 /** Termos legais aceitos na etapa Contrato. */
@@ -45,6 +60,10 @@ export type CredentialingSnapshot = {
     | 'address'
     | 'profession'
     | 'specialty'
+    | 'technical_categories'
+    | 'cardiorrespiratory_habilitation_status'
+    | 'cardiorrespiratory_request_basis'
+    | 'cardiorrespiratory_experience_description'
     | 'credentialing_status'
     | 'flag_assinado'
   >
@@ -78,6 +97,25 @@ export function isDadosComplete(pro: CredentialingSnapshot['professional']): boo
     && pro.phone?.trim()
     && pro.profession
     && pro.birth_date,
+  )
+}
+
+export function isCategoriasComplete(
+  pro: Pick<
+    CredentialingSnapshot['professional'],
+    | 'technical_categories'
+    | 'cardiorrespiratory_request_basis'
+    | 'cardiorrespiratory_experience_description'
+  >,
+): boolean {
+  const categories = (pro.technical_categories ?? []) as PpTechnicalCategory[]
+  if (categories.length < 1) return false
+
+  if (!ppHasCardiorrespiratoryCategory(categories)) return true
+
+  return Boolean(
+    pro.cardiorrespiratory_request_basis
+    && pro.cardiorrespiratory_experience_description?.trim(),
   )
 }
 
@@ -123,6 +161,7 @@ export function computeStepCompletion(snapshot: CredentialingSnapshot): StepComp
 
   return {
     dados: credentialed || isDadosComplete(snapshot.professional),
+    categorias: credentialed || isCategoriasComplete(snapshot.professional),
     conselho: credentialed || isConselhoComplete(snapshot.council),
     documentos: credentialed || isDocumentosComplete(snapshot.documents),
     banco: credentialed || isBancoComplete(snapshot.bank),
@@ -166,3 +205,16 @@ export function isCredentialingPendingReview(status: string): boolean {
 export function isCredentialingActive(status: string): boolean {
   return status === 'ativo'
 }
+
+export function inferRequestsCardioHabilitation(
+  pro: Pick<
+    CredentialingSnapshot['professional'],
+    'technical_categories' | 'cardiorrespiratory_request_basis'
+  >,
+): boolean {
+  const categories = (pro.technical_categories ?? []) as PpTechnicalCategory[]
+  if (!ppHasCardiorrespiratoryCategory(categories)) return false
+  return Boolean(pro.cardiorrespiratory_request_basis)
+}
+
+export { CARDIORRESPIRATORY_CATEGORY, type CardiorrespiratoryRequestBasis, type PpTechnicalCategory }

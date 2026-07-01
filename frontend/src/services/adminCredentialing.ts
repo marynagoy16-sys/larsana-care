@@ -20,6 +20,8 @@ export type CredentialingListItem = {
   council_type: string | null
   flag_assinado: boolean
   has_complete_documents: boolean
+  cardiorrespiratory_habilitation_status: string
+  technical_categories: string[] | null
 }
 
 const LIST_SELECT = `
@@ -32,6 +34,8 @@ const LIST_SELECT = `
   credentialing_status,
   updated_at,
   flag_assinado,
+  cardiorrespiratory_habilitation_status,
+  technical_categories,
   professional_councils ( council_type, registration_number ),
   professional_documents ( document_type )
 `
@@ -58,6 +62,8 @@ function mapListRow(row: Record<string, unknown>): CredentialingListItem {
     council_registration: council?.registration_number ?? null,
     flag_assinado: Boolean(row.flag_assinado),
     has_complete_documents: hasCompleteRequiredDocuments(documentTypes),
+    cardiorrespiratory_habilitation_status: String(row.cardiorrespiratory_habilitation_status ?? 'nao_solicitado'),
+    technical_categories: (row.technical_categories as string[] | null) ?? [],
   }
 }
 
@@ -83,7 +89,7 @@ export async function loadAdminCredentialingSnapshot(
   const { data: professional, error: proError } = await supabase
     .from('professionals')
     .select(
-      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, credentialing_status, flag_assinado, pp_class, created_at, updated_at, asaas_wallet_id',
+      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado, pp_class, created_at, updated_at, asaas_wallet_id',
     )
     .eq('id', professionalId)
     .maybeSingle()
@@ -175,6 +181,26 @@ export async function requestCredentialingRevision(professionalId: string) {
       is_active: false,
     })
     .eq('id', professionalId)
+
+  if (error) throw error
+}
+
+export type CardiorrespiratoryReviewStatus =
+  | 'em_analise'
+  | 'habilitado'
+  | 'nao_habilitado'
+  | 'suspenso'
+
+export async function reviewCardiorrespiratoryHabilitation(
+  professionalId: string,
+  newStatus: CardiorrespiratoryReviewStatus,
+  adminNotes?: string,
+) {
+  const { error } = await supabase.rpc('review_cardiorrespiratory_habilitation' as never, {
+    p_professional_id: professionalId,
+    p_new_status: newStatus,
+    p_admin_notes: adminNotes ?? null,
+  } as never)
 
   if (error) throw error
 }

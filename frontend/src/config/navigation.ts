@@ -207,6 +207,7 @@ export const routeTitles: Record<string, string> = {
   '/admin': 'Dashboard',
   '/admin/pacientes': 'Pacientes',
   '/admin/pacientes/novo': 'Novo paciente',
+  '/admin/pacientes/:id/prontuario': 'Prontuário',
   '/admin/avaliacoes': 'Avaliações',
   '/admin/ciclos': 'Ciclos',
   '/admin/ciclos/novo': 'Novo ciclo',

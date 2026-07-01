@@ -1,7 +1,11 @@
-export const careStatusLabels: Record<string, string> = {
-  ATIVO: 'Ativo',
-  PAUSA: 'Em pausa',
-}
+export { careStatusLabels, getCareStatusLabel, isPatientOnPause } from '@/lib/patientCareStatus'
+export {
+  cardioHabilitationDocumentTypeLabels,
+  cardiorrespiratoryHabilitationStatusLabels,
+  cardiorrespiratoryRequestBasisLabels,
+  ppTechnicalCategoryLabels,
+  getPpTechnicalCategoryLabel,
+} from '@/lib/ppTechnicalCategories'
 
 export const patientLevelLabels: Record<string, string> = {
   N1: 'Nível 1',
@@ -49,8 +53,18 @@ export const cycleStatusLabels: Record<string, string> = {
   rascunho: 'Rascunho',
   aguardando_pagamento: 'Aguardando pagamento',
   ativo: 'Ativo',
+  em_pausa: 'Em pausa',
+  em_analise: 'Em análise',
   encerrado: 'Encerrado',
+  fechado_financeiramente: 'Fechado financeiramente',
   cancelado: 'Cancelado',
+}
+
+export const pauseTypeLabels: Record<string, string> = {
+  none: 'Não aplicável',
+  justified: 'Justificada',
+  unjustified: 'Injustificada',
+  professional_or_operation_issue: 'Problema PP / operação',
 }
 
 export const paymentStatusLabels: Record<string, string> = {
@@ -117,6 +131,11 @@ export const professionalDocumentTypeLabels: Record<string, string> = {
   CERTIFICATE: 'Certificado / especialização',
   SIGNED_CONTRACT_PDF: 'Contrato assinado',
   VISIT_CARD_PHOTO: 'Foto cartão de visita',
+  CARDIO_CERTIFICATE: 'Certificado ou curso (Cardiorrespiratória)',
+  CARDIO_EXPERIENCE_PROOF: 'Comprovante de experiência (Cardiorrespiratória)',
+  CARDIO_CV: 'Currículo (Cardiorrespiratória)',
+  CARDIO_PROFESSIONAL_DECLARATION: 'Declaração profissional (Cardiorrespiratória)',
+  CARDIO_OTHER: 'Outro documento relevante (Cardiorrespiratória)',
 }
 
 export const sessionStatusLabels: Record<string, string> = {

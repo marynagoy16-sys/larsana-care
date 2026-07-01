@@ -24,17 +24,29 @@ import { formatCpf, formatDate, formatDateTime } from '@/lib/formatters'
 import {
   councilTypeLabels,
   credentialingStatusLabels,
+  cardiorrespiratoryHabilitationStatusLabels,
+  cardiorrespiratoryRequestBasisLabels,
   personTypeLabels,
   ppClassLabels,
   professionTypeLabels,
   professionalDocumentTypeLabels,
 } from '@/constants/labels'
 import {
+  CARDIO_HABILITATION_DOCUMENTS,
+  REQUIRED_PP_DOCUMENTS,
+} from '@/lib/credentialingModel'
+import {
+  getPpTechnicalCategoryLabel,
+  ppHasCardiorrespiratoryCategory,
+} from '@/lib/ppTechnicalCategories'
+import {
   adminCredentialingQueryKeys,
   approveCredentialing,
   getProfessionalDocumentViewUrl,
   loadAdminCredentialingSnapshot,
   requestCredentialingRevision,
+  reviewCardiorrespiratoryHabilitation,
+  type CardiorrespiratoryReviewStatus,
 } from '@/services/adminCredentialing'
 import type { Tables } from '@/types/database'
 import { cn } from '@/lib/utils'
@@ -191,6 +203,13 @@ export function CredenciamentoDetailPage() {
     },
   })
 
+  const cardioReview = useCrudMutation({
+    mutationFn: ({ status, notes }: { status: CardiorrespiratoryReviewStatus; notes?: string }) =>
+      reviewCardiorrespiratoryHabilitation(id!, status, notes),
+    queryKey: adminCredentialingQueryKeys.detail(id ?? ''),
+    successMessage: 'Status de habilitação Cardiorrespiratória atualizado',
+  })
+
   if (isLoading) {
     return (
       <>
@@ -232,7 +251,18 @@ export function CredenciamentoDetailPage() {
     created_at?: string
     updated_at?: string
     asaas_wallet_id?: string | null
+    technical_categories?: string[] | null
+    cardiorrespiratory_habilitation_status?: string
+    cardiorrespiratory_request_basis?: string | null
+    cardiorrespiratory_experience_description?: string | null
   }
+
+  const technicalCategories = proExtended.technical_categories ?? []
+  const cardioStatus = proExtended.cardiorrespiratory_habilitation_status ?? 'nao_solicitado'
+  const hasCardioCategory = ppHasCardiorrespiratoryCategory(technicalCategories)
+  const cardioDocs = snapshot.documents.filter((d) =>
+    (CARDIO_HABILITATION_DOCUMENTS as readonly string[]).includes(d.document_type),
+  )
 
   const requiredDocs = ['RG_CNH', 'COUNCIL_CARD', 'CRIMINAL_BACKGROUND'] as const
   const uploadedTypes = new Set(snapshot.documents.map((d) => d.document_type))
@@ -307,7 +337,6 @@ export function CredenciamentoDetailPage() {
               label="Profissão"
               value={professionTypeLabels[pro.profession] ?? pro.profession}
             />
-            <DetailRow label="Especialidade" value={pro.specialty} />
             <DetailRow
               label="Classe PP"
               value={proExtended.pp_class ? (ppClassLabels[proExtended.pp_class] ?? proExtended.pp_class) : '—'}
@@ -326,6 +355,99 @@ export function CredenciamentoDetailPage() {
             />
           </DetailSection>
         </CascadeItem>
+
+        <CascadeItem>
+          <DetailSection title="Categorias técnicas">
+            {technicalCategories.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {technicalCategories.map((category) => (
+                  <Badge key={category} variant="secondary">
+                    {getPpTechnicalCategoryLabel(category)}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhuma categoria informada.</p>
+            )}
+          </DetailSection>
+        </CascadeItem>
+
+        {(hasCardioCategory || cardioStatus !== 'nao_solicitado') && (
+          <CascadeItem>
+            <DetailSection title="Habilitação Cardiorrespiratória">
+              <DetailRow
+                label="Status"
+                value={
+                  cardiorrespiratoryHabilitationStatusLabels[cardioStatus]
+                  ?? cardioStatus
+                }
+              />
+              {proExtended.cardiorrespiratory_request_basis && (
+                <DetailRow
+                  label="Base da solicitação"
+                  value={
+                    cardiorrespiratoryRequestBasisLabels[proExtended.cardiorrespiratory_request_basis]
+                    ?? proExtended.cardiorrespiratory_request_basis
+                  }
+                />
+              )}
+              {proExtended.cardiorrespiratory_experience_description && (
+                <DetailRow
+                  label="Experiência relatada"
+                  value={proExtended.cardiorrespiratory_experience_description}
+                />
+              )}
+              {cardioDocs.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Documentos</p>
+                  {cardioDocs.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between gap-3 text-sm">
+                      <span>{professionalDocumentTypeLabels[doc.document_type] ?? doc.document_type}</span>
+                      <DocumentFileLink doc={doc} />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 pt-3">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={cardioReview.isPending}
+                  onClick={() => cardioReview.mutate({ status: 'habilitado' })}
+                >
+                  Aprovar habilitação
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={cardioReview.isPending}
+                  onClick={() => cardioReview.mutate({ status: 'nao_habilitado' })}
+                >
+                  Reprovar
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={cardioReview.isPending}
+                  onClick={() => cardioReview.mutate({ status: 'suspenso' })}
+                >
+                  Suspender
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={cardioReview.isPending}
+                  onClick={() => cardioReview.mutate({ status: 'em_analise' })}
+                >
+                  Voltar para análise
+                </Button>
+              </div>
+            </DetailSection>
+          </CascadeItem>
+        )}
 
         <CascadeItem>
           <DetailSection title="Conselho profissional">

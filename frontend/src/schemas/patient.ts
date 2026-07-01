@@ -10,17 +10,40 @@ import {
 } from '@/schemas/common'
 import { sanitizeCep, trimText } from '@/lib/sanitize'
 
+
+export const patientCareStatusSchema = z.enum([
+  'ATIVO',
+  'PAUSA',
+  'PAUSA_JUSTIFICADA',
+  'PAUSA_SOLICITADA_PACIENTE',
+  'ALTA',
+  'OBITO',
+  'CANCELADO',
+])
+
 export const patientStepSchema = z.object({
   full_name: requiredString('Nome completo'),
   cpf: cpfSchema,
   birth_date: dateSchema,
   patient_level: z.enum(['N1', 'N2', 'N3', 'VALOR_SOCIAL']),
-  care_status: z.enum(['ATIVO', 'PAUSA']).default('ATIVO'),
+  care_status: patientCareStatusSchema.default('ATIVO'),
   region_id: z.string().uuid('Selecione a região'),
   city_id: z.string().uuid('Selecione a cidade'),
   allocated_professional_id: z.string().uuid().optional().nullable(),
   suggested_weekly_frequency: z.number().min(1).max(7).optional().nullable(),
   attendance_period: z.enum(['MANHA', 'TARDE', 'NOITE']).optional().nullable(),
+  technical_category: z
+    .enum([
+      'ortopedico',
+      'pos_operatorio',
+      'neurologico',
+      'idoso_gerontologia',
+      'funcional_condicionamento',
+      'pediatrico_geral',
+      'cardiorrespiratoria',
+    ])
+    .optional()
+    .nullable(),
   clinical_summary: optionalString,
   is_valor_social: z.boolean().default(false),
 })

@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Circle,
   Activity,
+  PauseCircle,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -39,6 +40,9 @@ import { cycleStatusLabels, paymentStatusLabels, ppClassLabels } from '@/constan
 import { careSessionsService } from '@/services/index'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
+import { RescheduleSessionModal } from '@/components/cycles/RescheduleSessionModal'
+import { FinancialClosurePanel } from '@/components/cycles/FinancialClosurePanel'
+import { InitiatePauseModal } from '@/components/cycles/InitiatePauseModal'
 import { requiredString } from '@/schemas/common'
 
 interface MedicalRecordSummary {
@@ -70,6 +74,7 @@ interface CycleDetail {
   created_at: string
   patient_id: string
   assigned_professional_id: string
+  reschedule_count_consecutive: number
   patients: { full_name: string } | null
   professionals: {
     full_name: string
@@ -121,6 +126,9 @@ const CYCLE_STATUS_COLORS: Record<string, string> = {
   ativo: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
   rascunho: 'bg-muted text-muted-foreground',
   encerrado: 'bg-secondary text-secondary-foreground',
+  em_pausa: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500',
+  em_analise: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  fechado_financeiramente: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400',
   aguardando_pagamento: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500',
   cancelado: 'bg-destructive/10 text-destructive',
 }
@@ -139,6 +147,7 @@ async function fetchCycleDetail(id: string): Promise<CycleDetail> {
       id, cycle_number, session_count, status, payment_status,
       total_amount_cents, session_unit_price_cents,
       started_at, created_at, patient_id, assigned_professional_id,
+      reschedule_count_consecutive,
       patients ( full_name ),
       professionals (
         full_name,
@@ -298,10 +307,14 @@ function SessionScheduleItem({
   slot,
   expanded,
   onToggle,
+  onReschedule,
+  canReschedule,
 }: {
   slot: SessionSlot
   expanded: boolean
   onToggle: () => void
+  onReschedule?: (session: Session) => void
+  canReschedule?: boolean
 }) {
   const { session, number } = slot
   const status = session?.status ?? 'prevista'
@@ -311,19 +324,21 @@ function SessionScheduleItem({
   const records = normalizeMedicalRecords(session?.medical_records)
   const primaryRecord = records[0] ?? null
   const canExpand = isDone
+  const showReschedule = canReschedule && session && (status === 'prevista' || status === 'remarcada')
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-      <button
-        type="button"
-        onClick={canExpand ? onToggle : undefined}
-        disabled={!canExpand}
-        className={cn(
-          'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
-          canExpand && 'hover:bg-muted/30 cursor-pointer',
-          !canExpand && 'cursor-default',
-        )}
-      >
+      <div className="flex items-center gap-2 px-4 py-3">
+        <button
+          type="button"
+          onClick={canExpand ? onToggle : undefined}
+          disabled={!canExpand}
+          className={cn(
+            'flex min-w-0 flex-1 items-center gap-3 text-left transition-colors',
+            canExpand && 'hover:bg-muted/30 cursor-pointer',
+            !canExpand && 'cursor-default',
+          )}
+        >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/60 text-xs font-bold">
           {number}
         </div>
@@ -348,7 +363,20 @@ function SessionScheduleItem({
         ) : (
           <Circle size={8} className="shrink-0 text-muted-foreground/30" />
         )}
-      </button>
+        </button>
+
+        {showReschedule && onReschedule && session && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="shrink-0"
+            onClick={() => onReschedule(session)}
+          >
+            <RefreshCw size={14} className="mr-1" />
+            Remarcar
+          </Button>
+        )}
+      </div>
 
       {expanded && isDone && (
         <div className="border-t border-border bg-muted/20 px-4 py-4 space-y-4">
@@ -371,14 +399,17 @@ function SessionScheduleSection({
   cycle,
   slots,
   onAddSession,
+  onReschedule,
 }: {
   cycle: CycleDetail
   slots: SessionSlot[]
   onAddSession: () => void
+  onReschedule: (session: Session) => void
 }) {
   const [expandedSession, setExpandedSession] = useState<number | null>(null)
   const sessions = cycle.care_sessions ?? []
   const canAddSession = sessions.length < cycle.session_count
+  const canReschedule = ['ativo', 'em_pausa'].includes(cycle.status)
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -405,6 +436,8 @@ function SessionScheduleSection({
             onToggle={() =>
               setExpandedSession((current) => (current === slot.number ? null : slot.number))
             }
+            onReschedule={onReschedule}
+            canReschedule={canReschedule}
           />
         ))}
       </div>
@@ -561,7 +594,10 @@ function CycleDetailPageHeader({
 export function CycleDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [addSessionOpen, setAddSessionOpen] = useState(false)
+  const [rescheduleSession, setRescheduleSession] = useState<Session | null>(null)
+  const [pauseModalOpen, setPauseModalOpen] = useState(false)
 
   const { data: cycle, isLoading, isFetching } = useQuery({
     queryKey: ['care_cycle_detail', id],
@@ -608,13 +644,21 @@ export function CycleDetailPage() {
   return (
     <>
       <PageHeader>
-        <CycleDetailPageHeader
-          onBack={goBack}
-          cycleNumber={cycle.cycle_number}
-          status={cycle.status}
-          patientName={cycle.patients?.full_name}
-          isFetching={isFetching}
-        />
+        <div className="flex items-center justify-between gap-4 flex-wrap min-w-0 flex-1">
+          <CycleDetailPageHeader
+            onBack={goBack}
+            cycleNumber={cycle.cycle_number}
+            status={cycle.status}
+            patientName={cycle.patients?.full_name}
+            isFetching={isFetching}
+          />
+          {['ativo', 'em_analise'].includes(cycle.status) && (
+            <Button variant="outline" size="sm" onClick={() => setPauseModalOpen(true)} className="shrink-0">
+              <PauseCircle size={14} className="mr-1.5" />
+              Registrar pausa
+            </Button>
+          )}
+        </div>
       </PageHeader>
 
       <CrudScrollPageLayout>
@@ -636,6 +680,17 @@ export function CycleDetailPage() {
             cycle={cycle}
             slots={sessionSlots}
             onAddSession={() => setAddSessionOpen(true)}
+            onReschedule={setRescheduleSession}
+          />
+        </CascadeItem>
+
+        <CascadeItem>
+          <FinancialClosurePanel
+            cycleId={cycle.id}
+            sessionsCompleted={doneSessions}
+            sessionCount={cycle.session_count}
+            cycleStatus={cycle.status}
+            onClosed={() => queryClient.invalidateQueries({ queryKey: ['care_cycle_detail', id] })}
           />
         </CascadeItem>
 
@@ -648,6 +703,7 @@ export function CycleDetailPage() {
               {[
                 { label: 'Valor por sessão', value: formatCurrency(cycle.session_unit_price_cents) },
                 { label: 'Início', value: cycle.started_at ? formatDate(cycle.started_at) : '—' },
+                { label: 'Remarcações consecutivas', value: String(cycle.reschedule_count_consecutive ?? 0) },
                 { label: 'Abertura', value: formatDate(cycle.created_at) },
               ].map((row) => (
                 <div key={row.label} className="flex flex-col sm:flex-row sm:gap-4 py-1 border-b border-border/50 last:border-0">
@@ -665,6 +721,24 @@ export function CycleDetailPage() {
         onOpenChange={setAddSessionOpen}
         cycleId={cycle.id}
         nextSessionNumber={nextSessionNumber}
+      />
+
+      {rescheduleSession && (
+        <RescheduleSessionModal
+          open={!!rescheduleSession}
+          onOpenChange={(open) => !open && setRescheduleSession(null)}
+          sessionId={rescheduleSession.id}
+          sessionNumber={rescheduleSession.session_number}
+          nextSequenceNumber={(cycle.reschedule_count_consecutive ?? 0) + 1}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['care_cycle_detail', id] })}
+        />
+      )}
+
+      <InitiatePauseModal
+        open={pauseModalOpen}
+        onOpenChange={setPauseModalOpen}
+        cycleId={cycle.id}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['care_cycle_detail', id] })}
       />
       </CrudScrollPageLayout>
     </>

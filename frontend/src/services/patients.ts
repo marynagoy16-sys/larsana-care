@@ -35,13 +35,13 @@ export interface PatientStats {
   valor_social: number
 }
 
-const PAGE_SIZE = 20
+import { PAUSE_CARE_STATUSES } from '@/lib/patientCareStatus'
 
 export async function getPatientStats(): Promise<PatientStats> {
   const [totalRes, ativosRes, pausaRes, incompletosRes, semPpRes, valorSocialRes] = await Promise.all([
     supabase.from('patients').select('*', { count: 'exact', head: true }),
     supabase.from('patients').select('*', { count: 'exact', head: true }).eq('care_status', 'ATIVO'),
-    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('care_status', 'PAUSA'),
+    supabase.from('patients').select('*', { count: 'exact', head: true }).in('care_status', PAUSE_CARE_STATUSES),
     supabase.from('patients').select('*', { count: 'exact', head: true }).eq('is_data_complete', false),
     supabase.from('patients').select('*', { count: 'exact', head: true }).is('allocated_professional_id', null),
     supabase.from('patients').select('*', { count: 'exact', head: true }).eq('is_valor_social', true),
@@ -276,6 +276,7 @@ export async function createPatientWizard(
       allocated_professional_id: patient.allocated_professional_id ?? null,
       suggested_weekly_frequency: patient.suggested_weekly_frequency ?? null,
       attendance_period: patient.attendance_period ?? null,
+      technical_category: patient.technical_category ?? null,
       clinical_summary: patient.clinical_summary ?? null,
       is_valor_social: patient.is_valor_social,
       is_data_complete: true,

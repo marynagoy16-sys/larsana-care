@@ -8,9 +8,11 @@ import {
 } from '@/lib/credentialingModel'
 import type {
   BancoStepValues,
+  CategoriasStepValues,
   ConselhoStepValues,
   DadosStepValues,
 } from '@/schemas/credentialing'
+import { normalizeTechnicalCategoriesForSave } from '@/lib/ppTechnicalCategories'
 import type { Tables, TablesInsert } from '@/types/database'
 
 export const PROFESSIONAL_DOCS_BUCKET = 'professional-documents'
@@ -43,7 +45,7 @@ export async function loadCredentialingSnapshot(): Promise<CredentialingSnapshot
   const { data: professional, error: proError } = await supabase
     .from('professionals')
     .select(
-      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, credentialing_status, flag_assinado',
+      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado',
     )
     .eq('user_id', user.id)
     .maybeSingle()
@@ -114,7 +116,29 @@ export async function saveDadosStep(values: DadosStepValues) {
       phone: values.phone,
       address: values.address,
       profession: values.profession,
-      specialty: values.specialty ?? null,
+    })
+    .eq('id', professionalId)
+
+  if (error) throw error
+}
+
+export async function saveCategoriasStep(values: CategoriasStepValues) {
+  const professionalId = await requireProfessionalId()
+  const categories = normalizeTechnicalCategoriesForSave(
+    values.technical_categories,
+    values.requests_cardio_habilitation,
+  )
+
+  const { error } = await supabase
+    .from('professionals')
+    .update({
+      technical_categories: categories,
+      cardiorrespiratory_request_basis: values.requests_cardio_habilitation
+        ? values.cardiorrespiratory_request_basis ?? null
+        : null,
+      cardiorrespiratory_experience_description: values.requests_cardio_habilitation
+        ? values.cardiorrespiratory_experience_description?.trim() ?? null
+        : null,
     })
     .eq('id', professionalId)
 
@@ -256,16 +280,18 @@ export async function acceptContratoAndSubmit() {
 
 export type SaveStepFn = {
   dados: typeof saveDadosStep
+  categorias: typeof saveCategoriasStep
   conselho: typeof saveConselhoStep
   banco: typeof saveBancoStep
 }
 
 export const CREDENTIALING_STEP_SAVE: SaveStepFn = {
   dados: saveDadosStep,
+  categorias: saveCategoriasStep,
   conselho: saveConselhoStep,
   banco: saveBancoStep,
 }
 
 export function stepHasPersistedSave(step: CredentialingStepId): step is keyof SaveStepFn {
-  return step === 'dados' || step === 'conselho' || step === 'banco'
+  return step === 'dados' || step === 'categorias' || step === 'conselho' || step === 'banco'
 }

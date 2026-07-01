@@ -4,6 +4,7 @@ export interface DemandListFilters {
   status?: string
   demand_type?: string
   required_profession?: string
+  technical_category?: string
   region_id?: string
   assigned_professional_id?: string
   sem_pp?: boolean
@@ -21,6 +22,7 @@ export function countActiveDemandFilters(filters: DemandListFilters): number {
   if (filters.status) n++
   if (filters.demand_type) n++
   if (filters.required_profession) n++
+  if (filters.technical_category) n++
   if (filters.region_id) n++
   if (filters.assigned_professional_id) n++
   if (filters.sem_pp) n++
@@ -36,6 +38,7 @@ export function matchesDemandFilters(row: DemandListItem, filters: DemandListFil
   if (filters.status && String(row.status) !== filters.status) return false
   if (filters.demand_type && row.demand_type !== filters.demand_type) return false
   if (filters.required_profession && String(row.required_profession) !== filters.required_profession) return false
+  if (filters.technical_category && row.technical_category !== filters.technical_category) return false
   if (filters.region_id && row.region_id !== filters.region_id) return false
   if (filters.sem_pp && row.assigned_professional_id) return false
   if (filters.assigned_professional_id && row.assigned_professional_id !== filters.assigned_professional_id) {

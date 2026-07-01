@@ -122,6 +122,9 @@ export function CredentialingStepHint({
     dados: readOnly
       ? 'Dados pessoais e profissionais cadastrados.'
       : 'Informe seus dados pessoais e profissionais.',
+    categorias: readOnly
+      ? 'Categorias técnicas de atendimento selecionadas.'
+      : 'Selecione as categorias técnicas de atendimento e, se aplicável, solicite habilitação Cardiorrespiratória.',
     conselho: readOnly
       ? 'Registro no conselho profissional.'
       : 'Registre seu conselho profissional (CREFITO ou COREN).',

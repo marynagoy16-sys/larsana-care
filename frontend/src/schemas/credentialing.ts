@@ -18,7 +18,6 @@ export const dadosStepSchema = z.object({
   phone: phoneSchema,
   address: requiredString('Endereço'),
   profession: z.enum(['FISIO', 'NUTI', 'MED', 'CUID', 'FONO']),
-  specialty: optionalString,
 }).superRefine((data, ctx) => {
   if (data.person_type === 'PF') {
     const cpf = sanitizeCpf(data.cpf_cnpj)
@@ -53,7 +52,67 @@ export const contratoAcceptSchema = z.object({
   acceptContract: z.boolean().refine((v) => v === true, { message: 'Aceite o contrato LRS-PROF' }),
 })
 
+const ppTechnicalCategoryEnum = z.enum([
+  'ortopedico',
+  'pos_operatorio',
+  'neurologico',
+  'idoso_gerontologia',
+  'funcional_condicionamento',
+  'pediatrico_geral',
+  'cardiorrespiratoria',
+])
+
+const cardiorrespiratoryRequestBasisEnum = z.enum([
+  'certificado',
+  'experiencia',
+  'certificado_e_experiencia',
+  'analise_larsana',
+])
+
+export const categoriasStepSchema = z
+  .object({
+    technical_categories: z
+      .array(ppTechnicalCategoryEnum)
+      .min(1, 'Selecione ao menos uma categoria técnica'),
+    requests_cardio_habilitation: z.boolean(),
+    cardiorrespiratory_request_basis: cardiorrespiratoryRequestBasisEnum.optional(),
+    cardiorrespiratory_experience_description: optionalString,
+  })
+  .superRefine((data, ctx) => {
+    const wantsCardio = data.technical_categories.includes('cardiorrespiratoria')
+
+    if (!wantsCardio) return
+
+    if (data.requests_cardio_habilitation !== true && data.requests_cardio_habilitation !== false) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe se deseja solicitar habilitação Cardiorrespiratória',
+        path: ['requests_cardio_habilitation'],
+      })
+      return
+    }
+
+    if (!data.requests_cardio_habilitation) return
+
+    if (!data.cardiorrespiratory_request_basis) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe a base da sua solicitação',
+        path: ['cardiorrespiratory_request_basis'],
+      })
+    }
+
+    if (!data.cardiorrespiratory_experience_description?.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Descreva brevemente sua experiência em Cardiorrespiratória',
+        path: ['cardiorrespiratory_experience_description'],
+      })
+    }
+  })
+
 export type DadosStepValues = z.infer<typeof dadosStepSchema>
+export type CategoriasStepValues = z.infer<typeof categoriasStepSchema>
 export type ConselhoStepValues = z.infer<typeof conselhoStepSchema>
 export type BancoStepValues = z.infer<typeof bancoStepSchema>
 export type ContratoAcceptValues = z.infer<typeof contratoAcceptSchema>

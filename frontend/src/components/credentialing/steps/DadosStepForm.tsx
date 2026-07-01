@@ -25,7 +25,6 @@ function toDefaultValues(pro: CredentialingSnapshot['professional']): DadosStepV
     phone: pro.phone ?? '',
     address: pro.address ?? '',
     profession: pro.profession ?? 'FISIO',
-    specialty: pro.specialty ?? undefined,
   }
 }
 
@@ -134,18 +133,6 @@ export function DadosStepForm({ snapshot, onSubmit, disabled }: Props) {
             )}
           />
         </div>
-
-        <FormField
-          control={form.control}
-          name="specialty"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Especialidade (opcional)</FormLabel>
-              <FormControl><Input {...field} disabled={disabled} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField

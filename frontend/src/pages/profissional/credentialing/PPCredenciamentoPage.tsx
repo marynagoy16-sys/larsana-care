@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { CredentialingStatusBanner } from '@/components/credentialing/CredentialingStatusBanner'
 import { CredentialingStepHint, CredentialingStepper } from '@/components/credentialing/CredentialingStepper'
 import { DadosStepForm } from '@/components/credentialing/steps/DadosStepForm'
+import { CategoriasTecnicasStepForm } from '@/components/credentialing/steps/CategoriasTecnicasStepForm'
 import { ConselhoStepForm } from '@/components/credentialing/steps/ConselhoStepForm'
 import {
   DocumentosStepForm,
@@ -26,6 +27,7 @@ import {
   loadPpLegalTermsForContrato,
   removeProfessionalDocument,
   saveBancoStep,
+  saveCategoriasStep,
   saveConselhoStep,
   saveDadosStep,
   stepHasPersistedSave,
@@ -80,6 +82,7 @@ export function PPCredenciamentoPage() {
   const saveMutation = useMutation({
     mutationFn: async ({ stepId, values }: { stepId: CredentialingStepId; values: unknown }) => {
       if (stepId === 'dados') await saveDadosStep(values as Parameters<typeof saveDadosStep>[0])
+      if (stepId === 'categorias') await saveCategoriasStep(values as Parameters<typeof saveCategoriasStep>[0])
       if (stepId === 'conselho') await saveConselhoStep(values as Parameters<typeof saveConselhoStep>[0])
       if (stepId === 'banco') await saveBancoStep(values as Parameters<typeof saveBancoStep>[0])
     },
@@ -166,6 +169,37 @@ export function PPCredenciamentoPage() {
             snapshot={snapshot}
             disabled={readOnly}
             onSubmit={(values) => handleStepSave(values)}
+          />
+        )
+      case 'categorias':
+        return (
+          <CategoriasTecnicasStepForm
+            key={`categorias-${snapshot.professional.id}-${(snapshot.professional.technical_categories ?? []).join(',')}`}
+            snapshot={snapshot}
+            disabled={readOnly}
+            uploadingType={uploadingType}
+            onSubmit={(values) => handleStepSave(values)}
+            onUpload={async (file, type) => {
+              setUploadingType(type)
+              try {
+                await uploadProfessionalDocument(file, type)
+                invalidate()
+                toast.success('Documento enviado')
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : 'Erro ao enviar')
+              } finally {
+                setUploadingType(null)
+              }
+            }}
+            onRemove={async (id) => {
+              try {
+                await removeProfessionalDocument(id)
+                invalidate()
+                toast.success('Documento removido')
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : 'Erro ao remover')
+              }
+            }}
           />
         )
       case 'conselho':

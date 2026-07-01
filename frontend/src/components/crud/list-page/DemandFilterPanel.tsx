@@ -9,9 +9,11 @@ import {
   attendancePeriodLabels,
   demandStatusLabels,
   demandTypeLabels,
+  getPpTechnicalCategoryLabel,
   patientLevelLabels,
   professionTypeLabels,
 } from '@/constants/labels'
+import { ppTechnicalCategorySelectOptions } from '@/lib/ppTechnicalCategories'
 import { ProfessionalSearchField } from '@/components/forms/ProfessionalSearchField'
 import { useRegions } from '@/hooks/queries/useRegions'
 import type { DemandListFilters } from '@/lib/demandFilters'
@@ -90,6 +92,22 @@ export function DemandFilterPanel({ open, onOpenChange, filters, onApply }: Dema
               <SelectItem value="all">Todas</SelectItem>
               {Object.entries(professionTypeLabels).map(([k, v]) => (
                 <SelectItem key={k} value={k}>{v}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Categoria técnica</Label>
+          <Select
+            value={draft.technical_category ?? 'all'}
+            onValueChange={(v) => setDraft((d) => ({ ...d, technical_category: v === 'all' ? undefined : v }))}
+          >
+            <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {ppTechnicalCategorySelectOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>

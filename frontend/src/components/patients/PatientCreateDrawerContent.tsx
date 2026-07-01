@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PatientCareStatusSelect } from '@/components/forms/PatientCareStatusSelect'
+import { PatientTechnicalCategorySelect } from '@/components/forms/PatientTechnicalCategorySelect'
 import { MaskedInput } from '@/components/forms/MaskedInput'
 import { CityRegionFields } from '@/components/forms/CityRegionFields'
 import { patientWizardSchema, type PatientWizardValues } from '@/schemas/patient'
@@ -35,6 +37,7 @@ const defaultValues: PatientWizardValues = {
     allocated_professional_id: null,
     suggested_weekly_frequency: 2,
     attendance_period: null,
+    technical_category: null,
     clinical_summary: '',
     is_valor_social: false,
   },
@@ -305,14 +308,21 @@ export function PatientCreateDrawerContent({ onClose, onCreated }: PatientCreate
                   <FormField control={form.control} name="patient.care_status" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          {Object.entries(careStatusLabels).map(([k, v]) => (
-                            <SelectItem key={k} value={k}>{v}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <PatientCareStatusSelect value={field.value} onValueChange={field.onChange} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="patient.technical_category" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria técnica de atendimento</FormLabel>
+                      <FormControl>
+                        <PatientTechnicalCategorySelect
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />

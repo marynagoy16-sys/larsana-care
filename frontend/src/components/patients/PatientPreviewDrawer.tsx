@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   X,
   Mail,
@@ -10,6 +11,7 @@ import {
   FileText,
   Check,
   ChevronRight,
+  Stethoscope,
 } from 'lucide-react'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -18,7 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Checkbox } from '@/components/ui/checkbox'
 import { usePatient } from '@/hooks/queries/usePatients'
 import { formatCpf, formatDateTime, formatPhone } from '@/lib/formatters'
-import { careStatusLabels, patientDocumentTypeLabels, patientLevelLabels } from '@/constants/labels'
+import { careStatusLabels, getPpTechnicalCategoryLabel, patientDocumentTypeLabels, patientLevelLabels } from '@/constants/labels'
 import { ResponsibleFormModal } from '@/components/patients/ResponsibleFormModal'
 import { AddressFormModal } from '@/components/patients/AddressFormModal'
 import { DocumentUploadModal } from '@/components/patients/DocumentUploadModal'
@@ -89,6 +91,7 @@ export function PatientPreviewDrawer({
   onEdit,
   onCreated,
 }: PatientPreviewDrawerProps) {
+  const navigate = useNavigate()
   const isCreate = mode === 'create'
   const { data: patient, isLoading } = usePatient(patientId ?? undefined, open && !isCreate && !!patientId)
   const deleteDoc = useDeletePatientDocument(patientId ?? '')
@@ -193,6 +196,12 @@ export function PatientPreviewDrawer({
                 {/* Key info grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-5 py-4 border-b border-border">
                   <InfoCell label="Status" value={careStatusLabels[patient.care_status] ?? patient.care_status} />
+                  <InfoCell
+                    label="Categoria técnica"
+                    value={patient.technical_category
+                      ? getPpTechnicalCategoryLabel(patient.technical_category)
+                      : '—'}
+                  />
                   <InfoCell label="Nível" value={patientLevelLabels[patient.patient_level] ?? patient.patient_level} />
                   <InfoCell label="Região" value={patient.regions ? `${patient.regions.code} — ${patient.regions.name}` : '—'} />
                   <InfoCell label="Cidade" value={patient.cities?.name ?? '—'} />
@@ -300,24 +309,56 @@ export function PatientPreviewDrawer({
                   </div>
 
                   {patient.clinical_summary ? (
-                    <div className="rounded-xl border border-border p-3 space-y-2">
+                    <button
+                      type="button"
+                      className="w-full rounded-xl border border-border p-3 space-y-2 text-left hover:bg-muted/40 transition-colors group"
+                      onClick={() => patientId && navigate(`/admin/pacientes/${patientId}/prontuario`)}
+                    >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-sm font-medium">
                           <FileText size={14} className="text-muted-foreground" />
                           Resumo clínico
                         </div>
-                        <span className="text-[11px] text-muted-foreground">
-                          {formatDateTime(patient.updated_at)}
-                        </span>
+                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <span>{formatDateTime(patient.updated_at)}</span>
+                          <ChevronRight
+                            size={14}
+                            className="text-muted-foreground/50 group-hover:text-primary transition-colors"
+                          />
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{patient.clinical_summary}</p>
-                    </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                        {patient.clinical_summary}
+                      </p>
+                      <p className="text-xs font-medium text-primary">Ver prontuário e evoluções</p>
+                    </button>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Nenhuma nota registrada.</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Nenhuma nota registrada.</p>
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors"
+                        onClick={() => patientId && navigate(`/admin/pacientes/${patientId}/prontuario`)}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Stethoscope size={14} className="text-muted-foreground" />
+                          Prontuário e evoluções
+                        </span>
+                        <ChevronRight size={14} className="text-muted-foreground" />
+                      </button>
+                    </div>
                   )}
 
                   {/* Quick links */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                    <button
+                      type="button"
+                      className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/50"
+                      onClick={() => patientId && navigate(`/admin/pacientes/${patientId}/prontuario`)}
+                    >
+                      Prontuário
+                      <ChevronRight size={14} />
+                    </button>
                     <button
                       type="button"
                       className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted/50"

@@ -880,6 +880,7 @@ export type Database = {
           region_id: string | null
           required_profession: Database["public"]["Enums"]["profession_type"]
           status: Database["public"]["Enums"]["demand_status"]
+          technical_category: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at: string
         }
         Insert: {
@@ -893,6 +894,7 @@ export type Database = {
           region_id?: string | null
           required_profession?: Database["public"]["Enums"]["profession_type"]
           status?: Database["public"]["Enums"]["demand_status"]
+          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at?: string
         }
         Update: {
@@ -906,6 +908,7 @@ export type Database = {
           region_id?: string | null
           required_profession?: Database["public"]["Enums"]["profession_type"]
           status?: Database["public"]["Enums"]["demand_status"]
+          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at?: string
         }
         Relationships: [
@@ -1096,6 +1099,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["assessment_status"]
           suggested_patient_level: Database["public"]["Enums"]["patient_level"]
           suggested_weekly_frequency?: number | null
+          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at?: string
         }
         Update: {
@@ -1122,6 +1126,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["assessment_status"]
           suggested_patient_level?: Database["public"]["Enums"]["patient_level"]
           suggested_weekly_frequency?: number | null
+          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at?: string
         }
         Relationships: [
@@ -1991,6 +1996,7 @@ export type Database = {
           region_id: string | null
           sex: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency: number | null
+          technical_category: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at: string
           valor_social_amount_cents: number | null
           valor_social_approved_by: string | null
@@ -2015,6 +2021,7 @@ export type Database = {
           region_id?: string | null
           sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
+          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at?: string
           valor_social_amount_cents?: number | null
           valor_social_approved_by?: string | null
@@ -2039,6 +2046,7 @@ export type Database = {
           region_id?: string | null
           sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
+          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
           updated_at?: string
           valor_social_amount_cents?: number | null
           valor_social_approved_by?: string | null
@@ -2455,6 +2463,10 @@ export type Database = {
           profession: Database["public"]["Enums"]["profession_type"]
           referral_source: string | null
           specialty: string | null
+          technical_categories: Database["public"]["Enums"]["pp_technical_category"][]
+          cardiorrespiratory_habilitation_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          cardiorrespiratory_request_basis: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
+          cardiorrespiratory_experience_description: string | null
           updated_at: string
           user_id: string | null
           weekly_hour_limit: number
@@ -2478,6 +2490,10 @@ export type Database = {
           profession?: Database["public"]["Enums"]["profession_type"]
           referral_source?: string | null
           specialty?: string | null
+          technical_categories?: Database["public"]["Enums"]["pp_technical_category"][]
+          cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          cardiorrespiratory_request_basis?: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
+          cardiorrespiratory_experience_description?: string | null
           updated_at?: string
           user_id?: string | null
           weekly_hour_limit?: number
@@ -2501,6 +2517,10 @@ export type Database = {
           profession?: Database["public"]["Enums"]["profession_type"]
           referral_source?: string | null
           specialty?: string | null
+          technical_categories?: Database["public"]["Enums"]["pp_technical_category"][]
+          cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          cardiorrespiratory_request_basis?: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
+          cardiorrespiratory_experience_description?: string | null
           updated_at?: string
           user_id?: string | null
           weekly_hour_limit?: number
@@ -3331,6 +3351,22 @@ export type Database = {
         Args: { p_roles: Database["public"]["Enums"]["user_role"][] }
         Returns: boolean
       }
+      pp_can_see_demand: {
+        Args: { p_professional_id: string; p_demand_id: string }
+        Returns: boolean
+      }
+      pp_is_operational_regular: {
+        Args: { p_professional_id: string }
+        Returns: boolean
+      }
+      review_cardiorrespiratory_habilitation: {
+        Args: {
+          p_professional_id: string
+          p_new_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          p_admin_notes?: string | null
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       alert_severity: "info" | "warning" | "critical"
@@ -3395,7 +3431,14 @@ export type Database = {
       nps_rated_entity_type: "professional" | "patient" | "platform"
       nps_rater_type: "paciente" | "pp"
       patient_attendance_period: "MANHA" | "TARDE" | "NOITE"
-      patient_care_status: "ATIVO" | "PAUSA"
+      patient_care_status:
+        | "ATIVO"
+        | "PAUSA"
+        | "PAUSA_JUSTIFICADA"
+        | "PAUSA_SOLICITADA_PACIENTE"
+        | "ALTA"
+        | "OBITO"
+        | "CANCELADO"
       patient_document_type: "RG" | "LAUDO" | "EXAME" | "OUTRO"
       patient_level: "N1" | "N2" | "N3" | "VALOR_SOCIAL"
       patient_sex: "M" | "F" | "OUTRO"
@@ -3404,6 +3447,25 @@ export type Database = {
       person_type: "PF" | "PJ"
       pp_class: "BRONZE" | "PRATA" | "OURO"
       profession_type: "FISIO" | "NUTI" | "MED" | "CUID" | "FONO"
+      cardiorrespiratory_habilitation_status:
+        | "nao_solicitado"
+        | "em_analise"
+        | "habilitado"
+        | "nao_habilitado"
+        | "suspenso"
+      cardiorrespiratory_request_basis:
+        | "certificado"
+        | "experiencia"
+        | "certificado_e_experiencia"
+        | "analise_larsana"
+      pp_technical_category:
+        | "ortopedico"
+        | "pos_operatorio"
+        | "neurologico"
+        | "idoso_gerontologia"
+        | "funcional_condicionamento"
+        | "pediatrico_geral"
+        | "cardiorrespiratoria"
       professional_document_type:
         | "RG_CNH"
         | "COUNCIL_CARD"
@@ -3411,6 +3473,11 @@ export type Database = {
         | "CERTIFICATE"
         | "SIGNED_CONTRACT_PDF"
         | "VISIT_CARD_PHOTO"
+        | "CARDIO_CERTIFICATE"
+        | "CARDIO_EXPERIENCE_PROOF"
+        | "CARDIO_CV"
+        | "CARDIO_PROFESSIONAL_DECLARATION"
+        | "CARDIO_OTHER"
       region_code: "A" | "B" | "C"
       session_status:
         | "prevista"
@@ -3623,7 +3690,15 @@ export const Constants = {
       nps_rated_entity_type: ["professional", "patient", "platform"],
       nps_rater_type: ["paciente", "pp"],
       patient_attendance_period: ["MANHA", "TARDE", "NOITE"],
-      patient_care_status: ["ATIVO", "PAUSA"],
+      patient_care_status: [
+        "ATIVO",
+        "PAUSA",
+        "PAUSA_JUSTIFICADA",
+        "PAUSA_SOLICITADA_PACIENTE",
+        "ALTA",
+        "OBITO",
+        "CANCELADO",
+      ],
       patient_document_type: ["RG", "LAUDO", "EXAME", "OUTRO"],
       patient_level: ["N1", "N2", "N3", "VALOR_SOCIAL"],
       patient_sex: ["M", "F", "OUTRO"],

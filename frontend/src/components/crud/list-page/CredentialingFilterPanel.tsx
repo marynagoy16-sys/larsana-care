@@ -85,6 +85,20 @@ export function CredentialingFilterPanel({
 
         <div className="flex items-center gap-2">
           <Checkbox
+            id="cardio_review_only"
+            checked={!!draft.cardio_review_only}
+            onCheckedChange={(c) => setDraft((d) => ({
+              ...d,
+              cardio_review_only: !!c,
+            }))}
+          />
+          <Label htmlFor="cardio_review_only" className="font-normal cursor-pointer">
+            Cardiorrespiratória em análise
+          </Label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Checkbox
             id="hide_active"
             checked={!!draft.hide_active}
             onCheckedChange={(c) => setDraft((d) => ({ ...d, hide_active: !!c }))}

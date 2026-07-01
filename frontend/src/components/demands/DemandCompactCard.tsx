@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { patientLevelLabels } from '@/constants/labels'
+import { patientLevelLabels, getPpTechnicalCategoryLabel } from '@/constants/labels'
+import { Badge } from '@/components/ui/badge'
 import { formatDistanceKm, haversineDistanceKm, type GeoPoint } from '@/lib/geo'
 import { cn } from '@/lib/utils'
 import type { DemandListItem } from '@/services/demands'
@@ -43,6 +44,9 @@ export function DemandCompactCard({
   const distance = resolveDemandDistance(demand, origin)
   const label = demand.patient_abbreviation
   const levelLabel = formatPatientLevel(demand.patient_level)
+  const categoryLabel = demand.technical_category
+    ? getPpTechnicalCategoryLabel(demand.technical_category)
+    : null
 
   return (
     <button
@@ -61,9 +65,16 @@ export function DemandCompactCard({
       </Avatar>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{label}</p>
-        {levelLabel && (
-          <p className="truncate text-xs text-muted-foreground">{levelLabel}</p>
-        )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {levelLabel && (
+            <p className="truncate text-xs text-muted-foreground">{levelLabel}</p>
+          )}
+          {categoryLabel && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-normal">
+              {categoryLabel}
+            </Badge>
+          )}
+        </div>
       </div>
       <span className="shrink-0 text-sm font-medium tabular-nums text-muted-foreground">{distance}</span>
       {showChevron && <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}

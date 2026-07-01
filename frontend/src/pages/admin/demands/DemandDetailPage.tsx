@@ -28,6 +28,7 @@ import {
   careStatusLabels,
   demandStatusLabels,
   demandTypeLabels,
+  getPpTechnicalCategoryLabel,
   patientLevelLabels,
   ppClassLabels,
   professionTypeLabels,
@@ -111,6 +112,12 @@ export function DemandDetailPage() {
                     label: 'Nível',
                     value: patient?.patient_level
                       ? patientLevelLabels[patient.patient_level] ?? patient.patient_level
+                      : '—',
+                  },
+                  {
+                    label: 'Categoria técnica',
+                    value: patient?.technical_category
+                      ? getPpTechnicalCategoryLabel(patient.technical_category)
                       : '—',
                   },
                   {

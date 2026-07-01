@@ -22,6 +22,7 @@ function staffRoute(children: ReactNode, allowed: UserRole[] = staffRoles) {
 const PatientListPage = lazy(() => import('@/pages/admin/patients/PatientListPage').then((m) => ({ default: m.PatientListPage })))
 const PatientDetailPage = lazy(() => import('@/pages/admin/patients/PatientDetailPage').then((m) => ({ default: m.PatientDetailPage })))
 const PatientEditPage = lazy(() => import('@/pages/admin/patients/PatientEditPage').then((m) => ({ default: m.PatientEditPage })))
+const PatientProntuarioPage = lazy(() => import('@/pages/admin/patients/PatientProntuarioPage').then((m) => ({ default: m.PatientProntuarioPage })))
 function lazyAdmin(exportName: keyof typeof import('@/pages/admin/modulePages')) {
   return lazy(() => import('@/pages/admin/modulePages').then((m) => ({ default: m[exportName] })))
 }
@@ -111,6 +112,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'pacientes', element: staffRoute(<PatientListPage />, operacaoRoles) },
       { path: 'pacientes/novo', element: <Navigate to="/admin/pacientes" replace /> },
       { path: 'pacientes/:id', element: staffRoute(<PatientDetailPage />, operacaoRoles) },
+      { path: 'pacientes/:id/prontuario', element: staffRoute(<PatientProntuarioPage />, operacaoRoles) },
       { path: 'pacientes/:id/editar', element: staffRoute(<PatientEditPage />, operacaoRoles) },
       { path: 'avaliacoes', element: staffRoute(<AssessmentsPage />, operacaoRoles) },
       { path: 'avaliacoes/:id', element: staffRoute(<AssessmentDetailPage />, operacaoRoles) },

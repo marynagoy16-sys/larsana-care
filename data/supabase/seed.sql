@@ -117,6 +117,7 @@ BEGIN
   INSERT INTO public.professionals (
     id, user_id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address,
     pp_class, profession, specialty, credentialing_status,
+    technical_categories, cardiorrespiratory_habilitation_status,
     flag_encaminhado, flag_assinado, asaas_wallet_id, is_active
   ) VALUES (
     v_professional_id,
@@ -132,6 +133,8 @@ BEGIN
     'FISIO',
     'Geriatria e reabilitação',
     'ativo',
+    ARRAY['idoso_gerontologia', 'funcional_condicionamento']::public.pp_technical_category[],
+    'nao_solicitado'::public.cardiorrespiratory_habilitation_status,
     true,
     true,
     '00000000-0000-4000-8000-000000000099',
@@ -141,7 +144,8 @@ BEGIN
     birth_date = EXCLUDED.birth_date,
     address = EXCLUDED.address,
     cpf_cnpj = EXCLUDED.cpf_cnpj,
-    specialty = EXCLUDED.specialty;
+    specialty = EXCLUDED.specialty,
+    technical_categories = EXCLUDED.technical_categories;
 
   INSERT INTO public.professional_councils (professional_id, council_type, registration_number)
   VALUES (v_professional_id, 'CREFITO', '269110-F')

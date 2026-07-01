@@ -28,6 +28,7 @@ export async function getPatientSearchOption(id: string): Promise<SearchOption |
 export interface ProfessionalSearchFilters {
   profession?: string
   credentialing_status?: string
+  technical_category?: string | null
 }
 
 export async function searchProfessionals(
@@ -50,6 +51,9 @@ export async function searchProfessionals(
   }
   if (filters.credentialing_status) {
     dbQuery = dbQuery.eq('credentialing_status', filters.credentialing_status as never)
+  }
+  if (filters.technical_category === 'cardiorrespiratoria') {
+    dbQuery = dbQuery.eq('cardiorrespiratory_habilitation_status', 'habilitado' as never)
   }
 
   const { data, error } = await dbQuery

@@ -16,6 +16,7 @@ type DemandPatientJoin = {
   attendance_period: string | null
   clinical_summary: string | null
   patient_level: string | null
+  technical_category: string | null
 }
 
 type DemandAddressJoin = {
@@ -27,6 +28,7 @@ type DemandAddressJoin = {
 
 export type DemandListItem = CrudRow & {
   demand_type: 'avaliacao' | 'continuidade'
+  technical_category: string | null
   patient_abbreviation: string
   patient_sex: string
   patient_age: string
@@ -53,6 +55,7 @@ type DemandPatientDetail = {
   clinical_summary: string | null
   patient_level: string | null
   care_status: string | null
+  technical_category: string | null
   suggested_weekly_frequency: number | null
   region_id: string | null
   city_id: string | null
@@ -111,6 +114,7 @@ const DEMAND_DETAIL_SELECT = `
   patients (
     full_name, cpf, birth_date, sex, diagnostic_hypothesis, attendance_period,
     clinical_summary, patient_level, care_status, suggested_weekly_frequency,
+    technical_category,
     region_id, city_id,
     regions ( code, name ),
     cities ( name ),
@@ -138,7 +142,8 @@ const DEMAND_LIST_SELECT = `
     diagnostic_hypothesis,
     attendance_period,
     clinical_summary,
-    patient_level
+    patient_level,
+    technical_category
   ),
   patient_addresses (
     full_address,
@@ -163,6 +168,9 @@ function mapDemandRow(
   return {
     ...row,
     demand_type: (row.demand_type as DemandListItem['demand_type']) ?? 'avaliacao',
+    technical_category: (row.technical_category as string | null)
+      ?? patient?.technical_category
+      ?? null,
     patient_abbreviation: formatPatientAbbreviation(patient?.full_name),
     patient_sex: formatPatientSex(patient?.sex),
     patient_age: formatPatientAge(patient?.birth_date),
