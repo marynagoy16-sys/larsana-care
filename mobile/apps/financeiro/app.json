@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "LarsanaCare Financeiro",
+    "slug": "larsana-care-financeiro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "larsanacare-financeiro",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4F6F1"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "br.com.larsanacare.financeiro"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#17310A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "br.com.larsanacare.financeiro"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-splash-screen"
+    ]
+  }
+}
