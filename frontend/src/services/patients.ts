@@ -5,6 +5,7 @@ import type { AddressStepValues, PatientWizardValues, ResponsibleStepValues } fr
 const PATIENT_DOCS_BUCKET = 'patient-documents'
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
+const PAGE_SIZE = 10
 
 export type Patient = Tables<'patients'>
 export type PatientListItem = Patient & {

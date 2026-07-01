@@ -9,7 +9,6 @@ import {
   attendancePeriodLabels,
   demandStatusLabels,
   demandTypeLabels,
-  getPpTechnicalCategoryLabel,
   patientLevelLabels,
   professionTypeLabels,
 } from '@/constants/labels'

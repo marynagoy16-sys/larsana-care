@@ -33,7 +33,6 @@ import {
 } from '@/constants/labels'
 import {
   CARDIO_HABILITATION_DOCUMENTS,
-  REQUIRED_PP_DOCUMENTS,
 } from '@/lib/credentialingModel'
 import {
   getPpTechnicalCategoryLabel,
