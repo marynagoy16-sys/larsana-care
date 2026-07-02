@@ -253,7 +253,7 @@ export const demandsService = {
         professionals: { full_name: string } | null
       }
     >
-    const mapped = rows.map(mapDemandRow)
+    const mapped = rows.map((row) => mapDemandRow(row))
 
     return { data: mapped, count: mapped.length }
   },

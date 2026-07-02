@@ -41,6 +41,7 @@ export const patientStepSchema = z.object({
       'funcional_condicionamento',
       'pediatrico_geral',
       'cardiorrespiratoria',
+      'atendimento_unico',
     ])
     .optional()
     .nullable(),

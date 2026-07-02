@@ -122,7 +122,7 @@ export async function saveDadosStep(values: DadosStepValues) {
   if (error) throw error
 
   if (values.referral_code?.trim()) {
-    const { error: referralError } = await supabase.rpc('register_pp_referral_on_signup' as never, {
+    const { error: referralError } = await supabase.rpc('register_pp_referral_on_signup', {
       p_referred_professional_id: professionalId,
       p_referral_code: values.referral_code.trim(),
     })

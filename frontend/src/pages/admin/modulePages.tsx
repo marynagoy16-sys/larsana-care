@@ -319,7 +319,7 @@ export function AssessmentDetailPage() {
               suggestedLevel={String(assessmentRecord.suggested_patient_level)}
               requestedLevel={assessmentRecord.requested_patient_level as string | null}
               reason={assessmentRecord.patient_level_change_reason as string | null}
-              queryKeys={[qk.assessments, [...qk.assessments, id]]}
+              queryKeys={[[...qk.assessments], [...qk.assessments, id]]}
             />
           </CascadeItem>
         )}

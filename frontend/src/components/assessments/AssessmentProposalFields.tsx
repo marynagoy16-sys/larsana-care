@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { patientLevelLabels, weeklyFrequencyLabels, proposedSessionCountLabels } from '@/constants/labels'
+import { weeklyFrequencyLabels, proposedSessionCountLabels } from '@/constants/labels'
 import type { AssessmentProposalFormValues } from '@/schemas/assessmentProposal'
 import {
   PROPOSAL_SESSION_COUNTS,

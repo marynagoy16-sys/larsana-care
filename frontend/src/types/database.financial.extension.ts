@@ -65,6 +65,20 @@ export type FinancialDatabaseTables = {
     created_by: string | null
     created_at: string
   }>
+  session_adjustments: FinancialTable<{
+    id: string
+    cycle_id: string
+    session_id: string
+    reason: string
+    session_value_cents: number
+    partial_percent: number
+    refund_family_cents: number
+    pp_transfer_cents: number
+    larsana_cents: number
+    cancelled_at: string
+    created_by: string | null
+    created_at: string
+  }>
 }
 
 export type FinancialDatabaseFunctions = {

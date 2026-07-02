@@ -89,7 +89,7 @@ export async function loadAdminCredentialingSnapshot(
   const { data: professional, error: proError } = await supabase
     .from('professionals')
     .select(
-      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado, pp_class, created_at, updated_at, asaas_wallet_id',
+      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, patient_preferences, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado, pp_class, created_at, updated_at, asaas_wallet_id',
     )
     .eq('id', professionalId)
     .maybeSingle()

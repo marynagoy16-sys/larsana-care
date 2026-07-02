@@ -28,7 +28,7 @@ export type AssessmentDetailViewData = {
   patient_level_change_reason?: string | null
   primary_diagnosis: string
   comorbidities?: string | null
-  mobility?: string
+  mobility?: string | null
   functionality?: string | null
   prior_conditions?: unknown
   surgeries?: unknown

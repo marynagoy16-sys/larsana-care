@@ -3255,6 +3255,11 @@ export type Database = {
           referral_source?: string | null
           specialty?: string | null
           technical_categories?: Database["public"]["Enums"]["pp_technical_category"][]
+          patient_preferences?: Database["public"]["Enums"]["pp_technical_category"][]
+          points_total?: number
+          patente?: Database["public"]["Enums"]["pp_patente"]
+          referral_code?: string | null
+          referral_count_pre_bronze?: number
           cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
           cardiorrespiratory_request_basis?: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
           cardiorrespiratory_experience_description?: string | null
@@ -3282,6 +3287,11 @@ export type Database = {
           referral_source?: string | null
           specialty?: string | null
           technical_categories?: Database["public"]["Enums"]["pp_technical_category"][]
+          patient_preferences?: Database["public"]["Enums"]["pp_technical_category"][]
+          points_total?: number
+          patente?: Database["public"]["Enums"]["pp_patente"]
+          referral_code?: string | null
+          referral_count_pre_bronze?: number
           cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
           cardiorrespiratory_request_basis?: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
           cardiorrespiratory_experience_description?: string | null

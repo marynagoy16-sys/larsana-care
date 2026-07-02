@@ -14,6 +14,7 @@ const baseSnapshot = (): CredentialingSnapshot => ({
     profession: 'FISIO',
     specialty: null,
     technical_categories: ['ortopedico'],
+    patient_preferences: ['ortopedico'],
     cardiorrespiratory_habilitation_status: 'nao_solicitado',
     cardiorrespiratory_request_basis: null,
     cardiorrespiratory_experience_description: null,
