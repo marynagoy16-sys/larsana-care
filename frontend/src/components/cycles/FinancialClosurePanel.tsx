@@ -82,6 +82,18 @@ export function FinancialClosurePanel({
         },
         { label: 'Valor realizado', value: formatCurrency(preview.completed_amount_cents) },
         { label: 'Saldo remanescente', value: formatCurrency(preview.remaining_amount_cents) },
+        ...(preview.session_cancel_refund_cents
+          ? [
+              {
+                label: 'Cancelamentos 50% (reembolso família)',
+                value: formatCurrency(preview.session_cancel_refund_cents),
+              },
+              {
+                label: 'Cancelamentos 50% (repasse PP)',
+                value: formatCurrency(preview.session_cancel_pp_cents ?? 0),
+              },
+            ]
+          : []),
         { label: 'Repasse PP calculado', value: formatCurrency(preview.pp_release_amount_cents) },
         { label: 'Comissão Larsana', value: formatCurrency(preview.larsana_commission_amount_cents) },
         { label: 'Taxa operacional', value: formatCurrency(preview.operational_fee_cents) },

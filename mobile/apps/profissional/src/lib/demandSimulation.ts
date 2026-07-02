@@ -1,6 +1,15 @@
 import { formatCurrency } from '@/lib/formatters'
 import type { CommissionRule, PricingEntry, RetentionRule } from '@/services/pricing'
 
+export type PpPatente = 'ALUMINIO' | 'BRONZE' | 'PRATA' | 'OURO'
+
+export const PATENTE_REPASSE_PERCENT: Record<PpPatente, number> = {
+  ALUMINIO: 65,
+  BRONZE: 70,
+  PRATA: 75,
+  OURO: 80,
+}
+
 export const ASSESSMENT_APPROVED_PAYOUT_CENTS = 10000
 export const ASSESSMENT_DECLINED_PAYOUT_CENTS = 5000
 
@@ -39,6 +48,13 @@ export interface ContinuidadeSimulation {
 
 const DEFAULT_CYCLE2_PERCENT = 70
 
+function mapPpClassToPatente(ppClass?: string | null): PpPatente {
+  if (ppClass === 'OURO') return 'OURO'
+  if (ppClass === 'PRATA') return 'PRATA'
+  if (ppClass === 'BRONZE') return 'BRONZE'
+  return 'ALUMINIO'
+}
+
 export function findSessionPriceCents(
   entries: PricingEntry[],
   regionId: string | null | undefined,
@@ -55,13 +71,21 @@ export function resolveCyclePercents(params: {
   commissions: CommissionRule[]
   retention: RetentionRule | null
   ppClass?: string | null
+  patente?: PpPatente | null
+  personType?: 'PF' | 'PJ' | null
 }): { cycle1Percent: number; cycle2Percent: number } {
   const larsanaRetention = params.retention ? Number(params.retention.larsana_percent) : 40
-  const cycle1Percent = 100 - larsanaRetention
+  let cycle1Percent = 100 - larsanaRetention
+  if (params.personType === 'PJ') {
+    cycle1Percent = params.retention ? 100 - Number(params.retention.larsana_percent) : 70
+    if (cycle1Percent === 60) cycle1Percent = 70
+  }
 
-  const ppClass = params.ppClass ?? 'BRONZE'
-  const commission = params.commissions.find((item) => item.pp_class === ppClass)
-  const cycle2Percent = commission ? Number(commission.pp_percent) : DEFAULT_CYCLE2_PERCENT
+  const patente = params.patente ?? mapPpClassToPatente(params.ppClass)
+  let cycle2Percent = PATENTE_REPASSE_PERCENT[patente]
+  if (params.personType === 'PJ') {
+    cycle2Percent = Math.min(cycle2Percent + 10, 95)
+  }
 
   return { cycle1Percent, cycle2Percent }
 }
@@ -95,6 +119,8 @@ export function buildAvaliacaoSimulation(params: {
   commissions: CommissionRule[]
   retention: RetentionRule | null
   ppClass?: string | null
+  patente?: PpPatente | null
+  personType?: 'PF' | 'PJ' | null
 }): AvaliacaoSimulation | null {
   if (params.sessionPriceCents == null) return null
 
@@ -120,6 +146,8 @@ export function buildContinuidadeSimulation(params: {
   retention: RetentionRule | null
   weeklyFrequency?: number | null
   ppClass?: string | null
+  patente?: PpPatente | null
+  personType?: 'PF' | 'PJ' | null
 }): ContinuidadeSimulation | null {
   if (params.sessionPriceCents == null) return null
 

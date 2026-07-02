@@ -26,10 +26,15 @@ type AssessmentDetail = {
   proposed_session_count: number
   suggested_patient_level: string
   proposed_patient_level: string
+  level_confirmed: boolean | null
+  level_change_review_status: string | null
   patient_level_change_reason: string | null
   primary_diagnosis: string
   comorbidities: string | null
-  mobility: string
+  mobility: string | null
+  functionality: string | null
+  prior_conditions: unknown
+  surgeries: unknown
   patients?: {
     full_name: string
     regions?: { code: string; name: string } | null
@@ -49,8 +54,9 @@ async function getPPAssessmentDetail(id: string): Promise<AssessmentDetail | nul
       id, patient_id, status, clinical_content, crefito_number, created_at,
       proposal_sent_at, response_deadline_at, family_response, responded_at,
       suggested_weekly_frequency, proposed_weekly_frequency, proposed_session_count,
-      suggested_patient_level, proposed_patient_level, patient_level_change_reason,
-      primary_diagnosis, comorbidities, mobility,
+      suggested_patient_level, proposed_patient_level, level_confirmed, level_change_review_status,
+      patient_level_change_reason, primary_diagnosis, comorbidities, mobility, functionality,
+      prior_conditions, surgeries,
       patients (
         full_name,
         regions ( code, name ),

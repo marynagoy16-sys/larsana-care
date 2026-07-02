@@ -66,6 +66,7 @@ export type CredentialingSnapshot = {
     | 'cardiorrespiratory_experience_description'
     | 'credentialing_status'
     | 'flag_assinado'
+    | 'patient_preferences'
   >
   council: Pick<Tables<'professional_councils'>, 'council_type' | 'registration_number'> | null
   bank: Pick<

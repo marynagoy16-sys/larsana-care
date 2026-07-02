@@ -29,6 +29,7 @@ import {
   Timer,
   GraduationCap,
   Pill,
+  Trophy,
 } from 'lucide-react'
 import type { UserRole } from '@/types/auth'
 
@@ -102,6 +103,7 @@ export const adminNavSections: NavSection[] = [
     icon: Settings,
     items: [
       { label: 'Tabela de preços', href: '/admin/config/precos', icon: Receipt, roles: ['admin'] },
+      { label: 'Pontuação PP', href: '/admin/config/pontos-pp', icon: Trophy, roles: ['admin'] },
       { label: 'Termos e contratos', href: '/admin/config/termos', icon: ScrollText, roles: ['admin'] },
       { label: 'Templates LRS-PROF', href: '/admin/config/contratos', icon: FileText, roles: ['admin'] },
       { label: 'Regiões e cidades', href: '/admin/config/regioes', icon: Building2, roles: ['admin', 'gestao'] },
@@ -119,6 +121,7 @@ export const profissionalNavSections: NavSection[] = [
     icon: Calendar,
     items: [
       { label: 'Início', href: '/profissional/inicio', icon: Home, roles: ['pp'], end: true },
+      { label: 'Minha evolução', href: '/profissional/evolucao', icon: Trophy, roles: ['pp'] },
       { label: 'Agenda', href: '/profissional/agenda', icon: Calendar, roles: ['pp'] },
       { label: 'Demandas', href: '/profissional/demandas', icon: MapPin, roles: ['pp'] },
     ],
@@ -232,6 +235,7 @@ export const routeTitles: Record<string, string> = {
   '/admin/relatorios/nps': 'NPS',
   '/admin/relatorios/repasses-aging': 'Aging repasses',
   '/admin/config/precos': 'Tabela de preços',
+  '/admin/config/pontos-pp': 'Pontuação PP',
   '/admin/config/termos': 'Termos e contratos',
   '/admin/config/contratos': 'Templates LRS-PROF',
   '/admin/config/regioes': 'Regiões e cidades',
@@ -243,6 +247,7 @@ export const routeTitles: Record<string, string> = {
   '/profissional/agenda': 'Agenda',
   '/profissional/demandas': 'Demandas',
   '/profissional/evolucoes': 'Evoluções pendentes',
+  '/profissional/evolucao': 'Minha evolução',
   '/profissional/evolucao/nova': 'Nova evolução',
   '/profissional/pacientes': 'Meus pacientes',
   '/profissional/avaliacoes': 'Avaliações',

@@ -8,21 +8,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { patientLevelLabels, weeklyFrequencyLabels, proposedSessionCountLabels } from '@/constants/labels'
 import type { AssessmentProposalFormValues } from '@/schemas/assessmentProposal'
 import {
-  PROPOSAL_PATIENT_LEVELS,
   PROPOSAL_SESSION_COUNTS,
   PROPOSAL_WEEKLY_FREQUENCIES,
 } from '@/schemas/assessmentProposal'
+import { PriorConditionsFields } from '@/components/assessments/PriorConditionsFields'
 
 type AssessmentProposalFieldsProps = {
   control: Control<AssessmentProposalFormValues>
+  suggestedLevelLabel: string
   showLevelChangeReason: boolean
 }
 
 export function AssessmentProposalFields({
   control,
+  suggestedLevelLabel,
   showLevelChangeReason,
 }: AssessmentProposalFieldsProps) {
   return (
@@ -83,30 +87,43 @@ export function AssessmentProposalFields({
         )}
       />
 
-      <FormField
-        control={control}
-        name="proposed_patient_level"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nível do paciente</FormLabel>
-            <FormControl>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROPOSAL_PATIENT_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {patientLevelLabels[level]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 space-y-3">
+        <div>
+          <p className="text-sm font-medium">Nível sugerido pela Larsana</p>
+          <p className="text-muted-foreground text-sm mt-0.5">{suggestedLevelLabel}</p>
+        </div>
+        <FormField
+          control={control}
+          name="level_confirmed"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Você confirma que este paciente é {suggestedLevelLabel}?</FormLabel>
+              <FormControl>
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={field.value ? 'default' : 'outline'}
+                    onClick={() => field.onChange(true)}
+                  >
+                    Sim, confirmo
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={!field.value ? 'default' : 'outline'}
+                    className={cn(!field.value && 'border-amber-500')}
+                    onClick={() => field.onChange(false)}
+                  >
+                    Não, preciso justificar
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       {showLevelChangeReason && (
         <FormField
@@ -114,11 +131,11 @@ export function AssessmentProposalFields({
           name="patient_level_change_reason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Justificativa da alteração de nível</FormLabel>
+              <FormLabel>Justificativa — por que o nível sugerido não se aplica?</FormLabel>
               <FormControl>
                 <Textarea
                   rows={3}
-                  placeholder="Ex.: Por que o paciente passou de Nível 1 para Nível 2?"
+                  placeholder="Descreva por que acredita que o paciente deveria ter outro nível. A gestão Larsana analisará."
                   {...field}
                 />
               </FormControl>
@@ -130,44 +147,32 @@ export function AssessmentProposalFields({
 
       <FormField
         control={control}
+        name="functionality"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Funcionalidade</FormLabel>
+            <FormControl>
+              <Textarea
+                rows={3}
+                placeholder="Ex.: Deambula com andador, acamado, transferência com auxílio…"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <PriorConditionsFields control={control} />
+
+      <FormField
+        control={control}
         name="primary_diagnosis"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Diagnóstico principal</FormLabel>
             <FormControl>
               <Textarea rows={2} placeholder="Diagnóstico principal identificado na avaliação" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="comorbidities"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Comorbidades</FormLabel>
-            <FormControl>
-              <Textarea rows={3} placeholder="Comorbidades relevantes (opcional)" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name="mobility"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Mobilidade</FormLabel>
-            <FormControl>
-              <Textarea
-                rows={3}
-                placeholder="Ex.: Deambula com andador, acamado, transferência com auxílio..."
-                {...field}
-              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -193,11 +198,11 @@ export function AssessmentProposalFields({
         name="clinical_content"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Laudo complementar (opcional)</FormLabel>
+            <FormLabel>Avaliação clínica</FormLabel>
             <FormControl>
               <Textarea
-                rows={5}
-                placeholder="Observações adicionais da avaliação clínica..."
+                rows={6}
+                placeholder="Descreva em texto corrido como foi a avaliação, conduta e observações clínicas…"
                 {...field}
               />
             </FormControl>

@@ -45,7 +45,7 @@ export async function loadCredentialingSnapshot(): Promise<CredentialingSnapshot
   const { data: professional, error: proError } = await supabase
     .from('professionals')
     .select(
-      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado',
+      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, patient_preferences, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado',
     )
     .eq('user_id', user.id)
     .maybeSingle()
@@ -120,6 +120,14 @@ export async function saveDadosStep(values: DadosStepValues) {
     .eq('id', professionalId)
 
   if (error) throw error
+
+  if (values.referral_code?.trim()) {
+    const { error: referralError } = await supabase.rpc('register_pp_referral_on_signup' as never, {
+      p_referred_professional_id: professionalId,
+      p_referral_code: values.referral_code.trim(),
+    })
+    if (referralError) throw referralError
+  }
 }
 
 export async function saveCategoriasStep(values: CategoriasStepValues) {
@@ -133,6 +141,7 @@ export async function saveCategoriasStep(values: CategoriasStepValues) {
     .from('professionals')
     .update({
       technical_categories: categories,
+      patient_preferences: values.patient_preferences ?? [],
       cardiorrespiratory_request_basis: values.requests_cardio_habilitation
         ? values.cardiorrespiratory_request_basis ?? null
         : null,

@@ -15,6 +15,7 @@ import {
   Plus,
   User,
   AlertTriangle,
+  Ban,
   RefreshCw,
   Circle,
   Activity,
@@ -41,6 +42,7 @@ import { careSessionsService } from '@/services/index'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
 import { RescheduleSessionModal } from '@/components/cycles/RescheduleSessionModal'
+import { CancelSessionModal } from '@/components/cycles/CancelSessionModal'
 import { FinancialClosurePanel } from '@/components/cycles/FinancialClosurePanel'
 import { InitiatePauseModal } from '@/components/cycles/InitiatePauseModal'
 import { requiredString } from '@/schemas/common'
@@ -119,6 +121,12 @@ const SESSION_STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckC
     icon: AlertTriangle,
     color: 'text-destructive',
     badge: 'bg-destructive/10 text-destructive',
+  },
+  cancelada_sem_justificativa: {
+    label: 'Cancelada 50%',
+    icon: Ban,
+    color: 'text-orange-600 dark:text-orange-400',
+    badge: 'bg-orange-500/10 text-orange-700 dark:text-orange-400',
   },
 }
 
@@ -308,13 +316,17 @@ function SessionScheduleItem({
   expanded,
   onToggle,
   onReschedule,
+  onCancel,
   canReschedule,
+  canCancel,
 }: {
   slot: SessionSlot
   expanded: boolean
   onToggle: () => void
   onReschedule?: (session: Session) => void
+  onCancel?: (session: Session) => void
   canReschedule?: boolean
+  canCancel?: boolean
 }) {
   const { session, number } = slot
   const status = session?.status ?? 'prevista'
@@ -325,6 +337,7 @@ function SessionScheduleItem({
   const primaryRecord = records[0] ?? null
   const canExpand = isDone
   const showReschedule = canReschedule && session && (status === 'prevista' || status === 'remarcada')
+  const showCancel = canCancel && session && (status === 'prevista' || status === 'remarcada')
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -376,6 +389,17 @@ function SessionScheduleItem({
             Remarcar
           </Button>
         )}
+        {showCancel && onCancel && session && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="shrink-0 text-orange-700 border-orange-200 hover:bg-orange-50"
+            onClick={() => onCancel(session)}
+          >
+            <Ban size={14} className="mr-1" />
+            Cancelar 50%
+          </Button>
+        )}
       </div>
 
       {expanded && isDone && (
@@ -400,16 +424,19 @@ function SessionScheduleSection({
   slots,
   onAddSession,
   onReschedule,
+  onCancel,
 }: {
   cycle: CycleDetail
   slots: SessionSlot[]
   onAddSession: () => void
   onReschedule: (session: Session) => void
+  onCancel: (session: Session) => void
 }) {
   const [expandedSession, setExpandedSession] = useState<number | null>(null)
   const sessions = cycle.care_sessions ?? []
   const canAddSession = sessions.length < cycle.session_count
   const canReschedule = ['ativo', 'em_pausa'].includes(cycle.status)
+  const canCancel = canReschedule && cycle.payment_status === 'pago'
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -437,7 +464,9 @@ function SessionScheduleSection({
               setExpandedSession((current) => (current === slot.number ? null : slot.number))
             }
             onReschedule={onReschedule}
+            onCancel={onCancel}
             canReschedule={canReschedule}
+            canCancel={canCancel}
           />
         ))}
       </div>
@@ -597,6 +626,7 @@ export function CycleDetailPage() {
   const queryClient = useQueryClient()
   const [addSessionOpen, setAddSessionOpen] = useState(false)
   const [rescheduleSession, setRescheduleSession] = useState<Session | null>(null)
+  const [cancelSession, setCancelSession] = useState<Session | null>(null)
   const [pauseModalOpen, setPauseModalOpen] = useState(false)
 
   const { data: cycle, isLoading, isFetching } = useQuery({
@@ -681,6 +711,7 @@ export function CycleDetailPage() {
             slots={sessionSlots}
             onAddSession={() => setAddSessionOpen(true)}
             onReschedule={setRescheduleSession}
+            onCancel={setCancelSession}
           />
         </CascadeItem>
 
@@ -730,6 +761,17 @@ export function CycleDetailPage() {
           sessionId={rescheduleSession.id}
           sessionNumber={rescheduleSession.session_number}
           nextSequenceNumber={(cycle.reschedule_count_consecutive ?? 0) + 1}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['care_cycle_detail', id] })}
+        />
+      )}
+
+      {cancelSession && (
+        <CancelSessionModal
+          open={!!cancelSession}
+          onOpenChange={(open) => !open && setCancelSession(null)}
+          sessionId={cancelSession.id}
+          sessionNumber={cancelSession.session_number}
+          scheduledAt={cancelSession.scheduled_at}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['care_cycle_detail', id] })}
         />
       )}

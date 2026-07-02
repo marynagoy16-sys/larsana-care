@@ -14,6 +14,9 @@ export interface FinancialClosurePreview {
   operational_fee_cents: number
   family_refund_amount_cents: number
   larsana_total_cents: number
+  session_cancel_refund_cents?: number
+  session_cancel_pp_cents?: number
+  session_cancel_larsana_cents?: number
 }
 
 export async function previewFinancialClosure(cycleId: string, pauseType: PauseType = 'none') {

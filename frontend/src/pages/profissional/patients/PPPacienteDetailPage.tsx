@@ -66,13 +66,12 @@ export function PPPacienteDetailPage() {
   })
 
   const suggestedLevel = form.watch('suggested_patient_level')
-  const proposedLevel = form.watch('proposed_patient_level')
-  const showLevelChangeReason = proposedLevel !== suggestedLevel
+  const levelConfirmed = form.watch('level_confirmed')
+  const showLevelChangeReason = levelConfirmed === false
 
   const createAssessment = useCrudMutation({
     mutationFn: async (values: AssessmentProposalFormValues) => {
       if (!professional?.id || !id) throw new Error('Profissional não encontrado')
-      const levelChanged = values.proposed_patient_level !== values.suggested_patient_level
       return initialAssessmentsService.create({
         patient_id: id,
         evaluator_professional_id: professional.id,
@@ -82,13 +81,17 @@ export function PPPacienteDetailPage() {
         proposed_weekly_frequency: values.proposed_weekly_frequency,
         proposed_session_count: values.proposed_session_count,
         suggested_patient_level: values.suggested_patient_level,
-        proposed_patient_level: values.proposed_patient_level,
-        patient_level_change_reason: levelChanged ? values.patient_level_change_reason?.trim() || null : null,
+        proposed_patient_level: values.suggested_patient_level,
+        level_confirmed: values.level_confirmed,
+        patient_level_change_reason: !values.level_confirmed ? values.patient_level_change_reason?.trim() || null : null,
         primary_diagnosis: values.primary_diagnosis,
-        comorbidities: values.comorbidities?.trim() || null,
-        mobility: values.mobility,
+        functionality: values.functionality,
+        mobility: values.functionality,
+        prior_conditions: values.prior_conditions,
+        surgeries: values.surgeries.filter((s) => s.name.trim().length > 0),
+        comorbidities: null,
         status: 'avaliacao_feita',
-      })
+      } as Record<string, unknown>)
     },
     queryKey: ['pp'],
     successMessage: 'Avaliação registrada com sucesso',
@@ -292,7 +295,11 @@ export function PPPacienteDetailPage() {
               </p>
             </div>
 
-            <AssessmentProposalFields control={form.control} showLevelChangeReason={showLevelChangeReason} />
+            <AssessmentProposalFields
+              control={form.control}
+              suggestedLevelLabel={patientLevelLabels[suggestedLevel] ?? suggestedLevel}
+              showLevelChangeReason={showLevelChangeReason}
+            />
           </form>
         </Form>
       </CrudDrawer>

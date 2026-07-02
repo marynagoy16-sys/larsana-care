@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, MapPin } from 'lucide-react'
+import { ChevronRight, MapPin, Trophy } from 'lucide-react'
 import { HomeAcademyBanner } from '@/components/profissional/home/HomeAcademyBanner'
 import { HomeDayKpiRow } from '@/components/profissional/home/HomeDayKpiRow'
 import { HomePendingEvolutionsList } from '@/components/profissional/home/HomePendingEvolutionsList'
@@ -38,6 +38,12 @@ import {
   listAgendaSessionsForDay,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
+import { getCurrentProfessional } from '@/services/professionals'
+import {
+  getProfessionalPointsProfile,
+  patenteLabels,
+  PATENTE_REPASSE_PERCENT,
+} from '@/services/ppPoints'
 
 const PP_DEMANDS_QUERY_KEY = ['pp', 'demands'] as const
 const MAX_TODAY_SESSIONS_MOBILE = 3
@@ -100,6 +106,34 @@ function describeNearbyDemands(
   }
 }
 
+function HomeEvolutionCard({
+  points,
+  patenteLabel,
+  repassePercent,
+}: {
+  points: number
+  patenteLabel: string
+  repassePercent: number
+}) {
+  return (
+    <Link
+      to="/profissional/evolucao"
+      className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+        <Trophy className="h-4 w-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">Minha evolução</p>
+        <p className="text-xs text-muted-foreground">
+          {points} pts · {patenteLabel} · {repassePercent}% repasse
+        </p>
+      </div>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+    </Link>
+  )
+}
+
 function HomeOpportunitiesCard({
   title,
   subtitle,
@@ -154,6 +188,17 @@ export function PPHomePage() {
   const pendingEvolutionsQuery = useQuery({
     queryKey: ppEvolutionsQueryKeys.pending,
     queryFn: listPendingEvolutionsForPp,
+  })
+
+  const { data: professional } = useQuery({
+    queryKey: ['pp', 'current_professional'],
+    queryFn: getCurrentProfessional,
+  })
+
+  const { data: pointsProfile } = useQuery({
+    queryKey: ['pp', 'points_profile', professional?.id],
+    queryFn: () => getProfessionalPointsProfile(professional!.id),
+    enabled: !!professional?.id,
   })
 
   const { data: courses } = useQuery({
@@ -318,6 +363,14 @@ export function PPHomePage() {
                 </div>
               </div>
             </div>
+          </CascadeItem>
+
+          <CascadeItem>
+            <HomeEvolutionCard
+              points={pointsProfile?.points_total ?? 0}
+              patenteLabel={patenteLabels[pointsProfile?.patente ?? 'ALUMINIO']}
+              repassePercent={PATENTE_REPASSE_PERCENT[pointsProfile?.patente ?? 'ALUMINIO']}
+            />
           </CascadeItem>
 
           <CascadeItem className="space-y-3 lg:hidden">

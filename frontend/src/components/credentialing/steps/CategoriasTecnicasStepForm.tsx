@@ -35,6 +35,7 @@ function toDefaultValues(pro: CredentialingSnapshot['professional']): Categorias
   const categories = (pro.technical_categories ?? []) as PpTechnicalCategory[]
   return {
     technical_categories: categories,
+    patient_preferences: (pro.patient_preferences ?? []) as PpTechnicalCategory[],
     requests_cardio_habilitation: inferRequestsCardioHabilitation(pro),
     cardiorrespiratory_request_basis: pro.cardiorrespiratory_request_basis ?? undefined,
     cardiorrespiratory_experience_description: pro.cardiorrespiratory_experience_description ?? undefined,
@@ -130,6 +131,54 @@ export function CategoriasTecnicasStepForm({
           )}
         />
 
+        <div className="space-y-3 pt-2 border-t border-border">
+          <div>
+            <h4 className="font-medium text-sm">Preferências de atendimento (opcional)</h4>
+            <p className="text-sm text-muted-foreground mt-1">
+              Indique os tipos de paciente que você prefere ou aceita atender. Isso ajuda na distribuição de demandas,
+              mas não impede outros atendimentos.
+            </p>
+          </div>
+          <FormField
+            control={form.control}
+            name="patient_preferences"
+            render={() => (
+              <FormItem>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {PP_TECHNICAL_CATEGORY_VALUES.filter((c) => c !== CARDIORRESPIRATORY_CATEGORY).map((category) => (
+                    <FormField
+                      key={`pref-${category}`}
+                      control={form.control}
+                      name="patient_preferences"
+                      render={({ field }) => {
+                        const checked = field.value?.includes(category)
+                        return (
+                          <FormItem className="flex items-start gap-3 rounded-lg border border-dashed border-border p-3">
+                            <FormControl>
+                              <Checkbox
+                                checked={checked}
+                                disabled={disabled}
+                                onCheckedChange={(value) => {
+                                  const current = field.value ?? []
+                                  if (value) field.onChange([...current, category])
+                                  else field.onChange(current.filter((c) => c !== category))
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal leading-snug cursor-pointer">
+                              {ppTechnicalCategoryLabels[category]}
+                            </FormLabel>
+                          </FormItem>
+                        )
+                      }}
+                    />
+                  ))}
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+
         <p className="text-sm text-muted-foreground">
           As categorias gerais são compatíveis com a formação base em Fisioterapia e poderão ser
           selecionadas por Profissionais Parceiros regulares, desde que estejam com cadastro aprovado,
@@ -137,7 +186,8 @@ export function CategoriasTecnicasStepForm({
           bloqueios internos na plataforma.
         </p>
         <p className="text-sm text-muted-foreground">
-          A categoria Cardiorrespiratória exige habilitação específica pela Larsana Care.
+          A categoria Cardiorrespiratória exige habilitação específica pela Larsana Care. Envie especialização,
+          curso reconhecido pelo MEC ou comprovação de experiência na área.
         </p>
 
         {wantsCardio && (

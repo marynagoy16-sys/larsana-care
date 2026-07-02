@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
-import { ChevronRight, MapPin } from 'lucide-react-native'
+import { ChevronRight, MapPin, Trophy } from 'lucide-react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SessionCard } from '@/components/profissional/SessionCard'
 import { useAuth } from '@/providers/AuthProvider'
@@ -16,6 +16,12 @@ import {
   listAgendaSessionsForDay,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
+import {
+  getCurrentProfessionalId,
+  getProfessionalPointsProfile,
+  patenteLabels,
+  PATENTE_REPASSE_PERCENT,
+} from '@/services/ppPoints'
 
 const MAX_TODAY_SESSIONS = 3
 
@@ -67,6 +73,17 @@ export default function InicioScreen() {
     queryFn: listPendingEvolutionsForPp,
   })
 
+  const { data: professionalId } = useQuery({
+    queryKey: ['pp', 'professional_id'],
+    queryFn: getCurrentProfessionalId,
+  })
+
+  const { data: pointsProfile } = useQuery({
+    queryKey: ['pp', 'points_profile', professionalId],
+    queryFn: () => getProfessionalPointsProfile(professionalId!),
+    enabled: !!professionalId,
+  })
+
   const sessions = sessionsQuery.data ?? []
   const daySummary = buildAgendaDaySummary(sessions)
   const demandsCount = demandsQuery.data?.count ?? 0
@@ -94,6 +111,23 @@ export default function InicioScreen() {
       </PageHeader>
 
       <ScrollView className="flex-1 px-4" contentContainerClassName="gap-5 pb-28">
+        <Pressable
+          onPress={() => router.push('/(app)/minha-evolucao')}
+          className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 active:bg-muted/30"
+        >
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-amber-500/10">
+            <Trophy size={18} color="#B45309" />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-sm font-medium text-foreground">Minha evolução</Text>
+            <Text className="text-xs text-muted-foreground">
+              {pointsProfile?.points_total ?? 0} pts · {patenteLabels[pointsProfile?.patente ?? 'ALUMINIO']} ·{' '}
+              {PATENTE_REPASSE_PERCENT[pointsProfile?.patente ?? 'ALUMINIO']}% repasse
+            </Text>
+          </View>
+          <ChevronRight size={18} color="#5A7920" />
+        </Pressable>
+
         <View className="gap-3">
           <SectionTitle
             title="Seu dia"

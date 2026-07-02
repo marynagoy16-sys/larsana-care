@@ -144,6 +144,7 @@ export const sessionStatusLabels: Record<string, string> = {
   remarcada: 'Remarcada',
   falta: 'Falta',
   intercorrencia: 'Intercorrência',
+  cancelada_sem_justificativa: 'Cancelada (50%)',
 }
 
 export const attendancePeriodLabels: Record<string, string> = {

@@ -18,6 +18,7 @@ export const dadosStepSchema = z.object({
   phone: phoneSchema,
   address: requiredString('Endereço'),
   profession: z.enum(['FISIO', 'NUTI', 'MED', 'CUID', 'FONO']),
+  referral_code: optionalString,
 }).superRefine((data, ctx) => {
   if (data.person_type === 'PF') {
     const cpf = sanitizeCpf(data.cpf_cnpj)
@@ -60,6 +61,7 @@ const ppTechnicalCategoryEnum = z.enum([
   'funcional_condicionamento',
   'pediatrico_geral',
   'cardiorrespiratoria',
+  'atendimento_unico',
 ])
 
 const cardiorrespiratoryRequestBasisEnum = z.enum([
@@ -74,6 +76,7 @@ export const categoriasStepSchema = z
     technical_categories: z
       .array(ppTechnicalCategoryEnum)
       .min(1, 'Selecione ao menos uma categoria técnica'),
+    patient_preferences: z.array(ppTechnicalCategoryEnum).optional().default([]),
     requests_cardio_habilitation: z.boolean(),
     cardiorrespiratory_request_basis: cardiorrespiratoryRequestBasisEnum.optional(),
     cardiorrespiratory_experience_description: optionalString,

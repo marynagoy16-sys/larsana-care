@@ -25,6 +25,7 @@ function toDefaultValues(pro: CredentialingSnapshot['professional']): DadosStepV
     phone: pro.phone ?? '',
     address: pro.address ?? '',
     profession: pro.profession ?? 'FISIO',
+    referral_code: '',
   }
 }
 
@@ -169,6 +170,26 @@ export function DadosStepForm({ snapshot, onSubmit, disabled }: Props) {
             <FormItem>
               <FormLabel>Endereço completo</FormLabel>
               <FormControl><Textarea rows={2} {...field} disabled={disabled} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="referral_code"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de indicação (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="Código de um colega PP"
+                  className="font-mono uppercase"
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

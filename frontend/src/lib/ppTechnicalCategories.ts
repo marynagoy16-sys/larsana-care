@@ -6,6 +6,7 @@ export const PP_TECHNICAL_CATEGORY_VALUES = [
   'funcional_condicionamento',
   'pediatrico_geral',
   'cardiorrespiratoria',
+  'atendimento_unico',
 ] as const
 
 export type PpTechnicalCategory = (typeof PP_TECHNICAL_CATEGORY_VALUES)[number]
@@ -24,6 +25,7 @@ export const ppTechnicalCategoryLabels: Record<PpTechnicalCategory, string> = {
   funcional_condicionamento: 'Funcional / Condicionamento',
   pediatrico_geral: 'Pediátrico geral',
   cardiorrespiratoria: 'Cardiorrespiratória',
+  atendimento_unico: 'Atendimento único',
 }
 
 export const ppTechnicalCategorySelectOptions = PP_TECHNICAL_CATEGORY_VALUES.map((value) => ({
@@ -118,4 +120,14 @@ export function normalizeTechnicalCategoriesForSave(
     return categories.filter((c) => c !== CARDIORRESPIRATORY_CATEGORY)
   }
   return categories
+}
+
+/** Soft filter: 1=match, 0=sem preferências, -1=fora das preferências */
+export function scoreDemandPreferenceMatch(
+  demandCategory: string | null | undefined,
+  preferences: PpTechnicalCategory[] | null | undefined,
+): 1 | 0 | -1 {
+  if (!preferences?.length) return 0
+  if (!demandCategory) return 0
+  return preferences.includes(demandCategory as PpTechnicalCategory) ? 1 : -1
 }

@@ -5,6 +5,11 @@ import {
   weeklyFrequencyLabels,
 } from '@/constants/labels'
 import { formatCurrency } from '@/lib/formatters'
+import {
+  formatPriorConditionsSummary,
+  parsePriorConditions,
+  parseSurgeries,
+} from '@/lib/assessmentPriorConditions'
 import { AssessmentTrackingTimeline, type AssessmentTrackingData } from '@/components/assessments/AssessmentTrackingTimeline'
 
 export type AssessmentDetailViewData = {
@@ -18,10 +23,15 @@ export type AssessmentDetailViewData = {
   proposed_session_count: number
   suggested_patient_level: string
   proposed_patient_level: string
+  level_confirmed?: boolean | null
+  level_change_review_status?: string | null
   patient_level_change_reason?: string | null
   primary_diagnosis: string
   comorbidities?: string | null
-  mobility: string
+  mobility?: string
+  functionality?: string | null
+  prior_conditions?: unknown
+  surgeries?: unknown
   clinical_content?: string | null
   patient?: {
     full_name?: string
@@ -83,7 +93,16 @@ function formatProfessionalLabel(evaluator: AssessmentDetailViewData['evaluator'
 }
 
 export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetailViewProps) {
-  const levelChanged = data.proposed_patient_level !== data.suggested_patient_level
+  const levelPendingReview = data.level_change_review_status === 'pendente'
+  const levelNotConfirmed = data.level_confirmed === false
+  const functionality = data.functionality ?? data.mobility ?? '—'
+  const priorSummary = formatPriorConditionsSummary(parsePriorConditions(data.prior_conditions))
+  const surgeries = parseSurgeries(data.surgeries)
+  const surgeriesLabel =
+    surgeries.length > 0
+      ? surgeries.map((s) => `${s.name} (${s.year})`).join('\n')
+      : '—'
+
   const unitPriceCents =
     totalAmountCents != null && data.proposed_session_count > 0
       ? Math.round(totalAmountCents / data.proposed_session_count)
@@ -133,14 +152,15 @@ export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetai
           <div className="shrink-0 min-h-[5.25rem] px-5 py-4 border-b border-border flex flex-col justify-center">
             <h3 className="font-semibold text-sm">Dados clínicos</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Diagnóstico, comorbidades e mobilidade registrados na avaliação.
+              Funcionalidade, doenças prévias e avaliação registrados na visita.
             </p>
           </div>
           <div className="flex flex-1 flex-col p-5">
             <div className="grid h-full grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-fr flex-1">
               <ClinicalTile label="Diagnóstico principal" value={data.primary_diagnosis} />
-              <ClinicalTile label="Comorbidades" value={data.comorbidities?.trim() || '—'} />
-              <ClinicalTile label="Mobilidade" value={data.mobility} />
+              <ClinicalTile label="Funcionalidade" value={functionality} />
+              <ClinicalTile label="Doenças prévias" value={priorSummary} />
+              <ClinicalTile label="Cirurgias prévias" value={surgeriesLabel} />
               <ClinicalTile
                 label="Responsável legal"
                 value={resolvePrimaryResponsible(data.patient?.patient_responsibles)}
@@ -158,7 +178,7 @@ export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetai
         <div className="px-5 pb-2">
           <PlanRow label="Região" value={regionLabel} />
           <PlanRow
-            label="Nível"
+            label="Nível confirmado"
             value={
               unitPriceCents != null
                 ? `${levelLabel} · ${formatCurrency(unitPriceCents)}/sessão`
@@ -175,14 +195,14 @@ export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetai
           />
           <PlanRow label="Frequência" value={freqDetail} />
           <PlanRow label="Profissional" value={formatProfessionalLabel(data.evaluator)} />
-          {levelChanged && data.patient_level_change_reason && (
+          {(levelNotConfirmed || levelPendingReview) && data.patient_level_change_reason && (
             <PlanRow
-              label="Alteração de nível"
-              value={`${patientLevelLabels[data.suggested_patient_level]} → ${levelLabel} — ${data.patient_level_change_reason}`}
+              label="Nível não confirmado"
+              value={`Sugerido: ${patientLevelLabels[data.suggested_patient_level] ?? data.suggested_patient_level} — ${data.patient_level_change_reason}`}
             />
           )}
           {data.clinical_content?.trim() && (
-            <PlanRow label="Laudo complementar" value={data.clinical_content.trim()} />
+            <PlanRow label="Avaliação clínica" value={data.clinical_content.trim()} />
           )}
         </div>
       </section>

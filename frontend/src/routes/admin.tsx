@@ -58,6 +58,9 @@ const RepassesAgingReportPage = lazyAdmin('RepassesAgingReportPage')
 const RegionsConfigPage = lazy(() =>
   import('@/pages/admin/regions/RegionsConfigPage').then((m) => ({ default: m.RegionsConfigPage })),
 )
+const PpPointsConfigPage = lazy(() =>
+  import('@/pages/admin/config/PpPointsConfigPage').then((m) => ({ default: m.PpPointsConfigPage })),
+)
 const PricingConfigPage = lazy(() =>
   import('@/pages/admin/pricing/PricingConfigPage').then((m) => ({ default: m.PricingConfigPage })),
 )
@@ -142,6 +145,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'relatorios/nps', element: staffRoute(<NpsReportPage />, operacaoRoles) },
       { path: 'relatorios/repasses-aging', element: staffRoute(<RepassesAgingReportPage />, financeiroRoles) },
       { path: 'config/precos', element: staffRoute(<PricingConfigPage />, adminOnly) },
+      { path: 'config/pontos-pp', element: staffRoute(<PpPointsConfigPage />, adminOnly) },
       { path: 'config/termos', element: staffRoute(<TermsConfigPage />, adminOnly) },
       { path: 'config/contratos', element: staffRoute(<ContractsConfigPage />, adminOnly) },
       { path: 'config/regioes', element: staffRoute(<RegionsConfigPage />, operacaoRoles) },

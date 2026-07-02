@@ -1534,8 +1534,14 @@ export type Database = {
           crefito_number: string
           evaluator_professional_id: string
           family_response: Database["public"]["Enums"]["family_response"] | null
+          functionality: string | null
           id: string
+          level_confirmed: boolean
+          level_change_review_status:
+            | Database["public"]["Enums"]["level_change_review_status"]
+            | null
           mobility: string
+          prior_conditions: Json | null
           patient_id: string
           patient_level_change_reason: string | null
           primary_diagnosis: string
@@ -1549,6 +1555,7 @@ export type Database = {
           status: Database["public"]["Enums"]["assessment_status"]
           suggested_patient_level: Database["public"]["Enums"]["patient_level"]
           suggested_weekly_frequency: number | null
+          surgeries: Json | null
           updated_at: string
         }
         Insert: {
@@ -3216,6 +3223,11 @@ export type Database = {
           referral_source: string | null
           specialty: string | null
           technical_categories: Database["public"]["Enums"]["pp_technical_category"][]
+          patient_preferences: Database["public"]["Enums"]["pp_technical_category"][]
+          points_total: number
+          patente: Database["public"]["Enums"]["pp_patente"]
+          referral_code: string | null
+          referral_count_pre_bronze: number
           cardiorrespiratory_habilitation_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
           cardiorrespiratory_request_basis: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
           cardiorrespiratory_experience_description: string | null
@@ -4095,6 +4107,22 @@ export type Database = {
       }
     }
     Functions: {
+      cancel_session_without_justification: {
+        Args: { p_cancelled_at: string; p_session_id: string }
+        Returns: Json
+      }
+      register_pp_referral_on_signup: {
+        Args: { p_referred_professional_id: string; p_referral_code: string }
+        Returns: string
+      }
+      review_assessment_level_change: {
+        Args: {
+          p_assessment_id: string
+          p_approved: boolean
+          p_review_notes?: string
+        }
+        Returns: Json
+      }
       accept_demand: {
         Args: { p_demand_id: string }
         Returns: Json
@@ -4338,6 +4366,12 @@ export type Database = {
         | "experiencia"
         | "certificado_e_experiencia"
         | "analise_larsana"
+      level_change_review_status:
+        | "nao_aplicavel"
+        | "pendente"
+        | "aprovado"
+        | "rejeitado"
+      pp_patente: "ALUMINIO" | "BRONZE" | "PRATA" | "OURO"
       pp_technical_category:
         | "ortopedico"
         | "pos_operatorio"
@@ -4346,6 +4380,7 @@ export type Database = {
         | "funcional_condicionamento"
         | "pediatrico_geral"
         | "cardiorrespiratoria"
+        | "atendimento_unico"
       professional_document_type:
         | "RG_CNH"
         | "COUNCIL_CARD"
@@ -4365,6 +4400,7 @@ export type Database = {
         | "falta"
         | "remarcada"
         | "intercorrencia"
+        | "cancelada_sem_justificativa"
       ticket_status: "aberto" | "em_andamento" | "resolvido" | "fechado"
       transfer_status:
         | "aguardando_nf"
@@ -4631,6 +4667,7 @@ export const Constants = {
         "falta",
         "remarcada",
         "intercorrencia",
+        "cancelada_sem_justificativa",
       ],
       ticket_status: ["aberto", "em_andamento", "resolvido", "fechado"],
       transfer_status: [

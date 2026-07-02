@@ -7,6 +7,7 @@ import {
   formatPatientSex,
   resolveDiagnosticHypothesis,
 } from '@/lib/patientDisplay'
+import { scoreDemandPreferenceMatch, type PpTechnicalCategory } from '@/lib/ppTechnicalCategories'
 
 type DemandPatientJoin = {
   full_name: string
@@ -43,6 +44,7 @@ export type DemandListItem = CrudRow & {
   location_lng: number | null
   location_address: string | null
   location_neighborhood: string | null
+  preference_match_score?: 1 | 0 | -1
 }
 
 type DemandPatientDetail = {
@@ -160,17 +162,20 @@ function mapDemandRow(
     patient_addresses: DemandAddressJoin | null
     professionals: { full_name: string } | null
   },
+  preferences?: PpTechnicalCategory[] | null,
 ): DemandListItem {
   const patient = row.patients
   const address = row.patient_addresses
   const professional = row.professionals
+  const technicalCategory = (row.technical_category as string | null)
+    ?? patient?.technical_category
+    ?? null
 
   return {
     ...row,
     demand_type: (row.demand_type as DemandListItem['demand_type']) ?? 'avaliacao',
-    technical_category: (row.technical_category as string | null)
-      ?? patient?.technical_category
-      ?? null,
+    technical_category: technicalCategory,
+    preference_match_score: scoreDemandPreferenceMatch(technicalCategory, preferences),
     patient_abbreviation: formatPatientAbbreviation(patient?.full_name),
     patient_sex: formatPatientSex(patient?.sex),
     patient_age: formatPatientAge(patient?.birth_date),
@@ -193,6 +198,18 @@ function mapDemandRow(
 
 export const demandsService = {
   async listOpenForPp() {
+    const { data: { user } } = await supabase.auth.getUser()
+    let preferences: PpTechnicalCategory[] | null = null
+
+    if (user) {
+      const { data: pro } = await supabase
+        .from('professionals')
+        .select('patient_preferences')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      preferences = (pro?.patient_preferences ?? null) as PpTechnicalCategory[] | null
+    }
+
     const { data, error } = await supabase
       .from('demands')
       .select(DEMAND_LIST_SELECT)
@@ -208,7 +225,9 @@ export const demandsService = {
         professionals: { full_name: string } | null
       }
     >
-    const mapped = rows.map(mapDemandRow)
+    const mapped = rows
+      .map((row) => mapDemandRow(row, preferences))
+      .sort((a, b) => (b.preference_match_score ?? 0) - (a.preference_match_score ?? 0))
 
     return { data: mapped, count: mapped.length }
   },

@@ -48,6 +48,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { AssessmentProposalSummary } from '@/components/assessments/AssessmentProposalSummary'
 import { AssessmentSendProposalCard } from '@/components/assessments/AssessmentSendProposalCard'
+import { AssessmentLevelReviewCard } from '@/components/assessments/AssessmentLevelReviewCard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { estimateAssessmentProposalTotalCents } from '@/services/assessmentProposal'
@@ -311,6 +312,18 @@ export function AssessmentDetailPage() {
 
       <CrudScrollPageLayout>
       <CascadeReveal className="space-y-6">
+        {assessmentRecord.level_change_review_status === 'pendente' && (
+          <CascadeItem>
+            <AssessmentLevelReviewCard
+              assessmentId={String(assessmentRecord.id)}
+              suggestedLevel={String(assessmentRecord.suggested_patient_level)}
+              requestedLevel={assessmentRecord.requested_patient_level as string | null}
+              reason={assessmentRecord.patient_level_change_reason as string | null}
+              queryKeys={[qk.assessments, [...qk.assessments, id]]}
+            />
+          </CascadeItem>
+        )}
+
         {assessmentRecord.status === 'avaliacao_feita' && hasProposal && (
           <CascadeItem>
             <AssessmentSendProposalCard
