@@ -97,7 +97,7 @@ export default function EvolucaoNovaScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <Text className="text-lg font-semibold text-foreground">Nova evolução</Text>
         </View>
@@ -105,7 +105,7 @@ export default function EvolucaoNovaScreen() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 pb-8">

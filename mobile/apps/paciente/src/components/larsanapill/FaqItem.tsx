@@ -13,7 +13,7 @@ export function FaqItem({ question, answer }: { question: string; answer: string
         className="flex-row items-start justify-between gap-3 p-4"
       >
         <Text className="flex-1 font-medium text-foreground">{question}</Text>
-        <ChevronDown size={16} color="#5A7920" style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }} />
+        <ChevronDown size={16} color="#49796B" style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }} />
       </Pressable>
       {open ? (
         <View className="border-t border-border px-4 pb-4 pt-3">

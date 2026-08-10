@@ -16,7 +16,7 @@ function KpiCard({ label, value, icon: Icon, description }: {
     <View className="flex-1 rounded-xl border border-border bg-card p-3 gap-2 min-w-[100px]">
       <View className="flex-row items-center justify-between">
         <Text className="text-xs font-medium text-muted-foreground">{label}</Text>
-        <Icon size={14} color="#5A7920" />
+        <Icon size={14} color="#49796B" />
       </View>
       <Text className="text-2xl font-bold text-foreground">{value}</Text>
       {description ? (
@@ -43,7 +43,7 @@ export default function RepassesTabScreen() {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-3 pb-28">

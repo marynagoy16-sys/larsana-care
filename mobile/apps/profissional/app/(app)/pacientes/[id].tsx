@@ -25,7 +25,7 @@ function CardSection({ title, subtitle, icon: Icon, children }: {
   return (
     <View className="rounded-xl border border-border bg-card overflow-hidden">
       <View className={`px-5 py-4 border-b border-border bg-muted/20 ${Icon ? 'flex-row items-center gap-2' : ''}`}>
-        {Icon ? <Icon size={16} color="#5A7920" /> : null}
+        {Icon ? <Icon size={16} color="#49796B" /> : null}
         <Text className="text-sm font-semibold text-foreground">{title}</Text>
         {subtitle ? <Text className="text-xs text-muted-foreground mt-0.5">{subtitle}</Text> : null}
       </View>
@@ -89,7 +89,7 @@ export default function PacienteDetailScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['top']}>
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -100,7 +100,7 @@ export default function PacienteDetailScreen() {
         <PageHeader>
           <View className="flex-row items-center gap-2">
             <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={22} color="#17310A" />
+              <ArrowLeft size={22} color="#095742" />
             </Pressable>
             <Text className="text-lg font-semibold text-foreground">Paciente</Text>
           </View>
@@ -121,7 +121,7 @@ export default function PacienteDetailScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <View className="min-w-0 flex-1">
             <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>{data.full_name}</Text>

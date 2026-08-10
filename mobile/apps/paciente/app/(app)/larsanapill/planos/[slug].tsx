@@ -33,7 +33,7 @@ function PlanStatCard({ icon: Icon, label, value }: { icon: LucideIcon; label: s
     <Card className="flex-1 min-w-[46%] p-4">
       <View className="flex-row items-center gap-3">
         <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-          <Icon size={20} color="#17310A" />
+          <Icon size={20} color="#095742" />
         </View>
         <View className="min-w-0 flex-1">
           <Text className="text-xs text-muted-foreground">{label}</Text>
@@ -69,7 +69,7 @@ export default function WeeklyPlanSalesScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['top', 'bottom']}>
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -151,14 +151,14 @@ export default function WeeklyPlanSalesScreen() {
 
           <View className="gap-4">
             <View className="flex-row items-center gap-2">
-              <Sparkles size={20} color="#17310A" />
+              <Sparkles size={20} color="#095742" />
               <Text className="text-xl font-semibold text-foreground">O que você ganha</Text>
             </View>
             <View className="gap-3">
               {copy.benefits.map((benefit) => (
                 <Card key={benefit.title} className="p-4">
                   <View className="flex-row items-start gap-2">
-                    <CheckCircle2 size={16} color="#17310A" style={{ marginTop: 2 }} />
+                    <CheckCircle2 size={16} color="#095742" style={{ marginTop: 2 }} />
                     <Text className="flex-1 font-medium text-foreground">{benefit.title}</Text>
                   </View>
                   <Text className="mt-1 pl-6 text-sm text-muted-foreground">{benefit.description}</Text>
@@ -184,13 +184,13 @@ export default function WeeklyPlanSalesScreen() {
 
           <View className="gap-4">
             <View className="flex-row items-center gap-2">
-              <Users size={20} color="#17310A" />
+              <Users size={20} color="#095742" />
               <Text className="text-xl font-semibold text-foreground">Para quem é este plano</Text>
             </View>
             <View className="gap-2">
               {copy.audience.map((item) => (
                 <View key={item} className="flex-row items-start gap-2">
-                  <ArrowRight size={16} color="#17310A" style={{ marginTop: 2 }} />
+                  <ArrowRight size={16} color="#095742" style={{ marginTop: 2 }} />
                   <Text className="flex-1 text-sm text-foreground">{item}</Text>
                 </View>
               ))}
@@ -200,7 +200,7 @@ export default function WeeklyPlanSalesScreen() {
           {sortedDays.length > 0 ? (
             <View className="gap-4">
               <View className="flex-row items-center gap-2">
-                <Dumbbell size={20} color="#17310A" />
+                <Dumbbell size={20} color="#095742" />
                 <Text className="text-xl font-semibold text-foreground">Sua rotina semanal</Text>
               </View>
               <Text className="text-sm text-muted-foreground">
@@ -216,7 +216,7 @@ export default function WeeklyPlanSalesScreen() {
                     <Card key={day.id} className={cn(isDone && 'border-primary/40 bg-primary/5')}>
                       <View className="flex-row items-center gap-3 p-4">
                         <View className="h-11 w-11 items-center justify-center rounded-full bg-primary/10">
-                          <Icon size={20} color="#17310A" />
+                          <Icon size={20} color="#095742" />
                         </View>
                         <View className="min-w-0 flex-1">
                           <View className="flex-row flex-wrap items-center gap-2">
@@ -249,7 +249,7 @@ export default function WeeklyPlanSalesScreen() {
 
           <View className="gap-4">
             <View className="flex-row items-center gap-2">
-              <HelpCircle size={20} color="#17310A" />
+              <HelpCircle size={20} color="#095742" />
               <Text className="text-xl font-semibold text-foreground">Perguntas frequentes</Text>
             </View>
             <View className="gap-2">

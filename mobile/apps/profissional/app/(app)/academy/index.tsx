@@ -27,7 +27,7 @@ export default function AcademyHubScreen() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 pb-8">
@@ -45,7 +45,7 @@ export default function AcademyHubScreen() {
                 className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 active:bg-muted/30"
               >
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <GraduationCap size={18} color="#17310A" />
+                  <GraduationCap size={18} color="#095742" />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="font-medium text-foreground">{course.title}</Text>
@@ -55,7 +55,7 @@ export default function AcademyHubScreen() {
                     </Text>
                   ) : null}
                 </View>
-                <ChevronRight size={18} color="#5A7920" />
+                <ChevronRight size={18} color="#49796B" />
               </Pressable>
             ))
           )}

@@ -26,7 +26,7 @@ export default function PagamentosScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-3 pb-28">
@@ -53,7 +53,7 @@ export default function PagamentosScreen() {
                     {String(charge.payment_status)} · {charge.due_date ? formatDate(String(charge.due_date)) : '—'}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#5A7920" />
+                <ChevronRight size={18} color="#49796B" />
               </Pressable>
             ))
           )}

@@ -57,7 +57,7 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   placeholder="seu@email.com"
-                  placeholderTextColor="#5A7920"
+                  placeholderTextColor="#49796B"
                   className="h-12 rounded-xl bg-muted px-4 text-base text-foreground"
                 />
               </View>
@@ -69,11 +69,11 @@ export default function LoginScreen() {
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     placeholder="••••••••"
-                    placeholderTextColor="#5A7920"
+                    placeholderTextColor="#49796B"
                     className="h-12 rounded-xl bg-muted px-4 pr-12 text-base text-foreground"
                   />
                   <Pressable onPress={() => setShowPassword((v) => !v)} className="absolute right-4 top-3.5">
-                    {showPassword ? <EyeOff size={18} color="#5A7920" /> : <Eye size={18} color="#5A7920" />}
+                    {showPassword ? <EyeOff size={18} color="#49796B" /> : <Eye size={18} color="#49796B" />}
                   </Pressable>
                 </View>
               </View>

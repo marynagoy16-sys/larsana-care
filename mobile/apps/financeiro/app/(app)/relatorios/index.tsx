@@ -32,13 +32,13 @@ export default function RelatoriosHubScreen() {
             <Pressable key={report.href} onPress={() => router.push(report.href)}>
               <Card className="flex-row items-center gap-4 p-4">
                 <View className="rounded-xl bg-primary/10 p-2.5">
-                  <Icon size={22} color="#17310A" />
+                  <Icon size={22} color="#095742" />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="text-base font-semibold text-foreground">{report.title}</Text>
                   <Text className="text-sm text-muted-foreground">{report.subtitle}</Text>
                 </View>
-                <ChevronRight size={20} color="#5A7920" />
+                <ChevronRight size={20} color="#49796B" />
               </Card>
             </Pressable>
           )

@@ -45,7 +45,7 @@ export default function CaixaScreen() {
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color="#17310A" className="mt-8" />
+          <ActivityIndicator color="#095742" className="mt-8" />
         ) : data?.length ? (
           data.map((expense) => <ExpenseCard key={expense.id} expense={expense} />)
         ) : (

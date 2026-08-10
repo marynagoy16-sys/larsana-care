@@ -30,7 +30,7 @@ export default function PerfilTabScreen() {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 pb-28">

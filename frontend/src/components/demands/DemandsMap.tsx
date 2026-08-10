@@ -42,7 +42,7 @@ function buildDemandMarkers(demands: DemandListItem[], origin: GeoPoint): Demand
 }
 
 function createDemandPinIcon(selected: boolean, demandType: DemandListItem['demand_type']) {
-  const color = demandType === 'continuidade' ? '#17310A' : '#0369A1'
+  const color = demandType === 'continuidade' ? '#095742' : '#0369A1'
   const size = selected ? 36 : 32
 
   return L.divIcon({

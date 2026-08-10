@@ -85,7 +85,7 @@ function PacienteTabBar({ state, navigation }: BottomTabBarProps) {
               accessibilityRole="button"
               accessibilityLabel={item.label}
             >
-              <TabIcon size={20} color={isFocused ? '#17310A' : '#5A7920'} />
+              <TabIcon size={20} color={isFocused ? '#095742' : '#49796B'} />
               <Text
                 className={cn(
                   'w-full text-center text-[9px]',

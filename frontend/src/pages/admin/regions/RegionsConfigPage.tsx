@@ -56,7 +56,7 @@ export function RegionsConfigPage() {
       <EntityListPage
         title="Regiões e cidades"
         description="Configure cidades e bairros de cobertura por região operacional (A, B, C)"
-        queryKey={regionsQueryKeys.regions}
+        queryKey={regionsQueryKeys.regionsWithStats}
         queryFn={async () => {
           const data = await listRegionsWithStats()
           setRows(data)

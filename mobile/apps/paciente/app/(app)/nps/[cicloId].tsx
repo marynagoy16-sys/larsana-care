@@ -33,7 +33,7 @@ export default function NpsScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <Text className="text-lg font-semibold">Avalie o atendimento</Text>
         </View>

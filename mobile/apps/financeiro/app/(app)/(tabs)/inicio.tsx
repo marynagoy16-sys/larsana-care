@@ -15,7 +15,7 @@ export default function InicioScreen() {
   if (isLoading && !data) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </View>
     )
   }

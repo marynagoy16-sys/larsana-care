@@ -18,7 +18,7 @@ export function SubScreenHeader({ title }: { title: string }) {
           className="rounded-xl p-2 active:bg-muted/40"
           accessibilityLabel="Voltar"
         >
-          <ChevronLeft size={24} color="#17310A" />
+          <ChevronLeft size={24} color="#095742" />
         </Pressable>
         <Text className="flex-1 font-display text-lg font-bold text-foreground" numberOfLines={1}>
           {title}

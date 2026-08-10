@@ -50,7 +50,7 @@ export function DemandMap({ origin, points, initialRegion, onSelectPoint, mapHei
   return (
     <View style={{ height: mapHeight, width: '100%' }}>
       <MapView style={{ flex: 1 }} initialRegion={initialRegion}>
-        <Marker coordinate={{ latitude: origin.lat, longitude: origin.lng }} pinColor="#5A7920" />
+        <Marker coordinate={{ latitude: origin.lat, longitude: origin.lng }} pinColor="#49796B" />
         {points.map((point) => (
           <Marker
             key={point.id}

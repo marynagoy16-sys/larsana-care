@@ -21,7 +21,7 @@ export function PatientActiveTreatmentCard({ cycle }: { cycle: ActiveCycleSummar
       <View className="gap-3 p-5">
         {cycle.professionalName ? (
           <View className="flex-row items-center gap-2">
-            <UserRound size={16} color="#5A7920" />
+            <UserRound size={16} color="#49796B" />
             <Text className="text-sm text-muted-foreground">
               Profissional: <Text className="font-medium text-foreground">{cycle.professionalName}</Text>
             </Text>
@@ -29,7 +29,7 @@ export function PatientActiveTreatmentCard({ cycle }: { cycle: ActiveCycleSummar
         ) : null}
         {cycle.nextSessionAt ? (
           <View className="flex-row items-center gap-2">
-            <Calendar size={16} color="#5A7920" />
+            <Calendar size={16} color="#49796B" />
             <Text className="text-sm text-muted-foreground">
               Próxima sessão:{' '}
               <Text className="font-medium text-foreground">{formatDateTime(cycle.nextSessionAt)}</Text>

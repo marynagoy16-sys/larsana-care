@@ -25,14 +25,14 @@ export default function CicloDetailScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <Text className="text-lg font-semibold">Ciclo</Text>
         </View>
       </PageHeader>
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : !data ? (
         <View className="flex-1 items-center justify-center">

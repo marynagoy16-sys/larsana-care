@@ -65,7 +65,7 @@ export default function MaisScreen() {
           >
             <Card className="flex-row items-center gap-4 p-4">
               <View className={`rounded-xl p-2.5 ${item.destructive ? 'bg-destructive/10' : 'bg-primary/10'}`}>
-                <Icon size={22} color={item.destructive ? '#DC2626' : '#17310A'} />
+                <Icon size={22} color={item.destructive ? '#DC2626' : '#095742'} />
               </View>
               <View className="min-w-0 flex-1">
                 <Text className={`text-base font-semibold ${item.destructive ? 'text-destructive' : 'text-foreground'}`}>
@@ -73,7 +73,7 @@ export default function MaisScreen() {
                 </Text>
                 <Text className="text-sm text-muted-foreground">{item.subtitle}</Text>
               </View>
-              {!item.destructive ? <ChevronRight size={20} color="#5A7920" /> : null}
+              {!item.destructive ? <ChevronRight size={20} color="#49796B" /> : null}
             </Card>
           </Pressable>
         )

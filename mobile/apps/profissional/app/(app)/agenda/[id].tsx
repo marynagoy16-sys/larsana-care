@@ -23,7 +23,7 @@ export default function SessionDetailScreen() {
   if (isLoading || !session) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['top']}>
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -39,7 +39,7 @@ export default function SessionDetailScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-3">
           <Pressable onPress={() => router.back()} className="rounded-xl p-2">
-            <ArrowLeft size={20} color="#17310A" />
+            <ArrowLeft size={20} color="#095742" />
           </Pressable>
           <Text className="flex-1 font-display text-lg font-bold text-foreground" numberOfLines={1}>
             {session.patientName}

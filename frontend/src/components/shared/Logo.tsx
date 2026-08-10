@@ -1,57 +1,89 @@
+import { useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
+import {
+  getBrandLogoSrc,
+  resolveBrandLayout,
+  type BrandLogoLayout,
+  type BrandLogoStyle,
+  type BrandLogoVariant,
+} from '@/lib/brandAssets'
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
-  variant?: 'light' | 'dark'
+  variant?: BrandLogoVariant
+  /** Alterna automaticamente entre fundo claro/escuro conforme o tema da aplicação */
+  adaptToTheme?: boolean
+  /** v1 = ouro + verde/branco · v2 = monocromático */
+  style?: BrandLogoStyle
+  layout?: BrandLogoLayout | 'auto'
   className?: string
   subtitle?: string
   size?: 'sm' | 'md'
   collapsed?: boolean
   compact?: boolean
+  /** Logo vertical completo (login hero, splash) */
+  full?: boolean
 }
 
-export function Logo({ variant = 'light', className, subtitle, size = 'sm', collapsed, compact }: LogoProps) {
-  const onDark = variant === 'dark'
-  const iconSize = compact
-    ? 'w-[var(--sidebar-collapsed-item-size)] h-[var(--sidebar-collapsed-item-size)] text-sm rounded-xl'
-    : size === 'md'
-      ? 'w-11 h-11 text-base'
-      : 'w-9 h-9 text-sm'
-  const titleSize = size === 'md' ? 'text-lg' : 'text-sm'
+const layoutHeights: Record<BrandLogoLayout, { sm: string; md: string }> = {
+  symbol: { sm: 'h-9 w-9', md: 'h-11 w-11' },
+  horizontal: { sm: 'h-8', md: 'h-10' },
+  vertical: { sm: 'h-14', md: 'h-20' },
+}
+
+export function Logo({
+  variant = 'light',
+  adaptToTheme = false,
+  style = 'v1',
+  layout = 'auto',
+  className,
+  subtitle,
+  size = 'sm',
+  collapsed,
+  compact,
+  full,
+}: LogoProps) {
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+
+  const themeVariant: BrandLogoVariant =
+    mounted && resolvedTheme === 'dark' ? 'dark' : 'light'
+  const activeVariant = adaptToTheme ? themeVariant : variant
+  const onDark = activeVariant === 'dark'
+  const resolvedLayout = resolveBrandLayout({ layout, full, collapsed, compact })
+  const src = getBrandLogoSrc(resolvedLayout, activeVariant, style)
+  const dimensionClass = layoutHeights[resolvedLayout][size]
+  const isSymbol = resolvedLayout === 'symbol'
 
   return (
-    <div className={cn('flex items-center', collapsed ? 'justify-center' : 'gap-3', className)}>
-      <div
-        className={cn(
-          'rounded-xl flex items-center justify-center font-display font-bold shrink-0',
-          iconSize,
-          onDark ? 'bg-white/15 text-white' : 'bg-brand-dark text-white',
-        )}
-      >
-        LC
-      </div>
-      {!collapsed && (
-        <div className="min-w-0">
-          <p
-            className={cn(
-              'font-display font-bold leading-tight truncate',
-              titleSize,
-              onDark ? 'text-white' : 'text-foreground',
-            )}
-          >
-            LarsanaCare
-          </p>
-          {subtitle && (
-            <p
-              className={cn(
-                'text-[10px] truncate',
-                onDark ? 'text-white/70' : 'text-muted-foreground',
-              )}
-            >
-              {subtitle}
-            </p>
-          )}
-        </div>
+    <div
+      className={cn(
+        'flex',
+        isSymbol && collapsed ? 'justify-center' : 'flex-col items-start gap-2',
+        !isSymbol && !collapsed && subtitle ? 'gap-2' : undefined,
+        className,
       )}
+    >
+      <img
+        src={src}
+        alt="Larsana Care"
+        className={cn(
+          'shrink-0 object-contain object-left',
+          isSymbol ? cn('rounded-xl', dimensionClass) : cn('w-auto max-w-full', dimensionClass),
+        )}
+      />
+      {subtitle && !collapsed && !isSymbol ? (
+        <p
+          className={cn(
+            'text-[10px] font-medium uppercase tracking-widest truncate',
+            onDark ? 'text-white/70' : 'text-muted-foreground',
+          )}
+        >
+          {subtitle}
+        </p>
+      ) : null}
     </div>
   )
 }

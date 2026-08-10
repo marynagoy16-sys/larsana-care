@@ -70,7 +70,7 @@ export default function DemandasScreen() {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1" contentContainerClassName="gap-3 pb-28">
@@ -78,7 +78,7 @@ export default function DemandasScreen() {
             <View className="mx-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
               <View className="flex-row items-center justify-between gap-3 border-b border-border px-4 py-3">
                 <View className="min-w-0 flex-1 flex-row items-center gap-2">
-                  <MapPin size={16} color="#17310A" />
+                  <MapPin size={16} color="#095742" />
                   <View className="min-w-0">
                     <Text className="text-sm font-semibold leading-tight text-foreground">Mapa das demandas</Text>
                     <Text className="text-xs text-muted-foreground">
@@ -87,7 +87,7 @@ export default function DemandasScreen() {
                   </View>
                 </View>
                 <View className="shrink-0 flex-row items-center gap-1 rounded-full bg-muted px-2 py-1">
-                  <Navigation size={12} color="#5A7920" />
+                  <Navigation size={12} color="#49796B" />
                   <Text className="text-xs font-medium text-muted-foreground">{mapPoints.length}</Text>
                 </View>
               </View>
@@ -133,7 +133,7 @@ export default function DemandasScreen() {
                     }
                   >
                     <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <MapPin size={18} color="#17310A" />
+                      <MapPin size={18} color="#095742" />
                     </View>
                     <View className="min-w-0 flex-1 gap-1">
                       <Text className="font-medium text-foreground">{demand.patient_abbreviation}</Text>
@@ -150,11 +150,11 @@ export default function DemandasScreen() {
                     <View className="items-end gap-0.5">
                       {distance != null ? (
                         <View className="flex-row items-center gap-1">
-                          <Navigation size={12} color="#5A7920" />
+                          <Navigation size={12} color="#49796B" />
                           <Text className="text-xs font-medium text-primary">{formatDistanceKm(distance)}</Text>
                         </View>
                       ) : null}
-                      <ChevronRight size={18} color="#5A7920" />
+                      <ChevronRight size={18} color="#49796B" />
                     </View>
                   </Pressable>
                 )

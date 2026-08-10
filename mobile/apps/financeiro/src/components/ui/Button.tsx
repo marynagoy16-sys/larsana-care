@@ -47,7 +47,7 @@ export function Button({
       )}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'default' ? '#fff' : '#17310A'} />
+        <ActivityIndicator color={variant === 'default' ? '#fff' : '#095742'} />
       ) : typeof children === 'string' ? (
         <Text className={cn('text-base font-semibold', textClasses[variant])}>{children}</Text>
       ) : (

@@ -60,7 +60,7 @@ export default function LarsanaPillContentScreen() {
       <SubScreenHeader title={content?.title ?? playerContext?.category.title ?? 'Conteúdo'} />
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : !content || !playerContext || !slug || !id ? (
         <View className="flex-1 items-center justify-center px-6">

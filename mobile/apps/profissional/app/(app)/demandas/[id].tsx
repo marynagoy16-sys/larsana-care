@@ -56,7 +56,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function CardSection({ title, icon: Icon, children, variant }: { title: string; icon: any; children: React.ReactNode; variant?: 'default' | 'warning' }) {
   const borderColor = variant === 'warning' ? 'border-amber-200' : 'border-border'
   const bgColor = variant === 'warning' ? 'bg-amber-50/50' : 'bg-card'
-  const iconColor = variant === 'warning' ? '#92400e' : '#5A7920'
+  const iconColor = variant === 'warning' ? '#92400e' : '#49796B'
   return (
     <View className={`rounded-xl border ${borderColor} ${bgColor} overflow-hidden`}>
       <View className={`flex-row items-center gap-2 px-4 py-3 border-b ${variant === 'warning' ? 'border-amber-200/60' : 'border-border'}`}>
@@ -158,7 +158,7 @@ export default function DemandDetailScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['bottom']}>
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -169,7 +169,7 @@ export default function DemandDetailScreen() {
         <PageHeader>
           <View className="flex-row items-center gap-2">
             <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={22} color="#17310A" />
+              <ArrowLeft size={22} color="#095742" />
             </Pressable>
             <Text className="text-lg font-semibold text-foreground">Demanda</Text>
           </View>
@@ -194,7 +194,7 @@ export default function DemandDetailScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <View className="flex-1 flex-row items-center justify-between pr-2">
             <Text className="text-lg font-semibold text-foreground">Demanda</Text>
@@ -404,7 +404,7 @@ export default function DemandDetailScreen() {
             <View className="mb-4 flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-foreground">Recusar demanda</Text>
               <Pressable onPress={() => setDeclineModalOpen(false)} className="p-2">
-                <X size={20} color="#5A7920" />
+                <X size={20} color="#49796B" />
               </Pressable>
             </View>
             <Text className="mb-3 text-sm text-muted-foreground">

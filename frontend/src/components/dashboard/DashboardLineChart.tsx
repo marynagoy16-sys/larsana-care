@@ -40,7 +40,7 @@ export function DashboardLineChart({ data, className }: DashboardLineChartProps)
         <defs>
           <linearGradient id="revenueBarFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="hsl(100 50% 28%)" />
-            <stop offset="100%" stopColor="hsl(100 66% 11.6%)" />
+            <stop offset="100%" stopColor="hsl(163.8 81.3% 18.8%)" />
           </linearGradient>
         </defs>
 

@@ -72,7 +72,7 @@ export function DashboardPage() {
 
   const operacaoMetrics = useMemo(
     () => [
-      { label: 'Pacientes ativos', value: kpis?.pacientes_ativos ?? 0, color: 'hsl(100 66% 11.6%)' },
+      { label: 'Pacientes ativos', value: kpis?.pacientes_ativos ?? 0, color: 'hsl(163.8 81.3% 18.8%)' },
       { label: 'Ciclos abertos', value: kpis?.ciclos_abertos ?? 0, color: 'hsl(100 40% 32%)' },
       { label: 'Avaliações em análise', value: kpis?.avaliacoes_em_analise ?? 0, color: 'hsl(80 22% 58%)' },
     ],

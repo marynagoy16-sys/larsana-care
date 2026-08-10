@@ -38,7 +38,7 @@ function SectionTitle({ title, actionLabel, onAction }: {
       {actionLabel && onAction ? (
         <Pressable onPress={onAction} className="flex-row items-center">
           <Text className="text-sm text-primary">{actionLabel}</Text>
-          <ChevronRight size={16} color="#17310A" />
+          <ChevronRight size={16} color="#095742" />
         </Pressable>
       ) : null}
     </View>
@@ -96,7 +96,7 @@ export default function InicioScreen() {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -125,7 +125,7 @@ export default function InicioScreen() {
               {PATENTE_REPASSE_PERCENT[pointsProfile?.patente ?? 'ALUMINIO']}% repasse
             </Text>
           </View>
-          <ChevronRight size={18} color="#5A7920" />
+          <ChevronRight size={18} color="#49796B" />
         </Pressable>
 
         <View className="gap-3">
@@ -161,7 +161,7 @@ export default function InicioScreen() {
             className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 active:bg-muted/30"
           >
             <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <MapPin size={18} color="#17310A" />
+              <MapPin size={18} color="#095742" />
             </View>
             <View className="min-w-0 flex-1">
               <Text className="text-sm font-medium text-foreground">
@@ -173,7 +173,7 @@ export default function InicioScreen() {
                 {demandsCount > 0 ? 'Veja oportunidades na sua região' : 'Novas oportunidades aparecerão aqui'}
               </Text>
             </View>
-            <ChevronRight size={18} color="#5A7920" />
+            <ChevronRight size={18} color="#49796B" />
           </Pressable>
         </View>
       </ScrollView>

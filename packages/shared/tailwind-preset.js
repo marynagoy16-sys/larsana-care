@@ -32,6 +32,13 @@ module.exports = {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+        brand: {
+          light: 'hsl(var(--brand-light))',
+          dark: 'hsl(var(--brand-dark))',
+          care: 'hsl(var(--brand-care))',
+          gold: 'hsl(var(--brand-gold))',
+          linen: 'hsl(var(--brand-linen))',
+        },
       },
     },
   },

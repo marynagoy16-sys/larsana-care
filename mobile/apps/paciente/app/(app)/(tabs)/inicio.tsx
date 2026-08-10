@@ -19,7 +19,7 @@ export default function InicioScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['bottom']}>
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }

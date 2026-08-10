@@ -27,21 +27,21 @@ export function DevQuickLogin({ disabled, onLoadingChange }: DevQuickLoginProps)
   }
 
   return (
-    <div className="space-y-3 rounded-2xl border border-dashed border-primary/30 bg-primary/[0.04] p-4">
+    <div className="space-y-2 rounded-2xl border border-dashed border-primary/30 bg-primary/[0.04] p-3 lg:p-2.5">
       <div>
-        <p className="text-sm font-semibold text-foreground">Login rápido (dev)</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm font-semibold text-foreground lg:text-xs">Login rápido (dev)</p>
+        <p className="text-xs text-muted-foreground lg:text-[11px]">
           Usuários do seed · senha <code className="text-[11px]">LarsanaCare2026!</code>
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-1.5 lg:grid-cols-3">
         {DEV_LOGIN_USERS.map((user) => (
           <Button
             key={user.email}
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 justify-start rounded-xl bg-background/80 text-left"
+            className="h-8 justify-start rounded-lg bg-background/80 px-2 text-left text-xs lg:h-7 lg:px-2 lg:text-[11px]"
             disabled={disabled}
             onClick={() => void handleQuickLogin(user.email, user.label)}
           >

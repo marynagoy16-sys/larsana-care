@@ -25,7 +25,7 @@ export default function RepassesAgingReportScreen() {
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color="#17310A" />
+          <ActivityIndicator color="#095742" />
         ) : data?.transfers.length ? (
           data.transfers.map((transfer) => (
             <View key={transfer.id} className="gap-1">

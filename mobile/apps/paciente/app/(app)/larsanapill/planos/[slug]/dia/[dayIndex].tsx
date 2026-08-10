@@ -69,7 +69,7 @@ export default function WeeklyPlanPlayerScreen() {
       <SubScreenHeader title={activeDay ? `Dia ${activeDay.day_index} — ${activeDay.title}` : 'Plano'} />
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : !playerContext || !activeDay ? (
         <View className="flex-1 items-center justify-center">

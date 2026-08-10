@@ -52,7 +52,7 @@ export default function ContaScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-3 pb-28">
@@ -90,7 +90,7 @@ export default function ContaScreen() {
             }}
           >
             <View className="flex-row items-center gap-2">
-              <LogOut size={16} color="#17310A" />
+              <LogOut size={16} color="#095742" />
               <Text className="font-semibold text-foreground">Sair</Text>
             </View>
           </Button>

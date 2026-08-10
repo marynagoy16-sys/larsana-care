@@ -1,8 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
 import { listCities, listRegions, regionsQueryKeys } from '@/services/regions'
 
-export function useRegions() {
-  return useQuery({ queryKey: regionsQueryKeys.regions, queryFn: listRegions })
+function normalizeRegions(data: unknown) {
+  if (Array.isArray(data)) return data
+  if (data && typeof data === 'object' && Array.isArray((data as { data?: unknown }).data)) {
+    return (data as { data: ReturnType<typeof listRegions> extends Promise<infer T> ? T : never }).data
+  }
+  return []
+}
+
+export function useRegions(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: regionsQueryKeys.regions,
+    queryFn: listRegions,
+    select: normalizeRegions,
+    enabled: options?.enabled ?? true,
+  })
 }
 
 export function useAllCities() {

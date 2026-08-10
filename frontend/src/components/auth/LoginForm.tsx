@@ -11,7 +11,7 @@ import { getHomePathForRole } from '@/types/auth'
 import { cn } from '@/lib/utils'
 
 const loginInputClass =
-  'h-12 rounded-xl border-0 bg-muted px-4 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/30'
+  'h-11 rounded-xl border-0 bg-muted px-4 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/30 lg:h-10 lg:text-sm'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -47,7 +47,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-3.5">
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
           E-mail
@@ -98,7 +98,7 @@ export function LoginForm() {
 
       <Button
         type="submit"
-        className="h-12 w-full rounded-xl text-base font-semibold"
+        className="h-11 w-full rounded-xl text-base font-semibold lg:h-10 lg:text-sm"
         disabled={loading}
       >
         {loading ? 'Entrando...' : 'Entrar'}

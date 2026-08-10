@@ -47,13 +47,13 @@ export function DatePicker({
       {label ? <Text className="text-sm font-medium text-muted-foreground">{label}</Text> : null}
       <View className="relative">
         <View className="absolute left-3 top-3.5">
-          <Calendar size={18} color="#5A7920" />
+          <Calendar size={18} color="#49796B" />
         </View>
         <TextInput
           value={display}
           onChangeText={handleChange}
           placeholder="DD/MM/AAAA"
-          placeholderTextColor="#5A7920"
+          placeholderTextColor="#49796B"
           keyboardType="numeric"
           className="h-12 rounded-xl border border-border bg-card pl-10 pr-4 text-base text-foreground"
         />
@@ -95,7 +95,7 @@ export function MonthPicker({
           value={display}
           onChangeText={handleChange}
           placeholder="MM/AAAA"
-          placeholderTextColor="#5A7920"
+          placeholderTextColor="#49796B"
           keyboardType="numeric"
           className="h-12 rounded-xl border border-border bg-card px-4 text-base text-foreground"
         />

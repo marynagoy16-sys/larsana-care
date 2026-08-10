@@ -4,30 +4,35 @@
 
 @layer base {
   :root {
-    --brand-light: 80 23% 95.5%;
-    --brand-dark: 100 66% 11.6%;
-    --background: 80 23% 95.5%;
-    --foreground: 100 66% 11.6%;
+    /* LarsanaCare — paleta oficial */
+    --brand-light: 48 45.5% 97.8%;
+    --brand-dark: 163.5 83.3% 9.4%;
+    --brand-care: 163.8 81.3% 18.8%;
+    --brand-gold: 43.9 36.6% 56.1%;
+    --brand-linen: 40 20% 91.2%;
+
+    --background: var(--brand-light);
+    --foreground: var(--brand-dark);
     --card: 0 0% 100%;
-    --card-foreground: 100 66% 11.6%;
+    --card-foreground: var(--brand-dark);
     --popover: 0 0% 100%;
-    --popover-foreground: 100 66% 11.6%;
-    --primary: 100 66% 11.6%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 80 18% 92%;
-    --secondary-foreground: 100 66% 11.6%;
-    --muted: 80 16% 93%;
-    --muted-foreground: 100 25% 32%;
-    --accent: 80 18% 92%;
-    --accent-foreground: 100 66% 11.6%;
+    --popover-foreground: var(--brand-dark);
+    --primary: var(--brand-care);
+    --primary-foreground: var(--brand-light);
+    --secondary: var(--brand-linen);
+    --secondary-foreground: var(--brand-dark);
+    --muted: 40 15% 93%;
+    --muted-foreground: 163 25% 38%;
+    --accent: 44 30% 92%;
+    --accent-foreground: var(--brand-dark);
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 80 14% 86%;
-    --input: 80 16% 93%;
-    --ring: 100 66% 11.6%;
-    --nav-icon: 100 66% 11.6%;
-    --nav-icon-muted: 100 25% 32%;
-    --nav-active-bg: 95 48% 88%;
-    --nav-active-fg: 100 66% 11.6%;
+    --border: 40 12% 85%;
+    --input: var(--brand-linen);
+    --ring: var(--brand-care);
+    --nav-icon: var(--brand-care);
+    --nav-icon-muted: 163 25% 38%;
+    --nav-active-bg: 163 35% 90%;
+    --nav-active-fg: var(--brand-care);
   }
 }

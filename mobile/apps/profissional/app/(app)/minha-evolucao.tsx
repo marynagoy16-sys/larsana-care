@@ -48,7 +48,7 @@ export default function MinhaEvolucaoScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -57,7 +57,7 @@ export default function MinhaEvolucaoScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <PageHeader>
         <View className="flex-row items-center gap-2">
-          <Trophy size={20} color="#17310A" />
+          <Trophy size={20} color="#095742" />
           <Text className="font-display text-xl font-bold text-foreground">Minha evolução</Text>
         </View>
       </PageHeader>

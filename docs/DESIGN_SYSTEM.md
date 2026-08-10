@@ -2,8 +2,8 @@
 
 Sistema de design técnico para o ecossistema Larsana Care — painel administrativo, portal do profissional, portal do paciente e apps nativos. Stack: React + Tailwind + shadcn/ui.
 
-**Versão:** 5.1  
-**Última atualização:** 05/06/2026  
+**Versão:** 6.0  
+**Última atualização:** 10/08/2026  
 **Plataforma:** LarsanaCare Fisioterapia Domiciliar
 
 ---
@@ -12,7 +12,7 @@ Sistema de design técnico para o ecossistema Larsana Care — painel administra
 
 1. [Stack Tecnológica](#1-stack-tecnológica)
 2. [Paleta de Cores (HSL)](#2-paleta-de-cores-hsl)
-   - [2.2 Escala Yellow-Green](#22-escala-yellow-green-larsana)
+   - [2.2 Paleta Oficial LarsanaCare](#22-paleta-oficial-larsanacare)
    - [2.5 Configuração Tailwind](#25-configuração-tailwind-cores)
    - [2.7 Tokens de Marca](#27-tokens-de-marca)
    - [2.8 Regras Visuais de Cor](#28-regras-visuais-de-cor)
@@ -71,146 +71,102 @@ Sistema de design técnico para o ecossistema Larsana Care — painel administra
 
 ### 2.1 Filosofia Visual
 
-Identidade **saúde domiciliar** — acolhimento, confiança clínica e vitalidade. Paleta **yellow-green** (verde-limão) como cor de marca Larsana Care.
+Identidade **saúde domiciliar** — acolhimento, confiança clínica e serenidade. Paleta em **verdes profundos** com acentos em **ouro** e neutros em **linho/branco acolhimento**.
 
 **Atmosfera de interface** (inspirada em padrões *content-first* de apps densos): a UI recua em superfícies neutras para que **dados clínicos, pacientes e ciclos** sejam o foco. O verde Larsana aparece de forma **funcional** — CTAs, estados ativos, FAB — nunca como decoração de fundo. Geometria **pill e circular** em botões e buscas; tipografia **compacta** (10px–24px) para varredura rápida de listas operacionais.
 
 Características:
 
-- **Verde escuro** (`brand-dark`, escala 900–950) em hero, navbar e áreas premium — seriedade e contraste
-- **Verde primário** (`brand-primary`, escala 500) em ações principais — cuidado e energia
-- **Verde médio** (`brand-accent`, escala 400–600) em CTAs secundários, badges e destaques
-- **Fundos claros** (escala 50–100) para legibilidade em prontuários, listagens e formulários
-- **Superfícies em camadas** (background → card → elevated) com sombras perceptíveis, não bordas cruas
+- **Verde Lar Profundo** (`brand-dark`) em texto, contraste e hover de CTAs — seriedade e legibilidade
+- **Verde Cuidado** (`brand-care`, `primary`) em ações principais — cuidado e confiança clínica
+- **Ouro** (`brand-gold`) em badges, destaques premium e acentos decorativos
+- **Linho Sereno** (`brand-linen`) em superfícies secundárias, inputs e bordas suaves
+- **Branco Acolhimento** (`brand-light`) como fundo principal — acolhimento e clareza
 - Todas as cores em **HSL** (formato Tailwind/shadcn: `H S% L%`) para opacidade dinâmica e temas claro/escuro
 
-### 2.2 Escala Yellow-Green (Larsana)
+### 2.2 Paleta Oficial LarsanaCare
 
-Escala oficial da marca. Usar tokens semânticos (`primary`, `brand-dark`) na UI; a escala numérica para ilustrações, gráficos e estados hover.
+Cinco cores de marca. Usar tokens semânticos (`primary`, `brand-dark`, `brand-care`) na UI; hex apenas em ícones nativos e gráficos.
 
 ```css
 :root {
-  /* ===== ESCALA YELLOW-GREEN — LarsanaCare ===== */
-  --color-yellow-green-50:  84 60% 95.1%;   /* #F4FAEB — rgb(244 250 235) */
-  --color-yellow-green-100: 80.7 56.9% 90%;  /* #EAF4D7 — rgb(234 244 215) */
-  --color-yellow-green-200: 81 58.8% 80%;    /* #D5EAAE — rgb(213 234 174) */
-  --color-yellow-green-300: 80.9 58.2% 70%;  /* #C0DF86 — rgb(192 223 134) */
-  --color-yellow-green-400: 80.8 57.8% 60%;  /* #ABD45E — rgb(171 212 94) */
-  --color-yellow-green-500: 80.8 57.6% 50%;  /* #96C936 — rgb(150 201 54) — PRIMÁRIA */
-  --color-yellow-green-600: 80.8 57.8% 40%;  /* #78A12B — rgb(120 161 43) — HOVER */
-  --color-yellow-green-700: 80.9 58.2% 30%;  /* #5A7920 — rgb(90 121 32) */
-  --color-yellow-green-800: 81 58.8% 20%;    /* #3C5115 — rgb(60 81 21) */
-  --color-yellow-green-900: 80.7 56.9% 10%;  /* #1E280B — rgb(30 40 11) — DARK UI */
-  --color-yellow-green-950: 80 60% 6.9%;     /* #151C07 — rgb(21 28 7) — TEXTO / FUNDO DARK */
+  /* ===== PALETA OFICIAL — LarsanaCare ===== */
+  --brand-light: 48 45.5% 97.8%;    /* #FCFBF7 — Branco Acolhimento — fundo */
+  --brand-dark: 163.5 83.3% 9.4%;   /* #042C21 — Verde Lar Profundo — texto */
+  --brand-care: 163.8 81.3% 18.8%;  /* #095742 — Verde Cuidado — CTAs */
+  --brand-gold: 43.9 36.6% 56.1%;   /* #B8A266 — Ouro — destaques */
+  --brand-linen: 40 20% 91.2%;      /* #EDEAE4 — Linho Sereno — superfícies */
 }
 ```
 
-| Token | Hex | HSL | Uso típico |
-|-------|-----|-----|------------|
-| `50` | `#F4FAEB` | `84 60% 95.1%` | Fundo de página (light) |
-| `100` | `#EAF4D7` | `80.7 56.9% 90%` | Superfícies secundárias, sidebar |
-| `200` | `#D5EAAE` | `81 58.8% 80%` | Bordas, divisores |
-| `300` | `#C0DF86` | `80.9 58.2% 70%` | Hover suave, chips |
-| `400` | `#ABD45E` | `80.8 57.8% 60%` | Accent, badges, destaque |
-| `500` | `#96C936` | `80.8 57.6% 50%` | **Botões primários, links, ring** |
-| `600` | `#78A12B` | `80.8 57.8% 40%` | Hover botão primário |
-| `700` | `#5A7920` | `80.9 58.2% 30%` | Texto muted forte |
-| `800` | `#3C5115` | `81 58.8% 20%` | Texto sobre fundos claros (alternativo) |
-| `900` | `#1E280B` | `80.7 56.9% 10%` | Navbar, hero, sidebar dark accent |
-| `950` | `#151C07` | `80 60% 6.9%` | Texto principal, fundo dark theme |
+| Token | Nome | Hex | HSL | Uso típico |
+|-------|------|-----|-----|------------|
+| `brand-light` | Branco Acolhimento | `#FCFBF7` | `48 45.5% 97.8%` | Fundo de página, texto sobre CTAs |
+| `brand-dark` | Verde Lar Profundo | `#042C21` | `163.5 83.3% 9.4%` | Texto principal, contraste, hover de botão |
+| `brand-care` | Verde Cuidado | `#095742` | `163.8 81.3% 18.8%` | **Botões primários, links, ring, ícones ativos** |
+| `brand-gold` | Ouro | `#B8A266` | `43.9 36.6% 56.1%` | Badges premium, destaques, acentos |
+| `brand-linen` | Linho Sereno | `#EDEAE4` | `40 20% 91.2%` | Superfícies secundárias, inputs, sidebar |
+| *(derivado)* | Muted | `#49796B` | `163 25% 38%` | Ícones inativos, placeholders, texto muted |
 
 ### 2.3 Light Theme (`:root`)
 
 ```css
 :root {
   /* ===== CORE COLORS ===== */
-  --background: 84 60% 95.1%;          /* yellow-green-50 #F4FAEB */
-  --foreground: 80 60% 6.9%;           /* yellow-green-950 #151C07 */
+  --background: var(--brand-light);       /* #FCFBF7 Branco Acolhimento */
+  --foreground: var(--brand-dark);        /* #042C21 Verde Lar Profundo */
 
   /* ===== BRAND COLORS — LarsanaCare ===== */
-  --brand: 80.8 57.6% 50%;             /* yellow-green-500 #96C936 */
-  --brand-dark: 80.7 56.9% 10%;        /* yellow-green-900 #1E280B */
-  --brand-primary: 80.8 57.6% 50%;
-  --brand-primary-dark: 80.8 57.8% 40%; /* yellow-green-600 #78A12B */
-  --brand-accent: 80.8 57.8% 60%;      /* yellow-green-400 #ABD45E */
-  --brand-muted: 80.7 56.9% 90%;       /* yellow-green-100 #EAF4D7 */
+  --brand-primary-dark: var(--brand-dark); /* hover = Verde Lar Profundo */
 
   /* ===== SEMANTIC SURFACES ===== */
   --card: 0 0% 100%;
-  --card-foreground: 80 60% 6.9%;
+  --card-foreground: var(--brand-dark);
 
   --popover: 0 0% 100%;
-  --popover-foreground: 80 60% 6.9%;
+  --popover-foreground: var(--brand-dark);
 
-  /* ===== PRIMARY (Ações principais — verde Larsana) ===== */
-  --primary: 80.8 57.6% 50%;
-  --primary-foreground: 0 0% 100%;
+  /* ===== PRIMARY (Ações principais — Verde Cuidado) ===== */
+  --primary: var(--brand-care);
+  --primary-foreground: var(--brand-light);
 
-  /* ===== SECONDARY (Superfícies neutras) ===== */
-  --secondary: 80.7 56.9% 90%;
-  --secondary-foreground: 80.7 56.9% 10%;
+  /* ===== SECONDARY (Superfícies neutras — Linho Sereno) ===== */
+  --secondary: var(--brand-linen);
+  --secondary-foreground: var(--brand-dark);
 
   /* ===== MUTED (Elementos sutis) ===== */
-  --muted: 84 60% 95.1%;
-  --muted-foreground: 80.9 58.2% 30%;
+  --muted: 40 15% 93%;
+  --muted-foreground: 163 25% 38%;
 
-  /* ===== ACCENT (CTAs secundários — verde mais escuro) ===== */
-  --accent: 80.8 57.8% 40%;
-  --accent-foreground: 0 0% 100%;
+  /* ===== ACCENT (Destaques — tint ouro) ===== */
+  --accent: 44 30% 92%;
+  --accent-foreground: var(--brand-dark);
 
   /* ===== DESTRUCTIVE (Erros/Exclusões) ===== */
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
   /* ===== INPUTS & BORDERS ===== */
-  --border: 81 58.8% 80%;              /* yellow-green-200 #D5EAAE */
-  --input: 84 60% 95.1%;
-  --ring: 80.8 57.6% 50%;              /* Focus ring — primária */
+  --border: 40 12% 85%;
+  --input: var(--brand-linen);
+  --ring: var(--brand-care);
+
+  /* ===== NAV / SIDEBAR ===== */
+  --nav-icon: var(--brand-care);
+  --nav-icon-muted: 163 25% 38%;
+  --nav-active-bg: 163 35% 90%;
+  --nav-active-fg: var(--brand-care);
+  --nav-hover-bg: 40 18% 94%;
 
   /* ===== BORDER RADIUS ===== */
-  --radius: 0.5rem;                    /* 8px — cards; botões usam rounded-full */
-
-  /* ===== SHADOWS (elevação) ===== */
-  --shadow-elevated: 0 8px 8px hsl(80 60% 6.9% / 0.08);
-  --shadow-dialog: 0 8px 24px hsl(80 60% 6.9% / 0.15);
-  --shadow-inset-border: 0 1px 0 hsl(var(--background)), inset 0 0 0 1px hsl(var(--border));
-
-  /* ===== SIDEBAR ===== */
-  --sidebar-background: 80.7 56.9% 90%;
-  --sidebar-foreground: 80 60% 6.9%;
-  --sidebar-primary: 80.8 57.6% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 80.8 57.6% 50% / 0.12;
-  --sidebar-accent-foreground: 80.8 57.8% 40%;
-  --sidebar-border: 81 58.8% 80%;
-  --sidebar-ring: 80.8 57.6% 50%;
-
-  /* ===== CHANNEL COLORS (Integrações) ===== */
-  --whatsapp: 142 70% 45%;
-  --instagram: 340 75% 55%;
-  --facebook: 80.8 57.8% 40%;
-  --telegram: 200 75% 50%;
-  --twitter: 203 89% 53%;
-  --email: 80.9 58.2% 30%;
-  --livechat: 80.8 57.6% 50%;
+  --radius: 0.5rem;
 
   /* ===== STATUS COLORS ===== */
-  --success: 80.8 57.8% 40%;           /* Alinhado à marca */
-  --warning: 38 92% 50%;               /* Âmbar — alertas (contraste semântico) */
+  --success: 163.8 81.3% 18.8%;
+  --warning: 38 92% 50%;
   --warning-foreground: 38 92% 25%;
   --error: 0 72% 51%;
   --info: 199 89% 48%;
-
-  /* ===== ONLINE STATUS ===== */
-  --online: 80.8 57.6% 50%;
-  --offline: 80 20% 50%;
-  --away: 38 92% 50%;
-  --busy: 0 72% 51%;
-
-  /* ===== TRANSITIONS ===== */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 ```
 
@@ -219,75 +175,55 @@ Escala oficial da marca. Usar tokens semânticos (`primary`, `brand-dark`) na UI
 ```css
 .dark {
   /* ===== CORE COLORS ===== */
-  --background: 80 60% 6.9%;             /* yellow-green-950 #151C07 */
-  --foreground: 84 60% 95.1%;           /* yellow-green-50 */
-
-  /* ===== BRAND COLORS ===== */
-  --brand: 80.8 57.8% 60%;
-  --brand-dark: 80 60% 6.9%;
-  --brand-primary: 80.8 57.8% 60%;     /* yellow-green-400 — mais legível no escuro */
-  --brand-primary-dark: 80.8 57.6% 50%;
-  --brand-accent: 80.9 58.2% 70%;
-  --brand-muted: 80.7 56.9% 10%;
+  --background: 163.5 50% 5%;
+  --foreground: var(--brand-light);
 
   /* ===== SEMANTIC SURFACES ===== */
-  --card: 80.7 56.9% 10%;
-  --card-foreground: 84 60% 95.1%;
+  --card: 163.5 40% 8%;
+  --card-foreground: var(--brand-light);
 
-  --popover: 80.7 56.9% 10%;
-  --popover-foreground: 84 60% 95.1%;
+  --popover: 163.5 40% 8%;
+  --popover-foreground: var(--brand-light);
 
   /* ===== PRIMARY ===== */
-  --primary: 80.8 57.8% 60%;
-  --primary-foreground: 80 60% 6.9%;
+  --primary: var(--brand-care);
+  --primary-foreground: var(--brand-light);
 
   /* ===== SECONDARY ===== */
-  --secondary: 81 58.8% 20%;
-  --secondary-foreground: 84 60% 95.1%;
+  --secondary: 163.5 25% 13%;
+  --secondary-foreground: var(--brand-light);
 
   /* ===== MUTED ===== */
-  --muted: 80.7 56.9% 10%;
-  --muted-foreground: 80.9 58.2% 70%;
+  --muted: 163.5 25% 13%;
+  --muted-foreground: 163 15% 58%;
 
   /* ===== ACCENT ===== */
-  --accent: 80.8 57.6% 50%;
-  --accent-foreground: 0 0% 100%;
+  --accent: 163.5 25% 13%;
+  --accent-foreground: var(--brand-light);
 
   /* ===== DESTRUCTIVE ===== */
-  --destructive: 0 72% 60%;
+  --destructive: 0 62% 55%;
   --destructive-foreground: 0 0% 100%;
 
   /* ===== INPUTS & BORDERS ===== */
-  --border: 80.9 58.2% 30%;
-  --input: 80.7 56.9% 10%;
-  --ring: 80.8 57.8% 60%;
+  --border: 163.5 20% 16%;
+  --input: 163.5 25% 13%;
+  --ring: var(--brand-care);
 
-  /* ===== SIDEBAR DARK ===== */
-  --sidebar-background: 80 60% 5%;
-  --sidebar-foreground: 84 60% 95.1%;
-  --sidebar-primary: 80.8 57.8% 60%;
-  --sidebar-primary-foreground: 80 60% 6.9%;
-  --sidebar-accent: 80.8 57.8% 60% / 0.15;
-  --sidebar-accent-foreground: 80.9 58.2% 70%;
-  --sidebar-border: 80.9 58.2% 30%;
-  --sidebar-ring: 80.8 57.8% 60%;
+  --brand-primary-dark: 163.8 70% 24%;
 
-  /* ===== STATUS COLORS (mais brilhantes) ===== */
-  --success: 80.8 57.8% 60%;
+  /* ===== NAV DARK ===== */
+  --nav-icon: 163 20% 72%;
+  --nav-icon-muted: 163 10% 50%;
+  --nav-active-bg: 163.5 30% 11%;
+  --nav-active-fg: var(--brand-light);
+  --nav-hover-bg: 163.5 35% 8%;
+
+  /* ===== STATUS COLORS ===== */
+  --success: 163.8 70% 30%;
   --warning: 38 92% 55%;
-  --error: 0 72% 60%;
+  --error: 0 62% 55%;
   --info: 199 89% 55%;
-
-  /* ===== ONLINE STATUS ===== */
-  --online: 80.8 57.8% 60%;
-  --offline: 80 15% 45%;
-  --away: 38 92% 55%;
-  --busy: 0 72% 60%;
-
-  /* ===== SHADOWS (dark — mais pesadas) ===== */
-  --shadow-elevated: 0 8px 8px hsl(0 0% 0% / 0.3);
-  --shadow-dialog: 0 8px 24px hsl(0 0% 0% / 0.5);
-  --shadow-inset-border: 0 1px 0 hsl(80 60% 6.9%), inset 0 0 0 1px hsl(80.9 58.2% 30% / 0.6);
 }
 ```
 
@@ -343,25 +279,12 @@ export default {
           ring: withOpacity("--sidebar-ring"),
         },
         brand: {
-          DEFAULT: withOpacity("--brand"),
+          light: withOpacity("--brand-light"),
           dark: withOpacity("--brand-dark"),
-          primary: withOpacity("--brand-primary"),
+          care: withOpacity("--brand-care"),
+          gold: withOpacity("--brand-gold"),
+          linen: withOpacity("--brand-linen"),
           "primary-dark": withOpacity("--brand-primary-dark"),
-          accent: withOpacity("--brand-accent"),
-          muted: withOpacity("--brand-muted"),
-        },
-        "yellow-green": {
-          50:  "hsl(84 60% 95.1%)",
-          100: "hsl(80.7 56.9% 90%)",
-          200: "hsl(81 58.8% 80%)",
-          300: "hsl(80.9 58.2% 70%)",
-          400: "hsl(80.8 57.8% 60%)",
-          500: "hsl(80.8 57.6% 50%)",
-          600: "hsl(80.8 57.8% 40%)",
-          700: "hsl(80.9 58.2% 30%)",
-          800: "hsl(81 58.8% 20%)",
-          900: "hsl(80.7 56.9% 10%)",
-          950: "hsl(80 60% 6.9%)",
         },
       },
       boxShadow: {
@@ -380,7 +303,7 @@ export default {
 } satisfies Config;
 ```
 
-> Use `bg-primary`, `bg-brand-dark`, etc. na UI. A escala `yellow-green-*` é reservada para gráficos, ilustrações e estados que precisam de tons fixos fora dos tokens semânticos. Tipografia, `fontSize` e `letterSpacing` — ver §3.3.
+> Use `bg-primary`, `bg-brand-care`, `bg-brand-dark`, etc. na UI. Referência de hex para ícones nativos: `@larsana/shared` → `larsanaPalette`. Tipografia, `fontSize` e `letterSpacing` — ver §3.3.
 
 ### 2.6 Como Usar Cores no Tailwind
 
@@ -402,15 +325,15 @@ export default {
 
 ### 2.7 Tokens de Marca
 
-| Token | Hex | HSL | Uso |
-|-------|-----|-----|-----|
-| `brand-dark` | `#1E280B` | `80.7 56.9% 10%` | Hero, navbar, topbar portal |
-| `brand-primary` | `#96C936` | `80.8 57.6% 50%` | Botões primários, links, focus ring |
-| `brand-primary-dark` | `#78A12B` | `80.8 57.8% 40%` | Hover de botão primário |
-| `brand-accent` | `#ABD45E` | `80.8 57.8% 60%` | Badges, chips, destaques |
-| `neutral-light` | `#F4FAEB` | `84 60% 95.1%` | Fundos e inputs (yellow-green-50) |
-| `neutral-border` | `#D5EAAE` | `81 58.8% 80%` | Bordas de cards e divisores |
-| `text-on-dark` | `#FFFFFF` | `0 0% 100%` | Textos sobre fundo brand-dark |
+| Token | Nome | Hex | HSL | Uso |
+|-------|------|-----|-----|-----|
+| `brand-light` | Branco Acolhimento | `#FCFBF7` | `48 45.5% 97.8%` | Fundo de página, texto sobre CTAs |
+| `brand-dark` | Verde Lar Profundo | `#042C21` | `163.5 83.3% 9.4%` | Texto principal, contraste, hover de botão |
+| `brand-care` | Verde Cuidado | `#095742` | `163.8 81.3% 18.8%` | Botões primários, links, focus ring, ícones ativos |
+| `brand-gold` | Ouro | `#B8A266` | `43.9 36.6% 56.1%` | Badges premium, destaques decorativos |
+| `brand-linen` | Linho Sereno | `#EDEAE4` | `40 20% 91.2%` | Superfícies secundárias, inputs, bordas |
+| `brand-primary-dark` | — | `#042C21` | `163.5 83.3% 9.4%` | Hover de botão primário |
+| `text-on-dark` | — | `#FCFBF7` | `48 45.5% 97.8%` | Textos sobre fundo escuro |
 
 ### 2.8 Regras Visuais de Cor
 
@@ -472,7 +395,7 @@ export default {
 - Empacotar listas densamente — gaps de 8–12px
 
 **Don't**
-- Não introduzir cores de marca além do yellow-green (sem azul/laranja como accent de UI)
+- Não introduzir cores de marca além da paleta oficial (Verde Lar Profundo, Verde Cuidado, Ouro, Linho Sereno, Branco Acolhimento)
 - Não usar botões quadrados (`rounded-md`) para ações primárias
 - Não usar sombras leves demais no dark theme — elevar opacidade
 - Não inflar títulos dentro do app logado (reservar hero grande para marketing)
@@ -1682,10 +1605,11 @@ animation: {
 - [x] Active states: `bg-sidebar-accent text-foreground`
 - [x] Muted text: `text-muted-foreground`
 - [x] Bordas sutis: `border-border/30`
-- [x] Brand primary: Verde `#96C936` (HSL 80.8 57.6% 50% — yellow-green-500)
-- [x] Brand dark: `#1E280B` (HSL 80.7 56.9% 10% — yellow-green-900)
-- [x] CTA secundário: `#78A12B` (HSL 80.8 57.8% 40% — yellow-green-600) via token `accent`
-- [x] Escala completa `--color-yellow-green-50` … `950` documentada
+- [x] Brand primary: Verde Cuidado `#095742` (HSL 163.8 81.3% 18.8%)
+- [x] Brand dark: Verde Lar Profundo `#042C21` (HSL 163.5 83.3% 9.4%)
+- [x] Fundo: Branco Acolhimento `#FCFBF7` via token `brand-light`
+- [x] Accent premium: Ouro `#B8A266` via token `brand-gold`
+- [x] Superfícies: Linho Sereno `#EDEAE4` via token `brand-linen`
 
 ### Componentes e geometria
 

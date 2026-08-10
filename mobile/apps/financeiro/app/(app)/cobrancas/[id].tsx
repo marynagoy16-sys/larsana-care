@@ -39,7 +39,7 @@ export default function ChargeDetailScreen() {
     return (
       <View className="flex-1 bg-background">
         <SubScreenHeader title="Cobrança" />
-        <ActivityIndicator className="mt-8" color="#17310A" />
+        <ActivityIndicator className="mt-8" color="#095742" />
       </View>
     )
   }

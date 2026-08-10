@@ -19,7 +19,7 @@ export function SubScreenHeader({ title, onBack, right }: SubScreenHeaderProps) 
         className="rounded-xl border border-border/60 bg-card p-2.5 active:bg-muted/40"
         accessibilityLabel="Voltar"
       >
-        <ArrowLeft size={20} color="#17310A" />
+        <ArrowLeft size={20} color="#095742" />
       </Pressable>
       <Text className="min-w-0 flex-1 font-display text-lg font-bold text-foreground" numberOfLines={2}>
         {title}

@@ -46,7 +46,7 @@ export default function AcademyCourseModulesScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <View className="min-w-0 flex-1">
             <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>
@@ -63,7 +63,7 @@ export default function AcademyCourseModulesScreen() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : !data ? (
         <View className="flex-1 items-center justify-center px-6">
@@ -103,7 +103,7 @@ export default function AcademyCourseModulesScreen() {
                   className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 active:bg-muted/30"
                 >
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <BookOpen size={18} color="#17310A" />
+                    <BookOpen size={18} color="#095742" />
                   </View>
                   <View className="min-w-0 flex-1 gap-1">
                     <Text className="font-medium text-foreground">{mod.title}</Text>
@@ -111,7 +111,7 @@ export default function AcademyCourseModulesScreen() {
                       {mod.completedLessons}/{mod.totalLessons} aulas · {modPercent}%
                     </Text>
                   </View>
-                  <ChevronRight size={18} color="#5A7920" />
+                  <ChevronRight size={18} color="#49796B" />
                 </Pressable>
               )
             })

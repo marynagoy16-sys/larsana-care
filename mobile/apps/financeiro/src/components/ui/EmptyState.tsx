@@ -14,7 +14,7 @@ export function EmptyState({
   return (
     <View className="items-center justify-center gap-3 px-6 py-12">
       <View className="rounded-full bg-muted p-4">
-        <Inbox size={32} color="#5A7920" />
+        <Inbox size={32} color="#49796B" />
       </View>
       <Text className="text-center text-base font-semibold text-foreground">{title}</Text>
       {description ? (

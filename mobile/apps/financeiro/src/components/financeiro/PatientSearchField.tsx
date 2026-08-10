@@ -65,7 +65,7 @@ export function PatientSearchField({
         onFocus={() => setFocused(true)}
         onBlur={() => setTimeout(() => setFocused(false), 200)}
         placeholder="Buscar paciente por nome"
-        placeholderTextColor="#5A7920"
+        placeholderTextColor="#49796B"
         className={cn(
           'h-12 rounded-xl border border-border bg-card px-4 text-base text-foreground',
           error && 'border-destructive',
@@ -76,7 +76,7 @@ export function PatientSearchField({
         <View className="max-h-48 overflow-hidden rounded-xl border border-border bg-card">
           {loading ? (
             <View className="items-center py-4">
-              <ActivityIndicator color="#17310A" />
+              <ActivityIndicator color="#095742" />
             </View>
           ) : (
             <ScrollView keyboardShouldPersistTaps="handled">

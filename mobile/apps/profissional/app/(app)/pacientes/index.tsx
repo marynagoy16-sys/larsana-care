@@ -16,7 +16,7 @@ function KpiCard({ label, value, icon: Icon, description }: {
     <View className="flex-1 rounded-xl border border-border bg-card p-3 gap-2 min-w-[100px]">
       <View className="flex-row items-center justify-between">
         <Text className="text-xs font-medium text-muted-foreground">{label}</Text>
-        <Icon size={14} color="#5A7920" />
+        <Icon size={14} color="#49796B" />
       </View>
       <Text className="text-2xl font-bold text-foreground">{value}</Text>
       {description ? (
@@ -45,7 +45,7 @@ export default function PacientesScreen() {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-3 pb-8">
@@ -90,7 +90,7 @@ export default function PacientesScreen() {
                 className="flex-row items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 active:bg-muted/30"
               >
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Users size={18} color="#17310A" />
+                  <Users size={18} color="#095742" />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="font-medium text-foreground">{patient.full_name}</Text>
@@ -98,7 +98,7 @@ export default function PacientesScreen() {
                     {patient.care_status} {patient.patient_level ? `· ${patient.patient_level}` : ''}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#5A7920" />
+                <ChevronRight size={18} color="#49796B" />
               </Pressable>
             ))
           )}

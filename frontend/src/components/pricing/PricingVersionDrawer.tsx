@@ -14,7 +14,7 @@ import { patientLevelLabels, ppClassLabels } from '@/constants/labels'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { mapSupabaseError } from '@/lib/supabase-errors'
 import { cn } from '@/lib/utils'
-import { listRegions } from '@/services/regions'
+import { useRegions } from '@/hooks/queries/useRegions'
 import {
   PP_CLASSES,
   PRICING_PATIENT_LEVELS,
@@ -89,11 +89,7 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
   const [retentionPercent, setRetentionPercent] = useState('40')
   const [savingTab, setSavingTab] = useState<'prices' | 'commissions' | 'retention' | null>(null)
 
-  const { data: regions = [] } = useQuery({
-    queryKey: ['regions'],
-    queryFn: listRegions,
-    enabled: open,
-  })
+  const { data: regions = [] } = useRegions({ enabled: open })
 
   const { data: bundle, isLoading } = useQuery({
     queryKey: pricingQueryKeys.bundle(versionId ?? ''),

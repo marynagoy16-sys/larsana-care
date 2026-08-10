@@ -87,8 +87,8 @@ function resolveResponseLabel(status: string): string | null {
 
 function StepIcon({ state }: { state: StepState }) {
   if (state === 'done') return <CheckCircle size={20} color="#059669" />
-  if (state === 'current') return <CircleDot size={20} color="#5A7920" />
-  if (state === 'unlocked') return <CircleDot size={20} color="#5A7920" />
+  if (state === 'current') return <CircleDot size={20} color="#49796B" />
+  if (state === 'unlocked') return <CircleDot size={20} color="#49796B" />
   return <Circle size={20} color="#D1D5DB" />
 }
 
@@ -216,7 +216,7 @@ export default function AvaliacaoDetailScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['bottom']}>
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </SafeAreaView>
     )
   }
@@ -227,7 +227,7 @@ export default function AvaliacaoDetailScreen() {
         <PageHeader>
           <View className="flex-row items-center gap-2">
             <Pressable onPress={() => router.back()} className="p-2">
-              <ArrowLeft size={22} color="#17310A" />
+              <ArrowLeft size={22} color="#095742" />
             </Pressable>
             <Text className="text-lg font-semibold text-foreground">Avaliação</Text>
           </View>
@@ -276,7 +276,7 @@ export default function AvaliacaoDetailScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <Text className="flex-1 text-lg font-semibold text-foreground" numberOfLines={1}>
             {assessment.patients?.full_name ?? 'Paciente'}

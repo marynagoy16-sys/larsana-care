@@ -82,7 +82,7 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   autoComplete="email"
                   placeholder="seu@email.com"
-                  placeholderTextColor="#5A7920"
+                  placeholderTextColor="#49796B"
                   className="h-12 rounded-xl bg-muted px-4 text-base text-foreground"
                 />
               </View>
@@ -96,7 +96,7 @@ export default function LoginScreen() {
                     secureTextEntry={!showPassword}
                     autoComplete="password"
                     placeholder="••••••••"
-                    placeholderTextColor="#5A7920"
+                    placeholderTextColor="#49796B"
                     className="h-12 rounded-xl bg-muted px-4 pr-12 text-base text-foreground"
                   />
                   <Pressable
@@ -104,9 +104,9 @@ export default function LoginScreen() {
                     className="absolute right-4 top-3.5"
                   >
                     {showPassword ? (
-                      <EyeOff size={18} color="#5A7920" />
+                      <EyeOff size={18} color="#49796B" />
                     ) : (
-                      <Eye size={18} color="#5A7920" />
+                      <Eye size={18} color="#49796B" />
                     )}
                   </Pressable>
                 </View>

@@ -57,7 +57,7 @@ function LarsanaTabBar({ state, navigation }: BottomTabBarProps) {
               accessibilityRole="button"
               accessibilityLabel={item.label}
             >
-              <TabIcon size={22} color={isFocused ? '#17310A' : '#5A7920'} />
+              <TabIcon size={22} color={isFocused ? '#095742' : '#49796B'} />
               <Text
                 className={cn(
                   'max-w-[64px] truncate text-[10px]',

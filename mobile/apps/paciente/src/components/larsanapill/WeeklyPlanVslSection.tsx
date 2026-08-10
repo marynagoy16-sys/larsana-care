@@ -29,7 +29,7 @@ export function WeeklyPlanVslSection({ content, planTitle }: WeeklyPlanVslSectio
       ) : (
         <Card className="border-dashed">
           <View className="items-center gap-3 p-8">
-            <PlayCircle size={40} color="#5A7920" />
+            <PlayCircle size={40} color="#49796B" />
             <Text className="text-center text-sm text-muted-foreground">
               A demonstração em vídeo deste plano será disponibilizada em breve. Enquanto isso, explore a rotina
               semanal abaixo.

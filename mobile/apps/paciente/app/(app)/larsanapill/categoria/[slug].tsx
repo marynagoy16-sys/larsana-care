@@ -29,7 +29,7 @@ export default function LarsanaPillCategoryScreen() {
       <SubScreenHeader title={category?.title ?? 'Categoria'} />
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : !category ? (
         <View className="flex-1 items-center justify-center">
@@ -50,7 +50,7 @@ export default function LarsanaPillCategoryScreen() {
                 <Text className="font-medium text-foreground">{content.title}</Text>
                 <Text className="text-xs text-muted-foreground">{content.content_type}</Text>
               </View>
-              <ChevronRight size={18} color="#5A7920" />
+              <ChevronRight size={18} color="#49796B" />
             </Pressable>
           ))}
         </ScrollView>

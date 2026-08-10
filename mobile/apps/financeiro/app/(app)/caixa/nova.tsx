@@ -61,7 +61,7 @@ export default function NovaDespesaScreen() {
                 value={value}
                 onChangeText={onChange}
                 placeholder="Ex: Aluguel, Material..."
-                placeholderTextColor="#5A7920"
+                placeholderTextColor="#49796B"
                 className="h-12 rounded-xl border border-border bg-card px-4 text-base text-foreground"
               />
             )}
@@ -86,7 +86,7 @@ export default function NovaDespesaScreen() {
                 }}
                 keyboardType="numeric"
                 placeholder="R$ 0,00"
-                placeholderTextColor="#5A7920"
+                placeholderTextColor="#49796B"
                 className="h-12 rounded-xl border border-border bg-card px-4 text-base text-foreground"
               />
             )}

@@ -9,7 +9,7 @@ type Neighborhood = Database['public']['Tables']['neighborhoods']['Row']
 export async function listRegions() {
   const { data, error } = await supabase.from('regions').select('*').order('code')
   if (error) throw error
-  return data
+  return data ?? []
 }
 
 export async function listCities(regionId?: string) {
@@ -210,6 +210,7 @@ export type { City, Region }
 
 export const regionsQueryKeys = {
   regions: ['regions'] as const,
+  regionsWithStats: ['regions', 'with-stats'] as const,
   allCities: ['cities', 'all'] as const,
   cities: (regionId?: string) => ['cities', regionId ?? 'all'] as const,
   geography: (regionId: string) => ['region_geography', regionId] as const,

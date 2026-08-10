@@ -35,7 +35,7 @@ export default function AgendaScreen() {
 
       <View className="flex-row items-center justify-between px-4 pb-3">
         <Pressable onPress={() => setAnchorDate((d) => subDays(d, 1))} className="p-2">
-          <ChevronLeft size={22} color="#17310A" />
+          <ChevronLeft size={22} color="#095742" />
         </Pressable>
         <View className="flex-1 items-center px-2">
           <Text className="text-center font-display text-base font-bold text-foreground">
@@ -43,7 +43,7 @@ export default function AgendaScreen() {
           </Text>
         </View>
         <Pressable onPress={() => setAnchorDate((d) => addDays(d, 1))} className="p-2">
-          <ChevronRight size={22} color="#17310A" />
+          <ChevronRight size={22} color="#095742" />
         </Pressable>
       </View>
 
@@ -60,7 +60,7 @@ export default function AgendaScreen() {
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-2 pb-8">

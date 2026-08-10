@@ -40,7 +40,7 @@ export default function DelumaExportScreen() {
         </Button>
 
         {isLoading ? (
-          <ActivityIndicator color="#17310A" />
+          <ActivityIndicator color="#095742" />
         ) : data?.length ? (
           data.map((item) => (
             <Card key={item.id} className="p-4">

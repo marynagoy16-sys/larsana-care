@@ -85,7 +85,7 @@ export default function NovaCobrancaScreen() {
                 }}
                 keyboardType="numeric"
                 placeholder="R$ 0,00"
-                placeholderTextColor="#5A7920"
+                placeholderTextColor="#49796B"
                 className="h-12 rounded-xl border border-border bg-card px-4 text-base text-foreground"
               />
             )}

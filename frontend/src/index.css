@@ -4,9 +4,12 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * LarsanaCare / DEL — cores da logo
- * #F4F6F1  fundo claro
- * #17310A  verde escuro (texto, destaques, CTAs)
+ * LarsanaCare — paleta oficial
+ * #FCFBF7  Branco Acolhimento — fundo
+ * #042C21  Verde Lar Profundo — texto, contraste
+ * #095742  Verde Cuidado — CTAs, estados ativos
+ * #B8A266  Ouro — destaques
+ * #EDEAE4  Linho Sereno — superfícies secundárias
  */
 :root {
   --shell-gap: 1rem;
@@ -18,8 +21,11 @@
   --sidebar-scrollbar-width: 5px;
   --sidebar-collapse-btn-size: 1.75rem;
 
-  --brand-light: 80 23% 95.5%;
-  --brand-dark: 100 66% 11.6%;
+  --brand-light: 48 45.5% 97.8%;
+  --brand-dark: 163.5 83.3% 9.4%;
+  --brand-care: 163.8 81.3% 18.8%;
+  --brand-gold: 43.9 36.6% 56.1%;
+  --brand-linen: 40 20% 91.2%;
 
   --background: var(--brand-light);
   --foreground: var(--brand-dark);
@@ -28,65 +34,64 @@
   --popover: 0 0% 100%;
   --popover-foreground: var(--brand-dark);
 
-  --primary: var(--brand-dark);
-  --primary-foreground: 0 0% 100%;
+  --primary: var(--brand-care);
+  --primary-foreground: var(--brand-light);
 
-  --secondary: 80 18% 92%;
+  --secondary: var(--brand-linen);
   --secondary-foreground: var(--brand-dark);
-  --muted: 80 16% 93%;
-  --muted-foreground: 100 25% 32%;
-  --accent: 80 18% 92%;
+  --muted: 40 15% 93%;
+  --muted-foreground: 163 25% 38%;
+  --accent: 44 30% 92%;
   --accent-foreground: var(--brand-dark);
 
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 80 14% 86%;
-  --input: 80 16% 93%;
-  --ring: var(--brand-dark);
+  --border: 40 12% 85%;
+  --input: var(--brand-linen);
+  --ring: var(--brand-care);
 
-  --brand-primary-dark: 100 66% 9%;
+  --brand-primary-dark: var(--brand-dark);
 
-  --nav-icon: var(--brand-dark);
-  --nav-icon-muted: 100 25% 32%;
-  --nav-active-bg: 95 48% 88%;
-  --nav-active-fg: var(--brand-dark);
-  --nav-hover-bg: 80 20% 94%;
+  --nav-icon: var(--brand-care);
+  --nav-icon-muted: 163 25% 38%;
+  --nav-active-bg: 163 35% 90%;
+  --nav-active-fg: var(--brand-care);
+  --nav-hover-bg: 40 18% 94%;
 }
 
 .dark {
-  /* Fundos neutros — verde só em CTAs e destaques */
-  --background: 0 0% 5%;
-  --foreground: 0 0% 95%;
-  --card: 0 0% 9%;
-  --card-foreground: 0 0% 95%;
-  --popover: 0 0% 9%;
-  --popover-foreground: 0 0% 95%;
+  --background: 163.5 50% 5%;
+  --foreground: var(--brand-light);
+  --card: 163.5 40% 8%;
+  --card-foreground: var(--brand-light);
+  --popover: 163.5 40% 8%;
+  --popover-foreground: var(--brand-light);
 
-  --primary: var(--brand-light);
-  --primary-foreground: var(--brand-dark);
+  --primary: var(--brand-care);
+  --primary-foreground: var(--brand-light);
 
-  --secondary: 0 0% 13%;
-  --secondary-foreground: 0 0% 95%;
-  --muted: 0 0% 13%;
-  --muted-foreground: 0 0% 58%;
-  --accent: 0 0% 13%;
-  --accent-foreground: 0 0% 95%;
+  --secondary: 163.5 25% 13%;
+  --secondary-foreground: var(--brand-light);
+  --muted: 163.5 25% 13%;
+  --muted-foreground: 163 15% 58%;
+  --accent: 163.5 25% 13%;
+  --accent-foreground: var(--brand-light);
 
   --destructive: 0 62% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 0 0% 16%;
-  --input: 0 0% 13%;
-  --ring: var(--brand-light);
+  --border: 163.5 20% 16%;
+  --input: 163.5 25% 13%;
+  --ring: var(--brand-care);
 
-  --brand-primary-dark: 80 20% 88%;
+  --brand-primary-dark: 163.8 70% 24%;
 
-  --nav-icon: 80 16% 72%;
-  --nav-icon-muted: 0 0% 50%;
-  --nav-active-bg: 0 0% 11%;
-  --nav-active-fg: 0 0% 94%;
-  --nav-hover-bg: 0 0% 8%;
+  --nav-icon: 163 20% 72%;
+  --nav-icon-muted: 163 10% 50%;
+  --nav-active-bg: 163.5 30% 11%;
+  --nav-active-fg: var(--brand-light);
+  --nav-hover-bg: 163.5 35% 8%;
 }
 
 @theme {
@@ -95,6 +100,9 @@
 
   --color-brand-light: hsl(var(--brand-light));
   --color-brand-dark: hsl(var(--brand-dark));
+  --color-brand-care: hsl(var(--brand-care));
+  --color-brand-gold: hsl(var(--brand-gold));
+  --color-brand-linen: hsl(var(--brand-linen));
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -264,7 +272,7 @@ body {
   height: 28px;
   margin: 0 auto;
   border-radius: 9999px 9999px 9999px 0;
-  background: var(--pin-color, #17310a);
+  background: var(--pin-color, #095742);
   border: 3px solid #fff;
   transform: rotate(-45deg);
   box-shadow:
@@ -277,7 +285,7 @@ body {
   height: 32px;
   border-width: 3.5px;
   box-shadow:
-    0 0 0 4px rgb(23 49 10 / 0.22),
+    0 0 0 4px rgb(9 87 66 / 0.22),
     0 6px 16px rgb(0 0 0 / 0.38),
     0 0 0 1px rgb(0 0 0 / 0.2);
 }
@@ -288,8 +296,8 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 9999px;
-  background: rgb(23 49 10 / 0.15);
-  border: 2px solid rgb(23 49 10 / 0.35);
+  background: rgb(9 87 66 / 0.15);
+  border: 2px solid rgb(9 87 66 / 0.35);
 }
 
 .demand-map-origin__core {
@@ -297,7 +305,7 @@ body {
   inset: 5px;
   display: block;
   border-radius: 9999px;
-  background: #17310a;
+  background: #095742;
   border: 2.5px solid #fff;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
 }
@@ -323,4 +331,3 @@ body {
 .demand-map-popup span {
   color: hsl(var(--muted-foreground));
 }
-

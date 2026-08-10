@@ -41,7 +41,7 @@ export function AppHeader() {
           className="rounded-xl border border-border/60 bg-card p-2.5 active:bg-muted/40"
           accessibilityLabel="Notificações"
         >
-          <Bell size={20} color={onNotificacoes ? '#17310A' : '#5A7920'} />
+          <Bell size={20} color={onNotificacoes ? '#095742' : '#49796B'} />
         </Pressable>
       </View>
     </View>

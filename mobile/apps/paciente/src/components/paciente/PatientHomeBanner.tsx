@@ -40,7 +40,7 @@ export function PatientHomeBanner({ context }: { context: PatientHomeContext }) 
       <View className="rounded-xl border border-primary/25 bg-primary/5 p-5">
         <View className="flex-row items-start gap-3">
           <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <CreditCard size={20} color="#17310A" />
+            <CreditCard size={20} color="#095742" />
           </View>
           <View className="min-w-0 flex-1 gap-3">
             <View>

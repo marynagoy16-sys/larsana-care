@@ -36,7 +36,7 @@ export default function FaturamentoReportScreen() {
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color="#17310A" />
+          <ActivityIndicator color="#095742" />
         ) : data?.charges.length ? (
           data.charges.map((charge) => <ChargeCard key={charge.id} charge={charge} />)
         ) : (

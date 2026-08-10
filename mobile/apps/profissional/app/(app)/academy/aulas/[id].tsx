@@ -50,7 +50,7 @@ export default function AcademyLessonScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => router.back()} className="p-2">
-            <ArrowLeft size={22} color="#17310A" />
+            <ArrowLeft size={22} color="#095742" />
           </Pressable>
           <Text className="flex-1 text-lg font-semibold text-foreground" numberOfLines={1}>
             {lesson?.title ?? 'Aula'}
@@ -60,7 +60,7 @@ export default function AcademyLessonScreen() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#17310A" />
+          <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : !lesson ? (
         <View className="flex-1 items-center justify-center px-6">

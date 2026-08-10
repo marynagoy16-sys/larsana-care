@@ -7,5 +7,5 @@ export const PLAN_COLORS: Record<string, string> = {
 }
 
 export function getPlanColor(code: string): string {
-  return PLAN_COLORS[code] ?? '#17310A'
+  return PLAN_COLORS[code] ?? '#095742'
 }

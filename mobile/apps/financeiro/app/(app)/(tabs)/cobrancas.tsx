@@ -62,7 +62,7 @@ export default function CobrancasScreen() {
         <StatusFilter value={statusFilter} onChange={setStatusFilter} />
 
         {isLoading ? (
-          <ActivityIndicator color="#17310A" className="mt-8" />
+          <ActivityIndicator color="#095742" className="mt-8" />
         ) : filtered.length ? (
           filtered.map((charge) => <ChargeCard key={charge.id} charge={charge} />)
         ) : (

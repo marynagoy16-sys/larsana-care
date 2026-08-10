@@ -8,7 +8,7 @@ export default function Index() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </View>
     )
   }
@@ -17,7 +17,7 @@ export default function Index() {
   if (role === null) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#17310A" />
+        <ActivityIndicator size="large" color="#095742" />
       </View>
     )
   }

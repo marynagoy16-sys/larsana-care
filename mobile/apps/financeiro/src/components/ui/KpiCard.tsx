@@ -11,7 +11,7 @@ export function KpiCard({ label, value, icon: Icon, description }: {
     <View className="min-w-[100px] flex-1 gap-2 rounded-xl border border-border bg-card p-3">
       <View className="flex-row items-center justify-between">
         <Text className="text-xs font-medium text-muted-foreground">{label}</Text>
-        <Icon size={14} color="#5A7920" />
+        <Icon size={14} color="#49796B" />
       </View>
       <Text className="text-2xl font-bold text-foreground">{value}</Text>
       {description ? (

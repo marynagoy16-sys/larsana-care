@@ -13,7 +13,7 @@ export default function NotificacoesScreen() {
           description="Alertas financeiros e avisos aparecerão aqui."
         />
         <View className="items-center opacity-30">
-          <Bell size={48} color="#5A7920" />
+          <Bell size={48} color="#49796B" />
         </View>
       </ScrollView>
     </View>

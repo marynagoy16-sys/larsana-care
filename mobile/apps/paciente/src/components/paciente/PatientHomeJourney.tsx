@@ -82,8 +82,8 @@ function buildJourneySteps(context: PatientHomeContext): JourneyStep[] {
 
 function StepIcon({ state }: { state: StepState }) {
   if (state === 'done') return <CheckCircle2 size={20} color="#059669" />
-  if (state === 'current') return <CircleDot size={20} color="#17310A" />
-  if (state === 'waiting') return <CircleDot size={20} color="#5A7920" />
+  if (state === 'current') return <CircleDot size={20} color="#095742" />
+  if (state === 'waiting') return <CircleDot size={20} color="#49796B" />
   return <Circle size={20} color="#d1d5db" />
 }
 
