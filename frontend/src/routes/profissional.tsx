@@ -44,6 +44,8 @@ const PPAvaliacoesPage = lazy(() =>
 const PPAvaliacaoDetailPage = lazy(() =>
   import('@/pages/profissional/assessments/PPAvaliacaoDetailPage').then((m) => ({ default: m.PPAvaliacaoDetailPage })),
 )
+const PPContaPage = lazyPP('PPContaPage')
+const PPAparenciaPage = lazyPP('PPAparenciaPage')
 const PPCredenciamentoPage = lazyPP('PPCredenciamentoPage')
 const PPPerfilPage = lazyPP('PPPerfilPage')
 const PPSimuladorPage = lazyPP('PPSimuladorPage')
@@ -77,6 +79,8 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'avaliacoes/:id', element: ppRoute(<PPAvaliacaoDetailPage />) },
       { path: 'repasses', element: ppRoute(<PPRepassesPage />) },
       { path: 'repasses/:id', element: ppRoute(<PPRepasseDetailPage />) },
+      { path: 'conta', element: ppRoute(<PPContaPage />) },
+      { path: 'conta/aparencia', element: ppRoute(<PPAparenciaPage />) },
       { path: 'simulador', element: ppRoute(<PPSimuladorPage />) },
       { path: 'credenciamento', element: ppRoute(<PPCredenciamentoPage />) },
       { path: 'credenciamento/contrato', element: ppRoute(<PPCredenciamentoPage />) },

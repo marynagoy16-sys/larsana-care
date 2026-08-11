@@ -9,6 +9,7 @@ export function PPPacientesPage() {
   return (
     <EntityListPage
       title="Meus pacientes"
+      showStats={false}
       queryKey={['pp', 'patients']}
       queryFn={() => listPPPatients()}
       onRowClick={(r) => navigate(`/profissional/pacientes/${r.id}`)}

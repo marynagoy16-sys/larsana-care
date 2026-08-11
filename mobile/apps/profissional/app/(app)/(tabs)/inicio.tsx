@@ -7,12 +7,11 @@ import { ChevronRight, MapPin, Trophy } from 'lucide-react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SessionCard } from '@/components/profissional/SessionCard'
 import { useAuth } from '@/providers/AuthProvider'
-import { toAgendaDayKey } from '@/lib/agendaWeek'
+import { toAgendaDayKey, formatAgendaDayTitleShort } from '@/lib/agendaWeek'
 import { listOpenDemandsForPp } from '@/services/demands'
 import { listPendingEvolutionsForPp, ppEvolutionsQueryKeys } from '@/services/ppEvolutions'
 import {
   buildAgendaDaySummary,
-  formatAgendaDayTitleShort,
   listAgendaSessionsForDay,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
@@ -132,12 +131,12 @@ export default function InicioScreen() {
           <SectionTitle
             title="Seu dia"
             actionLabel="Ver agenda"
-            onAction={() => router.push('/(app)/agenda')}
+            onAction={() => router.push('/(app)/(tabs)/agenda')}
           />
           {sessions.length === 0 ? (
             <View className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6">
               <Text className="text-center text-sm text-muted-foreground">
-                Você não tem sessões agendadas para hoje.
+                Você não tem terapias agendadas para hoje.
               </Text>
             </View>
           ) : (
@@ -147,7 +146,7 @@ export default function InicioScreen() {
               ))}
               {remaining > 0 ? (
                 <Text className="px-1 text-xs text-muted-foreground">
-                  +{remaining} sessão{remaining === 1 ? '' : 'ões'} hoje
+                  +{remaining} terapia{remaining === 1 ? '' : 's'} hoje
                 </Text>
               ) : null}
             </View>

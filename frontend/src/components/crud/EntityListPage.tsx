@@ -44,7 +44,9 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   emptyMessage?: string
   exportFileName?: string
   mobileVariant?: 'default' | 'compact'
+  mobileFlush?: boolean
   getMobileAvatarLabel?: (row: T) => string
+  getMobileTags?: (row: T) => ReactNode
   showPagination?: boolean
   rowFilter?: (row: T) => boolean
   filterResetKey?: string
@@ -53,6 +55,9 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   activeFilterCount?: number
   onClearFilters?: () => void
   buildStats?: (rows: T[], filteredRows: T[]) => StatCardItem[]
+  layoutClassName?: string
+  tableSectionClassName?: string
+  splitScrollOnMobile?: boolean
 }
 
 function filterRows<T extends Record<string, unknown>>(
@@ -95,7 +100,9 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   emptyMessage,
   exportFileName,
   mobileVariant,
+  mobileFlush,
   getMobileAvatarLabel,
+  getMobileTags,
   showPagination = true,
   rowFilter,
   filterResetKey,
@@ -104,6 +111,9 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   activeFilterCount = 0,
   onClearFilters,
   buildStats,
+  layoutClassName,
+  tableSectionClassName,
+  splitScrollOnMobile = false,
 }: EntityListPageProps<T>) {
   const [deleteTarget, setDeleteTarget] = useState<T | null>(null)
   const [search, setSearch] = useState('')
@@ -212,7 +222,11 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
 
   return (
     <>
-    <CrudListPageLayout>
+    <CrudListPageLayout
+      className={cn(
+        splitScrollOnMobile && 'flex flex-1 flex-col min-h-0 max-lg:h-full max-lg:overflow-hidden',
+      )}
+    >
       {isInitialLoad ? (
         <CrudListPageSkeleton
           showStats={showStats}
@@ -221,7 +235,13 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
           toolbarActions={onCreate ? 4 : 3}
         />
       ) : (
-        <CascadeReveal className="space-y-4">
+        <CascadeReveal
+          className={cn(
+            'space-y-4',
+            splitScrollOnMobile && 'flex flex-1 flex-col min-h-0 max-lg:space-y-0 max-lg:overflow-hidden',
+            layoutClassName,
+          )}
+        >
           {showStats && statCards.length > 0 && (
             <CascadeItem>
               <StatsCardRow cards={statCards} columns={statsColumns} isLoading={isLoading} />
@@ -249,13 +269,20 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
             </CascadeItem>
           )}
 
-          {beforeTable ? <CascadeItem>{beforeTable}</CascadeItem> : null}
+          {beforeTable ? (
+            <CascadeItem className={cn(splitScrollOnMobile && 'shrink-0')}>{beforeTable}</CascadeItem>
+          ) : null}
 
-          <CascadeItem>
+          <CascadeItem
+            className={cn(splitScrollOnMobile && 'flex min-h-0 flex-1 flex-col overflow-hidden max-lg:min-h-0')}
+          >
             <div
               className={cn(
                 'transition-opacity duration-300',
                 isTableRefreshing && 'opacity-50 pointer-events-none',
+                tableSectionClassName,
+                splitScrollOnMobile &&
+                  'min-h-0 flex-1 overflow-y-auto scrollbar-sidebar max-lg:pb-2',
               )}
             >
               <DataTable
@@ -269,7 +296,9 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
                 }))}
                 emptyMessage={emptyMessage}
                 mobileVariant={mobileVariant}
+                mobileFlush={mobileFlush}
                 getMobileAvatarLabel={getMobileAvatarLabel}
+                getMobileTags={getMobileTags}
               />
             </div>
           </CascadeItem>

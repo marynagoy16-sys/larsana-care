@@ -1,14 +1,9 @@
 import { Logo } from '@/components/shared/Logo'
 import { LoginForm } from '@/components/auth/LoginForm'
-import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 export function LoginPage() {
   return (
     <div className="relative box-border flex h-dvh flex-col overflow-hidden bg-background p-4 sm:p-5">
-      <div className="absolute top-4 right-4 z-10 sm:top-5 sm:right-5">
-        <ThemeToggle />
-      </div>
-
       <div className="mx-auto grid h-full min-h-0 w-full max-w-6xl flex-1 gap-4 lg:grid-cols-2 lg:gap-6">
         {/* Painel promocional */}
         <div className="relative hidden h-full min-h-0 overflow-hidden rounded-3xl bg-brand-care p-8 text-brand-light lg:flex lg:flex-col lg:justify-between">
@@ -43,15 +38,16 @@ export function LoginPage() {
           <div className="mx-auto w-full max-w-md space-y-5 lg:space-y-4">
             <div className="flex justify-center lg:hidden">
               <Logo
-                subtitle="Fisioterapia Domiciliar"
-                size="md"
-                layout="vertical"
+                layout="horizontal"
                 adaptToTheme
-                className="w-full items-center [&_img]:mx-auto [&_img]:h-20 [&_img]:object-center sm:[&_img]:h-24"
+                style="v1"
+                size="sm"
+                subtitle="Fisioterapia Domiciliar"
+                className="items-center [&_img]:!h-7 [&_img]:mx-auto"
               />
             </div>
 
-            <div className="space-y-2 text-center lg:text-left">
+            <div className="hidden space-y-2 text-center lg:block lg:text-left">
               <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
                 Bem-vindo de volta
               </h1>

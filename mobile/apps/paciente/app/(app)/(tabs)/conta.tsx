@@ -1,17 +1,38 @@
 import { useState } from 'react'
-import { ActivityIndicator, Modal, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
-import { FileStack, Layers, List, LogOut, SquareStack } from 'lucide-react-native'
-import { KpiCard } from '@/components/ui/KpiCard'
+import {
+  Bell,
+  ChevronRight,
+  CreditCard,
+  FileText,
+  HelpCircle,
+  LogOut,
+  User,
+} from 'lucide-react-native'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/providers/AuthProvider'
 import { supabase } from '@/lib/supabase'
 
+type MenuItem = {
+  label: string
+  href: string
+  Icon: typeof User
+  description?: string
+}
+
+const MENU_ITEMS: MenuItem[] = [
+  { label: 'Pagamentos', href: '/(app)/(tabs)/pagamentos', Icon: CreditCard, description: 'PIX e boletos' },
+  { label: 'Documentos', href: '/(app)/(tabs)/documentos', Icon: FileText, description: 'Termos e comprovantes' },
+  { label: 'Notificações', href: '/(app)/(tabs)/notificacoes', Icon: Bell, description: 'Alertas e avisos importantes' },
+  { label: 'Ajuda', href: '/(app)/(tabs)/ajuda', Icon: HelpCircle, description: 'Suporte e FAQ' },
+]
+
 export default function ContaScreen() {
   const router = useRouter()
-  const { signOut } = useAuth()
+  const { signOut, profile } = useAuth()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [fullName, setFullName] = useState('')
@@ -45,7 +66,6 @@ export default function ContaScreen() {
   })
 
   const rows = data?.data ?? []
-  const count = data?.count ?? 0
   const responsible = rows[0] as { full_name: string; email: string; phone: string } | undefined
 
   return (
@@ -55,18 +75,25 @@ export default function ContaScreen() {
           <ActivityIndicator size="large" color="#095742" />
         </View>
       ) : (
-        <ScrollView className="flex-1 px-4" contentContainerClassName="gap-3 pb-28">
-          <View className="flex-row flex-wrap gap-2">
-            <KpiCard label="Total" value={String(count)} icon={SquareStack} description="Responsável" />
-            <KpiCard label="Registros" value={String(count)} icon={FileStack} description="Sem filtro aplicado" />
-            <KpiCard label="Nesta página" value={String(count)} icon={List} description={count === 0 ? 'Nenhum registro' : `1–${count} de ${count}`} />
-            <KpiCard label="Páginas" value="1" icon={Layers} description="—" />
-          </View>
-          {responsible ? (
-            <View className="rounded-xl border border-border bg-card p-5 gap-3">
-              <Text className="font-medium text-foreground">{responsible.full_name}</Text>
-              <Text className="text-sm text-muted-foreground">{responsible.email}</Text>
+        <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 pb-28 py-4">
+          <View className="rounded-xl border border-border bg-card p-5 gap-3">
+            <View className="flex-row items-center gap-3">
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <User size={22} color="#095742" />
+              </View>
+              <View className="flex-1 min-w-0">
+                <Text className="font-display text-lg font-bold text-foreground" numberOfLines={1}>
+                  {responsible?.full_name ?? profile?.full_name ?? 'Responsável'}
+                </Text>
+                <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+                  {responsible?.email ?? profile?.email ?? '—'}
+                </Text>
+              </View>
+            </View>
+            {responsible?.phone ? (
               <Text className="text-sm text-muted-foreground">{responsible.phone}</Text>
+            ) : null}
+            {responsible ? (
               <Button
                 variant="outline"
                 onPress={() => {
@@ -78,20 +105,46 @@ export default function ContaScreen() {
               >
                 Editar responsável
               </Button>
-            </View>
-          ) : (
-            <Text className="text-muted-foreground">Nenhum responsável cadastrado.</Text>
-          )}
+            ) : (
+              <Text className="text-sm text-muted-foreground">Nenhum responsável cadastrado.</Text>
+            )}
+          </View>
+
+          <View className="rounded-xl border border-border bg-card overflow-hidden">
+            {MENU_ITEMS.map((item, index) => {
+              const ItemIcon = item.Icon
+              return (
+                <Pressable
+                  key={item.href}
+                  onPress={() => router.push(item.href as '/(app)/(tabs)/tratamento')}
+                  className={`flex-row items-center gap-3 px-4 py-3.5 active:bg-muted/40 ${
+                    index < MENU_ITEMS.length - 1 ? 'border-b border-border' : ''
+                  }`}
+                >
+                  <ItemIcon size={20} color="#095742" />
+                  <View className="flex-1 min-w-0">
+                    <Text className="font-medium text-foreground">{item.label}</Text>
+                    {item.description ? (
+                      <Text className="text-xs text-muted-foreground">{item.description}</Text>
+                    ) : null}
+                  </View>
+                  <ChevronRight size={18} color="#49796B" />
+                </Pressable>
+              )
+            })}
+          </View>
+
           <Button
             variant="outline"
+            className="border-destructive/30"
             onPress={async () => {
               await signOut()
               router.replace('/(auth)/login')
             }}
           >
             <View className="flex-row items-center gap-2">
-              <LogOut size={16} color="#095742" />
-              <Text className="font-semibold text-foreground">Sair</Text>
+              <LogOut size={16} color="#dc2626" />
+              <Text className="font-semibold text-destructive">Sair</Text>
             </View>
           </Button>
         </ScrollView>
@@ -103,8 +156,12 @@ export default function ContaScreen() {
             <TextInput value={fullName} onChangeText={setFullName} placeholder="Nome" className="h-12 rounded-xl bg-muted px-4" />
             <TextInput value={email} onChangeText={setEmail} placeholder="E-mail" className="h-12 rounded-xl bg-muted px-4" />
             <TextInput value={phone} onChangeText={setPhone} placeholder="Telefone" className="h-12 rounded-xl bg-muted px-4" />
-            <Button onPress={() => update.mutate()} loading={update.isPending}>Salvar</Button>
-            <Button variant="outline" onPress={() => setOpen(false)}>Cancelar</Button>
+            <Button onPress={() => update.mutate()} loading={update.isPending}>
+              Salvar
+            </Button>
+            <Button variant="outline" onPress={() => setOpen(false)}>
+              Cancelar
+            </Button>
           </View>
         </View>
       </Modal>

@@ -13,6 +13,8 @@
  */
 :root {
   --shell-gap: 1rem;
+  /* Altura da bottom nav flutuante + respiro para o último item não ficar atrás do menu */
+  --bottom-nav-clearance: calc(6.25rem + env(safe-area-inset-bottom, 0px));
   --sidebar-width: 17.5rem;
   --sidebar-width-collapsed: 5rem;
   --sidebar-width-mobile: 21rem;
@@ -224,6 +226,24 @@ body {
 
 .shell-content-y-bottom {
   padding-bottom: var(--shell-gap);
+}
+
+.shell-content-scroll-top {
+  padding-top: calc(var(--shell-gap) + 0.5rem);
+}
+
+.shell-content-scroll-top-compact {
+  padding-top: 0;
+}
+
+.shell-bottom-nav-clearance {
+  padding-bottom: calc(var(--shell-gap) + var(--bottom-nav-clearance));
+}
+
+@media (min-width: 1024px) {
+  .shell-bottom-nav-clearance {
+    padding-bottom: var(--shell-gap);
+  }
 }
 
 .sidebar-inset {

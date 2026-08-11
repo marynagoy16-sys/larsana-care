@@ -55,9 +55,9 @@ export default function SessionDetailScreen() {
             <Text className="font-medium text-foreground">{timeLabel}</Text>
           </View>
           <View>
-            <Text className="text-xs text-muted-foreground">Ciclo / sessão</Text>
+            <Text className="text-xs text-muted-foreground">Ciclo / terapia</Text>
             <Text className="font-medium text-foreground">
-              Ciclo {session.cycleNumber} · Sessão #{session.sessionNumber}
+              Ciclo {session.cycleNumber} · Terapia #{session.sessionNumber}
             </Text>
           </View>
           <View>

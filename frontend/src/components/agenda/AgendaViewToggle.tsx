@@ -5,9 +5,17 @@ interface AgendaViewToggleProps {
   value: AgendaViewMode
   onChange: (value: AgendaViewMode) => void
   className?: string
+  dayLabel?: string
+  weekLabel?: string
 }
 
-export function AgendaViewToggle({ value, onChange, className }: AgendaViewToggleProps) {
+export function AgendaViewToggle({
+  value,
+  onChange,
+  className,
+  dayLabel = 'Diário',
+  weekLabel = 'Semanal',
+}: AgendaViewToggleProps) {
   return (
     <div
       className={cn(
@@ -30,7 +38,7 @@ export function AgendaViewToggle({ value, onChange, className }: AgendaViewToggl
           )}
           aria-pressed={value === mode}
         >
-          {mode === 'day' ? 'Dia' : 'Semana'}
+          {mode === 'day' ? dayLabel : weekLabel}
         </button>
       ))}
     </div>

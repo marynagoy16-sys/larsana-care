@@ -2,9 +2,9 @@
 
 **Produto:** Ecossistema de gestão de fisioterapia e saúde domiciliar  
 **Cliente:** DELUMA Serviços de Saúde e Educação Ltda. (marca Larsana Care)  
-**Versão do documento:** 1.1  
-**Data:** 05/06/2026  
-**Status:** Aprovado para desenvolvimento  
+**Versão do documento:** 1.2  
+**Data:** 11/08/2026  
+**Status:** Aprovado para desenvolvimento (V1.1 go-live em andamento)  
 
 ---
 
@@ -79,14 +79,38 @@ Todos os perfis autenticam na **mesma aplicação web** (`app.larsanacare.com.br
 - **Aplicação web completa** com todos os perfis (admin + PP + paciente)  
 - **Apps nativos** iOS/Android para PP e Paciente (paridade funcional com a web)  
 
-### 4.2 Fora do escopo (V1)
+### 4.2 Fora do escopo (V1 base)
 
 - Split instantâneo de pagamento no gateway  
-- Assinatura digital Gov.br / certificado ICP-Brasil  
+- **Assinatura digital ICP-Brasil / Gov.br nas evoluções clínicas** — fora do V1 base; tratada como **V1.2** após spike jurídico (ver §4.3 e `docs/SPIKE_ASSINATURA_DIGITAL.md`)  
 - Cartão de crédito para pacientes  
 - Teleconsulta / atendimento remoto  
 - Módulo completo de cuidadores (COREN) — preparar arquitetura, ativar após fisio  
-- Publicação nas lojas Apple/Google — **fase posterior à web completa** (web disponível antes dos apps nativos)  
+- Vendas pagas do Academy via Asaas — track separado (Elias); não bloqueia go-live operacional  
+
+### 4.3 Escopo V1.1 — Go-live app paciente (alinhamento 03/08/2026)
+
+Repriorização acordada com DELUMA: **lançar o app nativo do paciente** nas lojas enquanto PP entra em validação paralela. A web permanece canal principal para admin e gestão.
+
+| ID | Item | Descrição | Prioridade |
+|----|------|-----------|------------|
+| V11-01 | Publicação app paciente | TestFlight / Play Internal → produção | P0 |
+| V11-02 | Soft launch regional | App funcional mesmo sem PP na região; LarsanaPill como produto principal | P0 |
+| V11-03 | Solicitar atendimento | Tab/fluxo dedicado; paciente **não escolhe** PP — demanda vai ao pool | P0 |
+| V11-04 | Mapa ilustrativo | SVG estático (sem Google Maps API) durante busca de PP | P0 |
+| V11-05 | Mensagem “Estamos chegando” | Exibida quando região não tem PP credenciado ativo | P0 |
+| V11-06 | Lista de espera | CTA “Desejo iniciar tratamento”; flag no admin por região | P0 |
+| V11-07 | Timeline Correios — solicitação | Estados: enviada → procurando PP → PP atribuído → avaliação | P0 |
+| V11-08 | Nav paciente mobile | Início · LarsanaPill (FAB) · Solicitar · Conta; Docs/Pagar em subtelas | P0 |
+| V11-09 | Nav PP mobile | Início · Agenda · Demandas (FAB) · Repasses · Academy; Perfil no menu (⋮) | P0 |
+| V11-10 | Agenda PP semanal | Vista por semana + sub-aba evoluções pendentes com badge | P0 |
+| V11-11 | Prontuário PP por ciclos | Agrupamento decrescente; avaliação inicial destacada no topo | P0 |
+| V11-12 | Terminologia UI | Exibir **“terapia”** na interface; schema interno mantém `care_sessions` | P1 |
+| V11-13 | Imutabilidade evoluções | Registro finalizado não editável por admin; trilha em `medical_record_versions` | P0 |
+| V11-14 | Integração Asaas produção | PIX/boleto real + webhook (pré-requisito pagamento ciclo) | P0 |
+| V11-15 | Identidade visual | Logo, paleta e textos oficiais em toda a plataforma | P0 — concluído |
+
+**Nota:** aceite digital de termos (checkbox + IP) permanece **sem Gov.br**, conforme §4.1. A assinatura CREFITO de evoluções clínicas é requisito regulatório distinto — ver spike.
 
 ---
 
@@ -283,6 +307,8 @@ Todos os perfis autenticam na **mesma aplicação web** (`app.larsanacare.com.br
 | PRT-08 | Controle de versão | Trilha de edições (quem, quando, o quê) | P1 |
 | PRT-09 | Acesso restrito | PP vê seus pacientes; gestão vê todos; paciente não vê evolução clínica | P0 |
 | PRT-10 | Tipo intercorrência | Registrar internação, suspensão, etc. (como na planilha Aline) | P1 |
+| PRT-11 | Imutabilidade pós-finalização | Admin/gestão não editam conteúdo clínico; append-only com motivo | P0 (V1.1) |
+| PRT-12 | Assinatura CREFITO por terapia | Assinatura eletrônica válida por evolução (Gov.br, ICP ou terceiro) | P1 (V1.2 — spike) |
 
 ---
 
@@ -382,6 +408,8 @@ Todos os perfis autenticam na **mesma aplicação web** (`app.larsanacare.com.br
 | APP-PAC-08 | NPS fim de ciclo | ✓ | ✓ | 24h após última sessão; push no app | P2 |
 | APP-PAC-09 | Resposta proposta avaliação | ✓ | ✓ | SIM/NÃO à proposta pós-avaliação (workflow AVL) | P0 |
 | APP-PAC-10 | Dados do responsável | ✓ | ✓ | Edição de contato e endereço (com validação gestão) | P1 |
+| APP-PAC-11 | Solicitar atendimento | ✓ | ✓ | Fluxo de demanda + mapa SVG + timeline Correios | P0 (V1.1) |
+| APP-PAC-12 | Lista de espera regional | ✓ | ✓ | CTA quando região sem cobertura PP | P0 (V1.1) |
 
 ---
 
@@ -670,3 +698,5 @@ Formação PP e LarsanaPill estão disponíveis na **web** nesta fase. Apps nati
 | **Academy** | Módulo de educação: Formação PP (LMS) + LarsanaPill (PHIL) |
 | **LarsanaPill** | Conteúdo educacional para pacientes — complemento ao tratamento presencial |
 | **Gate Academy** | Regra configurável que condiciona acesso a demandas (ou outros alvos) à conclusão da trilha |
+| **Terapia** | Termo de UI para atendimento domiciliar registrado (equivale a `care_session` no schema) |
+| **Lista de espera** | Lead de paciente em região sem cobertura PP; gestão pode contatar quando houver capacidade |

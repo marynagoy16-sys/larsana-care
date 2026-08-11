@@ -1,8 +1,8 @@
 # Mapa de Páginas — LarsanaCare Fisioterapia Domiciliar
 
-**Versão:** 1.0  
-**Data:** 05/06/2026  
-**Base:** PRD v1.1 · `modulos.md` · `DESIGN_SYSTEM.md`  
+**Versão:** 1.1  
+**Data:** 11/08/2026  
+**Base:** PRD v1.2 · `modulos.md` · `DESIGN_SYSTEM.md` · alinhamento 03/08/2026  
 **App:** `app.larsanacare.com.br` (web unificada)
 
 ---
@@ -26,7 +26,7 @@ Uma única aplicação web com **login unificado** e roteamento por perfil após
 |------|--------|----------------|---------------|
 | **Admin** | Admin, Financeiro, Gestão | Sidebar fixa `w-60` | Drawer (hamburger) — **sem bottom nav** |
 | **Portal PP** | Profissional Parceiro | Sidebar fixa | Bottom nav **5 itens** + FAB central |
-| **Portal Paciente** | Paciente / Responsável | Header simples | Bottom nav **5 itens** (botões grandes) |
+| **Portal Paciente** | Paciente / Responsável | Header simples | Bottom nav **4 itens + FAB** LarsanaPill (botões grandes) |
 
 **Princípio de dados:** cada perfil vê apenas o escopo RBAC. PP **nunca** vê valor integral cobrado do paciente. Paciente **nunca** vê evolução clínica do prontuário.
 
@@ -173,7 +173,8 @@ Estrutura fixa com itens **ocultos por permissão** (não mudar layout entre sub
 | `/admin/credenciamento` | Fila credenciamento | Aprovar onboarding | Estados: docs → termos → contrato → aguardando aprovação | Gestão, Admin |
 | `/admin/credenciamento/:id` | Detalhe credenciamento | Validar e ativar | Documentos, preview LRS-PROF, aprovar/reprovar, Wallet Asaas | Gestão, Admin |
 | `/admin/demandas` | Demandas | Matching geográfico | Mapa/lista oportunidades; status; PP atribuído | Gestão, Admin |
-| `/admin/demandas/:id` | Detalhe demanda | Alocar PP | Paciente, endereço, região, sugestões PP, aceite/recusa | Gestão, Admin |
+| `/admin/demandas/:id` | Detalhe demanda | Alocar PP | Paciente, endereço, região, sugestões PP, aceite/recusa |
+| `/admin/lista-espera` | Lista de espera | Leads regionais | Pacientes que desejam tratamento em região sem cobertura PP | Gestão, Admin |
 | `/admin/academy` | Academy — dashboard | Visão educação | Cursos, matrículas, taxa conclusão, preset ativo | Gestão, Admin |
 | `/admin/academy/cursos` | Cursos Academy | CMS Formação PP | CRUD cursos, módulos, aulas | Gestão, Admin |
 | `/admin/academy/cursos/:id` | Detalhe curso | Edição conteúdo | Módulos M1–M5, upload mídia bucket `academy-content` | Gestão, Admin |
@@ -260,34 +261,36 @@ Estrutura fixa com itens **ocultos por permissão** (não mudar layout entre sub
 └─────────────────────────────────────┘
 ```
 
-### 5.2 Bottom nav mobile (5 itens)
+### 5.2 Bottom nav mobile (5 itens) — alinhamento 03/08/2026
 
-Padrão **2 + FAB + 2** (conforme design system).
+Padrão **2 + FAB + 2** com **Demandas no centro** (conforme reunião DELUMA).
 
 | # | Ícone | Rota | Label (acessibilidade) | Objetivo |
 |---|-------|------|------------------------|----------|
-| 1 | `Calendar` | `/profissional/agenda` | Agenda | Sessões do dia, endereços, navegação |
-| 2 | `MapPin` | `/profissional/demandas` | Demandas | Oportunidades, aceitar/recusar |
-| 3 | `ClipboardPlus` | `/profissional/evolucao/nova` | **FAB** Registrar evolução | Atalho principal — nova evolução |
+| 1 | `Home` | `/profissional/inicio` | Início | Resumo do dia, atalhos |
+| 2 | `Calendar` | `/profissional/agenda` | Agenda | Sessões da **semana**; sub-aba evoluções pendentes |
+| 3 | `MapPin` | `/profissional/demandas` | **FAB** Demandas | Oportunidades, aceitar/recusar |
 | 4 | `Wallet` | `/profissional/repasses` | Repasses | Ganhos liberados e pendentes |
-| 5 | `User` | `/profissional/perfil` | Perfil | Conta, credenciamento, sair |
+| 5 | `GraduationCap` | `/profissional/academy` | Academy | Formação PP M1–M5 |
 
-> **Avaliações (rastreio)** e **evoluções pendentes** ficam na Agenda (badges) e em Meus pacientes — não ocupam slot no bottom nav.
+> **Perfil** e **Credenciamento** ficam no menu superior (⋮), não na tab bar.  
+> **Evolução** é acessada pela Agenda (“Criar evolução”) ou pelas evoluções pendentes — não ocupa slot central.  
+> Copy de UI: preferir **“terapia”** em vez de “sessão” (schema interno inalterado).
 
 ### 5.3 Páginas detalhadas — PP
 
 | Rota | Página | Objetivo | Dados exibidos (escopo PP) |
 |------|--------|----------|----------------------------|
 | `/profissional` | Redirect | — | → `/profissional/agenda` |
-| `/profissional/agenda` | Agenda do dia | Planejar visitas | Sessões hoje/semana; endereço; status pagamento ciclo (só ícone bloqueio); alertas prontuário |
-| `/profissional/agenda/:sessaoId` | Detalhe sessão | Antes/durante visita | Horário, paciente, endereço, mapa, botões: iniciar evolução, check-in, comparecimento |
+| `/profissional/agenda` | Agenda da semana | Planejar visitas | Sessões da semana; endereço; sub-abas: agenda / evoluções pendentes; ação “Criar evolução” |
+| `/profissional/agenda/:sessaoId` | Detalhe terapia | Antes/durante visita | Horário, paciente, endereço; botões: criar evolução, prontuário |
 | `/profissional/demandas` | Demandas | Novas oportunidades | Lista/mapa por proximidade; região; aceitar/recusar + motivo |
 | `/profissional/demandas/:id` | Detalhe demanda | Decisão | Resumo paciente (sem dados financeiros integrais); distância; carga horária restante |
 | `/profissional/evolucoes` | Evoluções pendentes | Conformidade 24h/7d | Sessões sem registro; prazo restante |
 | `/profissional/evolucao/nova` | Nova evolução | Registrar prontuário | Editor rich-text; templates; anexos; rascunho (offline no app) |
 | `/profissional/evolucao/:id` | Editar evolução | Complementar registro | Versão, metadados CREFITO, ciclo |
 | `/profissional/pacientes` | Meus pacientes | Carteira alocada | Lista pacientes do PP; status tratamento |
-| `/profissional/pacientes/:id` | Ficha paciente (PP) | Contexto clínico | Dados básicos, ciclos, prontuário (seus registros), avaliações |
+| `/profissional/pacientes/:id` | Prontuário (PP) | Histórico clínico | **Avaliação inicial destacada**; ciclos em ordem decrescente; drill-down terapias por ciclo |
 | `/profissional/avaliacoes` | Avaliações — rastreio | Status proposta família | Cards estilo Correios: feita → enviada → análise → SIM/NÃO |
 | `/profissional/avaliacoes/:id` | Detalhe avaliação | Acompanhar + registrar | Timeline; laudo; sem valor financeiro do ciclo futuro |
 | `/profissional/repasses` | Repasses | Ganhos pós-ciclo | **Somente valor de repasse**; status: pendente NF, em fila, liberado |
@@ -320,27 +323,31 @@ Padrão **2 + FAB + 2** (conforme design system).
 Header horizontal simplificado (sem sidebar densa):
 
 ```
-Início · Pagamentos · Meu tratamento · LarsanaPill · Documentos · Ajuda · Conta
+Início · LarsanaPill · Solicitar atendimento · Meu tratamento · Conta
 ```
 
-### 6.2 Bottom nav mobile (5 itens)
+Documentos, pagamentos e ajuda ficam em **Conta** ou como ações contextuais (ex.: pagar ciclo).
+
+### 6.2 Bottom nav mobile (5 itens + FAB central)
 
 | # | Ícone | Rota | Label | Objetivo |
 |---|-------|------|-------|----------|
-| 1 | `Home` | `/paciente` | Início | Timeline, próxima sessão, alertas |
-| 2 | `CreditCard` | `/paciente/pagamentos` | Pagar | Cobrança ciclo ativo PIX/boleto |
-| 3 | `Heart` | `/paciente/tratamento` | Tratamento | Ciclo, sessões, profissional |
-| 4 | `FileText` | `/paciente/documentos` | Documentos | Aceites, comprovantes, termos |
-| 5 | `User` | `/paciente/conta` | Conta | Dados responsável, ajuda, sair |
+| 1 | `Home` | `/paciente` | Início | Timeline, próxima terapia, banner proposta |
+| 2 | `UserPlus` | `/paciente/solicitar` | Solicitar | Pedir atendimento; mapa SVG; timeline Correios |
+| 3 | `Pill` | `/paciente/larsanapill` | **FAB** LarsanaPill | Conteúdo PHIL — destaque central |
+| 4 | `Heart` | `/paciente/tratamento` | Tratamento | Ciclo, terapias, profissional |
+| 5 | `User` | `/paciente/conta` | Conta | Dados, documentos, pagamentos, ajuda, sair |
 
-> **Proposta SIM/NÃO** aparece como **banner/modal na Início** quando pendente — não ocupa item fixo do nav.
+> **Pagamento** é ação dentro do ciclo/tratamento, não tab fixa.
+> **Proposta SIM/NÃO** aparece como banner/modal na Início quando pendente.
 
 ### 6.3 Páginas detalhadas — Paciente
 
 | Rota | Página | Objetivo | Dados exibidos (escopo paciente) |
 |------|--------|----------|----------------------------------|
-| `/paciente` | Início / Timeline | Visão do tratamento | PP atual, ciclo nº, próximas sessões, status pagamento, banner proposta pendente, **card LarsanaPill** |
-| `/paciente/tratamento` | Meu tratamento | Plano em andamento | Ciclo 4/8 sessões, realizadas vs previstas, pausa — **sem evolução clínica** |
+| `/paciente` | Início / Timeline | Visão do tratamento | PP atual, ciclo nº, próximas terapias, status pagamento, banner proposta |
+| `/paciente/solicitar` | Solicitar atendimento | Pedir profissional parceiro | Mapa SVG; timeline Correios; waitlist se região sem cobertura |
+| `/paciente/tratamento` | Meu tratamento | Plano em andamento | Ciclo 4/8 terapias, realizadas vs previstas — **sem evolução clínica** |
 | `/paciente/tratamento/ciclo/:id` | Detalhe ciclo | Acompanhar sessões | Datas, status (realizada/falta/remarcada), nome PP |
 | `/paciente/pagamentos` | Pagamentos | Pagar ciclo antecipado | Valor do ciclo, PIX/boleto Asaas, vencimento, status |
 | `/paciente/pagamentos/:id` | Detalhe pagamento | Pagar / comprovante | QR PIX, boleto PDF, comprovante após confirmação |
@@ -404,12 +411,43 @@ PP se cadastra / recebe convite
 | **Admin** | Completa (4 seções + sistema) | Drawer only | — |
 | **Financeiro** | Visão + Financeiro + Relatórios financeiros | Drawer only | — |
 | **Gestão** | Visão + Operação + Relatórios operacionais | Drawer only | — |
-| **PP** | Hoje · Clínico · Financeiro · Conta | Agenda · Demandas · **FAB** · Repasses · Perfil | 5 |
-| **Paciente** | Header links (6 itens) | Início · Pagar · Tratamento · Documentos · Conta | 5 |
+| **PP** | Hoje · Clínico · Financeiro · Conta | Início · Agenda · **FAB Demandas** · Repasses · Academy | 5 |
+| **Paciente** | Header links (5 itens) | Início · Solicitar · **FAB LarsanaPill** · Tratamento · Conta | 5 |
 
 ---
 
-## 9. Priorização V1 (Fase 1 — web completa)
+## 9. Priorização V1.1 (go-live app paciente — 03/08/2026)
+
+### P0 — obrigatório soft launch paciente
+
+| Área | Páginas / entregas |
+|------|---------------------|
+| Paciente app | nav 4+FAB, solicitar atendimento, mapa SVG, waitlist, timeline Correios, LarsanaPill |
+| Paciente web | paridade nav + solicitar |
+| PP app | nav realinhada, agenda semanal, prontuário por ciclos |
+| Backend | `patient_waitlist`, `service_requests`, cobertura regional |
+| Asaas | create-charge + webhook produção |
+| Prontuário | imutabilidade evoluções (PRT-11) |
+
+### P1 — logo após soft launch
+
+| Área | Páginas |
+|------|---------|
+| Admin | lista-espera, demandas |
+| PP | repasses UX, credenciamento repaginado, copy “terapia” |
+| Assinatura | spike concluído → implementação V1.2 (PRT-12) |
+
+### P2 — evolução
+
+| Área | Páginas |
+|------|---------|
+| Admin | mapa cobertura avançado, suporte |
+| PP | cartão visita, check-in GPS |
+| Academy vendas | checkout Asaas (track Elias) |
+
+---
+
+## 9.1 Priorização V1 base (web completa — referência histórica)
 
 ### P0 — obrigatório go-live
 

@@ -14,6 +14,9 @@ export const AGENDA_TIMELINE_TOP_INSET_PX = 10
 /** Inset no topo da grade semanal — espaço para o rótulo 07:00 não ser cortado. */
 export const AGENDA_WEEK_TIMELINE_TOP_INSET_PX = 12
 
+/** Altura em px de cada hora na grade semanal mobile (mais compacta, estilo Google Agenda). */
+export const AGENDA_WEEK_MOBILE_HOUR_HEIGHT_PX = 48
+
 /** Altura em px de cada hora na grade semanal (mais compacta). */
 export const AGENDA_WEEK_HOUR_HEIGHT_PX = 56
 

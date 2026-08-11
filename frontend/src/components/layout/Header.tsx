@@ -1,9 +1,9 @@
 import { Menu, Search, Bell } from 'lucide-react'
+import { Link, NavLink } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { UserMenu } from '@/components/layout/UserMenu'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import type { NavItem } from '@/config/navigation'
-import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { COMING_SOON_BADGE } from '@/config/navigation'
@@ -13,6 +13,9 @@ interface HeaderProps {
   pageTitle: string
   onMenuClick?: () => void
   showSearch?: boolean
+  showThemeToggle?: boolean
+  showUserMenu?: boolean
+  notificationsHref?: string
   horizontalNav?: NavItem[]
 }
 
@@ -20,6 +23,9 @@ export function Header({
   pageTitle,
   onMenuClick,
   showSearch = true,
+  showThemeToggle = true,
+  showUserMenu = true,
+  notificationsHref,
   horizontalNav,
 }: HeaderProps) {
   const { header } = usePageHeader()
@@ -53,6 +59,7 @@ export function Header({
             <NavLink
               key={item.href}
               to={item.href}
+              end={item.end}
               className={({ isActive }) =>
                 cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors',
@@ -84,17 +91,32 @@ export function Header({
             <Search size={18} />
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative rounded-lg h-9 w-9 text-muted-foreground hover:text-foreground"
-          aria-label="Notificações"
-        >
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-        </Button>
-        <ThemeToggle />
-        <UserMenu variant="full" />
+        {notificationsHref ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative rounded-lg h-9 w-9 text-muted-foreground hover:text-foreground"
+            aria-label="Notificações"
+            asChild
+          >
+            <Link to={notificationsHref}>
+              <Bell size={18} />
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative rounded-lg h-9 w-9 text-muted-foreground hover:text-foreground"
+            aria-label="Notificações"
+          >
+            <Bell size={18} />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
+          </Button>
+        )}
+        {showThemeToggle ? <ThemeToggle /> : null}
+        {showUserMenu ? <UserMenu variant="full" /> : null}
       </div>
     </header>
   )

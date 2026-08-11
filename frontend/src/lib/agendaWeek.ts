@@ -14,8 +14,8 @@ export const AGENDA_WEEK_STARTS_ON = 1 as const
 
 export type AgendaViewMode = 'day' | 'week'
 
-/** Dias úteis exibidos na grade semanal (seg–sex). */
-export const AGENDA_WEEK_WORK_DAYS = 5
+/** Dias exibidos na grade semanal (seg–dom, estilo Google Agenda). */
+export const AGENDA_WEEK_WORK_DAYS = 7
 
 export function getWeekRange(anchor: Date): { start: Date; end: Date; days: Date[] } {
   const start = startOfWeek(anchor, { locale: ptBR, weekStartsOn: AGENDA_WEEK_STARTS_ON })
@@ -45,6 +45,12 @@ export function formatAgendaWeekTitleShort(weekStart: Date, weekEnd: Date): stri
     return `${format(weekStart, 'd', { locale: ptBR })}–${format(weekEnd, 'd MMM', { locale: ptBR })}`
   }
   return `${format(weekStart, 'd/M', { locale: ptBR })}–${format(weekEnd, 'd/M', { locale: ptBR })}`
+}
+
+/** Título compacto para cabeçalho em telas estreitas (ex.: "Terça, 11 de ago"). */
+export function formatAgendaDayTitleShort(date: Date): string {
+  const label = format(date, "EEE, d 'de' MMM", { locale: ptBR })
+  return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
 export function formatWeekDayHeader(date: Date): { weekday: string; day: string } {

@@ -18,17 +18,17 @@ interface LogoProps {
   layout?: BrandLogoLayout | 'auto'
   className?: string
   subtitle?: string
-  size?: 'sm' | 'md'
+  size?: 'xs' | 'sm' | 'md'
   collapsed?: boolean
   compact?: boolean
   /** Logo vertical completo (login hero, splash) */
   full?: boolean
 }
 
-const layoutHeights: Record<BrandLogoLayout, { sm: string; md: string }> = {
-  symbol: { sm: 'h-9 w-9', md: 'h-11 w-11' },
-  horizontal: { sm: 'h-8', md: 'h-10' },
-  vertical: { sm: 'h-14', md: 'h-20' },
+const layoutHeights: Record<BrandLogoLayout, Record<'xs' | 'sm' | 'md', string>> = {
+  symbol: { xs: 'h-8 w-8', sm: 'h-9 w-9', md: 'h-11 w-11' },
+  horizontal: { xs: 'h-6', sm: 'h-8', md: 'h-10' },
+  vertical: { xs: 'h-12', sm: 'h-14', md: 'h-20' },
 }
 
 export function Logo({

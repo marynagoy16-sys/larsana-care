@@ -1,4 +1,7 @@
 Módulos do Projeto
+
+> **Go-live V1.1 (app paciente):** ver [PRD.md §4.3](./PRD.md) e [FASE0_CHECKLIST_ALINHAMENTO.md](./FASE0_CHECKLIST_ALINHAMENTO.md).
+
 Detalhamento dos Módulos
 Cada módulo foi planejado para entregar valor específico ao seu projeto, com entregas claras e mensuráveis.
 

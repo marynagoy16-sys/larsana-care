@@ -18,6 +18,9 @@ function lazyPaciente(exportName: keyof typeof import('@/pages/paciente/modulePa
 
 const PacienteHomePage = lazyPaciente('PacienteHomePage')
 const PacienteTratamentoPage = lazyPaciente('PacienteTratamentoPage')
+const PacienteSolicitarPage = lazy(() =>
+  import('@/pages/paciente/PacienteSolicitarPage').then((m) => ({ default: m.PacienteSolicitarPage })),
+)
 const PacienteCicloDetailPage = lazyPaciente('PacienteCicloDetailPage')
 const PacientePagamentosPage = lazyPaciente('PacientePagamentosPage')
 const PacientePagamentoDetailPage = lazyPaciente('PacientePagamentoDetailPage')
@@ -26,6 +29,11 @@ const PacienteDocumentosPage = lazyPaciente('PacienteDocumentosPage')
 const PacienteAceitePage = lazyPaciente('PacienteAceitePage')
 const PacienteNpsPage = lazyPaciente('PacienteNpsPage')
 const PacienteContaPage = lazyPaciente('PacienteContaPage')
+const PacienteAparenciaPage = lazyPaciente('PacienteAparenciaPage')
+const PacientePerfilPage = lazyPaciente('PacientePerfilPage')
+const PacienteNotificacoesPage = lazyPaciente('PacienteNotificacoesPage')
+const PacienteTermosPage = lazyPaciente('PacienteTermosPage')
+const PacienteTermoDetailPage = lazyPaciente('PacienteTermoDetailPage')
 const PacienteAjudaPage = lazyPaciente('PacienteAjudaPage')
 const LarsanaPillHubPage = lazy(() => import('@/pages/paciente/larsanapill/LarsanaPillHubPage').then((m) => ({ default: m.LarsanaPillHubPage })))
 const LarsanaPillCategoryPage = lazy(() =>
@@ -52,6 +60,7 @@ export const pacienteRoutes: RouteObject[] = [
     element: pacienteRoute(<AppShell variant="paciente" />),
     children: [
       { index: true, element: pacienteRoute(<PacienteHomePage />) },
+      { path: 'solicitar', element: pacienteRoute(<PacienteSolicitarPage />) },
       { path: 'tratamento', element: pacienteRoute(<PacienteTratamentoPage />) },
       { path: 'tratamento/ciclo/:id', element: pacienteRoute(<PacienteCicloDetailPage />) },
       { path: 'pagamentos', element: pacienteRoute(<PacientePagamentosPage />) },
@@ -61,6 +70,10 @@ export const pacienteRoutes: RouteObject[] = [
       { path: 'aceite-inicial', element: pacienteRoute(<PacienteAceitePage />) },
       { path: 'nps/:cicloId', element: pacienteRoute(<PacienteNpsPage />) },
       { path: 'conta', element: pacienteRoute(<PacienteContaPage />) },
+      { path: 'conta/aparencia', element: pacienteRoute(<PacienteAparenciaPage />) },
+      { path: 'conta/perfil', element: pacienteRoute(<PacientePerfilPage />) },
+      { path: 'termos', element: pacienteRoute(<PacienteTermosPage />) },
+      { path: 'termos/:id', element: pacienteRoute(<PacienteTermoDetailPage />) },
       { path: 'ajuda', element: pacienteRoute(<PacienteAjudaPage />) },
       { path: 'larsanapill', element: pacienteRoute(<LarsanaPillHubPage />) },
       { path: 'larsanapill/categoria/:slug', element: pacienteRoute(<LarsanaPillCategoryPage />) },
@@ -68,7 +81,7 @@ export const pacienteRoutes: RouteObject[] = [
       { path: 'larsanapill/planos/:slug/dia/:dayIndex', element: pacienteRoute(<WeeklyPlanPlayerPage />) },
       { path: 'larsanapill/categoria/:slug/conteudo/:id', element: pacienteRoute(<LarsanaPillContentPage />) },
       { path: 'larsanapill/conteudo/:id', element: pacienteRoute(<LarsanaPillContentRedirectPage />) },
-      { path: 'notificacoes', element: pacienteRoute(<PacienteHomePage />) },
+      { path: 'notificacoes', element: pacienteRoute(<PacienteNotificacoesPage />) },
     ],
   },
 ]

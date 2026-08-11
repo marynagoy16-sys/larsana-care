@@ -28,8 +28,8 @@ export function ContentFloatingToolbar({
   return (
     <div
       className={cn(
-        'fixed left-1/2 z-50 flex w-[min(100%-1.5rem,56rem)] -translate-x-1/2 flex-col gap-2 rounded-2xl border border-border/50 bg-muted/90 px-3 py-2.5 shadow-md backdrop-blur-md',
-        'bottom-[4.75rem] lg:bottom-6 sm:flex-row sm:items-center sm:justify-between',
+        'fixed left-1/2 z-50 hidden w-[min(100%-1.5rem,56rem)] -translate-x-1/2 flex-col gap-2 rounded-2xl border border-border/50 bg-muted/90 px-3 py-2.5 shadow-md backdrop-blur-md lg:flex',
+        'bottom-6 sm:flex-row sm:items-center sm:justify-between',
       )}
     >
       <div className="relative w-full shrink-0 sm:max-w-[17rem] lg:max-w-xs">

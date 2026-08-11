@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DataTableMobileCards } from '@/components/crud/DataTableMobileCards'
 import { CrudTableSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { cn } from '@/lib/utils'
 
 export interface DataTableColumn<T> {
   key: string
@@ -23,7 +24,9 @@ interface DataTableProps<T extends Record<string, unknown>> {
   onRowClick?: (row: T) => void
   getRowKey: (row: T) => string
   mobileVariant?: 'default' | 'compact'
+  mobileFlush?: boolean
   getMobileAvatarLabel?: (row: T) => string
+  getMobileTags?: (row: T) => ReactNode
 }
 
 export function DataTable<T extends Record<string, unknown>>({
@@ -34,7 +37,9 @@ export function DataTable<T extends Record<string, unknown>>({
   onRowClick,
   getRowKey,
   mobileVariant = 'default',
+  mobileFlush = false,
   getMobileAvatarLabel,
+  getMobileTags,
 }: DataTableProps<T>) {
   if (isLoading) {
     return <CrudTableSkeleton columns={columns.length} />
@@ -42,7 +47,12 @@ export function DataTable<T extends Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+      <div
+        className={cn(
+          'border border-dashed border-border p-8 text-center text-sm text-muted-foreground',
+          mobileFlush ? 'rounded-none border-x-0' : 'rounded-xl',
+        )}
+      >
         {emptyMessage}
       </div>
     )
@@ -56,7 +66,9 @@ export function DataTable<T extends Record<string, unknown>>({
         getRowKey={getRowKey}
         onRowClick={onRowClick}
         variant={mobileVariant}
+        flush={mobileFlush}
         getAvatarLabel={getMobileAvatarLabel}
+        getTags={getMobileTags}
       />
 
       <div className="hidden md:block rounded-xl border border-border">

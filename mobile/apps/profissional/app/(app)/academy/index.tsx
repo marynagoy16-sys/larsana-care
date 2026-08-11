@@ -22,7 +22,7 @@ export default function AcademyHubScreen() {
   const loading = profQuery.isLoading || coursesQuery.isLoading
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
       <PageHeader title="Academy" subtitle="Formação contínua do Profissional Parceiro" />
 
       {loading ? (

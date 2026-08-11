@@ -1,9 +1,8 @@
 import {
   endOfDay,
-  format,
   startOfDay,
 } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { getWeekRange } from '@/lib/agendaWeek'
 import { supabase } from '@/lib/supabase'
 import { resolveSessionTimes } from '@/lib/agendaTimeline'
 import { resolveAgendaDisplayStatus } from '@/lib/sessionStatus'
@@ -84,6 +83,7 @@ export type AgendaDaySummary = {
 
 export const ppAgendaQueryKeys = {
   day: (isoDate: string) => ['pp', 'agenda', 'day', isoDate] as const,
+  week: (isoDate: string) => ['pp', 'agenda', 'week', isoDate] as const,
   session: (sessionId: string) => ['pp', 'agenda', 'session', sessionId] as const,
 }
 
@@ -138,11 +138,6 @@ export function buildAgendaDaySummary(sessions: AgendaSessionItem[]): AgendaDayS
   }
 }
 
-export function formatAgendaDayTitleShort(date: Date): string {
-  const label = format(date, "EEE, d 'de' MMM", { locale: ptBR })
-  return label.charAt(0).toUpperCase() + label.slice(1)
-}
-
 async function resolveProfessionalId(): Promise<string | null> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -178,6 +173,11 @@ async function listAgendaSessionsInRange(rangeStart: Date, rangeEnd: Date): Prom
 
 export async function listAgendaSessionsForDay(day: Date): Promise<AgendaSessionItem[]> {
   return listAgendaSessionsInRange(startOfDay(day), endOfDay(day))
+}
+
+export async function listAgendaSessionsForWeek(anchor: Date): Promise<AgendaSessionItem[]> {
+  const { start, end } = getWeekRange(anchor)
+  return listAgendaSessionsInRange(startOfDay(start), endOfDay(end))
 }
 
 export async function getAgendaSessionById(sessionId: string): Promise<AgendaSessionItem | null> {

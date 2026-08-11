@@ -1,6 +1,8 @@
 import { ChevronDown, LogOut, Moon, Sun, User } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/hooks/useAuth'
+import type { UserRole } from '@/types/auth'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -18,8 +20,14 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ variant = 'icon' }: UserMenuProps) {
-  const { profile, signOut } = useAuth()
+  const { profile, signOut, role } = useAuth()
   const { theme, setTheme } = useTheme()
+
+  const profileHref: Partial<Record<UserRole, string>> = {
+    pp: '/profissional/perfil',
+    paciente: '/paciente/conta/perfil',
+  }
+  const profilePath = role ? profileHref[role as UserRole] : undefined
 
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -78,10 +86,19 @@ export function UserMenu({ variant = 'icon' }: UserMenuProps) {
           {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
           {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
         </DropdownMenuItem>
-        <DropdownMenuItem disabled>
-          <User className="mr-2 h-4 w-4" />
-          Perfil
-        </DropdownMenuItem>
+        {profilePath ? (
+          <DropdownMenuItem asChild>
+            <Link to={profilePath}>
+              <User className="mr-2 h-4 w-4" />
+              Perfil
+            </Link>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem disabled>
+            <User className="mr-2 h-4 w-4" />
+            Perfil
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />

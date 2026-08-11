@@ -215,6 +215,8 @@ export { PPPacientesPage } from '@/pages/profissional/patients/PPPacientesPage'
 export { PPPacienteDetailPage } from '@/pages/profissional/patients/PPPacienteDetailPage'
 export { PPAvaliacoesPage } from '@/pages/profissional/assessments/PPAvaliacoesPage'
 export { PPAvaliacaoDetailPage } from '@/pages/profissional/assessments/PPAvaliacaoDetailPage'
+export { PPContaPage } from '@/pages/profissional/account/PPContaPage'
+export { PPAparenciaPage } from '@/pages/profissional/account/PPAparenciaPage'
 export { PPCredenciamentoPage } from '@/pages/profissional/credentialing/PPCredenciamentoPage'
 
 export function PPPerfilPage() {

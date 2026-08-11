@@ -42,13 +42,9 @@ export default function LoginScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView contentContainerClassName="flex-grow justify-center px-6 py-8" keyboardShouldPersistTaps="handled">
-          <View className="mx-auto w-full max-w-md space-y-8">
-            <Logo subtitle="Portal do Paciente" />
-            <View className="mt-8 space-y-2">
-              <Text className="font-display text-2xl font-bold text-foreground">Bem-vindo</Text>
-              <Text className="text-sm text-muted-foreground">Acompanhe o tratamento da sua família</Text>
-            </View>
-            <View className="mt-6 space-y-5">
+          <View className="mx-auto w-full max-w-md items-center space-y-8">
+            <Logo horizontal subtitle="Fisioterapia Domiciliar" />
+            <View className="mt-6 w-full space-y-5">
               <View>
                 <Text className="mb-2 text-sm font-medium text-muted-foreground">E-mail</Text>
                 <TextInput

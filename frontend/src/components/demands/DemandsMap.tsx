@@ -176,11 +176,11 @@ export function DemandsMap({
     <div
       className={cn(
         'overflow-hidden rounded-xl border border-border bg-card shadow-sm',
-        'max-sm:-mx-[var(--shell-gap)] max-sm:w-[calc(100%+2*var(--shell-gap))] max-sm:rounded-none max-sm:border-x-0 max-sm:shadow-none',
+        'max-sm:w-full max-sm:rounded-none max-sm:border-0 max-sm:shadow-none',
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="hidden items-center justify-between gap-3 border-b border-border px-4 py-3 sm:flex">
         <div className="flex items-center gap-2 min-w-0">
           <MapPin size={16} className="shrink-0 text-primary" />
           <div className="min-w-0">
@@ -197,10 +197,10 @@ export function DemandsMap({
         </Badge>
       </div>
 
-      <div ref={containerRef} className="h-[260px] w-full sm:h-[300px] lg:h-[320px]" />
+      <div ref={containerRef} className="h-[min(36dvh,280px)] w-full sm:h-[300px] lg:h-[320px]" />
 
       {missingLocationCount > 0 && (
-        <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
+        <p className="border-t border-border px-4 py-1.5 text-xs text-muted-foreground max-sm:pb-0">
           {missingLocationCount} demanda{missingLocationCount > 1 ? 's' : ''} sem coordenadas no endereço e não
           aparece{missingLocationCount > 1 ? 'm' : ''} no mapa.
         </p>

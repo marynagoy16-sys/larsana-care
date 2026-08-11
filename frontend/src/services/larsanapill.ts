@@ -283,6 +283,135 @@ export async function getPlansProgressSummary(
   return summary
 }
 
+export type PatientHomeLarsanaPillTeaser = {
+  kind: 'weekly_plan' | 'content' | 'hub'
+  eyebrow: string
+  title: string
+  subtitle: string
+  badge?: string
+  progressPercent?: number
+  planSlug?: string
+  categorySlug?: string
+  contentId?: string
+}
+
+function pickFeaturedWeeklyPlan(
+  plans: LarsanaPillWeeklyPlan[],
+  progress: Record<string, { completed: number; total: number }>,
+): LarsanaPillWeeklyPlan {
+  const inProgress = plans.find((plan) => {
+    const item = progress[plan.id]
+    return item && item.total > 0 && item.completed > 0 && item.completed < item.total
+  })
+  if (inProgress) return inProgress
+
+  const started = plans.find((plan) => (progress[plan.id]?.completed ?? 0) > 0)
+  if (started) return started
+
+  return plans[0]
+}
+
+async function buildContentTeaser(patientId: string): Promise<PatientHomeLarsanaPillTeaser | null> {
+  const hub = await getHubPlayerContext(patientId)
+  if (!hub.categories.length) return null
+
+  const sections = await Promise.all(
+    hub.categories.map(async (category) => {
+      const contents = await getCategoryContents(category.id)
+      return { category, contents, flat: flattenCategoryContents(category, contents) }
+    }),
+  )
+  const withContent = sections.filter((section) => section.contents.length > 0)
+  if (!withContent.length) return null
+
+  const allFlat = withContent.flatMap((section) => section.flat)
+  const continueId = getContinueContentId(allFlat, hub.completedIds)
+
+  if (continueId) {
+    const entry = withContent.find((section) => section.contents.some((content) => content.id === continueId))
+    const content = entry?.contents.find((item) => item.id === continueId)
+    if (entry && content) {
+      return {
+        kind: 'content',
+        eyebrow: 'LarsanaPill',
+        title: content.title,
+        subtitle: 'Continue de onde parou',
+        badge: entry.category.code,
+        progressPercent: hub.progressMap[content.id] ?? 0,
+        categorySlug: entry.category.slug,
+        contentId: content.id,
+      }
+    }
+  }
+
+  const entry = withContent[0]
+  const content = entry.contents[0]
+  return {
+    kind: 'content',
+    eyebrow: 'Conteúdo recomendado',
+    title: content.title,
+    subtitle: 'Exercícios e orientações para casa',
+    badge: entry.category.code,
+    categorySlug: entry.category.slug,
+    contentId: content.id,
+  }
+}
+
+export async function getPatientHomeLarsanaPillTeaser(
+  patientId: string,
+): Promise<PatientHomeLarsanaPillTeaser> {
+  const weeklyPlans = await getWeeklyPlans()
+  if (weeklyPlans.length > 0) {
+    const progress = await getPlansProgressSummary(
+      patientId,
+      weeklyPlans.map((plan) => plan.id),
+    )
+    const plan = pickFeaturedWeeklyPlan(weeklyPlans, progress)
+    const planProgress = progress[plan.id]
+    const progressPercent =
+      planProgress && planProgress.total > 0
+        ? Math.round((planProgress.completed / planProgress.total) * 100)
+        : 0
+
+    return {
+      kind: 'weekly_plan',
+      eyebrow: 'Plano da semana',
+      title: plan.title,
+      subtitle:
+        planProgress && planProgress.total > 0
+          ? `${planProgress.completed} de ${planProgress.total} dias concluídos`
+          : `${plan.sessions_per_week}x/semana · ${plan.minutes_per_session} min por sessão`,
+      badge: plan.code,
+      progressPercent,
+      planSlug: plan.slug,
+    }
+  }
+
+  const contentTeaser = await buildContentTeaser(patientId)
+  if (contentTeaser) return contentTeaser
+
+  return {
+    kind: 'hub',
+    eyebrow: 'LarsanaPill',
+    title: 'Exercícios em casa',
+    subtitle: 'Complemente seu tratamento com orientações guiadas',
+  }
+}
+
+export function patientHomeLarsanaPillTeaserHref(teaser: PatientHomeLarsanaPillTeaser): string {
+  if (teaser.kind === 'weekly_plan' && teaser.planSlug) {
+    return `/paciente/larsanapill/planos/${teaser.planSlug}`
+  }
+  if (teaser.kind === 'content' && teaser.categorySlug && teaser.contentId) {
+    return `/paciente/larsanapill/categoria/${teaser.categorySlug}/conteudo/${teaser.contentId}`
+  }
+  return '/paciente/larsanapill'
+}
+
+export const patientHomeLarsanaPillQueryKeys = {
+  teaser: (patientId: string) => ['paciente', 'home', 'larsanapill-teaser', patientId] as const,
+}
+
 export function parseExerciseSteps(metadata: Record<string, unknown>): ExerciseStep[] {
   const steps = metadata.steps
   if (!Array.isArray(steps)) return []

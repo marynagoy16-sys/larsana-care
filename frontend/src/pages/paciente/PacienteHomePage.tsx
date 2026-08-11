@@ -1,41 +1,41 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
+import { ChevronRight } from 'lucide-react'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
-import { CrudListPageSkeleton, PageHeaderSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { CrudListPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Logo } from '@/components/shared/Logo'
 import { PatientActiveTreatmentCard } from '@/components/paciente/PatientActiveTreatmentCard'
 import { PatientHomeBanner } from '@/components/paciente/PatientHomeBanner'
+import { PatientHomeHelpLink, PatientHomeLarsanaPillTeaser } from '@/components/paciente/PatientHomeExtras'
 import { PatientHomeJourney } from '@/components/paciente/PatientHomeJourney'
+import { PatientHomeKpiRow } from '@/components/paciente/PatientHomeKpiRow'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks/useAuth'
+import { cn } from '@/lib/utils'
 import { loadPatientHome, patientPortalQueryKeys } from '@/services/patientPortal'
 
-function PatientHomeGreeting({
-  responsibleFirstName,
-  patientName,
+function PatientHomeHeaderLogo() {
+  return <Logo layout="horizontal" adaptToTheme style="v1" size="xs" />
+}
+
+function HomeSectionTitle({
+  title,
+  action,
 }: {
-  responsibleFirstName: string
-  patientName?: string
+  title: string
+  action?: ReactNode
 }) {
   return (
-    <div className="min-w-0 space-y-0.5">
-      <h1 className="font-display font-bold text-2xl lg:text-[1.75rem] leading-tight tracking-tight truncate">
-        Olá, {responsibleFirstName}
-      </h1>
-      {patientName && (
-        <p className="text-sm text-muted-foreground truncate">
-          Cuidando de <span className="font-medium text-foreground">{patientName}</span>
-        </p>
-      )}
+    <div className={cn('flex items-center gap-3', action && 'justify-between')}>
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      {action}
     </div>
   )
 }
 
 export function PacienteHomePage() {
-  const { profile } = useAuth()
-  const fallbackFirstName = profile?.full_name?.split(' ')[0] ?? 'responsável'
-
   const { data, isLoading, isError } = useQuery({
     queryKey: patientPortalQueryKeys.home,
     queryFn: loadPatientHome,
@@ -44,8 +44,8 @@ export function PacienteHomePage() {
   if (isLoading) {
     return (
       <>
-        <PageHeader loading>
-          <PageHeaderSkeleton />
+        <PageHeader>
+          <PatientHomeHeaderLogo />
         </PageHeader>
         <CrudScrollPageLayout>
           <CrudListPageSkeleton showStats={false} tableColumns={0} />
@@ -58,7 +58,7 @@ export function PacienteHomePage() {
     return (
       <>
         <PageHeader>
-          <PatientHomeGreeting responsibleFirstName={fallbackFirstName} />
+          <PatientHomeHeaderLogo />
         </PageHeader>
         <CrudScrollPageLayout>
           <p className="text-muted-foreground p-6">Não foi possível carregar sua página inicial.</p>
@@ -71,7 +71,7 @@ export function PacienteHomePage() {
     return (
       <>
         <PageHeader>
-          <PatientHomeGreeting responsibleFirstName={fallbackFirstName} />
+          <PatientHomeHeaderLogo />
         </PageHeader>
         <CrudScrollPageLayout>
           <div className="rounded-xl border border-dashed border-border p-8 text-center space-y-3">
@@ -88,45 +88,74 @@ export function PacienteHomePage() {
     )
   }
 
-  const { linkedPatient, activeCycle, latestAssessment } = data
-  const responsibleFirstName = linkedPatient.responsibleName.split(' ')[0]
+  const { activeCycle, latestAssessment, linkedPatient } = data
+
+  const sidebarContent = (
+    <>
+      {(latestAssessment || activeCycle) && <PatientHomeJourney context={data} />}
+      <PatientHomeLarsanaPillTeaser patientId={linkedPatient.patientId} />
+    </>
+  )
 
   return (
     <>
       <PageHeader>
-        <PatientHomeGreeting
-          responsibleFirstName={responsibleFirstName}
-          patientName={linkedPatient.patientName}
-        />
+        <PatientHomeHeaderLogo />
       </PageHeader>
 
       <CrudScrollPageLayout>
-        <CascadeReveal className="space-y-5 pb-8">
-          <CascadeItem>
-            <PatientHomeBanner context={data} />
+        <CascadeReveal className="w-full space-y-5 pb-6 lg:max-w-none lg:space-y-6 lg:pb-8">
+          {(data.pendingProposal || data.pendingCharge) && (
+            <CascadeItem>
+              <PatientHomeBanner context={data} />
+            </CascadeItem>
+          )}
+
+          <CascadeItem className="hidden lg:block">
+            <PatientHomeKpiRow context={data} />
           </CascadeItem>
 
-        {!data.pendingProposal && !data.pendingCharge && !latestAssessment && (
-          <CascadeItem>
-            <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6 text-sm text-muted-foreground text-center">
-              Em breve você verá aqui o andamento do tratamento e avisos importantes.
+          <CascadeItem className="space-y-3">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
+              <div className="min-w-0 space-y-3">
+                <HomeSectionTitle
+                  title="Seu tratamento"
+                  action={
+                    <Button variant="ghost" size="sm" className="h-auto px-0 text-primary" asChild>
+                      <Link to="/paciente/tratamento">
+                        Ver tratamento
+                        <ChevronRight className="ml-0.5 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  }
+                />
+
+                {!data.pendingProposal && !data.pendingCharge && !latestAssessment && !activeCycle && (
+                  <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6 text-sm text-muted-foreground text-center">
+                    Em breve você verá aqui o andamento do tratamento e avisos importantes.
+                  </div>
+                )}
+
+                {activeCycle && (
+                  <PatientActiveTreatmentCard
+                    cycle={activeCycle}
+                    professionalNameFallback={linkedPatient.professionalName}
+                    featured
+                  />
+                )}
+              </div>
+
+              <div className="hidden min-w-0 flex-col gap-6 lg:flex">{sidebarContent}</div>
             </div>
           </CascadeItem>
-        )}
 
-        {(latestAssessment || activeCycle) && (
-          <CascadeItem>
-            <PatientHomeJourney context={data} />
-          </CascadeItem>
-        )}
+          <CascadeItem className="space-y-3 lg:hidden">{sidebarContent}</CascadeItem>
 
-        {activeCycle && (
           <CascadeItem>
-            <PatientActiveTreatmentCard cycle={activeCycle} />
+            <PatientHomeHelpLink />
           </CascadeItem>
-        )}
-      </CascadeReveal>
-    </CrudScrollPageLayout>
+        </CascadeReveal>
+      </CrudScrollPageLayout>
     </>
   )
 }

@@ -52,7 +52,7 @@ const DRAWER_SECTIONS: DrawerSection[] = [
     items: [
       { label: 'Início', href: '/(app)/(tabs)/inicio', icon: Calendar },
       { label: 'Minha evolução', href: '/(app)/minha-evolucao', icon: Trophy },
-      { label: 'Agenda', href: '/(app)/agenda', icon: Calendar },
+      { label: 'Agenda', href: '/(app)/(tabs)/agenda', icon: Calendar },
       { label: 'Demandas', href: '/(app)/(tabs)/demandas', icon: MapPin },
     ],
   },
@@ -60,7 +60,7 @@ const DRAWER_SECTIONS: DrawerSection[] = [
     title: 'Formação',
     icon: GraduationCap,
     items: [
-      { label: 'Academy', href: '/(app)/academy', icon: GraduationCap },
+      { label: 'Academy', href: '/(app)/(tabs)/academy', icon: GraduationCap },
       { label: 'Certificados', href: '/(app)/academy/certificados', icon: FileCheck },
     ],
   },
@@ -68,27 +68,22 @@ const DRAWER_SECTIONS: DrawerSection[] = [
     title: 'Clínico',
     icon: Stethoscope,
     items: [
-      { label: 'Evoluções pendentes', href: '/(app)/(tabs)/evolucao', icon: ClipboardList },
+      { label: 'Evoluções pendentes', href: '/(app)/(tabs)/agenda', icon: ClipboardList },
       { label: 'Meus pacientes', href: '/(app)/pacientes', icon: User },
       { label: 'Avaliações', href: '/(app)/avaliacoes', icon: FileCheck },
-    ],
-  },
-  {
-    title: 'Financeiro',
-    icon: Wallet,
-    items: [
-      { label: 'Repasses', href: '/(app)/(tabs)/repasses', icon: Wallet },
-      { label: 'Simulador de ganhos', href: '/(app)/simulador', icon: TrendingUp },
     ],
   },
   {
     title: 'Conta',
     icon: User,
     items: [
+      { label: 'Conta', href: '/(app)/(tabs)/conta', icon: User },
+      { label: 'Repasses', href: '/(app)/repasses', icon: Wallet },
+      { label: 'Simulador de ganhos', href: '/(app)/simulador', icon: TrendingUp },
       { label: 'Credenciamento', href: '/(app)/credenciamento', icon: Shield },
       { label: 'Cartão de visita', href: '/(app)/cartao', icon: CreditCard },
       { label: 'Notificações', href: '/(app)/notificacoes', icon: Bell },
-      { label: 'Perfil', href: '/(app)/(tabs)/perfil', icon: User },
+      { label: 'Perfil', href: '/(app)/perfil', icon: User },
     ],
   },
 ]

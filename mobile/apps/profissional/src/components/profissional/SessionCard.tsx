@@ -34,7 +34,7 @@ export function SessionCard({ session, className }: SessionCardProps) {
               {session.patientName}
             </Text>
             <Text className="text-xs text-muted-foreground">
-              Ciclo {session.cycleNumber} · Sessão #{session.sessionNumber}
+              Ciclo {session.cycleNumber} · Terapia #{session.sessionNumber}
             </Text>
             {session.address ? (
               <Text className="mt-0.5 text-xs text-muted-foreground" numberOfLines={1}>

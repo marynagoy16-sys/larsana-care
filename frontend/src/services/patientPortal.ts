@@ -66,7 +66,7 @@ export async function getLinkedPatient(): Promise<LinkedPatient | null> {
         id,
         full_name,
         care_status,
-        professionals:allocated_professional_id ( full_name )
+        professionals:professionals!patients_allocated_professional_id_fkey ( full_name )
       )`,
     )
     .limit(1)
@@ -87,7 +87,7 @@ export async function getLinkedPatient(): Promise<LinkedPatient | null> {
 }
 
 export async function getPatientHomeContext(patientId: string): Promise<Omit<PatientHomeContext, 'linkedPatient'>> {
-  const [assessmentResult, cycleResult, chargeResult] = await Promise.all([
+  const [assessmentResult, activeCycleResult, chargeResult] = await Promise.all([
     supabase
       .from('initial_assessments')
       .select(
@@ -102,16 +102,18 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
       .from('care_cycles')
       .select(
         `id, cycle_number, session_count, status, payment_status, assigned_professional_id,
-        professionals:assigned_professional_id ( full_name )`,
+        professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name )`,
       )
       .eq('patient_id', patientId)
-      .in('status', ['ativo', 'aguardando_pagamento', 'rascunho'])
+      .eq('status', 'ativo')
+      .eq('payment_status', 'pago')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
     supabase
       .from('charges_patient')
       .select('id, amount_cents, due_date, payment_status, cycle_id')
+      .eq('patient_id', patientId)
       .in('payment_status', ['pendente', 'vencido'])
       .order('due_date', { ascending: true })
       .limit(1)
@@ -119,7 +121,7 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
   ])
 
   if (assessmentResult.error) throw assessmentResult.error
-  if (cycleResult.error) throw cycleResult.error
+  if (activeCycleResult.error) throw activeCycleResult.error
   if (chargeResult.error) throw chargeResult.error
 
   const latestAssessment = assessmentResult.data as PatientAssessmentSummary | null
@@ -132,7 +134,7 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
       : null
 
   let activeCycle: ActiveCycleSummary | null = null
-  const cycleRow = cycleResult.data as {
+  const cycleRow = activeCycleResult.data as {
     id: string
     cycle_number: number
     session_count: number
@@ -141,7 +143,7 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
     professionals: { full_name: string } | null
   } | null
 
-  if (cycleRow?.status === 'ativo' && cycleRow.payment_status === 'pago') {
+  if (cycleRow) {
     const [sessionsResult, nextSessionResult] = await Promise.all([
       supabase
         .from('care_sessions')
@@ -150,7 +152,10 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
         .eq('status', 'realizada'),
       supabase
         .from('care_sessions')
-        .select('scheduled_at')
+        .select(
+          `scheduled_at,
+          professionals:professionals!care_sessions_professional_id_fkey ( full_name )`,
+        )
         .eq('cycle_id', cycleRow.id)
         .eq('status', 'prevista')
         .order('scheduled_at', { ascending: true })
@@ -161,6 +166,11 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
     if (sessionsResult.error) throw sessionsResult.error
     if (nextSessionResult.error) throw nextSessionResult.error
 
+    const nextSession = nextSessionResult.data as {
+      scheduled_at: string
+      professionals: { full_name: string } | null
+    } | null
+
     activeCycle = {
       id: cycleRow.id,
       cycle_number: cycleRow.cycle_number,
@@ -168,8 +178,9 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
       status: cycleRow.status,
       payment_status: cycleRow.payment_status,
       completedSessions: sessionsResult.count ?? 0,
-      professionalName: cycleRow.professionals?.full_name ?? null,
-      nextSessionAt: (nextSessionResult.data as { scheduled_at: string } | null)?.scheduled_at ?? null,
+      professionalName:
+        cycleRow.professionals?.full_name ?? nextSession?.professionals?.full_name ?? null,
+      nextSessionAt: nextSession?.scheduled_at ?? null,
     }
   }
 

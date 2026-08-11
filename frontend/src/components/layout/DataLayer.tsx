@@ -1,20 +1,15 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 
 interface DataLayerProps {
   children: ReactNode
+  /** @deprecated Reservado para compatibilidade; o scroll passa por trás da bottom nav. */
   reserveBottomNav?: boolean
 }
 
 /** Área principal que estica na altura disponível (header → rodapé do shell). */
-export function DataLayer({ children, reserveBottomNav }: DataLayerProps) {
+export function DataLayer({ children }: DataLayerProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-1 flex-col min-h-0 h-full w-full overflow-hidden',
-        reserveBottomNav && 'pb-20 lg:pb-0',
-      )}
-    >
+    <div className="flex flex-1 flex-col min-h-0 h-full w-full overflow-hidden">
       {children}
     </div>
   )

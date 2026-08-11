@@ -119,7 +119,7 @@ export default function EvolucaoNovaScreen() {
                   {sessionContext.patientName}
                 </Text>
                 <Text className="text-xs text-muted-foreground">
-                  Ciclo {sessionContext.cycleNumber} · Sessão #{sessionContext.sessionNumber}
+                  Ciclo {sessionContext.cycleNumber} · Terapia #{sessionContext.sessionNumber}
                 </Text>
               </View>
             ) : (

@@ -3,7 +3,6 @@ import {
   BarChart3,
   Calendar,
   ClipboardList,
-  ClipboardPlus,
   CreditCard,
   FileText,
   Heart,
@@ -30,6 +29,7 @@ import {
   GraduationCap,
   Pill,
   Trophy,
+  UserPlus,
 } from 'lucide-react'
 import type { UserRole } from '@/types/auth'
 
@@ -144,17 +144,11 @@ export const profissionalNavSections: NavSection[] = [
     ],
   },
   {
-    title: 'Financeiro',
-    icon: Wallet,
-    items: [
-      { label: 'Repasses', href: '/profissional/repasses', icon: Wallet, roles: ['pp'] },
-      { label: 'Simulador de ganhos', href: '/profissional/simulador', icon: TrendingUp, roles: ['pp'] },
-    ],
-  },
-  {
     title: 'Conta',
     icon: User,
     items: [
+      { label: 'Repasses', href: '/profissional/repasses', icon: Wallet, roles: ['pp'] },
+      { label: 'Simulador de ganhos', href: '/profissional/simulador', icon: TrendingUp, roles: ['pp'] },
       { label: 'Credenciamento', href: '/profissional/credenciamento', icon: Shield, roles: ['pp'] },
       { label: 'Cartão de visita', href: '/profissional/cartao', icon: CreditCard, roles: ['pp'] },
       { label: 'Notificações', href: '/profissional/notificacoes', icon: Bell, roles: ['pp'] },
@@ -165,28 +159,50 @@ export const profissionalNavSections: NavSection[] = [
 
 export const profissionalBottomNav: NavItem[] = [
   { label: 'Início', href: '/profissional/inicio', icon: Home, roles: ['pp'], end: true },
+  { label: 'Agenda', href: '/profissional/agenda', icon: Calendar, roles: ['pp'] },
   { label: 'Demandas', href: '/profissional/demandas', icon: MapPin, roles: ['pp'] },
-  { label: 'Evolução', href: '/profissional/evolucao/nova', icon: ClipboardPlus, roles: ['pp'] },
-  { label: 'Repasses', href: '/profissional/repasses', icon: Wallet, roles: ['pp'] },
-  { label: 'Perfil', href: '/profissional/perfil', icon: User, roles: ['pp'] },
+  { label: 'Academy', href: '/profissional/academy', icon: GraduationCap, roles: ['pp'] },
+  { label: 'Conta', href: '/profissional/conta', icon: User, roles: ['pp'] },
 ]
 
 export const pacienteHeaderNav: NavItem[] = [
-  { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'] },
-  { label: 'Pagamentos', href: '/paciente/pagamentos', icon: CreditCard, roles: ['paciente'] },
-  { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
+  { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
+  { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
-  { label: 'Documentos', href: '/paciente/documentos', icon: FileText, roles: ['paciente'] },
-  { label: 'Ajuda', href: '/paciente/ajuda', icon: HelpCircle, roles: ['paciente'] },
+  { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
 ]
 
 export const pacienteBottomNav: NavItem[] = [
-  { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'] },
-  { label: 'Pagar', href: '/paciente/pagamentos', icon: CreditCard, roles: ['paciente'] },
+  { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
+  { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
+  { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
   { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
-  { label: 'Documentos', href: '/paciente/documentos', icon: FileText, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
+]
+
+export const pacienteNavSections: NavSection[] = [
+  {
+    title: 'Principal',
+    icon: Home,
+    items: [
+      { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
+      { label: 'Solicitar atendimento', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
+      { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
+      { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
+    ],
+  },
+  {
+    title: 'Conta',
+    icon: User,
+    items: [
+      { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
+      { label: 'Pagamentos', href: '/paciente/pagamentos', icon: CreditCard, roles: ['paciente'] },
+      { label: 'Documentos', href: '/paciente/documentos', icon: FileText, roles: ['paciente'] },
+      { label: 'Notificações', href: '/paciente/notificacoes', icon: Bell, roles: ['paciente'] },
+      { label: 'Ajuda', href: '/paciente/ajuda', icon: HelpCircle, roles: ['paciente'] },
+    ],
+  },
 ]
 
 export function filterNavByRole(sections: NavSection[], role: UserRole): NavSection[] {
@@ -252,6 +268,8 @@ export const routeTitles: Record<string, string> = {
   '/profissional/pacientes': 'Meus pacientes',
   '/profissional/avaliacoes': 'Avaliações',
   '/profissional/repasses': 'Repasses',
+  '/profissional/conta': 'Conta',
+  '/profissional/conta/aparencia': 'Aparência',
   '/profissional/simulador': 'Simulador de ganhos',
   '/profissional/credenciamento': 'Credenciamento',
   '/profissional/credenciamento/contrato': 'Contrato LRS-PROF',
@@ -261,12 +279,16 @@ export const routeTitles: Record<string, string> = {
   '/profissional/academy': 'Academy',
   '/profissional/academy/certificados': 'Certificados',
   '/paciente': 'Início',
+  '/paciente/solicitar': 'Solicitar atendimento',
   '/paciente/tratamento': 'Meu tratamento',
   '/paciente/pagamentos': 'Pagamentos',
   '/paciente/proposta': 'Responder proposta',
   '/paciente/documentos': 'Documentos',
   '/paciente/aceite-inicial': 'Aceite inicial',
   '/paciente/conta': 'Conta',
+  '/paciente/conta/aparencia': 'Aparência',
+  '/paciente/conta/perfil': 'Perfil',
+  '/paciente/termos': 'Termos',
   '/paciente/ajuda': 'Ajuda',
   '/paciente/larsanapill': 'LarsanaPill',
   '/paciente/notificacoes': 'Notificações',
@@ -277,8 +299,24 @@ export function getPageTitle(pathname: string): string {
     pathname === '/paciente' ||
     pathname === '/paciente/notificacoes' ||
     pathname === '/paciente/proposta' ||
+    pathname === '/paciente/pagamentos' ||
+    pathname === '/paciente/documentos' ||
+    pathname === '/paciente/ajuda' ||
+    pathname === '/paciente/termos' ||
+    pathname === '/paciente/conta/aparencia' ||
+    pathname === '/paciente/conta/perfil' ||
+    pathname === '/profissional/conta/aparencia' ||
     pathname === '/profissional/inicio'
   ) {
+    return ''
+  }
+  if (/^\/paciente\/pagamentos\/[^/]+$/.test(pathname)) {
+    return ''
+  }
+  if (/^\/paciente\/termos\/[^/]+$/.test(pathname)) {
+    return ''
+  }
+  if (/^\/paciente\/tratamento\/ciclo\/[^/]+$/.test(pathname)) {
     return ''
   }
   if (/^\/admin\/ciclos\/[^/]+$/.test(pathname) && pathname !== '/admin/ciclos/novo') {
@@ -303,4 +341,10 @@ export function getPageTitle(pathname: string): string {
     if (routeTitles[base]) return routeTitles[base]
   }
   return 'LarsanaCare'
+}
+
+/** Rotas PP mobile sem barra superior do shell (mapa/conteúdo colado no topo). */
+export function shouldHideShellHeader(pathname: string, variant: string): boolean {
+  if (variant !== 'profissional') return false
+  return pathname === '/profissional/demandas'
 }

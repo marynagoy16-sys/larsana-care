@@ -1,10 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EntityListPage } from '@/components/crud/EntityListPage'
 import { DemandsMap } from '@/components/demands/DemandsMap'
 import { demandListColumns } from '@/components/demands/demandListColumns'
 import type { DataTableColumn } from '@/components/crud/DataTable'
+import { Badge } from '@/components/ui/badge'
+import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import { patientLevelLabels } from '@/constants/labels'
+import {
+  annotateDemandsWithHighlights,
+  demandHighlightLabels,
+  type DemandHighlightTag,
+  type DemandListItemWithHighlights,
+} from '@/lib/demandHighlights'
 import { formatDistanceKm, haversineDistanceKm, MAUA_CENTER, resolvePointsCenter } from '@/lib/geo'
 import { useMapOrigin } from '@/hooks/useMapOrigin'
 import { demandsService, type DemandListItem } from '@/services/demands'
@@ -45,9 +53,36 @@ function buildDemandColumns(origin: { lat: number; lng: number }): DataTableColu
   return [distanceColumn, neighborhoodColumn, levelColumn, ...baseWithoutStatus]
 }
 
+function DemandHighlightBadges({ tags }: { tags: DemandHighlightTag[] }) {
+  return (
+    <>
+      {tags.map((tag) => (
+        <Badge
+          key={tag}
+          className="h-5 shrink-0 border-0 bg-brand-gold px-1.5 py-0 text-[10px] font-semibold text-white dark:text-brand-care shadow-sm"
+        >
+          {demandHighlightLabels[tag]}
+        </Badge>
+      ))}
+    </>
+  )
+}
+
 export function PPDemandsPage() {
   const navigate = useNavigate()
+  const { setFixedMain } = useImmersiveLayout()
   const [selectedDemandId, setSelectedDemandId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setFixedMain(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => {
+      mq.removeEventListener('change', sync)
+      setFixedMain(false)
+    }
+  }, [setFixedMain])
 
   const { data } = useQuery({
     queryKey: PP_DEMANDS_QUERY_KEY,
@@ -66,29 +101,50 @@ export function PPDemandsPage() {
   const { origin } = useMapOrigin(mapFallbackCenter)
   const columns = useMemo(() => buildDemandColumns(origin), [origin])
 
+  const highlightTagsByDemandId = useMemo(() => {
+    const annotated = annotateDemandsWithHighlights(demands, origin)
+    return new Map(
+      annotated
+        .filter((demand): demand is DemandListItemWithHighlights & { highlight_tags: DemandHighlightTag[] } =>
+          Boolean(demand.highlight_tags?.length),
+        )
+        .map((demand) => [demand.id, demand.highlight_tags]),
+    )
+  }, [demands, origin])
+
   return (
-    <EntityListPage
-      title="Demandas"
-      queryKey={PP_DEMANDS_QUERY_KEY}
-      queryFn={() => demandsService.listOpenForPp()}
-      columns={columns}
-      showStats={false}
-      showToolbar={false}
-      showPagination={false}
-      searchable={false}
-      mobileVariant="compact"
-      getMobileAvatarLabel={(row) => row.patient_abbreviation}
-      onRowClick={(row) => navigate(`/profissional/demandas/${row.id}`)}
-      beforeTable={
-        <DemandsMap
-          demands={demands}
-          selectedId={selectedDemandId}
-          onSelectDemand={(id) => {
-            setSelectedDemandId(id)
-            navigate(`/profissional/demandas/${id}`)
-          }}
-        />
-      }
-    />
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden max-lg:h-full">
+      <EntityListPage
+        title="Demandas"
+        queryKey={PP_DEMANDS_QUERY_KEY}
+        queryFn={() => demandsService.listOpenForPp()}
+        columns={columns}
+        showStats={false}
+        showToolbar={false}
+        showPagination={false}
+        searchable={false}
+        mobileVariant="compact"
+        mobileFlush
+        splitScrollOnMobile
+        layoutClassName="max-lg:space-y-0"
+        tableSectionClassName="max-lg:px-0 lg:shell-content-x lg:pt-0"
+        getMobileAvatarLabel={(row) => row.patient_abbreviation}
+        getMobileTags={(row) => {
+          const tags = highlightTagsByDemandId.get(row.id)
+          return tags?.length ? <DemandHighlightBadges tags={tags} /> : null
+        }}
+        onRowClick={(row) => navigate(`/profissional/demandas/${row.id}`)}
+        beforeTable={
+          <DemandsMap
+            demands={demands}
+            selectedId={selectedDemandId}
+            onSelectDemand={(id) => {
+              setSelectedDemandId(id)
+              navigate(`/profissional/demandas/${id}`)
+            }}
+          />
+        }
+      />
+    </div>
   )
 }

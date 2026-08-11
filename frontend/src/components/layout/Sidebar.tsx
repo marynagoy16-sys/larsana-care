@@ -47,7 +47,8 @@ export function Sidebar({ sections, topItems, subtitle, collapsed, onToggleColla
           subtitle={subtitle}
           collapsed={collapsed}
           compact={collapsed}
-          className={collapsed ? undefined : 'px-3'}
+          size="xs"
+          className={collapsed ? undefined : 'px-3 gap-1.5'}
         />
       </div>
 

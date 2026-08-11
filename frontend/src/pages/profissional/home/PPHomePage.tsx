@@ -1,5 +1,5 @@
-import { useMemo, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, MapPin, Trophy } from 'lucide-react'
 import { HomeAcademyBanner } from '@/components/profissional/home/HomeAcademyBanner'
@@ -7,12 +7,12 @@ import { HomeDayKpiRow } from '@/components/profissional/home/HomeDayKpiRow'
 import { HomePendingEvolutionsList } from '@/components/profissional/home/HomePendingEvolutionsList'
 import { HomeSessionCard } from '@/components/profissional/home/HomeSessionCard'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
-import { CrudListPageSkeleton, PageHeaderSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { CrudListPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Logo } from '@/components/shared/Logo'
 import { Button } from '@/components/ui/button'
 import { ACADEMY_FORMATION_SLIDE } from '@/constants/academySlides'
-import { useAuth } from '@/hooks/useAuth'
 import { useMapOrigin } from '@/hooks/useMapOrigin'
 import {
   countDemandsWithinRadius,
@@ -34,7 +34,6 @@ import {
 } from '@/services/ppEvolutions'
 import {
   buildAgendaDaySummary,
-  formatAgendaDayTitleShort,
   listAgendaSessionsForDay,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
@@ -49,15 +48,8 @@ const PP_DEMANDS_QUERY_KEY = ['pp', 'demands'] as const
 const MAX_TODAY_SESSIONS_MOBILE = 3
 const MAX_TODAY_SESSIONS_DESKTOP = 5
 
-function HomeGreeting({ firstName, dateLabel }: { firstName: string; dateLabel: string }) {
-  return (
-    <div className="min-w-0 space-y-0.5">
-      <h1 className="truncate font-display text-xl font-bold leading-tight tracking-tight lg:text-2xl">
-        Olá, {firstName}
-      </h1>
-      <p className="truncate text-sm text-muted-foreground">{dateLabel}</p>
-    </div>
-  )
+function PPHomeHeaderLogo() {
+  return <Logo layout="horizontal" adaptToTheme style="v1" size="xs" />
 }
 
 function HomeSectionTitle({
@@ -76,7 +68,7 @@ function HomeSectionTitle({
         !inlineAction && action && 'justify-between',
       )}
     >
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <h2 className="text-sm font-semibold text-foreground">
         {title}
       </h2>
       {action}
@@ -163,8 +155,6 @@ function HomeOpportunitiesCard({
 
 export function PPHomePage() {
   const navigate = useNavigate()
-  const { profile } = useAuth()
-  const firstName = profile?.full_name?.split(' ')[0] ?? 'parceiro'
 
   const today = useMemo(() => {
     const d = new Date()
@@ -173,7 +163,6 @@ export function PPHomePage() {
   }, [])
 
   const dayKey = toAgendaDayKey(today)
-  const dateLabel = formatAgendaDayTitleShort(today)
 
   const sessionsQuery = useQuery({
     queryKey: ppAgendaQueryKeys.day(dayKey),
@@ -264,8 +253,8 @@ export function PPHomePage() {
   if (isLoading) {
     return (
       <>
-        <PageHeader loading>
-          <PageHeaderSkeleton />
+        <PageHeader>
+          <PPHomeHeaderLogo />
         </PageHeader>
         <CrudScrollPageLayout>
           <CrudListPageSkeleton showStats={false} tableColumns={0} />
@@ -277,7 +266,7 @@ export function PPHomePage() {
   return (
     <>
       <PageHeader>
-        <HomeGreeting firstName={firstName} dateLabel={dateLabel} />
+        <PPHomeHeaderLogo />
       </PageHeader>
 
       <CrudScrollPageLayout>
@@ -378,7 +367,10 @@ export function PPHomePage() {
               title="Oportunidades"
               action={
                 <Button variant="ghost" size="sm" className="h-auto px-0 text-primary" asChild>
-                  <Link to="/profissional/demandas">Ver todas</Link>
+                  <Link to="/profissional/demandas">
+                    Ver todas
+                    <ChevronRight className="ml-0.5 h-4 w-4" />
+                  </Link>
                 </Button>
               }
             />

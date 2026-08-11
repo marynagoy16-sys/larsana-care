@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 import { DemandCompactCard, sortDemandsByDistance } from '@/components/demands/DemandCompactCard'
 import { Button } from '@/components/ui/button'
 import type { GeoPoint } from '@/lib/geo'
@@ -44,12 +45,15 @@ interface HomeDemandsSectionHeaderProps {
 export function HomeDemandsSectionHeader({ showViewAll = true }: HomeDemandsSectionHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <h2 className="text-sm font-semibold text-foreground">
         Oportunidades
       </h2>
       {showViewAll && (
         <Button variant="ghost" size="sm" className="h-auto px-0 text-primary" asChild>
-          <Link to="/profissional/demandas">Ver todas</Link>
+          <Link to="/profissional/demandas">
+            Ver todas
+            <ChevronRight className="ml-0.5 h-4 w-4" />
+          </Link>
         </Button>
       )}
     </div>

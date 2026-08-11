@@ -67,7 +67,7 @@ export default function AgendaScreen() {
           {sessions.length === 0 ? (
             <View className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-8">
               <Text className="text-center text-sm text-muted-foreground">
-                Nenhuma sessão neste dia.
+                Nenhuma terapia neste dia.
               </Text>
             </View>
           ) : (

@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 import { PageSkeleton } from '@/components/shared/PageSkeleton'
 import { Outlet, useLocation } from 'react-router-dom'
@@ -10,9 +10,10 @@ import {
   filterNavItems,
   getPageTitle,
   pacienteBottomNav,
-  pacienteHeaderNav,
+  pacienteNavSections,
   profissionalBottomNav,
   profissionalNavSections,
+  shouldHideShellHeader,
   type NavItem,
 } from '@/config/navigation'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -25,6 +26,7 @@ import { PageFooterProvider, usePageFooter } from '@/contexts/PageFooterContext'
 import { PageHeaderProvider } from '@/contexts/PageHeaderContext'
 import { ImmersiveLayoutProvider, useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import type { UserRole } from '@/types/auth'
+import { cn } from '@/lib/utils'
 
 export type LayoutVariant = 'admin' | 'profissional' | 'paciente'
 
@@ -40,53 +42,98 @@ const subtitles: Record<LayoutVariant, string> = {
 
 function AppShellContent({
   variant,
-  hasSidebar,
+  hasMobileDrawer,
   pageTitle,
   setSidebarOpen,
   profBottom,
   pacBottom,
-  pacHeader,
   showBottomNav,
 }: {
   variant: LayoutVariant
-  hasSidebar: boolean
+  hasMobileDrawer: boolean
   pageTitle: string
   setSidebarOpen: (open: boolean) => void
   profBottom: NavItem[]
   pacBottom: NavItem[]
-  pacHeader: NavItem[]
   showBottomNav: boolean
 }) {
   const { suppressBottomNav } = usePageFooter()
   const { immersive, fixedMain } = useImmersiveLayout()
+  const location = useLocation()
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 1023px)').matches : false,
+  )
+  const hideShellHeader =
+    !immersive && isMobile && shouldHideShellHeader(location.pathname, variant)
   const showNav = showBottomNav && !suppressBottomNav
   const lockScroll = immersive || fixedMain
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setIsMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    setIsScrolled(false)
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [location.pathname])
 
   return (
     <>
       <DataLayer reserveBottomNav={showNav}>
+        {!immersive && !hideShellHeader && (
+          <div
+            className={cn(
+              'shell-content-x shell-content-y-top shrink-0 z-20 bg-background transition-[box-shadow,border-color] duration-200',
+              isScrolled && 'border-b border-border/50',
+            )}
+          >
+            <Header
+              pageTitle={pageTitle}
+              onMenuClick={hasMobileDrawer ? () => setSidebarOpen(true) : undefined}
+              showSearch={variant === 'admin'}
+              showThemeToggle={variant === 'admin'}
+              showUserMenu={variant === 'admin'}
+              notificationsHref={
+                variant === 'paciente'
+                  ? '/paciente/notificacoes'
+                  : variant === 'profissional'
+                    ? '/profissional/notificacoes'
+                    : undefined
+              }
+              horizontalNav={undefined}
+            />
+          </div>
+        )}
+
         <div
+          ref={scrollRef}
+          onScroll={() => {
+            const top = scrollRef.current?.scrollTop ?? 0
+            setIsScrolled(top > 0)
+          }}
           className={
             lockScroll
               ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
               : 'flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar'
           }
         >
-          {!immersive && (
-            <div className="shell-content-x shell-content-y-top shrink-0">
-              <Header
-                pageTitle={pageTitle}
-                onMenuClick={hasSidebar ? () => setSidebarOpen(true) : undefined}
-                showSearch={variant !== 'paciente'}
-                horizontalNav={variant === 'paciente' ? pacHeader : undefined}
-              />
-            </div>
-          )}
           <main
             className={
               lockScroll
                 ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden w-full'
-                : 'shell-content-x shell-content-y-bottom w-full min-w-0'
+                : cn(
+                    'w-full min-w-0',
+                    hideShellHeader ? 'max-lg:px-0' : 'shell-content-x',
+                    showNav && !hideShellHeader && 'shell-content-scroll-top',
+                    showNav && hideShellHeader && 'shell-content-scroll-top-compact',
+                    showNav ? 'shell-bottom-nav-clearance' : hideShellHeader ? 'pb-0' : 'shell-content-y-bottom',
+                  )
             }
           >
             <Suspense fallback={<PageSkeleton />}>
@@ -99,7 +146,7 @@ function AppShellContent({
       </DataLayer>
 
       {variant === 'profissional' && showNav && <ShellBottomNav items={profBottom} fabIndex={2} />}
-      {variant === 'paciente' && showNav && <ShellBottomNav items={pacBottom} />}
+      {variant === 'paciente' && showNav && <ShellBottomNav items={pacBottom} fabIndex={2} />}
     </>
   )
 }
@@ -125,18 +172,25 @@ function AppShellInner({ variant }: AppShellProps) {
   const adminSections = filterNavByRole(adminNavSections, userRole)
   const adminTopItems = filterNavItems(adminNavTopItems, userRole)
   const profSections = filterNavByRole(profissionalNavSections, userRole)
-  const pacHeader = filterNavItems(pacienteHeaderNav, userRole)
+  const pacSections = filterNavByRole(pacienteNavSections, userRole)
   const profBottom = filterNavItems(profissionalBottomNav, userRole)
   const pacBottom = filterNavItems(pacienteBottomNav, userRole)
 
-  const hasSidebar = variant === 'admin' || variant === 'profissional'
-  const sections = variant === 'admin' ? adminSections : profSections
+  const hasDesktopSidebar =
+    variant === 'admin' || variant === 'profissional' || variant === 'paciente'
+  const hasMobileDrawer = variant === 'admin'
+  const sections =
+    variant === 'admin'
+      ? adminSections
+      : variant === 'profissional'
+        ? profSections
+        : pacSections
   const topItems = variant === 'admin' ? adminTopItems : undefined
   const showBottomNav = (variant === 'profissional' || variant === 'paciente') && !immersive
 
   return (
     <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
-      {hasSidebar && (
+      {hasDesktopSidebar && (
         <>
           <Sidebar
             sections={sections}
@@ -145,13 +199,15 @@ function AppShellInner({ variant }: AppShellProps) {
             collapsed={sidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
           />
-          <MobileSidebar
-            open={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            sections={sections}
-            topItems={topItems}
-            subtitle={subtitles[variant]}
-          />
+          {hasMobileDrawer && (
+            <MobileSidebar
+              open={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+              sections={sections}
+              topItems={topItems}
+              subtitle={subtitles[variant]}
+            />
+          )}
         </>
       )}
 
@@ -160,12 +216,11 @@ function AppShellInner({ variant }: AppShellProps) {
           <PageFooterProvider>
             <AppShellContent
               variant={variant}
-              hasSidebar={hasSidebar}
+              hasMobileDrawer={hasMobileDrawer}
               pageTitle={pageTitle}
               setSidebarOpen={setSidebarOpen}
               profBottom={profBottom}
               pacBottom={pacBottom}
-              pacHeader={pacHeader}
               showBottomNav={showBottomNav}
             />
           </PageFooterProvider>

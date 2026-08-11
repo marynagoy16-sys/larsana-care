@@ -74,7 +74,7 @@ export function PacientePropostaPage() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
       queryClient.invalidateQueries({ queryKey: ['paciente', 'assessments'] })
-      queryClient.invalidateQueries({ queryKey: ['paciente', 'charges'] })
+      queryClient.invalidateQueries({ queryKey: ['paciente', 'charges-list'] })
       queryClient.invalidateQueries({ queryKey: ['paciente', 'cycles'] })
 
       if (result.family_response === 'SIM' && result.charge_id) {

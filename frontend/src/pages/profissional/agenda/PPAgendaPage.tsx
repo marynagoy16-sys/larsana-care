@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { addDays, isSameDay, subDays } from 'date-fns'
+import { addDays, addMonths, isSameDay, subDays, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,7 +34,7 @@ export function PPAgendaPage() {
   const { setFixedMain } = useImmersiveLayout()
   const scrollRef = useRef<HTMLDivElement>(null)
   const mobileScrollRef = useRef<HTMLDivElement>(null)
-  const [view, setView] = useState<AgendaViewMode>('day')
+  const [view, setView] = useState<AgendaViewMode>('week')
   const [anchorDate, setAnchorDate] = useState(() => {
     const d = new Date()
     d.setHours(0, 0, 0, 0)
@@ -105,6 +105,14 @@ export function PPAgendaPage() {
     setAnchorDate(d)
   }
 
+  const goPrevMonth = () => {
+    setAnchorDate((d) => subMonths(d, 1))
+  }
+
+  const goNextMonth = () => {
+    setAnchorDate((d) => addMonths(d, 1))
+  }
+
   const selectDay = (day: Date) => {
     const d = new Date(day)
     d.setHours(0, 0, 0, 0)
@@ -120,10 +128,7 @@ export function PPAgendaPage() {
     return (
       <>
         <PageHeader>
-          <h1 className="min-w-0 truncate text-lg font-medium leading-tight tracking-tight text-foreground sm:hidden">
-            {mobileMonthTitle}
-          </h1>
-          <h1 className="font-display hidden min-w-0 truncate text-2xl font-bold leading-tight tracking-tight sm:block lg:text-[1.75rem]">
+          <h1 className="font-display min-w-0 truncate text-xl font-bold leading-tight tracking-tight lg:text-2xl">
             Agenda
           </h1>
         </PageHeader>
@@ -137,10 +142,7 @@ export function PPAgendaPage() {
   return (
     <>
       <PageHeader>
-        <h1 className="min-w-0 truncate text-lg font-medium leading-tight tracking-tight text-foreground sm:hidden">
-          {mobileMonthTitle}
-        </h1>
-        <h1 className="font-display hidden min-w-0 truncate text-2xl font-bold leading-tight tracking-tight sm:block lg:text-[1.75rem]">
+        <h1 className="font-display min-w-0 truncate text-xl font-bold leading-tight tracking-tight lg:text-2xl">
           Agenda
         </h1>
       </PageHeader>
@@ -205,27 +207,93 @@ export function PPAgendaPage() {
         </div>
       </div>
 
-      {/* Cabeçalho mobile — sempre visualização dia, sem toggle */}
+      {/* Cabeçalho mobile */}
       <div className="shrink-0 border-b border-border/60 bg-background/80 sm:hidden">
-        <AgendaMobileDayStrip
-          anchorDate={anchorDate}
-          onSelectDay={selectDay}
-          sessionDayKeys={stripSessionDayKeys}
-          className="border-b-0"
-        />
+        <div className="flex items-center justify-between gap-3 shell-content-x py-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-0.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 rounded-full"
+              onClick={view === 'day' ? goPrevMonth : goPrev}
+              aria-label={view === 'day' ? 'Mês anterior' : 'Semana anterior'}
+            >
+              <ChevronLeft size={18} />
+            </Button>
+            <p className="min-w-0 flex-1 truncate text-center text-sm font-semibold text-foreground">
+              {view === 'day' ? mobileMonthTitle : title}
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 rounded-full"
+              onClick={view === 'day' ? goNextMonth : goNext}
+              aria-label={view === 'day' ? 'Próximo mês' : 'Próxima semana'}
+            >
+              <ChevronRight size={18} />
+            </Button>
+          </div>
+          <AgendaViewToggle
+            value={view}
+            onChange={setView}
+            className="shrink-0"
+          />
+        </div>
+
+        {view === 'day' ? (
+          <AgendaMobileDayStrip
+            anchorDate={anchorDate}
+            onSelectDay={selectDay}
+            sessionDayKeys={stripSessionDayKeys}
+            className="border-b-0"
+          />
+        ) : (
+          <div className="flex items-center justify-center gap-2 border-t border-border/40 px-4 py-2">
+            {isToday && (
+              <Badge variant="secondary" className="shrink-0 rounded-full text-xs">
+                Esta semana
+              </Badge>
+            )}
+            {!isToday && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 rounded-full px-2.5 text-xs"
+                onClick={goToday}
+              >
+                <CalendarDays size={14} className="mr-1" />
+                Hoje
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Mobile — sempre dia */}
-      <div
-        ref={mobileScrollRef}
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar shell-content-x pt-1.5 pb-24 sm:hidden"
-      >
-        <AgendaDayTimeline
-          date={anchorDate}
-          sessions={daySessions}
-          scrollContainerRef={mobileScrollRef}
-        />
-      </div>
+      {/* Mobile — dia ou semana */}
+      {view === 'day' ? (
+        <div
+          ref={mobileScrollRef}
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar shell-content-x pt-1.5 pb-24 sm:hidden"
+        >
+          <AgendaDayTimeline
+            date={anchorDate}
+            sessions={daySessions}
+            scrollContainerRef={mobileScrollRef}
+          />
+        </div>
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-col pt-1.5 pb-24 sm:hidden">
+          <AgendaWeekTimeline
+            anchorDate={anchorDate}
+            sessions={weekSessions}
+            onSelectDay={selectDayFromWeek}
+            scrollContainerRef={mobileScrollRef}
+          />
+        </div>
+      )}
 
       {/* Desktop — dia ou semana */}
       {view === 'day' ? (

@@ -12,29 +12,54 @@ interface LogoProps {
   variant?: 'light' | 'dark'
   /** Logo completo com tipografia LARSANA CARE embutida na imagem */
   full?: boolean
+  /** Logo horizontal compacto para header */
+  horizontal?: boolean
   /** Apenas o ícone, sem texto ao lado */
   markOnly?: boolean
 }
 
 export function Logo({
-  subtitle = 'Fisioterapia Domiciliar',
+  subtitle,
   variant = 'light',
   full = false,
+  horizontal = false,
   markOnly = false,
 }: LogoProps) {
   const onDark = variant === 'dark'
   const mark = onDark ? brandImages.markWhiteOnDark : brandImages.markGreenOnLight
   const fullLogo = onDark ? brandImages.logoDarkFull : brandImages.logoLightFull
 
+  if (horizontal) {
+    return (
+      <View className="items-center gap-2">
+        <Image
+          source={fullLogo}
+          accessibilityLabel="Larsana Care"
+          className="h-7 w-36"
+          resizeMode="contain"
+        />
+        {subtitle ? (
+          <Text
+            className={`text-center text-[10px] font-medium uppercase tracking-widest ${onDark ? 'text-white/70' : 'text-muted-foreground'}`}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+    )
+  }
+
+  const displaySubtitle = subtitle ?? 'Fisioterapia Domiciliar'
+
   if (full) {
     return (
       <View className="items-start">
         <Image source={fullLogo} accessibilityLabel="Larsana Care" className="h-16 w-48" resizeMode="contain" />
-        {subtitle ? (
+        {displaySubtitle ? (
           <Text
             className={`mt-2 text-xs font-medium uppercase tracking-widest ${onDark ? 'text-white/70' : 'text-muted-foreground'}`}
           >
-            {subtitle}
+            {displaySubtitle}
           </Text>
         ) : null}
       </View>
@@ -52,11 +77,11 @@ export function Logo({
         <Text className={`font-display text-xl font-bold ${onDark ? 'text-white' : 'text-foreground'}`}>
           LarsanaCare
         </Text>
-        {subtitle ? (
+        {displaySubtitle ? (
           <Text
             className={`text-xs font-medium uppercase tracking-widest ${onDark ? 'text-white/70' : 'text-muted-foreground'}`}
           >
-            {subtitle}
+            {displaySubtitle}
           </Text>
         ) : null}
       </View>

@@ -1,5 +1,6 @@
-import { Text, View } from 'react-native'
-import { CheckCircle2, Circle, CircleDot } from 'lucide-react-native'
+import { useState } from 'react'
+import { Pressable, Text, View } from 'react-native'
+import { CheckCircle2, ChevronDown, ChevronUp, Circle, CircleDot } from 'lucide-react-native'
 import { cn } from '@/lib/cn'
 import type { PatientHomeContext } from '@/services/patientPortal'
 
@@ -10,6 +11,10 @@ type JourneyStep = {
   label: string
   description?: string
   state: StepState
+}
+
+function shouldCompactJourney(context: PatientHomeContext): boolean {
+  return Boolean(context.activeCycle) && !context.pendingProposal && !context.pendingCharge
 }
 
 function buildJourneySteps(context: PatientHomeContext): JourneyStep[] {
@@ -87,44 +92,83 @@ function StepIcon({ state }: { state: StepState }) {
   return <Circle size={20} color="#d1d5db" />
 }
 
+function JourneyStepList({ steps }: { steps: JourneyStep[] }) {
+  return (
+    <>
+      {steps.map((step, index) => {
+        const isLast = index === steps.length - 1
+        const showDescription = step.state === 'done' || step.state === 'current' || step.state === 'waiting'
+        return (
+          <View key={step.key} className="flex-row gap-3">
+            <View className="items-center">
+              <StepIcon state={step.state} />
+              {!isLast ? (
+                <View className={cn('my-1 min-h-8 w-0.5 flex-1', step.state === 'done' ? 'bg-emerald-600/40' : 'bg-border')} />
+              ) : null}
+            </View>
+            <View className={cn('min-w-0 pb-6', isLast && 'pb-0')}>
+              <Text
+                className={cn(
+                  'text-sm font-medium',
+                  step.state === 'current' && 'text-primary',
+                  step.state === 'locked' && 'text-muted-foreground',
+                )}
+              >
+                {step.label}
+              </Text>
+              {showDescription && step.description ? (
+                <Text className="mt-0.5 text-xs text-muted-foreground">{step.description}</Text>
+              ) : null}
+            </View>
+          </View>
+        )
+      })}
+    </>
+  )
+}
+
 export function PatientHomeJourney({ context }: { context: PatientHomeContext }) {
+  const [expanded, setExpanded] = useState(false)
   const steps = buildJourneySteps(context)
+  const compact = shouldCompactJourney(context)
+  const doneCount = steps.filter((step) => step.state === 'done').length
+
+  if (compact && !expanded) {
+    return (
+      <View className="overflow-hidden rounded-xl border border-border/80 bg-muted/20">
+        <View className="flex-row items-center gap-3 px-4 py-3">
+          <CheckCircle2 size={18} color="#059669" />
+          <Text className="min-w-0 flex-1 text-sm text-muted-foreground">
+            <Text className="font-medium text-foreground">{doneCount} etapas concluídas</Text>
+            {' · '}detalhes do tratamento acima
+          </Text>
+          <Pressable onPress={() => setExpanded(true)} className="flex-row items-center gap-1 px-1">
+            <Text className="text-sm font-medium text-primary">Ver jornada</Text>
+            <ChevronDown size={16} color="#095742" />
+          </Pressable>
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View className="overflow-hidden rounded-xl border border-border bg-card">
-      <View className="border-b border-border px-5 py-4">
-        <Text className="text-sm font-semibold text-foreground">Sua jornada</Text>
-        <Text className="mt-0.5 text-xs text-muted-foreground">Acompanhe as etapas do cuidado</Text>
+      <View className="flex-row items-start justify-between gap-3 border-b border-border px-5 py-4">
+        <View className="min-w-0 flex-1">
+          <Text className="text-sm font-semibold text-foreground">Sua jornada</Text>
+          <Text className="mt-0.5 text-xs text-muted-foreground">
+            {compact ? 'Histórico das etapas do cuidado' : 'Acompanhe as etapas do cuidado'}
+          </Text>
+        </View>
+        {compact && expanded ? (
+          <Pressable onPress={() => setExpanded(false)} className="flex-row items-center gap-1 px-1">
+            <Text className="text-sm text-muted-foreground">Recolher</Text>
+            <ChevronUp size={16} color="#49796B" />
+          </Pressable>
+        ) : null}
       </View>
       <View className="p-5">
-        {steps.map((step, index) => {
-          const isLast = index === steps.length - 1
-          const showDescription = step.state === 'done' || step.state === 'current' || step.state === 'waiting'
-          return (
-            <View key={step.key} className="flex-row gap-3">
-              <View className="items-center">
-                <StepIcon state={step.state} />
-                {!isLast ? (
-                  <View className={cn('my-1 min-h-8 w-0.5 flex-1', step.state === 'done' ? 'bg-emerald-600/40' : 'bg-border')} />
-                ) : null}
-              </View>
-              <View className={cn('min-w-0 pb-6', isLast && 'pb-0')}>
-                <Text
-                  className={cn(
-                    'text-sm font-medium',
-                    step.state === 'current' && 'text-primary',
-                    step.state === 'locked' && 'text-muted-foreground',
-                  )}
-                >
-                  {step.label}
-                </Text>
-                {showDescription && step.description ? (
-                  <Text className="mt-0.5 text-xs text-muted-foreground">{step.description}</Text>
-                ) : null}
-              </View>
-            </View>
-          )
-        })}
+        <JourneyStepList steps={steps} />
       </View>
     </View>
   )

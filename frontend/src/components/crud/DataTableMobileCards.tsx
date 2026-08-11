@@ -40,6 +40,8 @@ interface DataTableMobileCardsProps<T> {
   getRowId?: (row: T) => string
   getAvatarLabel?: (row: T) => string
   variant?: 'default' | 'compact'
+  flush?: boolean
+  getTags?: (row: T) => ReactNode
 }
 
 function resolveColumn<T>(columns: MobileColumn<T>[], flag: keyof MobileColumn<T>) {
@@ -67,6 +69,8 @@ export function DataTableMobileCards<T>({
   getRowId,
   getAvatarLabel,
   variant = 'default',
+  flush = false,
+  getTags,
 }: DataTableMobileCardsProps<T>) {
   const primaryCol = resolveColumn(columns, 'mobilePrimary') ?? columns.find((c) => !c.mobileHidden) ?? columns[0]
   const subtitleCol = resolveColumn(columns, 'mobileSubtitle')
@@ -74,7 +78,12 @@ export function DataTableMobileCards<T>({
   const metaCols = columns.filter((c) => c.mobileMeta && !c.mobileHidden)
 
   return (
-    <div className={cn('md:hidden', variant === 'compact' ? 'space-y-2' : 'space-y-2.5')}>
+    <div
+      className={cn(
+        'md:hidden',
+        flush ? '' : variant === 'compact' ? 'space-y-2' : 'space-y-2.5',
+      )}
+    >
       {data.map((row) => {
         const rowId = getRowId?.(row) ?? getRowKey(row)
         const isSelected = selectedIds?.has(rowId)
@@ -94,9 +103,11 @@ export function DataTableMobileCards<T>({
                 }
               }}
               className={cn(
-                'flex items-center gap-3 rounded-xl border bg-card px-4 py-3 transition-colors',
+                'flex min-h-[4.25rem] items-center gap-3 bg-card px-4 transition-colors',
+                flush ? 'rounded-none border-0 py-4' : 'rounded-xl border py-3',
                 onRowClick && 'cursor-pointer active:bg-muted/40',
-                isSelected ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border',
+                !flush && (isSelected ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border'),
+                flush && isSelected && 'bg-primary/5',
               )}
             >
               {selectable && onToggle && (
@@ -105,7 +116,7 @@ export function DataTableMobileCards<T>({
                 </div>
               )}
 
-              <Avatar className="h-10 w-10 shrink-0 border border-border">
+              <Avatar className={cn('shrink-0 border border-border', flush ? 'h-11 w-11' : 'h-10 w-10')}>
                 <AvatarFallback className="bg-muted text-xs font-semibold text-foreground">
                   {getInitials(avatarText)}
                 </AvatarFallback>
@@ -113,7 +124,12 @@ export function DataTableMobileCards<T>({
 
               <div className="min-w-0 flex-1">
                 {primaryCol && (
-                  <div className="truncate text-sm font-medium text-foreground">{primaryCol.cell(row)}</div>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <div className="truncate text-sm font-medium text-foreground">{primaryCol.cell(row)}</div>
+                    {getTags?.(row) ? (
+                      <div className="flex shrink-0 items-center gap-1">{getTags(row)}</div>
+                    ) : null}
+                  </div>
                 )}
                 {subtitleCol && (
                   <p className="truncate text-xs text-muted-foreground">{subtitleCol.cell(row)}</p>

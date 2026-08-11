@@ -2,9 +2,10 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { ArrowLeft, MapPin } from 'lucide-react-native'
+import { ArrowLeft, ChevronDown, ChevronUp, MapPin, PenLine } from 'lucide-react-native'
+import { useState } from 'react'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { getPPPatientDetail } from '@/services/ppPatients'
+import { getPPPatientDetail, getPPPatientProntuario, prontuarioContentPreview } from '@/services/ppPatients'
 import { formatDate } from '@/lib/formatters'
 
 function InfoTile({ label, value }: { label: string; value: string }) {
@@ -77,6 +78,70 @@ const patientLevelLabels: Record<string, string> = {
   VALOR_SOCIAL: 'Valor social',
 }
 
+const recordTypeLabels: Record<string, string> = {
+  avaliacao: 'Avaliação inicial',
+  evolucao: 'Evolução',
+}
+
+function ProntuarioCycleSection({
+  cycleNumber,
+  status,
+  records,
+  defaultOpen = false,
+}: {
+  cycleNumber: number
+  status: string | null
+  records: Array<{
+    id: string
+    session_number: number | null
+    content_richtext: string | null
+    recorded_at: string
+    created_at: string
+  }>
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+
+  return (
+    <View className="rounded-xl border border-border bg-card overflow-hidden">
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        className="flex-row items-center justify-between px-4 py-3.5 active:bg-muted/20"
+      >
+        <View>
+          <Text className="text-sm font-semibold text-foreground">Ciclo {cycleNumber}</Text>
+          <Text className="text-xs text-muted-foreground">
+            {records.length} terapia{records.length === 1 ? '' : 's'} registrada{records.length === 1 ? '' : 's'}
+            {status ? ` · ${status}` : ''}
+          </Text>
+        </View>
+        {open ? <ChevronUp size={18} color="#49796B" /> : <ChevronDown size={18} color="#49796B" />}
+      </Pressable>
+      {open ? (
+        <View className="border-t border-border divide-y divide-border">
+          {records.length === 0 ? (
+            <Text className="px-4 py-3 text-xs text-muted-foreground">Nenhuma evolução neste ciclo.</Text>
+          ) : (
+            records.map((record) => (
+              <View key={record.id} className="px-4 py-3 gap-1">
+                <Text className="text-xs font-medium text-foreground">
+                  Terapia #{record.session_number ?? '—'}
+                </Text>
+                <Text className="text-xs text-muted-foreground leading-relaxed">
+                  {prontuarioContentPreview(record.content_richtext)}
+                </Text>
+                <Text className="text-[10px] text-muted-foreground">
+                  {formatDate(record.recorded_at ?? record.created_at)}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+      ) : null}
+    </View>
+  )
+}
+
 export default function PacienteDetailScreen() {
   const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -84,6 +149,12 @@ export default function PacienteDetailScreen() {
   const { data, isLoading } = useQuery({
     queryKey: ['pp', 'patient', id],
     queryFn: () => getPPPatientDetail(id!),
+  })
+
+  const { data: prontuario, isLoading: prontuarioLoading } = useQuery({
+    queryKey: ['pp', 'patient', id, 'prontuario'],
+    queryFn: () => getPPPatientProntuario(id!),
+    enabled: !!id,
   })
 
   if (isLoading) {
@@ -195,6 +266,61 @@ export default function PacienteDetailScreen() {
             </Pressable>
           </View>
         )}
+
+        <CardSection title="Prontuário" subtitle="Avaliação e evoluções por ciclo" icon={PenLine}>
+          {prontuarioLoading ? (
+            <ActivityIndicator color="#095742" />
+          ) : !prontuario ? (
+            <Text className="text-sm text-muted-foreground">Prontuário indisponível.</Text>
+          ) : (
+            <View className="gap-3">
+              {prontuario.assessmentRecords.length > 0 ? (
+                <View className="rounded-xl border border-primary/20 bg-primary/5 p-4 gap-2">
+                  <Text className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    Avaliação inicial
+                  </Text>
+                  {prontuario.assessmentRecords.map((record) => (
+                    <View key={record.id} className="gap-1">
+                      <Text className="text-sm font-medium text-foreground">
+                        {recordTypeLabels[record.record_type] ?? record.record_type}
+                      </Text>
+                      <Text className="text-xs text-muted-foreground leading-relaxed">
+                        {prontuarioContentPreview(record.content_richtext)}
+                      </Text>
+                      <Text className="text-[10px] text-muted-foreground">
+                        {formatDate(record.recorded_at ?? record.created_at)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : data.evaluation_pending ? (
+                <Text className="text-sm text-muted-foreground">
+                  Avaliação inicial ainda não registrada no prontuário.
+                </Text>
+              ) : null}
+
+              {prontuario.cycles.length === 0 ? (
+                <Text className="text-sm text-muted-foreground">Nenhum ciclo de tratamento registrado.</Text>
+              ) : (
+                prontuario.cycles.map((cycle, index) => (
+                  <ProntuarioCycleSection
+                    key={cycle.cycleId}
+                    cycleNumber={cycle.cycleNumber}
+                    status={cycle.status}
+                    defaultOpen={index === 0}
+                    records={cycle.records.map((r) => ({
+                      id: r.id,
+                      session_number: r.session_number,
+                      content_richtext: r.content_richtext,
+                      recorded_at: r.recorded_at,
+                      created_at: r.created_at,
+                    }))}
+                  />
+                ))
+              )}
+            </View>
+          )}
+        </CardSection>
       </ScrollView>
     </SafeAreaView>
   )
