@@ -15,7 +15,6 @@ interface AgendaWeekSessionBlockProps {
   columnIndex?: number
   columnCount?: number
   hourHeightPx?: number
-  compact?: boolean
 }
 
 export function AgendaWeekSessionBlock({
@@ -23,7 +22,6 @@ export function AgendaWeekSessionBlock({
   columnIndex = 0,
   columnCount = 1,
   hourHeightPx = AGENDA_WEEK_HOUR_HEIGHT_PX,
-  compact = false,
 }: AgendaWeekSessionBlockProps) {
   const navigate = useNavigate()
   const cfg = getAgendaStatusConfig(session.displayStatus)

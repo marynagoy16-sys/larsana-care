@@ -161,7 +161,6 @@ export function AgendaWeekTimeline({
     hourHeightPx: number,
     totalHeight: number,
     nowTop: number | null,
-    compact: boolean,
   ) => (
     <div className="flex w-full min-w-0" style={{ minHeight: totalHeight }}>
       <div className="relative w-9 shrink-0 sm:w-11" style={{ height: totalHeight }}>
@@ -243,7 +242,6 @@ export function AgendaWeekTimeline({
                   columnIndex={columnLayout?.columnIndex}
                   columnCount={columnLayout?.columnCount}
                   hourHeightPx={hourHeightPx}
-                  compact={compact}
                 />
               )
             })}
@@ -268,7 +266,6 @@ export function AgendaWeekTimeline({
             AGENDA_WEEK_MOBILE_HOUR_HEIGHT_PX,
             totalHeightMobile,
             nowTopMobile,
-            true,
           )}
         </div>
         <div className="hidden sm:block">
@@ -276,7 +273,6 @@ export function AgendaWeekTimeline({
             AGENDA_WEEK_HOUR_HEIGHT_PX,
             totalHeightDesktop,
             nowTopDesktop,
-            false,
           )}
         </div>
 
