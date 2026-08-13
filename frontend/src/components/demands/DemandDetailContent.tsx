@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
   ArrowLeft,
-  Calculator,
   CheckCircle2,
   RefreshCw,
   User,
@@ -239,46 +238,6 @@ export function AvaliacaoSections({
 
       <CascadeItem>
         <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-            <Calculator size={16} className="text-muted-foreground" />
-            <h3 className="font-semibold text-sm">Simulações de ganhos</h3>
-          </div>
-          <div className="p-5 space-y-5">
-            {loading ? (
-              <Skeleton className="h-32 w-full" />
-            ) : simulation ? (
-              simulation.rows.map((row) => (
-                <div key={row.weeklyFrequency} className="space-y-2">
-                  <p className="text-sm font-semibold">{row.label}</p>
-                  <div className="pl-3 space-y-1 text-sm text-muted-foreground">
-                    <p>
-                      <span className="text-foreground font-medium">1º ciclo:</span>{' '}
-                      ({formatCurrency(row.cycle1RepassePerSessionCents)} × {row.sessionsPerCycle}) ={' '}
-                      <strong className="text-foreground tabular-nums">
-                        {formatCurrency(row.cycle1TotalCents)}
-                      </strong>
-                    </p>
-                    <p>
-                      <span className="text-foreground font-medium">2º ciclo:</span>{' '}
-                      ({formatCurrency(row.cycle2RepassePerSessionCents)} × {row.sessionsPerCycle}) ={' '}
-                      <strong className="text-foreground tabular-nums">
-                        {formatCurrency(row.cycle2TotalCents)}
-                      </strong>
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Não foi possível calcular: verifique região e nível do paciente na tabela vigente.
-              </p>
-            )}
-          </div>
-        </div>
-      </CascadeItem>
-
-      <CascadeItem>
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
             <h3 className="font-semibold text-sm">Remuneração da avaliação</h3>
           </div>
@@ -384,35 +343,6 @@ export function ContinuidadeSections({
               desnecessário.
             </li>
           </ul>
-        </div>
-      </CascadeItem>
-
-      <CascadeItem>
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-            <Calculator size={16} className="text-muted-foreground" />
-            <h3 className="font-semibold text-sm">Simulações de ganhos</h3>
-          </div>
-          <div className="p-5">
-            {loading ? (
-              <Skeleton className="h-16 w-full" />
-            ) : simulation ? (
-              <div className="space-y-2">
-                <p className="text-sm font-semibold">{simulation.row.label}</p>
-                <p className="text-sm text-muted-foreground pl-3">
-                  <span className="text-foreground font-medium">Ciclo {simulation.row.sessionsPerCycle}:</span>{' '}
-                  ({formatCurrency(simulation.row.cycle2RepassePerSessionCents)} × {simulation.row.sessionsPerCycle}) ={' '}
-                  <strong className="text-foreground tabular-nums">
-                    {formatCurrency(simulation.row.cycle2TotalCents)}
-                  </strong>
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Não foi possível calcular: verifique região e nível do paciente na tabela vigente.
-              </p>
-            )}
-          </div>
         </div>
       </CascadeItem>
     </>

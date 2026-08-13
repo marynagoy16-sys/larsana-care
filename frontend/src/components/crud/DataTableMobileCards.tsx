@@ -41,6 +41,7 @@ interface DataTableMobileCardsProps<T> {
   getAvatarLabel?: (row: T) => string
   variant?: 'default' | 'compact'
   flush?: boolean
+  grouped?: boolean
   getTags?: (row: T) => ReactNode
 }
 
@@ -70,6 +71,7 @@ export function DataTableMobileCards<T>({
   getAvatarLabel,
   variant = 'default',
   flush = false,
+  grouped = false,
   getTags,
 }: DataTableMobileCardsProps<T>) {
   const primaryCol = resolveColumn(columns, 'mobilePrimary') ?? columns.find((c) => !c.mobileHidden) ?? columns[0]
@@ -77,11 +79,19 @@ export function DataTableMobileCards<T>({
   const badgeCol = resolveColumn(columns, 'mobileBadge')
   const metaCols = columns.filter((c) => c.mobileMeta && !c.mobileHidden)
 
+  const useGroupedList = grouped && variant === 'compact' && !flush
+
   return (
     <div
       className={cn(
         'md:hidden',
-        flush ? '' : variant === 'compact' ? 'space-y-2' : 'space-y-2.5',
+        useGroupedList
+          ? 'overflow-hidden rounded-xl border border-border bg-card shadow-none'
+          : flush
+            ? ''
+            : variant === 'compact'
+              ? 'space-y-2'
+              : 'space-y-2.5',
       )}
     >
       {data.map((row) => {
@@ -103,11 +113,17 @@ export function DataTableMobileCards<T>({
                 }
               }}
               className={cn(
-                'flex min-h-[4.25rem] items-center gap-3 bg-card px-4 transition-colors',
-                flush ? 'rounded-none border-0 py-4' : 'rounded-xl border py-3',
+                'flex min-h-[4.25rem] items-center gap-3 bg-card px-4 transition-colors shadow-none',
+                useGroupedList
+                  ? 'border-b border-border py-3.5 last:border-b-0'
+                  : flush
+                    ? 'rounded-none border-0 py-4'
+                    : 'rounded-xl border py-3',
                 onRowClick && 'cursor-pointer active:bg-muted/40',
-                !flush && (isSelected ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border'),
-                flush && isSelected && 'bg-primary/5',
+                !flush &&
+                  !useGroupedList &&
+                  (isSelected ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border'),
+                (flush || useGroupedList) && isSelected && 'bg-primary/5',
               )}
             >
               {selectable && onToggle && (
@@ -181,7 +197,7 @@ export function DataTableMobileCards<T>({
               }
             }}
             className={cn(
-              'rounded-xl border bg-card overflow-hidden transition-colors',
+              'overflow-hidden rounded-xl border border-border bg-card shadow-none transition-colors',
               onRowClick && 'cursor-pointer active:bg-muted/40',
               isSelected ? 'border-primary/50 ring-1 ring-primary/20' : 'border-border',
             )}

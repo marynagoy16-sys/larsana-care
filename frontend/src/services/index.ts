@@ -10,7 +10,7 @@ export const chargesService = createCrudService('charges')
 export const transfersService = createCrudService('transfers')
 export const transferQueueService = createCrudService('transfer_queue')
 export { demandsService } from '@/services/demands'
-export { listPPPatients, getPPPatientDetail, getPPProfessionalCrefito } from '@/services/ppPatients'
+export { listPPPatients, getPPPatientDetail, getPPPatientProntuario, getPPProfessionalCrefito } from '@/services/ppPatients'
 export type { DemandListItem } from '@/services/demands'
 export { listCareCycles } from '@/services/cycles'
 export type { CycleListItem } from '@/services/cycles'

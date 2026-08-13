@@ -30,7 +30,9 @@ const PPEvolucaoPage = lazy(() =>
 )
 const PPEvolucoesPage = lazyPP('PPEvolucoesPage')
 const PPEvolucaoNovaPage = lazyPP('PPEvolucaoNovaPage')
-const PPRepassesPage = lazyPP('PPRepassesPage')
+const PPRepassesPage = lazy(() =>
+  import('@/pages/profissional/account/PPRepassesPage').then((m) => ({ default: m.PPRepassesPage })),
+)
 const PPRepasseDetailPage = lazyPP('PPRepasseDetailPage')
 const PPPacientesPage = lazy(() =>
   import('@/pages/profissional/patients/PPPacientesPage').then((m) => ({ default: m.PPPacientesPage })),
@@ -47,10 +49,18 @@ const PPAvaliacaoDetailPage = lazy(() =>
 const PPContaPage = lazyPP('PPContaPage')
 const PPAparenciaPage = lazyPP('PPAparenciaPage')
 const PPCredenciamentoPage = lazyPP('PPCredenciamentoPage')
-const PPPerfilPage = lazyPP('PPPerfilPage')
-const PPSimuladorPage = lazyPP('PPSimuladorPage')
-const PPCartaoPage = lazyPP('PPCartaoPage')
-const PPNotificacoesPage = lazyPP('PPNotificacoesPage')
+const PPNotificacoesPage = lazy(() =>
+  import('@/pages/profissional/account/PPNotificacoesPage').then((m) => ({ default: m.PPNotificacoesPage })),
+)
+const PPSimuladorPage = lazy(() =>
+  import('@/pages/profissional/account/PPSimuladorPage').then((m) => ({ default: m.PPSimuladorPage })),
+)
+const PPCartaoPage = lazy(() =>
+  import('@/pages/profissional/account/PPCartaoPage').then((m) => ({ default: m.PPCartaoPage })),
+)
+const PPPerfilPage = lazy(() =>
+  import('@/pages/profissional/account/PPPerfilPage').then((m) => ({ default: m.PPPerfilPage })),
+)
 import { AcademyLessonPage } from '@/pages/profissional/academy/AcademyLessonPage'
 const AcademyHubPage = lazy(() => import('@/pages/profissional/academy/AcademyHubPage').then((m) => ({ default: m.AcademyHubPage })))
 const AcademyModulePage = lazy(() => import('@/pages/profissional/academy/AcademyModulePage').then((m) => ({ default: m.AcademyModulePage })))

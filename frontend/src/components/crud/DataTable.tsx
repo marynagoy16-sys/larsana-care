@@ -25,6 +25,7 @@ interface DataTableProps<T extends Record<string, unknown>> {
   getRowKey: (row: T) => string
   mobileVariant?: 'default' | 'compact'
   mobileFlush?: boolean
+  mobileGrouped?: boolean
   getMobileAvatarLabel?: (row: T) => string
   getMobileTags?: (row: T) => ReactNode
 }
@@ -38,6 +39,7 @@ export function DataTable<T extends Record<string, unknown>>({
   getRowKey,
   mobileVariant = 'default',
   mobileFlush = false,
+  mobileGrouped = false,
   getMobileAvatarLabel,
   getMobileTags,
 }: DataTableProps<T>) {
@@ -67,6 +69,7 @@ export function DataTable<T extends Record<string, unknown>>({
         onRowClick={onRowClick}
         variant={mobileVariant}
         flush={mobileFlush}
+        grouped={mobileGrouped}
         getAvatarLabel={getMobileAvatarLabel}
         getTags={getMobileTags}
       />

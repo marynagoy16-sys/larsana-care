@@ -306,6 +306,14 @@ export function getPageTitle(pathname: string): string {
     pathname === '/paciente/conta/aparencia' ||
     pathname === '/paciente/conta/perfil' ||
     pathname === '/profissional/conta/aparencia' ||
+    pathname === '/profissional/perfil' ||
+    pathname === '/profissional/notificacoes' ||
+    pathname === '/profissional/cartao' ||
+    pathname === '/profissional/simulador' ||
+    pathname === '/profissional/repasses' ||
+    pathname === '/profissional/credenciamento' ||
+    pathname === '/profissional/credenciamento/contrato' ||
+    pathname === '/profissional/evolucoes' ||
     pathname === '/profissional/inicio'
   ) {
     return ''

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, ArrowLeft, Calculator, CheckCircle, MapPin, Wallet, X, XCircle } from 'lucide-react-native'
+import { AlertTriangle, ArrowLeft, CheckCircle, MapPin, Wallet, X, XCircle } from 'lucide-react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import {
@@ -285,36 +285,6 @@ export default function DemandDetailScreen() {
             <Text className="text-xs leading-5 text-amber-900">• Atente-se à localização do paciente.</Text>
             <Text className="text-xs leading-5 text-amber-900">• Ao aceitar o paciente, verifique disponibilidade de horário na sua agenda para evitar remanejo desnecessário.</Text>
           </View>
-        </CardSection>
-
-        <CardSection title="Simulações de ganhos" icon={Calculator}>
-          {simulation ? (
-            <View className="gap-4">
-              {isAvaliacao && (simulation as any).rows.map((row: any) => (
-                <View key={row.weeklyFrequency} className="gap-1">
-                  <Text className="text-sm font-semibold text-foreground">{row.label}</Text>
-                  <Text className="text-xs text-muted-foreground">
-                    1º ciclo: ({formatCurrency(row.cycle1RepassePerSessionCents)} × {row.sessionsPerCycle}) = <Text className="font-bold text-foreground">{formatCurrency(row.cycle1TotalCents)}</Text>
-                  </Text>
-                  <Text className="text-xs text-muted-foreground">
-                    2º ciclo: ({formatCurrency(row.cycle2RepassePerSessionCents)} × {row.sessionsPerCycle}) = <Text className="font-bold text-foreground">{formatCurrency(row.cycle2TotalCents)}</Text>
-                  </Text>
-                </View>
-              ))}
-              {!isAvaliacao && (
-                <View className="gap-1">
-                  <Text className="text-sm font-semibold text-foreground">{(simulation as any).row.label}</Text>
-                  <Text className="text-xs text-muted-foreground">
-                    Ciclo {(simulation as any).row.sessionsPerCycle}: ({formatCurrency((simulation as any).row.cycle2RepassePerSessionCents)} × {(simulation as any).row.sessionsPerCycle}) = <Text className="font-bold text-foreground">{formatCurrency((simulation as any).row.cycle2TotalCents)}</Text>
-                  </Text>
-                </View>
-              )}
-            </View>
-          ) : (
-            <Text className="text-sm text-muted-foreground">
-              Não foi possível calcular: verifique região e nível do paciente na tabela vigente.
-            </Text>
-          )}
         </CardSection>
 
         {isAvaliacao && (

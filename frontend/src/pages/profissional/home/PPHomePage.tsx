@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight, MapPin, Trophy } from 'lucide-react'
+import { ChevronRight, ClipboardList, MapPin, Trophy } from 'lucide-react'
 import { HomeAcademyBanner } from '@/components/profissional/home/HomeAcademyBanner'
 import { HomeDayKpiRow } from '@/components/profissional/home/HomeDayKpiRow'
 import { HomePendingEvolutionsList } from '@/components/profissional/home/HomePendingEvolutionsList'
@@ -73,6 +73,35 @@ function HomeSectionTitle({
       </h2>
       {action}
     </div>
+  )
+}
+
+function HomePendingEvolutionsCard({
+  count,
+  onClick,
+}: {
+  count: number
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-xl border border-orange-200 bg-orange-50/80 px-4 py-3.5 text-left transition-colors hover:bg-orange-50 active:bg-orange-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:border-orange-900/40 dark:bg-orange-950/20 dark:hover:bg-orange-950/30"
+    >
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-orange-500/15 text-orange-700 dark:text-orange-300">
+        <ClipboardList className="size-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground">Evoluções pendentes</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {count === 1
+            ? '1 terapia aguardando registro (prazo 24h)'
+            : `${count} terapias aguardando registro (prazo 24h)`}
+        </p>
+      </div>
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+    </button>
   )
 }
 
@@ -353,6 +382,15 @@ export function PPHomePage() {
               </div>
             </div>
           </CascadeItem>
+
+          {pendingEvolutionsCount > 0 ? (
+            <CascadeItem className="lg:hidden">
+              <HomePendingEvolutionsCard
+                count={pendingEvolutionsCount}
+                onClick={() => navigate('/profissional/evolucoes')}
+              />
+            </CascadeItem>
+          ) : null}
 
           <CascadeItem>
             <HomeEvolutionCard

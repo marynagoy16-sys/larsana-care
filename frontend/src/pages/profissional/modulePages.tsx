@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EntityListPage } from '@/components/crud/EntityListPage'
 import { CrudDrawer } from '@/components/crud/CrudDrawer'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,19 +12,14 @@ import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
 import { sanitizeRichText } from '@/lib/sanitize'
-import { formatCurrency, formatDateTime } from '@/lib/formatters'
-import { medicalRecordsService, transfersService, notificationsService } from '@/services/index'
+import { medicalRecordsService, transfersService } from '@/services/index'
 import {
   getEvolutionSessionContext,
-  listPendingEvolutionsForPp,
-  pendingEvolutionDeadlineLabel,
   ppEvolutionsQueryKeys,
-  type PendingEvolutionRow,
 } from '@/services/ppEvolutions'
 import { getCurrentProfessional } from '@/services/professionals'
 import { getPPProfessionalCrefito } from '@/services/ppPatients'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
-import { supabase } from '@/lib/supabase'
 
 export { PPAgendaPage } from '@/pages/profissional/agenda/PPAgendaPage'
 export { PPHomePage } from '@/pages/profissional/home/PPHomePage'
@@ -33,51 +27,7 @@ export { PPSessionDetailPage } from '@/pages/profissional/agenda/PPSessionDetail
 
 export { PPDemandsPage } from '@/pages/profissional/demands/PPDemandsPage'
 
-export function PPEvolucoesPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage
-      title="Evoluções pendentes"
-      description="Sessões realizadas aguardando registro clínico (prazo 24h)"
-      queryKey={ppEvolutionsQueryKeys.pending}
-      queryFn={listPendingEvolutionsForPp}
-      onRowClick={(r) => navigate(`/profissional/evolucao/nova?session=${r.id}`)}
-      columns={[
-        {
-          key: 'patient',
-          header: 'Paciente',
-          cell: (r) => {
-            const row = r as unknown as PendingEvolutionRow
-            return row.care_cycles?.patients?.full_name ?? '—'
-          },
-        },
-        {
-          key: 'session',
-          header: 'Sessão',
-          cell: (r) => {
-            const row = r as unknown as PendingEvolutionRow
-            const cycle = row.care_cycles?.cycle_number
-            return cycle != null ? `Ciclo ${cycle} · Sessão #${row.session_number}` : `#${row.session_number}`
-          },
-        },
-        {
-          key: 'date',
-          header: 'Realizada em',
-          cell: (r) => {
-            const row = r as unknown as PendingEvolutionRow
-            const ref = row.check_out_at ?? row.scheduled_at
-            return ref ? formatDateTime(ref) : '—'
-          },
-        },
-        {
-          key: 'deadline',
-          header: 'Prazo',
-          cell: (r) => pendingEvolutionDeadlineLabel(r as unknown as PendingEvolutionRow),
-        },
-      ]}
-    />
-  )
-}
+export { PPEvolucoesPage } from '@/pages/profissional/evolution/PPEvolucoesPage'
 
 const PP_EVOLUTION_FORM_ID = 'pp-evolution-form'
 
@@ -197,15 +147,6 @@ export function PPEvolucaoNovaPage() {
   )
 }
 
-export function PPRepassesPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage title="Repasses" queryKey={['pp', 'transfers']} queryFn={() => transfersService.list('id, pp_transfer_amount_cents, status')}
-      onRowClick={(r) => navigate(`/profissional/repasses/${r.id}`)}
-      columns={[{ key: 'amount', header: 'Valor', cell: (r) => formatCurrency(Number(r.pp_transfer_amount_cents)) }, { key: 'status', header: 'Status', cell: (r) => String(r.status) }]} />
-  )
-}
-
 export function PPRepasseDetailPage() {
   return <GenericDetailPage title="Repasse" backPath="/profissional/repasses" queryKey={['pp', 'transfers']} queryFn={(id) => transfersService.getById(id)}
     fields={[{ key: 'pp_transfer_amount_cents', label: 'Valor', format: 'currency' }, { key: 'status', label: 'Status' }]} />
@@ -217,65 +158,9 @@ export { PPAvaliacoesPage } from '@/pages/profissional/assessments/PPAvaliacoesP
 export { PPAvaliacaoDetailPage } from '@/pages/profissional/assessments/PPAvaliacaoDetailPage'
 export { PPContaPage } from '@/pages/profissional/account/PPContaPage'
 export { PPAparenciaPage } from '@/pages/profissional/account/PPAparenciaPage'
+export { PPPerfilPage } from '@/pages/profissional/account/PPPerfilPage'
+export { PPNotificacoesPage } from '@/pages/profissional/account/PPNotificacoesPage'
+export { PPRepassesPage } from '@/pages/profissional/account/PPRepassesPage'
+export { PPSimuladorPage } from '@/pages/profissional/account/PPSimuladorPage'
+export { PPCartaoPage } from '@/pages/profissional/account/PPCartaoPage'
 export { PPCredenciamentoPage } from '@/pages/profissional/credentialing/PPCredenciamentoPage'
-
-export function PPPerfilPage() {
-  return (
-    <EntityListPage
-      title="Perfil"
-      description="Seus dados profissionais e credenciais"
-      queryKey={['pp', 'profile']}
-      queryFn={async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return { data: [], count: 0 }
-        const { data, error } = await supabase.from('professionals').select('id, full_name, profession, credentialing_status').eq('user_id', user.id)
-        if (error) throw error
-        return { data: (data ?? []) as (Record<string, unknown> & { id: string })[], count: data?.length ?? 0 }
-      }}
-      searchable={false}
-      columns={[
-        { key: 'name', header: 'Nome', cell: (r) => String(r.full_name) },
-        { key: 'profession', header: 'Profissão', cell: (r) => String(r.profession) },
-        { key: 'status', header: 'Credenciamento', cell: (r) => String(r.credentialing_status) },
-      ]}
-    />
-  )
-}
-
-export function PPSimuladorPage() {
-  return (
-    <EntityListPage
-      title="Simulador de repasse"
-      description="Histórico de repasses para estimativa de ganhos"
-      queryKey={['pp', 'simulador']}
-      queryFn={() => transfersService.list('id, pp_transfer_amount_cents, status, created_at')}
-      columns={[
-        { key: 'amount', header: 'Valor', cell: (r) => formatCurrency(Number(r.pp_transfer_amount_cents)) },
-        { key: 'status', header: 'Status', cell: (r) => String(r.status) },
-        { key: 'date', header: 'Data', cell: (r) => formatDateTime(String(r.created_at)) },
-      ]}
-    />
-  )
-}
-
-export function PPCartaoPage() {
-  return (
-    <EntityListPage
-      title="Cartão de visita"
-      description="Informações exibidas no cartão digital"
-      queryKey={['pp', 'cartao']}
-      queryFn={async () => ({ data: [], count: 0 })}
-      searchable={false}
-      emptyMessage="Cartão digital em breve."
-      columns={[
-        { key: 'field', header: 'Campo', cell: () => '—' },
-        { key: 'value', header: 'Valor', cell: () => '—' },
-      ]}
-    />
-  )
-}
-
-export function PPNotificacoesPage() {
-  return <EntityListPage title="Notificações" queryKey={['pp', 'notifications']} queryFn={() => notificationsService.list()}
-    columns={[{ key: 'title', header: 'Título', cell: (r) => String(r.title) }, { key: 'date', header: 'Data', cell: (r) => formatDateTime(String(r.created_at)) }]} />
-}

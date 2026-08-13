@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Bell,
   ChevronRight,
+  ClipboardList,
   CreditCard,
   LogOut,
   Moon,
@@ -19,7 +20,7 @@ import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPage
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { getThemeDescription } from '@/pages/paciente/PacienteAparenciaPage'
-import { supabase } from '@/lib/supabase'
+import { listPendingEvolutionsForPp, ppEvolutionsQueryKeys } from '@/services/ppEvolutions'
 import { cn } from '@/lib/utils'
 
 function AccountLinkRow({
@@ -54,7 +55,7 @@ function AccountLinkRow({
 }
 
 export function PPContaPage() {
-  const { profile, signOut } = useAuth()
+  const { signOut } = useAuth()
   const { theme, resolvedTheme } = useTheme()
   const [isDesktop, setIsDesktop] = useState<boolean | null>(() => {
     if (typeof window === 'undefined') return null
@@ -69,26 +70,23 @@ export function PPContaPage() {
     return () => mq.removeEventListener('change', sync)
   }, [])
 
-  const { data: professional, isLoading } = useQuery({
-    queryKey: ['pp', 'profile'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return null
-      const { data, error } = await supabase
-        .from('professionals')
-        .select('id, full_name, profession, credentialing_status')
-        .eq('user_id', user.id)
-        .maybeSingle()
-      if (error) throw error
-      return data
-    },
-  })
-
-  const displayName = professional?.full_name ?? profile?.full_name ?? 'Profissional'
   const themeDescription = getThemeDescription(
     theme as 'light' | 'dark' | 'system' | undefined,
     resolvedTheme,
   )
+
+  const { data: pendingEvolutions } = useQuery({
+    queryKey: ppEvolutionsQueryKeys.pending,
+    queryFn: listPendingEvolutionsForPp,
+  })
+
+  const pendingEvolutionCount = pendingEvolutions?.count ?? 0
+  const pendingEvolutionsDescription =
+    pendingEvolutionCount > 0
+      ? pendingEvolutionCount === 1
+        ? '1 terapia aguardando registro (prazo 24h)'
+        : `${pendingEvolutionCount} terapias aguardando registro (prazo 24h)`
+      : 'Terapias realizadas aguardando registro clínico'
 
   if (isDesktop === null) return null
   if (isDesktop) return <Navigate to="/profissional/perfil" replace />
@@ -96,21 +94,6 @@ export function PPContaPage() {
   return (
     <CrudScrollPageLayout>
       <div className="space-y-4 pb-8">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <User className="size-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-lg font-bold text-foreground truncate">{displayName}</p>
-              <p className="text-sm text-muted-foreground truncate">{profile?.email ?? '—'}</p>
-              {professional?.profession ? (
-                <p className="text-sm text-muted-foreground mt-0.5">{professional.profession}</p>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <AccountLinkRow
             to="/profissional/evolucao"
@@ -124,6 +107,13 @@ export function PPContaPage() {
             label="Meus pacientes"
             description="Prontuários e ciclos de tratamento"
             icon={Users}
+            className="border-b border-border"
+          />
+          <AccountLinkRow
+            to="/profissional/evolucoes"
+            label="Evoluções pendentes"
+            description={pendingEvolutionsDescription}
+            icon={ClipboardList}
             className="border-b border-border"
           />
           <AccountLinkRow
@@ -184,10 +174,6 @@ export function PPContaPage() {
           <LogOut className="size-4" />
           Sair
         </Button>
-
-        {isLoading ? (
-          <p className="text-center text-sm text-muted-foreground">Carregando dados…</p>
-        ) : null}
       </div>
     </CrudScrollPageLayout>
   )

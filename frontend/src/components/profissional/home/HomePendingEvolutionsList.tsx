@@ -37,7 +37,7 @@ export function HomePendingEvolutionsList({ items }: HomePendingEvolutionsListPr
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{patientName}</p>
               <p className="text-xs text-muted-foreground">
-                {cycle != null ? `Ciclo ${cycle} · Sessão #${row.session_number}` : `Sessão #${row.session_number}`}
+                {cycle != null ? `Ciclo ${cycle} · Terapia #${row.session_number}` : `Terapia #${row.session_number}`}
               </p>
             </div>
             <Badge

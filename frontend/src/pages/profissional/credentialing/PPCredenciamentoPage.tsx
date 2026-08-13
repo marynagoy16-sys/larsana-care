@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2 } from 'lucide-react'
+import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
 import { Button } from '@/components/ui/button'
 import { CredentialingStatusBanner } from '@/components/credentialing/CredentialingStatusBanner'
 import { CredentialingStepHint, CredentialingStepper } from '@/components/credentialing/CredentialingStepper'
@@ -281,7 +282,12 @@ export function PPCredenciamentoPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col gap-4 pb-[var(--shell-gap)] pr-[var(--shell-gap)] lg:flex-row">
+    <>
+      <div className="lg:hidden">
+        <PPAccountSubpageHeader title="Credenciamento" />
+      </div>
+
+      <div className="flex h-full min-h-0 w-full flex-col gap-4 px-[var(--shell-gap)] pb-[var(--bottom-nav-clearance)] lg:flex-row lg:px-0 lg:pb-[var(--shell-gap)] lg:pr-[var(--shell-gap)]">
       {/* Sidebar */}
       <aside className="flex shrink-0 flex-col gap-4 border-b bg-muted/10 p-4 lg:w-72 lg:border-b-0 lg:p-5">
         <CredentialingStatusBanner snapshot={snapshot} compact />
@@ -309,7 +315,7 @@ export function PPCredenciamentoPage() {
       </aside>
 
       {/* Painel direito — header/footer fixos, corpo scrollável */}
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
         <header className="shrink-0 border-b bg-muted/20 px-5 py-4 lg:px-8">
           <CredentialingStepHint step={step} readOnly={readOnly} asTitle />
         </header>
@@ -354,5 +360,6 @@ export function PPCredenciamentoPage() {
         )}
       </section>
     </div>
+    </>
   )
 }

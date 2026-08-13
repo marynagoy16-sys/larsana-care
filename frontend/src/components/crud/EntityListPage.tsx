@@ -45,6 +45,7 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   exportFileName?: string
   mobileVariant?: 'default' | 'compact'
   mobileFlush?: boolean
+  mobileGrouped?: boolean
   getMobileAvatarLabel?: (row: T) => string
   getMobileTags?: (row: T) => ReactNode
   showPagination?: boolean
@@ -101,6 +102,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   exportFileName,
   mobileVariant,
   mobileFlush,
+  mobileGrouped,
   getMobileAvatarLabel,
   getMobileTags,
   showPagination = true,
@@ -297,6 +299,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
                 emptyMessage={emptyMessage}
                 mobileVariant={mobileVariant}
                 mobileFlush={mobileFlush}
+                mobileGrouped={mobileGrouped}
                 getMobileAvatarLabel={getMobileAvatarLabel}
                 getMobileTags={getMobileTags}
               />
