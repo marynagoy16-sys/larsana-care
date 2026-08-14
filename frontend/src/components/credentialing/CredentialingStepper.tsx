@@ -109,15 +109,7 @@ export function CredentialingStepper({
   )
 }
 
-export function CredentialingStepHint({
-  step,
-  readOnly,
-  asTitle,
-}: {
-  step: CredentialingStepId
-  readOnly?: boolean
-  asTitle?: boolean
-}) {
+export function getCredentialingStepDescription(step: CredentialingStepId, readOnly?: boolean): string {
   const hints: Record<CredentialingStepId, string> = {
     dados: readOnly
       ? 'Dados pessoais e profissionais cadastrados.'
@@ -138,21 +130,33 @@ export function CredentialingStepHint({
       ? 'Termos aceitos e contrato LRS-PROF.'
       : 'Leia e aceite os termos e o contrato LRS-PROF para enviar à Larsana.',
   }
+  return hints[step]
+}
 
+export function CredentialingStepHint({
+  step,
+  readOnly,
+  asTitle,
+}: {
+  step: CredentialingStepId
+  readOnly?: boolean
+  asTitle?: boolean
+}) {
   const label = CREDENTIALING_STEPS.find((s) => s.id === step)?.label ?? step
+  const description = getCredentialingStepDescription(step, readOnly)
 
   if (asTitle) {
     return (
       <div>
         <h3 className="font-display text-lg font-semibold">{label}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{hints[step]}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </div>
     )
   }
 
   return (
     <p className="text-sm text-muted-foreground">
-      Etapa atual: <strong className="text-foreground">{label}</strong>. {hints[step]}
+      Etapa atual: <strong className="text-foreground">{label}</strong>. {description}
     </p>
   )
 }

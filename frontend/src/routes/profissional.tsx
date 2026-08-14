@@ -36,12 +36,17 @@ const PPEvolucaoNovaPage = lazyPP('PPEvolucaoNovaPage')
 const PPRepassesPage = lazy(() =>
   import('@/pages/profissional/account/PPRepassesPage').then((m) => ({ default: m.PPRepassesPage })),
 )
-const PPRepasseDetailPage = lazyPP('PPRepasseDetailPage')
+const PPRepasseDetailPage = lazy(() =>
+  import('@/pages/profissional/account/PPRepasseDetailPage').then((m) => ({ default: m.PPRepasseDetailPage })),
+)
 const PPPacientesPage = lazy(() =>
   import('@/pages/profissional/patients/PPPacientesPage').then((m) => ({ default: m.PPPacientesPage })),
 )
 const PPPacienteDetailPage = lazy(() =>
   import('@/pages/profissional/patients/PPPacienteDetailPage').then((m) => ({ default: m.PPPacienteDetailPage })),
+)
+const PPPacienteAssessmentPage = lazy(() =>
+  import('@/pages/profissional/patients/PPPacienteAssessmentPage').then((m) => ({ default: m.PPPacienteAssessmentPage })),
 )
 const PPAvaliacoesPage = lazy(() =>
   import('@/pages/profissional/assessments/PPAvaliacoesPage').then((m) => ({ default: m.PPAvaliacoesPage })),
@@ -89,6 +94,7 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'evolucao/:id', element: ppRoute(<PPEvolucoesPage />) },
       { path: 'pacientes', element: ppRoute(<PPPacientesPage />) },
       { path: 'pacientes/:id', element: ppRoute(<PPPacienteDetailPage />) },
+      { path: 'pacientes/:id/avaliacao', element: ppRoute(<PPPacienteAssessmentPage />) },
       { path: 'avaliacoes', element: ppRoute(<PPAvaliacoesPage />) },
       { path: 'avaliacoes/:id', element: ppRoute(<PPAvaliacaoDetailPage />) },
       { path: 'repasses', element: ppRoute(<PPRepassesPage />) },

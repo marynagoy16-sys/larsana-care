@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -83,13 +83,24 @@ async function getPPAssessmentDetail(id: string): Promise<AssessmentDetail | nul
 export function PPAvaliacaoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const goBack = () => navigate('/profissional/avaliacoes')
+  const location = useLocation()
+  const fromPatient = (location.state as { from?: string; patientId?: string } | null)?.from === 'patient'
+  const patientIdFromState = (location.state as { patientId?: string } | null)?.patientId
 
   const { data: assessment, isLoading } = useQuery({
     queryKey: ['pp', 'assessments', id],
     queryFn: () => getPPAssessmentDetail(id!),
     enabled: !!id,
   })
+
+  const goBack = () => {
+    const patientId = assessment?.patient_id ?? patientIdFromState
+    if (fromPatient && patientId) {
+      navigate(`/profissional/pacientes/${patientId}`)
+      return
+    }
+    navigate('/profissional/avaliacoes')
+  }
 
   const { data: professional } = useQuery({
     queryKey: ['pp', 'current_professional'],

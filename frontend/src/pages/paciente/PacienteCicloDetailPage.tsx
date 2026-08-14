@@ -4,7 +4,7 @@ import { CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CycleSessionsProgress } from '@/components/cycles/CycleSessionsProgress'
 import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
-import { cycleStatusLabels, sessionStatusLabels } from '@/constants/labels'
+import { sessionStatusLabels } from '@/constants/labels'
 import { formatDateTime } from '@/lib/formatters'
 import { loadPatientCycleDetail, patientTreatmentQueryKeys } from '@/services/patientTreatment'
 import { cn } from '@/lib/utils'
@@ -31,7 +31,6 @@ export function PacienteCicloDetailPage() {
     enabled: !!id,
   })
 
-  const statusLabel = cycle ? (cycleStatusLabels[cycle.status] ?? cycle.status) : ''
   const needsPayment = cycle
     ? cycle.status === 'aguardando_pagamento'
       || cycle.payment_status === 'pendente'
@@ -54,8 +53,6 @@ export function PacienteCicloDetailPage() {
           <PacienteEmptyState message="Ciclo não encontrado." />
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">{statusLabel}</p>
-
             {needsPayment && (
               <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/25 p-4">
                 <div className="flex items-start gap-3">
@@ -66,7 +63,7 @@ export function PacienteCicloDetailPage() {
                     <div>
                       <p className="font-semibold text-foreground">Pagamento pendente</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Pague este ciclo para liberar as sessões domiciliares.
+                        Pague este ciclo para liberar as terapias domiciliares.
                       </p>
                     </div>
                     <Button asChild size="sm">
@@ -78,22 +75,28 @@ export function PacienteCicloDetailPage() {
             )}
 
             <section className="rounded-xl border border-border bg-card overflow-hidden">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
+              <div className="space-y-3 px-5 py-4">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">Progresso do ciclo</p>
                   {cycle.professionalName && (
-                    <p className="text-xs text-muted-foreground mt-0.5">Profissional: {cycle.professionalName}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Profissional: {cycle.professionalName}
+                    </p>
                   )}
                 </div>
-                <CycleSessionsProgress done={cycle.completedSessions} total={cycle.session_count} />
+                <CycleSessionsProgress
+                  done={cycle.completedSessions}
+                  total={cycle.session_count}
+                  fullWidth
+                />
               </div>
             </section>
 
             <section className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">Sessões</h3>
+              <h3 className="text-sm font-semibold text-foreground">Terapias</h3>
 
               {cycle.sessions.length === 0 ? (
-                <PacienteEmptyState message="Nenhuma sessão registrada neste ciclo." />
+                <PacienteEmptyState message="Nenhuma terapia registrada neste ciclo." />
               ) : (
                 <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                   {cycle.sessions.map((session) => {
@@ -102,7 +105,7 @@ export function PacienteCicloDetailPage() {
                     return (
                       <div key={session.id} className="flex items-start gap-3 px-4 py-4">
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-foreground">Sessão {session.session_number}</p>
+                          <p className="font-medium text-foreground">Terapia {session.session_number}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {session.scheduled_at
                               ? formatDateTime(session.scheduled_at)

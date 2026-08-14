@@ -29,6 +29,7 @@ import {
   useDemandPricingContext,
 } from '@/components/demands/DemandDetailContent'
 import { demandsService, type AcceptDemandResult } from '@/services/demands'
+import { getDemandSchedulingFollowUp } from '@/services/scheduling'
 import { getCurrentProfessional } from '@/services/professionals'
 import { demandResponsesService } from '@/services/index'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
@@ -74,6 +75,15 @@ export function PPDemandDetailPage() {
     demand,
     professional?.pp_class ?? null,
   )
+
+  const isAssignedToMe =
+    demand?.status === 'alocada' && demand.assigned_professional_id === professional?.id
+
+  const { data: schedulingFollowUp } = useQuery({
+    queryKey: ['pp', 'demand_scheduling_follow_up', id],
+    queryFn: () => getDemandSchedulingFollowUp(id!),
+    enabled: !!id && isAssignedToMe,
+  })
 
   const existingResponse =
     demand?.demand_responses?.find((r) => r.professional_id === professional?.id) ?? null
@@ -206,21 +216,34 @@ export function PPDemandDetailPage() {
                   </p>
                 </div>
                 {existingResponse.response === 'accepted' && (
-                  <Button
-                    size="sm"
-                    disabled={acceptMutation.isPending}
-                    onClick={() => {
-                      if (demand.status === 'aberta' && id) {
-                        acceptMutation.mutate(undefined, {
-                          onSuccess: (result) => navigate(`/profissional/pacientes/${result.patient_id}`),
-                        })
-                        return
-                      }
-                      navigate(`/profissional/pacientes/${demand.patient_id}`)
-                    }}
-                  >
-                    {demand.status === 'aberta' ? 'Concluir alocação e ir ao paciente' : 'Ir para paciente'}
-                  </Button>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    {isAssignedToMe && schedulingFollowUp?.kind === 'needs_slots' && id && (
+                      <Button size="sm" onClick={() => navigate(`/profissional/demandas/${id}/agendar`)}>
+                        Enviar horários ao paciente
+                      </Button>
+                    )}
+                    {isAssignedToMe && schedulingFollowUp?.kind === 'awaiting_patient' && (
+                      <p className="text-sm text-muted-foreground">
+                        Horários enviados — aguardando confirmação da família (prazo de 7 dias).
+                      </p>
+                    )}
+                    <Button
+                      size="sm"
+                      variant={schedulingFollowUp?.kind === 'needs_slots' ? 'outline' : 'default'}
+                      disabled={acceptMutation.isPending}
+                      onClick={() => {
+                        if (demand.status === 'aberta' && id) {
+                          acceptMutation.mutate(undefined, {
+                            onSuccess: (result) => navigate(`/profissional/pacientes/${result.patient_id}`),
+                          })
+                          return
+                        }
+                        navigate(`/profissional/pacientes/${demand.patient_id}`)
+                      }}
+                    >
+                      {demand.status === 'aberta' ? 'Concluir alocação e ir ao paciente' : 'Ir para paciente'}
+                    </Button>
+                  </div>
                 )}
               </div>
             </CascadeItem>

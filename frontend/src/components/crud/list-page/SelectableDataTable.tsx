@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import { MoreVertical, ArrowUpDown } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -11,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { DataTableMobileCards } from '@/components/crud/DataTableMobileCards'
 import { CrudTableSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { CrudEmptyState } from '@/components/crud/CrudEmptyState'
 import { cn } from '@/lib/utils'
 
 export interface SelectableColumn<T> {
@@ -37,6 +39,7 @@ interface SelectableDataTableProps<T extends { id: string }> {
   data: T[]
   isLoading?: boolean
   emptyMessage?: string
+  emptyIcon?: LucideIcon
   selectedIds: Set<string>
   onSelectionChange: (ids: Set<string>) => void
   onRowClick?: (row: T) => void
@@ -52,6 +55,7 @@ export function SelectableDataTable<T extends { id: string }>({
   data,
   isLoading,
   emptyMessage = 'Nenhum registro encontrado.',
+  emptyIcon,
   selectedIds,
   onSelectionChange,
   onRowClick,
@@ -88,11 +92,7 @@ export function SelectableDataTable<T extends { id: string }>({
   }
 
   if (data.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-        {emptyMessage}
-      </div>
-    )
+    return <CrudEmptyState message={emptyMessage} icon={emptyIcon} />
   }
 
   return (

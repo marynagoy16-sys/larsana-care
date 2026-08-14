@@ -1,19 +1,12 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { MapPin, ArrowLeft, ChevronRight, FileText } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
-import { CrudDrawer } from '@/components/crud/CrudDrawer'
-import { Form } from '@/components/ui/form'
-import { FormActions } from '@/components/crud/FormActions'
-import { AssessmentProposalFields } from '@/components/assessments/AssessmentProposalFields'
 import {
   assessmentStatusLabels,
   patientLevelLabels,
@@ -24,19 +17,10 @@ import {
   formatPatientSex,
   resolveDiagnosticHypothesis,
 } from '@/lib/patientDisplay'
-import { getPPPatientDetail, getPPPatientProntuario, getPPProfessionalCrefito } from '@/services/ppPatients'
+import { getPPPatientDetail, getPPPatientProntuario } from '@/services/ppPatients'
+import { getPendingScheduleDemandIdForPatient } from '@/services/scheduling'
 import { PPPatientProntuarioSection } from '@/components/profissional/patients/PPPatientProntuarioSection'
-import { getCurrentProfessional } from '@/services/professionals'
-import { initialAssessmentsService } from '@/services/index'
-import { useCrudMutation } from '@/hooks/useCrudMutation'
-import {
-  assessmentProposalSchema,
-  buildAssessmentProposalDefaults,
-  normalizeWeeklyFrequency,
-  type AssessmentProposalFormValues,
-} from '@/schemas/assessmentProposal'
-
-const ASSESSMENT_FORM_ID = 'pp-assessment-form'
+import { PPPatientSituationBadge } from '@/components/profissional/patients/PPPatientSituationBadge'
 
 const FAMILY_RESPONSE_RESOLVED_STATUSES = new Set(['respondida_sim', 'respondida_nao', 'vencida'])
 
@@ -48,7 +32,6 @@ export function PPPacienteDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const goBack = () => navigate('/profissional/pacientes')
-  const [assessmentOpen, setAssessmentOpen] = useState(false)
   const [showClinicalSummary, setShowClinicalSummary] = useState(false)
 
   const { data: patient, isLoading } = useQuery({
@@ -63,69 +46,15 @@ export function PPPacienteDetailPage() {
     enabled: !!id,
   })
 
-  const { data: professional } = useQuery({
-    queryKey: ['pp', 'current_professional'],
-    queryFn: getCurrentProfessional,
+  const { data: pendingScheduleDemandId } = useQuery({
+    queryKey: ['pp', 'patient_pending_schedule', id],
+    queryFn: () => getPendingScheduleDemandIdForPatient(id!),
+    enabled: !!id,
   })
 
-  const { data: defaultCrefito } = useQuery({
-    queryKey: ['pp', 'crefito'],
-    queryFn: getPPProfessionalCrefito,
-  })
-
-  const form = useForm<AssessmentProposalFormValues>({
-    resolver: zodResolver(assessmentProposalSchema) as never,
-    defaultValues: buildAssessmentProposalDefaults(),
-  })
-
-  const suggestedLevel = form.watch('suggested_patient_level')
-  const levelConfirmed = form.watch('level_confirmed')
-  const showLevelChangeReason = levelConfirmed === false
-
-  const createAssessment = useCrudMutation({
-    mutationFn: async (values: AssessmentProposalFormValues) => {
-      if (!professional?.id || !id) throw new Error('Profissional não encontrado')
-      return initialAssessmentsService.create({
-        patient_id: id,
-        evaluator_professional_id: professional.id,
-        crefito_number: values.crefito_number,
-        clinical_content: values.clinical_content?.trim() || null,
-        suggested_weekly_frequency: normalizeWeeklyFrequency(patient?.suggested_weekly_frequency),
-        proposed_weekly_frequency: values.proposed_weekly_frequency,
-        proposed_session_count: values.proposed_session_count,
-        suggested_patient_level: values.suggested_patient_level,
-        proposed_patient_level: values.suggested_patient_level,
-        level_confirmed: values.level_confirmed,
-        patient_level_change_reason: !values.level_confirmed ? values.patient_level_change_reason?.trim() || null : null,
-        primary_diagnosis: values.primary_diagnosis,
-        functionality: values.functionality,
-        mobility: values.functionality,
-        prior_conditions: values.prior_conditions,
-        surgeries: values.surgeries.filter((s) => s.name.trim().length > 0),
-        comorbidities: null,
-        status: 'avaliacao_feita',
-      } as Record<string, unknown>)
-    },
-    queryKey: ['pp'],
-    successMessage: 'Avaliação registrada com sucesso',
-    onSuccess: (record) => {
-      setAssessmentOpen(false)
-      form.reset()
-      navigate(`/profissional/avaliacoes/${record.id}`)
-    },
-  })
-
-  const openAssessmentDrawer = () => {
-    if (!patient) return
-    setAssessmentOpen(true)
-    form.reset(
-      buildAssessmentProposalDefaults({
-        patientLevel: patient.patient_level,
-        suggestedWeeklyFrequency: patient.suggested_weekly_frequency,
-        diagnosticHypothesis: patient.diagnostic_hypothesis,
-        defaultCrefito,
-      }),
-    )
+  const openAssessment = () => {
+    if (!id) return
+    navigate(`/profissional/pacientes/${id}/avaliacao`)
   }
 
   if (isLoading) {
@@ -166,7 +95,12 @@ export function PPPacienteDetailPage() {
 
   const primaryAddress =
     patient.patient_addresses?.find((a) => a.is_primary) ?? patient.patient_addresses?.[0] ?? null
-  const latestAssessment = patient.initial_assessments?.[0] ?? null
+  const latestAssessment =
+    patient.initial_assessments?.length
+      ? [...patient.initial_assessments].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        )[0]
+      : null
   const hypothesis = resolveDiagnosticHypothesis(patient.diagnostic_hypothesis, patient.clinical_summary)
   const showAssessmentAtTop =
     latestAssessment != null && isAwaitingFamilyAssessmentResponse(latestAssessment.status)
@@ -180,7 +114,15 @@ export function PPPacienteDetailPage() {
             Status: {assessmentStatusLabels[latestAssessment.status] ?? latestAssessment.status}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate(`/profissional/avaliacoes/${latestAssessment.id}`)}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            navigate(`/profissional/avaliacoes/${latestAssessment.id}`, {
+              state: { from: 'patient', patientId: id },
+            })
+          }
+        >
           Ver rastreio
         </Button>
       </div>
@@ -286,10 +228,16 @@ export function PPPacienteDetailPage() {
               <span className="font-bold">Paciente:</span>{' '}
               <span className="font-normal">{patient.full_name}</span>
             </h1>
-            {patient.evaluation_pending ? (
-              <Badge className="mt-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                Avaliação pendente
-              </Badge>
+            {patient.situation !== 'none' ? (
+              <PPPatientSituationBadge
+                className="mt-1"
+                evaluation_pending={patient.evaluation_pending}
+                latest_assessment_status={patient.latest_assessment_status}
+                latest_cycle_status={patient.latest_cycle_status}
+                latest_cycle_payment_status={patient.latest_cycle_payment_status}
+                pending_evolution_count={patient.pending_evolution_count}
+                care_status={patient.care_status}
+              />
             ) : null}
           </div>
         </div>
@@ -297,6 +245,24 @@ export function PPPacienteDetailPage() {
 
       <CrudScrollPageLayout>
         <CascadeReveal className="space-y-5 pb-8">
+          {pendingScheduleDemandId && (
+            <CascadeItem>
+              <div className="rounded-xl border border-primary/25 bg-primary/5 px-5 py-4">
+                <p className="font-medium text-foreground">Horários pendentes de envio</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Você assumiu este paciente, mas ainda não enviou opções de horário para a família confirmar.
+                </p>
+                <Button
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => navigate(`/profissional/demandas/${pendingScheduleDemandId}/agendar`)}
+                >
+                  Enviar horários ao paciente
+                </Button>
+              </div>
+            </CascadeItem>
+          )}
+
           {patient.evaluation_pending && (
             <CascadeItem>
               <div className="rounded-xl border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/20 px-5 py-4">
@@ -305,8 +271,8 @@ export function PPPacienteDetailPage() {
                   Realize a visita domiciliar e registre a avaliação clínica para que a gestão envie a proposta à
                   família.
                 </p>
-                <Button size="sm" className="mt-3" onClick={openAssessmentDrawer}>
-                  Agendar avaliação
+                <Button size="sm" className="mt-3" onClick={openAssessment}>
+                  Registrar avaliação
                 </Button>
               </div>
             </CascadeItem>
@@ -341,45 +307,6 @@ export function PPPacienteDetailPage() {
           {!showAssessmentAtTop ? assessmentRegisteredCard : null}
         </CascadeReveal>
       </CrudScrollPageLayout>
-
-      <CrudDrawer
-        open={assessmentOpen}
-        onOpenChange={setAssessmentOpen}
-        title="Realizar avaliação"
-        size="lg"
-        footer={
-          <FormActions
-            form={ASSESSMENT_FORM_ID}
-            onCancel={() => setAssessmentOpen(false)}
-            isSubmitting={createAssessment.isPending}
-            submitLabel="Salvar avaliação"
-          />
-        }
-      >
-        <Form {...form}>
-          <form
-            id={ASSESSMENT_FORM_ID}
-            onSubmit={form.handleSubmit((values) => createAssessment.mutate(values))}
-            className="space-y-4"
-          >
-            <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
-              <p className="font-medium">Sugestão do sistema</p>
-              <p className="text-muted-foreground mt-0.5">
-                Nível {patientLevelLabels[suggestedLevel] ?? suggestedLevel}
-                {patient.suggested_weekly_frequency != null && (
-                  <> · frequência cadastro {normalizeWeeklyFrequency(patient.suggested_weekly_frequency)}x/semana</>
-                )}
-              </p>
-            </div>
-
-            <AssessmentProposalFields
-              control={form.control}
-              suggestedLevelLabel={patientLevelLabels[suggestedLevel] ?? suggestedLevel}
-              showLevelChangeReason={showLevelChangeReason}
-            />
-          </form>
-        </Form>
-      </CrudDrawer>
     </>
   )
 }

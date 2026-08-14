@@ -1,21 +1,39 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { Button } from '@/components/ui/button'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { credentialingStatusLabels, professionTypeLabels } from '@/constants/labels'
 import { useAuth } from '@/hooks/useAuth'
+import {
+  softFieldButtonClass,
+  softFieldInputClass,
+  softFieldLabelClass,
+  softFieldSelectClass,
+} from '@/lib/formFieldStyles'
+import { ppProfileSchema, type PpProfileValues } from '@/schemas/ppProfile'
+import { savePpProfile } from '@/services/professionalAccount'
 import { supabase } from '@/lib/supabase'
+import { cn } from '@/lib/utils'
 
-function ProfileField({ label, value }: { label: string; value: string | null | undefined }) {
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="px-5 py-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 text-sm font-medium text-foreground">{value?.trim() ? value : '—'}</p>
+    <div className="space-y-2">
+      <p className={softFieldLabelClass}>{label}</p>
+      <div className={cn(softFieldInputClass, 'flex items-center text-foreground')}>{value}</div>
     </div>
   )
 }
 
 export function PPPerfilPage() {
-  const { profile } = useAuth()
+  const queryClient = useQueryClient()
+  const { profile, refreshProfile } = useAuth()
 
   const { data: professional, isLoading } = useQuery({
     queryKey: ['pp', 'profile'],
@@ -24,13 +42,41 @@ export function PPPerfilPage() {
       if (!user) return null
       const { data, error } = await supabase
         .from('professionals')
-        .select('id, full_name, profession, credentialing_status')
+        .select('id, full_name, email, profession, credentialing_status')
         .eq('user_id', user.id)
         .maybeSingle()
       if (error) throw error
       return data
     },
   })
+
+  const form = useForm<PpProfileValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(ppProfileSchema) as any,
+    values: {
+      full_name: professional?.full_name ?? '',
+      email: professional?.email ?? profile?.email ?? '',
+      profession: (professional?.profession ?? 'FISIO') as PpProfileValues['profession'],
+    },
+    mode: 'onBlur',
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: savePpProfile,
+    onSuccess: async () => {
+      await refreshProfile()
+      await queryClient.invalidateQueries({ queryKey: ['pp', 'profile'] })
+      toast.success('Perfil atualizado.')
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível salvar o perfil.')
+    },
+  })
+
+  const credentialingLabel =
+    credentialingStatusLabels[professional?.credentialing_status ?? ''] ??
+    professional?.credentialing_status ??
+    '—'
 
   return (
     <>
@@ -40,11 +86,77 @@ export function PPPerfilPage() {
         {isLoading ? (
           <DetailPageSkeleton fields={4} />
         ) : (
-          <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border pb-8">
-            <ProfileField label="Nome completo" value={professional?.full_name ?? profile?.full_name} />
-            <ProfileField label="E-mail" value={profile?.email} />
-            <ProfileField label="Profissão" value={professional?.profession} />
-            <ProfileField label="Credenciamento" value={professional?.credentialing_status} />
+          <div className="space-y-4 pb-8">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit((values) => saveMutation.mutate(values))}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="full_name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className={softFieldLabelClass}>Nome completo</FormLabel>
+                      <FormControl>
+                        <Input {...field} autoComplete="name" className={softFieldInputClass} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className={softFieldLabelClass}>E-mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          autoComplete="email"
+                          className={softFieldInputClass}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="profession"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className={softFieldLabelClass}>Profissão</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className={softFieldSelectClass}>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(professionTypeLabels).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <ReadOnlyField label="Credenciamento" value={credentialingLabel} />
+
+                <Button type="submit" className={softFieldButtonClass} disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? 'Salvando…' : 'Salvar alterações'}
+                </Button>
+              </form>
+            </Form>
           </div>
         )}
       </CrudScrollPageLayout>

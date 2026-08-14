@@ -10,19 +10,99 @@ import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPage
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
+import { SessionAddressMapPreview } from '@/components/agenda/SessionAddressMapPreview'
 import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
-import { getAgendaStatusConfig } from '@/lib/sessionStatus'
+import { buildGoogleMapsSearchUrl } from '@/lib/geo'
+import { getAgendaStatusConfig, canEvolveTherapy } from '@/lib/sessionStatus'
 import { cn } from '@/lib/utils'
 import {
-  describeSessionType,
   getAgendaSessionById,
   ppAgendaQueryKeys,
   type AgendaSessionItem,
 } from '@/services/ppAgenda'
 
-function buildGoogleMapsUrl(address: string, neighborhood?: string | null): string {
-  const query = [address, neighborhood].filter(Boolean).join(', ')
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+function buildGoogleMapsUrl(
+  address: string,
+  neighborhood?: string | null,
+  latitude?: number | null,
+  longitude?: number | null,
+): string {
+  const lat = latitude != null ? Number(latitude) : null
+  const lng = longitude != null ? Number(longitude) : null
+  const point =
+    lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null
+  return buildGoogleMapsSearchUrl(address, neighborhood, point)
+}
+
+function SessionAddressSection({
+  address,
+  neighborhood,
+  latitude,
+  longitude,
+  showLabel = true,
+}: {
+  address: string
+  neighborhood?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  showLabel?: boolean
+}) {
+  const mapsUrl = buildGoogleMapsUrl(address, neighborhood, latitude, longitude)
+
+  const addressLink = (
+    <a
+      href={mapsUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-start gap-1.5 text-primary hover:underline"
+    >
+      <span>
+        {address}
+        {neighborhood ? (
+          <span className="block text-muted-foreground mt-0.5 font-normal">{neighborhood}</span>
+        ) : null}
+      </span>
+      <ExternalLink size={14} className="shrink-0 mt-0.5" />
+    </a>
+  )
+
+  return (
+    <div className="space-y-3">
+      {showLabel ? (
+        <DetailField label="Endereço do atendimento">{addressLink}</DetailField>
+      ) : (
+        addressLink
+      )}
+
+      <SessionAddressMapPreview
+        address={address}
+        neighborhood={neighborhood}
+        latitude={latitude}
+        longitude={longitude}
+      />
+    </div>
+  )
+}
+
+function AddressField({
+  address,
+  neighborhood,
+  latitude,
+  longitude,
+}: {
+  address: string
+  neighborhood?: string | null
+  latitude?: number | null
+  longitude?: number | null
+}) {
+  return (
+    <SessionAddressSection
+      address={address}
+      neighborhood={neighborhood}
+      latitude={latitude}
+      longitude={longitude}
+    />
+  )
 }
 
 function useIsLgUp() {
@@ -94,34 +174,9 @@ function MobileSessionLayout({
 function DetailField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-[11px] font-semibold tracking-wide text-muted-foreground">{label}</p>
       <p className="font-medium mt-0.5">{children}</p>
     </div>
-  )
-}
-
-function AddressField({ address, neighborhood }: { address: string; neighborhood?: string | null }) {
-  const mapsUrl = buildGoogleMapsUrl(address, neighborhood)
-
-  return (
-    <DetailField label="Endereço do atendimento">
-      <a
-        href={mapsUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-start gap-1.5 text-primary hover:underline"
-      >
-        <span>
-          {address}
-          {neighborhood ? (
-            <>
-              <span className="block text-muted-foreground mt-0.5 font-normal">{neighborhood}</span>
-            </>
-          ) : null}
-        </span>
-        <ExternalLink size={14} className="shrink-0 mt-0.5" />
-      </a>
-    </DetailField>
   )
 }
 
@@ -143,7 +198,7 @@ function SessionDetailBody({
   const scheduledLabel = session.scheduledAt
     ? format(new Date(session.scheduledAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
     : format(session.start, "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
-  const showEvolutionFooter = session.displayStatus === 'evolucao_pendente'
+  const showEvolutionFooter = canEvolveTherapy(session)
   const statusCfg = getAgendaStatusConfig(session.displayStatus)
 
   const sessionInfoFields = (
@@ -151,11 +206,15 @@ function SessionDetailBody({
       <DetailField label="Data e horário">
         <span className="capitalize">{scheduledLabel}</span>
       </DetailField>
-      <DetailField label="Tipo">{describeSessionType(session)}</DetailField>
       {session.address ? (
-        <AddressField address={session.address} neighborhood={session.neighborhood} />
+        <AddressField
+          address={session.address}
+          neighborhood={session.neighborhood}
+          latitude={session.latitude}
+          longitude={session.longitude}
+        />
       ) : session.neighborhood ? (
-        <AddressField address={session.neighborhood} />
+        <AddressField address={session.neighborhood} latitude={session.latitude} longitude={session.longitude} />
       ) : null}
     </>
   )
@@ -170,7 +229,7 @@ function SessionDetailBody({
       {mobile ? (
         <CascadeItem>
           <div className="space-y-4 text-sm">
-            <DetailField label="Ciclo e sessão">
+            <DetailField label="Ciclo e terapia">
               <span className="flex items-center justify-between gap-3">
                 <span className="min-w-0">
                   Ciclo {session.cycleNumber} · Terapia #{session.sessionNumber}
@@ -192,7 +251,6 @@ function SessionDetailBody({
                 <DetailField label="Data e horário">
                   <span className="capitalize">{scheduledLabel}</span>
                 </DetailField>
-                <DetailField label="Tipo">{describeSessionType(session)}</DetailField>
               </div>
             </div>
           </CascadeItem>
@@ -205,20 +263,13 @@ function SessionDetailBody({
                   <h3 className="font-semibold text-sm">Endereço do atendimento</h3>
                 </div>
                 <div className="p-5 text-sm">
-                  {session.address ? (
-                    <a
-                      href={buildGoogleMapsUrl(session.address, session.neighborhood)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 font-medium text-primary hover:underline"
-                    >
-                      {session.address}
-                      <ExternalLink size={14} className="shrink-0" />
-                    </a>
-                  ) : null}
-                  {session.neighborhood && (
-                    <p className="text-muted-foreground mt-1">{session.neighborhood}</p>
-                  )}
+                  <SessionAddressSection
+                    address={session.address ?? session.neighborhood!}
+                    neighborhood={session.address ? session.neighborhood : null}
+                    latitude={session.latitude}
+                    longitude={session.longitude}
+                    showLabel={false}
+                  />
                 </div>
               </div>
             </CascadeItem>
@@ -227,13 +278,15 @@ function SessionDetailBody({
       )}
 
       <CascadeItem>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={onOpenPatient}>
+        <div className="flex flex-col gap-2">
+          {showEvolutionFooter && (
+            <Button onClick={onOpenEvolution} className="h-12 w-full">
+              Evoluir terapia
+            </Button>
+          )}
+          <Button variant="outline" onClick={onOpenPatient} className="h-12 w-full">
             Ver paciente
           </Button>
-          {!mobile && showEvolutionFooter && (
-            <Button onClick={onOpenEvolution}>Evoluir terapia</Button>
-          )}
         </div>
       </CascadeItem>
     </CascadeReveal>
@@ -265,17 +318,6 @@ export function PPSessionDetailPage() {
   }
 
   const mobileTitle = session?.patientName ?? 'Terapia'
-  const showEvolutionFooter = session?.displayStatus === 'evolucao_pendente'
-
-  const evolutionFooter = showEvolutionFooter ? (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-background/65 backdrop-blur-xl backdrop-saturate-150 shadow-[0_-8px_32px_rgba(0,0,0,0.08)] supports-[backdrop-filter]:bg-background/55">
-      <div className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <Button className="h-12 w-full" onClick={openEvolution}>
-          Evoluir terapia
-        </Button>
-      </div>
-    </div>
-  ) : null
 
   if (isLoading) {
     if (!isLgUp) {
@@ -336,8 +378,7 @@ export function PPSessionDetailPage() {
       <MobileSessionLayout
         title={mobileTitle}
         onBack={goBack}
-        scrollClassName={showEvolutionFooter ? 'pb-28' : 'pb-8'}
-        footer={evolutionFooter}
+        scrollClassName="pb-8"
       >
         <SessionDetailBody
           session={session}

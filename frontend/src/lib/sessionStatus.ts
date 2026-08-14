@@ -100,3 +100,16 @@ export function getAgendaStatusConfig(displayStatus: AgendaDisplayStatus): Sessi
   if (displayStatus === 'evolucao_pendente') return EVOLUCAO_PENDENTE_CONFIG
   return SESSION_STATUS_CONFIG[displayStatus]
 }
+
+const NON_EVOLVABLE_STATUSES = new Set([
+  'falta',
+  'intercorrencia',
+  'cancelada',
+  'cancelada_sem_justificativa',
+])
+
+/** Terapia ainda pode receber evolução clínica (detalhe da sessão / menu da agenda). */
+export function canEvolveTherapy(session: { hasEvolution: boolean; status: string }): boolean {
+  if (session.hasEvolution) return false
+  return !NON_EVOLVABLE_STATUSES.has(session.status)
+}

@@ -76,12 +76,12 @@ export function PacienteHomePage() {
         </PageHeader>
         <CrudScrollPageLayout>
           <div className="rounded-xl border border-dashed border-border p-8 text-center space-y-3">
-            <p className="font-medium">Nenhum paciente vinculado à sua conta</p>
+            <p className="font-medium">Complete seu cadastro para continuar</p>
             <p className="text-sm text-muted-foreground">
-              Entre em contato com a Larsana para vincular o responsável ao paciente.
+              Precisamos do endereço e telefone para encontrar um profissional parceiro na sua região.
             </p>
             <Button asChild variant="outline" size="sm">
-              <Link to="/paciente/ajuda">Falar com a Larsana</Link>
+              <Link to="/paciente/onboarding">Completar cadastro</Link>
             </Button>
           </div>
         </CrudScrollPageLayout>

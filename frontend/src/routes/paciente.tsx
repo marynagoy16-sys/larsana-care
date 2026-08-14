@@ -3,13 +3,18 @@ import type { RouteObject } from 'react-router-dom'
 import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
 import { AppShell } from '@/components/layout/AppShell'
+import { PatientOnboardingGate } from '@/components/paciente/PatientOnboardingGate'
 
-function pacienteRoute(element: React.ReactNode) {
+function pacienteAuth(element: React.ReactNode) {
   return (
     <RequireAuth>
       <RequireRole allowed={['paciente']}>{element}</RequireRole>
     </RequireAuth>
   )
+}
+
+function pacienteRoute(element: React.ReactNode) {
+  return pacienteAuth(element)
 }
 
 function lazyPaciente(exportName: keyof typeof import('@/pages/paciente/modulePages')) {
@@ -21,6 +26,9 @@ const PacienteAgendamentoPage = lazy(() =>
 )
 const PacienteHomePage = lazyPaciente('PacienteHomePage')
 const PacienteTratamentoPage = lazyPaciente('PacienteTratamentoPage')
+const PacienteOnboardingPage = lazy(() =>
+  import('@/pages/paciente/PacienteOnboardingPage').then((m) => ({ default: m.PacienteOnboardingPage })),
+)
 const PacienteSolicitarPage = lazy(() =>
   import('@/pages/paciente/PacienteSolicitarPage').then((m) => ({ default: m.PacienteSolicitarPage })),
 )
@@ -60,9 +68,14 @@ const WeeklyPlanPlayerPage = lazy(() =>
 export const pacienteRoutes: RouteObject[] = [
   {
     path: '/paciente',
-    element: pacienteRoute(<AppShell variant="paciente" />),
+    element: pacienteAuth(
+      <PatientOnboardingGate>
+        <AppShell variant="paciente" />
+      </PatientOnboardingGate>,
+    ),
     children: [
       { index: true, element: pacienteRoute(<PacienteHomePage />) },
+      { path: 'onboarding', element: pacienteRoute(<PacienteOnboardingPage />) },
       { path: 'solicitar', element: pacienteRoute(<PacienteSolicitarPage />) },
       { path: 'tratamento', element: pacienteRoute(<PacienteTratamentoPage />) },
       { path: 'tratamento/ciclo/:id', element: pacienteRoute(<PacienteCicloDetailPage />) },

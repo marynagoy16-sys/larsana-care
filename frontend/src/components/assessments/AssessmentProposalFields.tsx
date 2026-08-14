@@ -1,4 +1,5 @@
 import type { Control } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -13,8 +14,10 @@ import { cn } from '@/lib/utils'
 import { weeklyFrequencyLabels, proposedSessionCountLabels } from '@/constants/labels'
 import type { AssessmentProposalFormValues } from '@/schemas/assessmentProposal'
 import {
-  PROPOSAL_SESSION_COUNTS,
   PROPOSAL_WEEKLY_FREQUENCIES,
+  sessionCountForWeeklyFrequency,
+  type ProposalSessionCount,
+  type ProposalWeeklyFrequency,
 } from '@/schemas/assessmentProposal'
 import { PriorConditionsFields } from '@/components/assessments/PriorConditionsFields'
 
@@ -29,6 +32,8 @@ export function AssessmentProposalFields({
   suggestedLevelLabel,
   showLevelChangeReason,
 }: AssessmentProposalFieldsProps) {
+  const { setValue } = useFormContext<AssessmentProposalFormValues>()
+
   return (
     <div className="space-y-4">
       <FormField
@@ -39,7 +44,13 @@ export function AssessmentProposalFields({
             <FormLabel>Frequência semanal sugerida</FormLabel>
             <Select
               value={String(field.value)}
-              onValueChange={(v) => field.onChange(Number(v))}
+              onValueChange={(v) => {
+                const frequency = Number(v) as ProposalWeeklyFrequency
+                field.onChange(frequency)
+                setValue('proposed_session_count', sessionCountForWeeklyFrequency(frequency), {
+                  shouldValidate: true,
+                })
+              }}
             >
               <FormControl>
                 <SelectTrigger>
@@ -65,23 +76,12 @@ export function AssessmentProposalFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Ciclo proposto</FormLabel>
-            <Select
-              value={String(field.value)}
-              onValueChange={(v) => field.onChange(Number(v))}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ciclo" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {PROPOSAL_SESSION_COUNTS.map((count) => (
-                  <SelectItem key={count} value={String(count)}>
-                    {proposedSessionCountLabels[count]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground">
+              {proposedSessionCountLabels[field.value as ProposalSessionCount] ?? `${field.value} sessões`}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Calculado automaticamente: 1x/semana → 4 sessões · 2x → 8 · 3x → 12
+            </p>
             <FormMessage />
           </FormItem>
         )}
@@ -106,7 +106,7 @@ export function AssessmentProposalFields({
                     variant={field.value ? 'default' : 'outline'}
                     onClick={() => field.onChange(true)}
                   >
-                    Sim, confirmo
+                    Sim
                   </Button>
                   <Button
                     type="button"
@@ -115,7 +115,7 @@ export function AssessmentProposalFields({
                     className={cn(!field.value && 'border-amber-500')}
                     onClick={() => field.onChange(false)}
                   >
-                    Não, preciso justificar
+                    Não
                   </Button>
                 </div>
               </FormControl>

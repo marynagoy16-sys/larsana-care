@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Copy, Trophy, Users } from 'lucide-react'
+import { Copy, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
+import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
+import { PatenteProgressSection } from '@/components/profissional/points/PatenteProgressSection'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { formatDateTime } from '@/lib/formatters'
 import { getCurrentProfessional } from '@/services/professionals'
@@ -17,46 +17,8 @@ import {
   listPointsLedger,
   patenteLabels,
   PATENTE_REPASSE_PERCENT,
-  resolveNextPatenteTarget,
-  type PpPatente,
+  DEFAULT_PP_POINTS_SETTINGS,
 } from '@/services/ppPoints'
-
-function resolvePatenteProgress(
-  points: number,
-  patente: PpPatente,
-  settings: { bronze_threshold: number; prata_threshold: number; ouro_threshold: number },
-): { current: number; target: number; percent: number; fromPatente: PpPatente } {
-  if (patente === 'OURO') {
-    return { current: points, target: settings.ouro_threshold, percent: 100, fromPatente: 'OURO' }
-  }
-  if (patente === 'PRATA') {
-    const from = settings.prata_threshold
-    const to = settings.ouro_threshold
-    return {
-      current: points,
-      target: to,
-      percent: Math.min(100, Math.round(((points - from) / Math.max(1, to - from)) * 100)),
-      fromPatente: 'PRATA',
-    }
-  }
-  if (patente === 'BRONZE') {
-    const from = settings.bronze_threshold
-    const to = settings.prata_threshold
-    return {
-      current: points,
-      target: to,
-      percent: Math.min(100, Math.round(((points - from) / Math.max(1, to - from)) * 100)),
-      fromPatente: 'BRONZE',
-    }
-  }
-  const to = settings.bronze_threshold
-  return {
-    current: points,
-    target: to,
-    percent: Math.min(100, Math.round((points / Math.max(1, to)) * 100)),
-    fromPatente: 'ALUMINIO',
-  }
-}
 
 export function PPEvolucaoPage() {
   const { data: professional } = useQuery({
@@ -89,13 +51,7 @@ export function PPEvolucaoPage() {
 
   const patente = profile?.patente ?? 'ALUMINIO'
   const points = profile?.points_total ?? 0
-  const nextTarget =
-    settings && profile
-      ? resolveNextPatenteTarget(points, settings, patente)
-      : null
-
-  const patenteProgress =
-    settings ? resolvePatenteProgress(points, patente, settings) : null
+  const progressSettings = settings ?? DEFAULT_PP_POINTS_SETTINGS
 
   const copyReferral = async () => {
     if (!referralCode) return
@@ -104,12 +60,7 @@ export function PPEvolucaoPage() {
 
   return (
     <>
-      <PageHeader>
-        <div className="flex items-center gap-3">
-          <Trophy className="size-5 text-primary" />
-          <h1 className="font-display font-bold text-xl">Minha jornada</h1>
-        </div>
-      </PageHeader>
+      <PPAccountSubpageHeader title="Minha jornada" />
 
       <CrudScrollPageLayout>
         <CascadeReveal className="space-y-5 pb-8">
@@ -123,28 +74,12 @@ export function PPEvolucaoPage() {
                 <Badge variant="secondary">{PATENTE_REPASSE_PERCENT[patente]}% repasse</Badge>
               </div>
               <p className="text-3xl font-bold tabular-nums">{points} <span className="text-base font-normal text-muted-foreground">pontos</span></p>
-              {patenteProgress && nextTarget && settings?.show_next_tier_hint && (
-                <div className="space-y-2 pt-1">
-                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <span>{patenteLabels[patenteProgress.fromPatente]}</span>
-                    <span>{patenteLabels[nextTarget.patente]}</span>
-                  </div>
-                  <Progress value={patenteProgress.percent} className="h-2.5" />
-                  <p className="text-sm text-muted-foreground">
-                    {points} / {nextTarget.threshold} pts · faltam{' '}
-                    <span className="font-medium text-foreground">
-                      {Math.max(0, nextTarget.threshold - points)} pts
-                    </span>{' '}
-                    para {patenteLabels[nextTarget.patente]} ({PATENTE_REPASSE_PERCENT[nextTarget.patente]}% repasse)
-                  </p>
-                </div>
-              )}
-              {nextTarget && settings?.show_next_tier_hint && !patenteProgress && (
-                <p className="text-sm text-muted-foreground">
-                  Faltam {Math.max(0, nextTarget.threshold - points)} pts para {patenteLabels[nextTarget.patente]} (
-                  {PATENTE_REPASSE_PERCENT[nextTarget.patente]}% repasse)
-                </p>
-              )}
+              <PatenteProgressSection
+                points={points}
+                patente={patente}
+                settings={progressSettings}
+                showHintText={progressSettings.show_next_tier_hint}
+              />
             </div>
           </CascadeItem>
 

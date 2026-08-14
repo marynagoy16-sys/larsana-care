@@ -39,6 +39,15 @@ export type AvailabilitySlotInput = {
   ends_at?: string
 }
 
+/** Prazo para o paciente confirmar um horário após o PP enviar opções (RPC `submit_pp_availability`). */
+export const SCHEDULING_PATIENT_RESPONSE_DAYS = 7
+
+/** Avaliação inicial deve ser agendada/realizada em até 7 dias após aceite da demanda. */
+export const AVALIACAO_MUST_OCCUR_WITHIN_DAYS = 7
+
+/** Horizonte máximo para oferta de horários de continuidade. */
+export const CONTINUIDADE_OFFER_HORIZON_DAYS = 28
+
 export async function submitPpAvailability(
   demandId: string,
   slots: AvailabilitySlotInput[],
@@ -117,4 +126,56 @@ export async function getSchedulingProposal(id: string): Promise<SchedulingPropo
 
   if (error) throw error
   return data as SchedulingProposal | null
+}
+
+export type DemandSchedulingFollowUp =
+  | { kind: 'needs_slots' }
+  | { kind: 'awaiting_patient' }
+  | { kind: 'confirmed' }
+
+export async function getDemandSchedulingFollowUp(demandId: string): Promise<DemandSchedulingFollowUp> {
+  const { data, error } = await supabase
+    .from('scheduling_proposals')
+    .select('status')
+    .eq('demand_id', demandId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) return { kind: 'needs_slots' }
+  if (data.status === 'pendente') return { kind: 'awaiting_patient' }
+  if (data.status === 'confirmado') return { kind: 'confirmed' }
+  return { kind: 'needs_slots' }
+}
+
+/** Demanda alocada ao PP atual que ainda precisa de envio de horários. */
+export async function getPendingScheduleDemandIdForPatient(patientId: string): Promise<string | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: professional, error: proError } = await supabase
+    .from('professionals')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (proError) throw proError
+  if (!professional) return null
+
+  const { data: demand, error: demandError } = await supabase
+    .from('demands')
+    .select('id')
+    .eq('patient_id', patientId)
+    .eq('status', 'alocada')
+    .eq('assigned_professional_id', professional.id)
+    .maybeSingle()
+
+  if (demandError) throw demandError
+  if (!demand) return null
+
+  const followUp = await getDemandSchedulingFollowUp(demand.id)
+  return followUp.kind === 'needs_slots' ? demand.id : null
 }

@@ -101,6 +101,24 @@ export function sessionHourSlot(start: Date, dayStartHour: number): number {
   return Math.max(Math.floor(startHourFrac), dayStartHour)
 }
 
+/** Limites da célula horária na grade (topo inclusive, altura até a linha seguinte). */
+export function hourCellBounds(
+  hour: number,
+  dayStartHour: number,
+  hourHeightPx = AGENDA_HOUR_HEIGHT_PX,
+): { topPx: number; heightPx: number } {
+  const topPx =
+    hour === dayStartHour
+      ? 0
+      : hourMarkerTopPx(hour, dayStartHour, hourHeightPx)
+  const bottomPx = hourMarkerTopPx(hour + 1, dayStartHour, hourHeightPx)
+
+  return {
+    topPx,
+    heightPx: bottomPx - topPx,
+  }
+}
+
 /** Grade da agenda: uma célula horária por sessão (hora do agendamento). */
 export function sessionHourCellLayout(
   start: Date,
@@ -108,11 +126,7 @@ export function sessionHourCellLayout(
   hourHeightPx = AGENDA_HOUR_HEIGHT_PX,
 ): { topPx: number; heightPx: number } {
   const snappedStartHour = sessionHourSlot(start, dayStartHour)
-
-  return {
-    topPx: hourMarkerTopPx(snappedStartHour, dayStartHour, hourHeightPx),
-    heightPx: hourHeightPx,
-  }
+  return hourCellBounds(snappedStartHour, dayStartHour, hourHeightPx)
 }
 
 export type SessionColumnLayout = {

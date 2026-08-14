@@ -221,6 +221,8 @@ export function filterNavItems(items: NavItem[], role: UserRole): NavItem[] {
 export const routeTitles: Record<string, string> = {
   '/login': 'Entrar',
   '/recuperar-senha': 'Recuperar senha',
+  '/redefinir-senha': 'Redefinir senha',
+  '/paciente/onboarding': 'Complete seu cadastro',
   '/aceite-termos': 'Aceite de termos',
   '/credenciamento-pendente': 'Credenciamento pendente',
   '/admin': 'Dashboard',
@@ -342,6 +344,9 @@ export function getPageTitle(pathname: string): string {
     return ''
   }
   if (/^\/profissional\/avaliacoes\/[^/]+$/.test(pathname)) {
+    return ''
+  }
+  if (/^\/profissional\/repasses\/[^/]+$/.test(pathname)) {
     return ''
   }
   if (routeTitles[pathname]) return routeTitles[pathname]

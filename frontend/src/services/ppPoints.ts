@@ -17,6 +17,14 @@ export type PpPointsSettings = {
   show_next_tier_hint: boolean
 }
 
+export const DEFAULT_PP_POINTS_SETTINGS: PpPointsSettings = {
+  id: 'default',
+  bronze_threshold: 600,
+  prata_threshold: 800,
+  ouro_threshold: 1000,
+  show_next_tier_hint: true,
+}
+
 export type PpPointsRule = {
   id: string
   rule_code: string
@@ -43,10 +51,10 @@ export type PpProfessionalPointsProfile = {
   referral_count_pre_bronze: number
 }
 
-export async function getPpPointsSettings(): Promise<PpPointsSettings | null> {
+export async function getPpPointsSettings(): Promise<PpPointsSettings> {
   const { data, error } = await supabase.from('pp_points_settings').select('*').limit(1).maybeSingle()
   if (error) throw error
-  return data as PpPointsSettings | null
+  return (data as PpPointsSettings | null) ?? DEFAULT_PP_POINTS_SETTINGS
 }
 
 export async function updatePpPointsSettings(values: Partial<PpPointsSettings>): Promise<void> {
@@ -109,6 +117,50 @@ export function resolveNextPatenteTarget(
     return { patente: 'PRATA', threshold: settings.prata_threshold }
   }
   return { patente: 'OURO', threshold: settings.ouro_threshold }
+}
+
+export type PatenteProgress = {
+  current: number
+  target: number
+  percent: number
+  fromPatente: PpPatente
+}
+
+export function resolvePatenteProgress(
+  points: number,
+  patente: PpPatente,
+  settings: Pick<PpPointsSettings, 'bronze_threshold' | 'prata_threshold' | 'ouro_threshold'>,
+): PatenteProgress {
+  if (patente === 'OURO') {
+    return { current: points, target: settings.ouro_threshold, percent: 100, fromPatente: 'OURO' }
+  }
+  if (patente === 'PRATA') {
+    const from = settings.prata_threshold
+    const to = settings.ouro_threshold
+    return {
+      current: points,
+      target: to,
+      percent: Math.min(100, Math.round(((points - from) / Math.max(1, to - from)) * 100)),
+      fromPatente: 'PRATA',
+    }
+  }
+  if (patente === 'BRONZE') {
+    const from = settings.bronze_threshold
+    const to = settings.prata_threshold
+    return {
+      current: points,
+      target: to,
+      percent: Math.min(100, Math.round(((points - from) / Math.max(1, to - from)) * 100)),
+      fromPatente: 'BRONZE',
+    }
+  }
+  const to = settings.bronze_threshold
+  return {
+    current: points,
+    target: to,
+    percent: Math.min(100, Math.round((points / Math.max(1, to)) * 100)),
+    fromPatente: 'ALUMINIO',
+  }
 }
 
 export const patenteLabels: Record<PpPatente, string> = {

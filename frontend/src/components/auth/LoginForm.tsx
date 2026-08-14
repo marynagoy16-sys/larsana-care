@@ -6,12 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/useAuth'
-import { DevQuickLogin } from '@/components/auth/DevQuickLogin'
 import { getHomePathForRole } from '@/types/auth'
+import { softFieldButtonClass, softFieldInputClass, softFieldLabelClass } from '@/lib/formFieldStyles'
 import { cn } from '@/lib/utils'
-
-const loginInputClass =
-  'h-11 rounded-xl border-0 bg-muted px-4 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/30 lg:h-10 lg:text-sm'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -49,7 +46,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-3.5">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
+        <Label htmlFor="email" className={softFieldLabelClass}>
           E-mail
         </Label>
         <Input
@@ -60,12 +57,12 @@ export function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           disabled={loading}
-          className={loginInputClass}
+          className={softFieldInputClass}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium text-muted-foreground">
+        <Label htmlFor="password" className={softFieldLabelClass}>
           Senha
         </Label>
         <div className="relative">
@@ -77,7 +74,7 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             disabled={loading}
-            className={cn(loginInputClass, 'pr-12')}
+            className={cn(softFieldInputClass, 'pr-12')}
           />
           <button
             type="button"
@@ -98,17 +95,15 @@ export function LoginForm() {
 
       <Button
         type="submit"
-        className="h-11 w-full rounded-xl text-base font-semibold lg:h-10 lg:text-sm"
+        className={softFieldButtonClass}
         disabled={loading}
       >
         {loading ? 'Entrando...' : 'Entrar'}
       </Button>
 
-      <DevQuickLogin disabled={loading} onLoadingChange={setLoading} />
-
       <p className="text-center text-sm text-muted-foreground">
         Primeiro acesso?{' '}
-        <Link to="/cadastro" className="text-primary hover:underline">
+        <Link to="/cadastro" className="font-semibold text-primary hover:underline">
           Criar conta
         </Link>
       </p>

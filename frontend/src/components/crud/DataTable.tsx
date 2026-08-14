@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DataTableMobileCards } from '@/components/crud/DataTableMobileCards'
+import { CrudEmptyState } from '@/components/crud/CrudEmptyState'
 import { CrudTableSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
-import { cn } from '@/lib/utils'
 
 export interface DataTableColumn<T> {
   key: string
@@ -21,6 +22,7 @@ interface DataTableProps<T extends Record<string, unknown>> {
   data: T[]
   isLoading?: boolean
   emptyMessage?: string
+  emptyIcon?: LucideIcon
   onRowClick?: (row: T) => void
   getRowKey: (row: T) => string
   mobileVariant?: 'default' | 'compact'
@@ -35,6 +37,7 @@ export function DataTable<T extends Record<string, unknown>>({
   data,
   isLoading,
   emptyMessage = 'Nenhum registro encontrado.',
+  emptyIcon,
   onRowClick,
   getRowKey,
   mobileVariant = 'default',
@@ -49,14 +52,11 @@ export function DataTable<T extends Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div
-        className={cn(
-          'border border-dashed border-border p-8 text-center text-sm text-muted-foreground',
-          mobileFlush ? 'rounded-none border-x-0' : 'rounded-xl',
-        )}
-      >
-        {emptyMessage}
-      </div>
+      <CrudEmptyState
+        message={emptyMessage}
+        icon={emptyIcon}
+        flush={mobileFlush}
+      />
     )
   }
 

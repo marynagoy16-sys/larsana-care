@@ -57,16 +57,6 @@ export function LoginPage() {
             </div>
 
             <LoginForm />
-
-            <p className="text-center text-sm text-muted-foreground">
-              Não tem acesso?{' '}
-              <a
-                href="mailto:contato@larsanacare.com.br"
-                className="font-medium text-primary hover:underline"
-              >
-                Fale com a gestão
-              </a>
-            </p>
           </div>
         </div>
       </div>

@@ -263,6 +263,7 @@ body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+  min-height: 0;
 }
 
 .pb-content-lesson-scroll {

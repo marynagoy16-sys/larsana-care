@@ -39,6 +39,46 @@ export function resolvePointsCenter(points: GeoPoint[]): GeoPoint {
 
 export const NEARBY_DEMANDS_RADIUS_KM = 20
 
+export function buildOsmEmbedUrl(point: GeoPoint, delta = 0.012): string {
+  const { lat, lng } = point
+  const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
+}
+
+export async function geocodeAddress(query: string): Promise<GeoPoint | null> {
+  const trimmed = query.trim()
+  if (!trimmed) return null
+
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(trimmed)}&format=json&limit=1&countrycodes=br`,
+    {
+      headers: {
+        'Accept-Language': 'pt-BR,pt',
+      },
+    },
+  )
+
+  if (!response.ok) return null
+
+  const results = (await response.json()) as Array<{ lat: string; lon: string }>
+  const hit = results[0]
+  if (!hit) return null
+
+  return { lat: Number(hit.lat), lng: Number(hit.lon) }
+}
+
+export function buildGoogleMapsSearchUrl(
+  address: string,
+  neighborhood?: string | null,
+  point?: GeoPoint | null,
+): string {
+  if (point) {
+    return `https://www.google.com/maps/search/?api=1&query=${point.lat},${point.lng}`
+  }
+  const query = [address, neighborhood].filter(Boolean).join(', ')
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
 export function countDemandsWithinRadius(
   demands: Array<{ location_lat: number | null; location_lng: number | null }>,
   origin: GeoPoint,

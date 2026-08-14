@@ -29,7 +29,7 @@ const AGENDA_SESSION_SELECT = `
       id,
       full_name,
       attendance_period,
-      patient_addresses ( full_address, neighborhood, is_primary )
+      patient_addresses ( full_address, neighborhood, is_primary, latitude, longitude )
     )
   ),
   medical_records ( id )
@@ -55,6 +55,8 @@ export type AgendaSessionRow = {
         full_address: string
         neighborhood: string | null
         is_primary: boolean
+        latitude: number | null
+        longitude: number | null
       }> | null
     } | null
   } | null
@@ -71,6 +73,8 @@ export type AgendaSessionItem = {
   attendancePeriod: string | null
   address: string | null
   neighborhood: string | null
+  latitude: number | null
+  longitude: number | null
   status: string
   displayStatus: ReturnType<typeof resolveAgendaDisplayStatus>
   isAssessment: boolean
@@ -102,8 +106,19 @@ function normalizeRecords(
 }
 
 function resolvePrimaryAddress(
-  addresses: Array<{ full_address: string; neighborhood: string | null; is_primary: boolean }> | null | undefined,
-): { full_address: string; neighborhood: string | null } | null {
+  addresses: Array<{
+    full_address: string
+    neighborhood: string | null
+    is_primary: boolean
+    latitude: number | null
+    longitude: number | null
+  }> | null | undefined,
+): {
+  full_address: string
+  neighborhood: string | null
+  latitude: number | null
+  longitude: number | null
+} | null {
   if (!addresses?.length) return null
   const primary = addresses.find((a) => a.is_primary) ?? addresses[0]
   return primary ?? null
@@ -129,6 +144,8 @@ function mapSessionRow(row: AgendaSessionRow): AgendaSessionItem | null {
     attendancePeriod: patient.attendance_period,
     address: addressInfo?.full_address ?? null,
     neighborhood: addressInfo?.neighborhood ?? null,
+    latitude: addressInfo?.latitude ?? null,
+    longitude: addressInfo?.longitude ?? null,
     status: row.status,
     displayStatus: resolveAgendaDisplayStatus(row.status, hasEvolution),
     isAssessment: row.is_assessment_session,

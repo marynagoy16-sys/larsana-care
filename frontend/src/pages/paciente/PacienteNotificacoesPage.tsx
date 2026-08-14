@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/formatters'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
+import { notificationsQueryKeys } from '@/services/notifications'
 
 type NotificationRow = {
   id: string
@@ -39,6 +40,7 @@ export function PacienteNotificacoesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['paciente', 'notifications'] })
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.unreadCount })
     },
   })
 
@@ -55,7 +57,7 @@ export function PacienteNotificacoesPage() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando notificações…</p>
         ) : notifications.length === 0 ? (
-          <PacienteEmptyState message="Você não tem notificações no momento." />
+          <PacienteEmptyState message="Você não tem notificações no momento." icon={Bell} />
         ) : (
           <div className="space-y-2">
             {notifications.map((notification) => {

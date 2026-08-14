@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2 } from 'lucide-react'
+import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
 import { Button } from '@/components/ui/button'
 import { CredentialingStatusBanner } from '@/components/credentialing/CredentialingStatusBanner'
 import { CredentialingStepHint, CredentialingStepper } from '@/components/credentialing/CredentialingStepper'
+import { CredentialingStepAccordion } from '@/components/credentialing/CredentialingStepAccordion'
 import { DadosStepForm } from '@/components/credentialing/steps/DadosStepForm'
 import { CategoriasTecnicasStepForm } from '@/components/credentialing/steps/CategoriasTecnicasStepForm'
 import { ConselhoStepForm } from '@/components/credentialing/steps/ConselhoStepForm'
@@ -45,8 +47,14 @@ export function PPCredenciamentoPage() {
   const [uploadingType, setUploadingType] = useState<string | null>(null)
 
   useEffect(() => {
-    setFixedMain(true)
-    return () => setFixedMain(false)
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const sync = () => setFixedMain(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => {
+      mq.removeEventListener('change', sync)
+      setFixedMain(false)
+    }
   }, [setFixedMain])
 
   const snapshotQuery = useQuery({
@@ -159,10 +167,10 @@ export function PPCredenciamentoPage() {
     }
   }
 
-  const renderStepContent = () => {
+  const renderStepContent = (stepId: CredentialingStepId) => {
     if (!snapshot) return null
 
-    switch (step) {
+    switch (stepId) {
       case 'dados':
         return (
           <DadosStepForm
@@ -287,21 +295,43 @@ export function PPCredenciamentoPage() {
         <PPAccountSubpageHeader title="Credenciamento" />
       </div>
 
-      <div className="flex h-full min-h-0 w-full flex-col gap-4 px-[var(--shell-gap)] pb-[var(--bottom-nav-clearance)] lg:flex-row lg:px-0 lg:pb-[var(--shell-gap)] lg:pr-[var(--shell-gap)]">
-      {/* Sidebar */}
+      {/* Mobile — scroll no AppShell + cards colapsáveis */}
+      <CrudScrollPageLayout>
+        <div className="space-y-4 pb-8 lg:hidden">
+          <CredentialingStatusBanner snapshot={snapshot} />
+          <CredentialingStepAccordion
+            currentStep={step}
+            completion={completion}
+            readOnly={readOnly}
+            editable={editable}
+            isLastStep={isLastStep}
+            stepIndex={stepIndex}
+            saving={saveMutation.isPending}
+            submitting={submitMutation.isPending}
+            onStepChange={setStep}
+            onGoBack={goBack}
+            onGoNext={() => void goNext()}
+            onSubmit={() => {
+              const form = document.getElementById('credentialing-step-form') as HTMLFormElement | null
+              form?.requestSubmit()
+            }}
+            renderStep={renderStepContent}
+          />
+          {editable && Object.values(completion).every(Boolean) && (
+            <p className="flex items-center gap-2 px-0.5 text-xs text-primary">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              Todas as etapas preenchidas — revise e envie na etapa Contrato.
+            </p>
+          )}
+        </div>
+      </CrudScrollPageLayout>
+
+      {/* Desktop — sidebar + painel com scroll interno */}
+      <div className="hidden h-full min-h-0 w-full flex-row gap-4 pr-[var(--shell-gap)] lg:flex">
       <aside className="flex shrink-0 flex-col gap-4 border-b bg-muted/10 p-4 lg:w-72 lg:border-b-0 lg:p-5">
         <CredentialingStatusBanner snapshot={snapshot} compact />
 
-        <div className="lg:hidden">
-          <CredentialingStepper
-            currentStep={step}
-            completion={completion}
-            onStepClick={setStep}
-            variant="pills"
-          />
-        </div>
-
-        <div className="hidden min-h-0 flex-1 flex-col lg:flex">
+        <div className="flex min-h-0 flex-1 flex-col">
           <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Etapas
           </p>
@@ -314,14 +344,13 @@ export function PPCredenciamentoPage() {
         </div>
       </aside>
 
-      {/* Painel direito — header/footer fixos, corpo scrollável */}
       <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
         <header className="shrink-0 border-b bg-muted/20 px-5 py-4 lg:px-8">
           <CredentialingStepHint step={step} readOnly={readOnly} asTitle />
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-sidebar px-5 py-5 lg:px-8 lg:py-6">
-          {renderStepContent()}
+          {renderStepContent(step)}
 
           {editable && Object.values(completion).every(Boolean) && (
             <p className="mt-6 flex items-center gap-2 text-xs text-primary">
@@ -359,7 +388,7 @@ export function PPCredenciamentoPage() {
           </footer>
         )}
       </section>
-    </div>
+      </div>
     </>
   )
 }

@@ -36,12 +36,13 @@ export function AgendaWeekSessionBlock({
     AGENDA_DAY_START_HOUR,
     hourHeightPx,
   )
-  const top = Math.round(topPx)
-  const height = Math.max(Math.round(heightPx), 1)
+  const top = topPx
+  const height = Math.max(heightPx, 1)
   const timeLabel = format(scheduledStart, 'HH:mm')
   const firstName = firstNameFromPatientName(session.patientName)
   const label = `${firstName}, ${timeLabel}`
   const showLabel = height >= 28
+  const wrapName = height >= 36
 
   return (
     <button
@@ -53,8 +54,9 @@ export function AgendaWeekSessionBlock({
         onDragStart?.(session.id)
       }}
       className={cn(
-        'absolute z-[2] block box-border overflow-hidden border-0 bg-transparent p-0 m-0',
+        'absolute z-[2] block box-border overflow-hidden border-0 p-0 m-0',
         'appearance-none transition-opacity hover:opacity-80',
+        showLabel && cfg.agendaFill,
         draggable && 'cursor-grab active:cursor-grabbing',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
       )}
@@ -66,15 +68,11 @@ export function AgendaWeekSessionBlock({
       {showLabel ? (
         <span
           className={cn(
-            'absolute inset-x-0.5 inset-y-0.5 flex items-start overflow-hidden rounded-[3px] px-1 py-0.5 text-left',
-            cfg.agendaFill,
-            'ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.08]',
+            'relative z-[1] block h-full whitespace-normal break-words px-1.5 pt-1 text-sm font-semibold leading-tight text-foreground sm:text-base',
+            wrapName ? 'line-clamp-2' : 'line-clamp-1',
           )}
         >
-          <span className={cn('absolute inset-y-0 left-0 w-[3px] rounded-l-[3px]', cfg.agendaBar)} />
-          <span className="relative z-[1] truncate pl-1 text-[9px] font-semibold leading-tight text-foreground sm:text-[10px]">
-            {firstName}
-          </span>
+          {firstName}
         </span>
       ) : (
         <span

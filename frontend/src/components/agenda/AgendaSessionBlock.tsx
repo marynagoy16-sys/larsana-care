@@ -16,7 +16,7 @@ import {
   sessionColumnPositionStyle,
   sessionHourCellLayout,
 } from '@/lib/agendaTimeline'
-import { getAgendaStatusConfig } from '@/lib/sessionStatus'
+import { getAgendaStatusConfig, canEvolveTherapy } from '@/lib/sessionStatus'
 import { cn } from '@/lib/utils'
 import type { AgendaSessionItem } from '@/services/ppAgenda'
 
@@ -114,7 +114,7 @@ export function AgendaSessionBlock({
             <DropdownMenuItem onClick={() => navigate(`/profissional/pacientes/${session.patientId}`)}>
               Ver paciente
             </DropdownMenuItem>
-            {session.displayStatus === 'evolucao_pendente' && (
+            {canEvolveTherapy(session) && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

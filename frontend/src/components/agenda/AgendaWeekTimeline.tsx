@@ -105,13 +105,6 @@ export function AgendaWeekTimeline({
     () => buildHourMarkers(AGENDA_DAY_START_HOUR, AGENDA_DAY_END_HOUR),
     [],
   )
-  const halfHours = useMemo(() => {
-    const markers: number[] = []
-    for (let h = AGENDA_DAY_START_HOUR; h < AGENDA_DAY_END_HOUR; h += 1) {
-      markers.push(h + 0.5)
-    }
-    return markers
-  }, [])
 
   const totalHeightMobile = useMemo(
     () => resolveTimelineContentHeight(sessions, AGENDA_WEEK_MOBILE_HOUR_HEIGHT_PX),
@@ -247,16 +240,6 @@ export function AgendaWeekTimeline({
                   }}
                 />
               ))}
-
-            {halfHours.map((hour) => (
-              <div
-                key={hour}
-                className="pointer-events-none absolute left-0 right-0 z-0 border-t border-dashed border-border/20"
-                style={{
-                  top: hourMarkerTopPx(hour, AGENDA_DAY_START_HOUR, hourHeightPx),
-                }}
-              />
-            ))}
 
             {today && nowTop !== null && (
               <div

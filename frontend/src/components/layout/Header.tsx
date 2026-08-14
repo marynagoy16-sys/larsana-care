@@ -1,6 +1,7 @@
-import { Menu, Search, Bell } from 'lucide-react'
-import { Link, NavLink } from 'react-router-dom'
+import { Menu, Search } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { NotificationBellButton } from '@/components/layout/NotificationBellButton'
 import { UserMenu } from '@/components/layout/UserMenu'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import type { NavItem } from '@/config/navigation'
@@ -91,30 +92,7 @@ export function Header({
             <Search size={18} />
           </Button>
         )}
-        {notificationsHref ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative rounded-lg h-9 w-9 text-muted-foreground hover:text-foreground"
-            aria-label="Notificações"
-            asChild
-          >
-            <Link to={notificationsHref}>
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-            </Link>
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative rounded-lg h-9 w-9 text-muted-foreground hover:text-foreground"
-            aria-label="Notificações"
-          >
-            <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-          </Button>
-        )}
+        {notificationsHref ? <NotificationBellButton href={notificationsHref} /> : null}
         {showThemeToggle ? <ThemeToggle /> : null}
         {showUserMenu ? <UserMenu variant="full" /> : null}
       </div>

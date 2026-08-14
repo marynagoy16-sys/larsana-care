@@ -18,6 +18,9 @@ const sizeClass = {
   full: 'w-full max-w-full',
 }
 
+const sheetClass =
+  'flex h-[100dvh] max-h-[100dvh] w-full flex-col gap-0 overflow-hidden p-0 border-l border-border/80 shadow-2xl'
+
 export function CrudDrawer({
   open,
   onOpenChange,
@@ -29,19 +32,25 @@ export function CrudDrawer({
 }: CrudDrawerProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className={cn(sizeClass[size], 'gap-0 overflow-hidden p-0')}>
-        <div className="flex h-full min-h-0 flex-col">
-          <SheetHeader className="shrink-0 border-b border-border pb-4 pr-10">
-            <SheetTitle>{title}</SheetTitle>
-            {description && <SheetDescription>{description}</SheetDescription>}
-          </SheetHeader>
+      <SheetContent side="right" className={cn(sizeClass[size], sheetClass)}>
+        <SheetHeader className="shrink-0 border-b border-border px-4 pb-4 pr-10 pt-4">
+          <SheetTitle>{title}</SheetTitle>
+          {description && <SheetDescription>{description}</SheetDescription>}
+        </SheetHeader>
 
-          <div className="relative min-h-0 flex-1">
-            <div className="drawer-scroll absolute inset-0 px-4 py-4">{children}</div>
+        <div className="relative min-h-0 flex-1 basis-0">
+          <div
+            className={cn(
+              'drawer-scroll absolute inset-0 overflow-y-auto overscroll-y-contain px-4 py-4',
+              footer && 'pb-[calc(5.5rem+env(safe-area-inset-bottom))]',
+            )}
+            onTouchMove={(event) => event.stopPropagation()}
+          >
+            {children}
           </div>
 
           {footer && (
-            <div className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+            <div className="absolute inset-x-0 bottom-0 z-10 border-t border-border bg-card/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur supports-[backdrop-filter]:bg-card/90">
               {footer}
             </div>
           )}

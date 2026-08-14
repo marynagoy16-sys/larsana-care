@@ -35,6 +35,14 @@ export function normalizeWeeklyFrequency(value: number | null | undefined): Prop
   return 2
 }
 
+export function sessionCountForWeeklyFrequency(
+  frequency: ProposalWeeklyFrequency,
+): ProposalSessionCount {
+  if (frequency === 1) return 4
+  if (frequency === 3) return 12
+  return 8
+}
+
 export function normalizeProposalPatientLevel(
   level: string | null | undefined,
 ): ProposalPatientLevel {
@@ -75,6 +83,17 @@ export const assessmentProposalSchema = z
       }
     }
 
+    const expectedSessionCount = sessionCountForWeeklyFrequency(
+      data.proposed_weekly_frequency as ProposalWeeklyFrequency,
+    )
+    if (data.proposed_session_count !== expectedSessionCount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Ciclo inconsistente com a frequência semanal',
+        path: ['proposed_session_count'],
+      })
+    }
+
     const detailFields = [
       ['cardiac_alteration', 'Alteração cardíaca'],
       ['neurological_alteration', 'Alteração neurológica'],
@@ -102,11 +121,12 @@ export function buildAssessmentProposalDefaults(input: {
   defaultCrefito?: string | null
 } = {}): AssessmentProposalFormValues {
   const suggestedLevel = normalizeProposalPatientLevel(input.patientLevel)
+  const weeklyFrequency = normalizeWeeklyFrequency(input.suggestedWeeklyFrequency)
   return {
     suggested_patient_level: suggestedLevel,
     level_confirmed: true,
-    proposed_weekly_frequency: normalizeWeeklyFrequency(input.suggestedWeeklyFrequency),
-    proposed_session_count: 8,
+    proposed_weekly_frequency: weeklyFrequency,
+    proposed_session_count: sessionCountForWeeklyFrequency(weeklyFrequency),
     patient_level_change_reason: '',
     primary_diagnosis: input.diagnosticHypothesis?.trim() ?? '',
     functionality: '',

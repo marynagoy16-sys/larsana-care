@@ -12,14 +12,13 @@ import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
 import { sanitizeRichText } from '@/lib/sanitize'
-import { medicalRecordsService, transfersService } from '@/services/index'
+import { medicalRecordsService } from '@/services/index'
 import {
   getEvolutionSessionContext,
   ppEvolutionsQueryKeys,
 } from '@/services/ppEvolutions'
 import { getCurrentProfessional } from '@/services/professionals'
 import { getPPProfessionalCrefito } from '@/services/ppPatients'
-import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
 
 export { PPAgendaPage } from '@/pages/profissional/agenda/PPAgendaPage'
 export { PPHomePage } from '@/pages/profissional/home/PPHomePage'
@@ -147,10 +146,7 @@ export function PPEvolucaoNovaPage() {
   )
 }
 
-export function PPRepasseDetailPage() {
-  return <GenericDetailPage title="Repasse" backPath="/profissional/repasses" queryKey={['pp', 'transfers']} queryFn={(id) => transfersService.getById(id)}
-    fields={[{ key: 'pp_transfer_amount_cents', label: 'Valor', format: 'currency' }, { key: 'status', label: 'Status' }]} />
-}
+export { PPRepasseDetailPage } from '@/pages/profissional/account/PPRepasseDetailPage'
 
 export { PPPacientesPage } from '@/pages/profissional/patients/PPPacientesPage'
 export { PPPacienteDetailPage } from '@/pages/profissional/patients/PPPacienteDetailPage'

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { listPendingEvolutionsForPp } from '@/services/ppEvolutions'
 import { getCurrentProfessional } from '@/services/professionals'
+import { resolvePPPatientSituation } from '@/lib/ppPatientSituation'
 
 export type PPPatientListItem = {
   id: string
@@ -14,7 +15,11 @@ export type PPPatientListItem = {
   sex: string | null
   suggested_weekly_frequency: number | null
   evaluation_pending: boolean
+  latest_assessment_status: string | null
+  latest_cycle_status: string | null
+  latest_cycle_payment_status: string | null
   pending_evolution_count: number
+  situation: ReturnType<typeof resolvePPPatientSituation>
 }
 
 export type PPPatientDetail = PPPatientListItem & {
@@ -42,8 +47,32 @@ const PATIENT_LIST_SELECT = `
   birth_date,
   sex,
   suggested_weekly_frequency,
-  allocated_professional_id
+  allocated_professional_id,
+  initial_assessments ( id, status, created_at ),
+  care_cycles ( id, status, payment_status, cycle_number )
 `
+
+type AssessmentRow = { id: string; status: string; created_at: string }
+type CycleRow = { id: string; status: string; payment_status: string; cycle_number: number }
+
+function pickLatestAssessment(assessments: AssessmentRow[] | null | undefined): AssessmentRow | null {
+  if (!assessments?.length) return null
+  return [...assessments].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )[0]
+}
+
+function pickLatestCycle(cycles: CycleRow[] | null | undefined): CycleRow | null {
+  if (!cycles?.length) return null
+  return [...cycles].sort((a, b) => b.cycle_number - a.cycle_number)[0]
+}
+
+function resolveEvaluationPending(
+  assessments: AssessmentRow[] | null | undefined,
+  cycles: CycleRow[] | null | undefined,
+): boolean {
+  return (assessments?.length ?? 0) === 0 && (cycles?.length ?? 0) === 0
+}
 
 const PATIENT_DETAIL_SELECT = `
   id,
@@ -62,22 +91,35 @@ const PATIENT_DETAIL_SELECT = `
   patient_addresses (
     full_address, street, number, neighborhood, postal_code, is_primary
   ),
-  initial_assessments ( id, status, created_at )
+  initial_assessments ( id, status, created_at ),
+  care_cycles ( id, status, payment_status, cycle_number )
 `
 
-async function resolveEvaluationPending(patientId: string): Promise<boolean> {
-  const [{ count: assessmentCount }, { count: cycleCount }] = await Promise.all([
-    supabase
-      .from('initial_assessments')
-      .select('id', { count: 'exact', head: true })
-      .eq('patient_id', patientId),
-    supabase
-      .from('care_cycles')
-      .select('id', { count: 'exact', head: true })
-      .eq('patient_id', patientId),
-  ])
+function buildPatientSituationFields(
+  care_status: string,
+  assessments: AssessmentRow[] | null | undefined,
+  cycles: CycleRow[] | null | undefined,
+  pendingEvolutionCount = 0,
+) {
+  const latestAssessment = pickLatestAssessment(assessments)
+  const latestCycle = pickLatestCycle(cycles)
+  const evaluation_pending = resolveEvaluationPending(assessments, cycles)
+  const situationInput = {
+    evaluation_pending,
+    latest_assessment_status: latestAssessment?.status ?? null,
+    latest_cycle_status: latestCycle?.status ?? null,
+    latest_cycle_payment_status: latestCycle?.payment_status ?? null,
+    pending_evolution_count: pendingEvolutionCount,
+    care_status,
+  }
 
-  return (assessmentCount ?? 0) === 0 && (cycleCount ?? 0) === 0
+  return {
+    evaluation_pending,
+    latest_assessment_status: situationInput.latest_assessment_status,
+    latest_cycle_status: situationInput.latest_cycle_status,
+    latest_cycle_payment_status: situationInput.latest_cycle_payment_status,
+    situation: resolvePPPatientSituation(situationInput),
+  }
 }
 
 export async function listPPPatients(): Promise<{ data: PPPatientListItem[]; count: number }> {
@@ -104,8 +146,24 @@ export async function listPPPatients(): Promise<{ data: PPPatientListItem[]; cou
     )
   }
 
-  const mapped = await Promise.all(
-    rows.map(async (row) => ({
+  const mapped = rows.map((row) => {
+    const latestAssessment = pickLatestAssessment(row.initial_assessments as AssessmentRow[] | null)
+    const latestCycle = pickLatestCycle(row.care_cycles as CycleRow[] | null)
+    const evaluation_pending = resolveEvaluationPending(
+      row.initial_assessments as AssessmentRow[] | null,
+      row.care_cycles as CycleRow[] | null,
+    )
+    const pending_evolution_count = pendingEvolutionCountByPatient.get(row.id) ?? 0
+    const situationInput = {
+      evaluation_pending,
+      latest_assessment_status: latestAssessment?.status ?? null,
+      latest_cycle_status: latestCycle?.status ?? null,
+      latest_cycle_payment_status: latestCycle?.payment_status ?? null,
+      pending_evolution_count,
+      care_status: row.care_status,
+    }
+
+    return {
       id: row.id,
       full_name: row.full_name,
       care_status: row.care_status,
@@ -116,10 +174,14 @@ export async function listPPPatients(): Promise<{ data: PPPatientListItem[]; cou
       birth_date: row.birth_date,
       sex: row.sex,
       suggested_weekly_frequency: row.suggested_weekly_frequency,
-      evaluation_pending: await resolveEvaluationPending(row.id),
-      pending_evolution_count: pendingEvolutionCountByPatient.get(row.id) ?? 0,
-    })),
-  )
+      evaluation_pending,
+      latest_assessment_status: situationInput.latest_assessment_status,
+      latest_cycle_status: situationInput.latest_cycle_status,
+      latest_cycle_payment_status: situationInput.latest_cycle_payment_status,
+      pending_evolution_count,
+      situation: resolvePPPatientSituation(situationInput),
+    }
+  })
 
   return { data: mapped, count: mapped.length }
 }
@@ -138,11 +200,13 @@ export async function getPPPatientDetail(id: string): Promise<PPPatientDetail | 
   if (error) throw error
   if (!data) return null
 
-  const evaluation_pending = await resolveEvaluationPending(id)
+  const assessments = data.initial_assessments as AssessmentRow[] | null
+  const cycles = data.care_cycles as CycleRow[] | null
 
   return {
-    ...(data as Omit<PPPatientDetail, 'evaluation_pending'>),
-    evaluation_pending,
+    ...(data as Omit<PPPatientDetail, 'evaluation_pending' | 'latest_assessment_status' | 'latest_cycle_status' | 'latest_cycle_payment_status' | 'situation' | 'pending_evolution_count'>),
+    pending_evolution_count: 0,
+    ...buildPatientSituationFields(data.care_status, assessments, cycles),
   }
 }
 

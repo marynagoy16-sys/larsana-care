@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, type ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { DataTable, type DataTableColumn } from '@/components/crud/DataTable'
@@ -42,6 +43,7 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   statsColumns?: 2 | 3 | 4
   pageSizeDefault?: number
   emptyMessage?: string
+  emptyIcon?: LucideIcon
   exportFileName?: string
   mobileVariant?: 'default' | 'compact'
   mobileFlush?: boolean
@@ -99,6 +101,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   statsColumns = 4,
   pageSizeDefault = 10,
   emptyMessage,
+  emptyIcon,
   exportFileName,
   mobileVariant,
   mobileFlush,
@@ -251,7 +254,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
           )}
 
           {(toolbar != null || showToolbar) && (
-            <CascadeItem>
+            <CascadeItem className="overflow-visible">
               {toolbar ?? (
                 <ListToolbar
                   search={searchable ? search : undefined}
@@ -297,6 +300,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
                   mobilePrimary: col.key === primaryCol?.key,
                 }))}
                 emptyMessage={emptyMessage}
+                emptyIcon={emptyIcon}
                 mobileVariant={mobileVariant}
                 mobileFlush={mobileFlush}
                 mobileGrouped={mobileGrouped}

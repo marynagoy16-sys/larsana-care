@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { LucideIcon } from 'lucide-react'
 import { ChevronLeft } from 'lucide-react'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
+import { CrudEmptyState } from '@/components/crud/CrudEmptyState'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 
@@ -61,10 +63,12 @@ export function PacienteSubpageShell({ children, title, backTo, onBack, loading 
   )
 }
 
-export function PacienteEmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-8 text-center">
-      <p className="text-sm text-muted-foreground">{message}</p>
-    </div>
-  )
+export function PacienteEmptyState({
+  message,
+  icon,
+}: {
+  message: string
+  icon?: LucideIcon
+}) {
+  return <CrudEmptyState message={message} icon={icon} muted />
 }
