@@ -31,12 +31,9 @@ export function PacientePagamentosPage() {
   const charges = Array.isArray(data) ? data : []
 
   return (
-    <PacienteSubpageShell loading={isLoading}>
+    <PacienteSubpageShell title="Pagamentos" loading={isLoading}>
       <div className="space-y-4 pb-8">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Pagamentos</h2>
-          <p className="text-sm text-muted-foreground mt-1">PIX, boletos e comprovantes dos ciclos</p>
-        </div>
+        <p className="text-sm text-muted-foreground">PIX, boletos e comprovantes dos ciclos</p>
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando pagamentos…</p>

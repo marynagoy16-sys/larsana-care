@@ -1,7 +1,12 @@
 import type { RouteObject } from 'react-router-dom'
+import { lazy } from 'react'
 import { GuestOnly } from '@/routes/guards/GuestOnly'
 import { comingSoonElement } from '@/routes/createComingSoonElement'
 import { LoginPageLazy } from '@/pages/auth/LoginPageLazy'
+
+const SignupPageLazy = lazy(() =>
+  import('@/pages/auth/SignupPage').then((m) => ({ default: m.SignupPage })),
+)
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -9,6 +14,14 @@ export const publicRoutes: RouteObject[] = [
     element: (
       <GuestOnly>
         <LoginPageLazy />
+      </GuestOnly>
+    ),
+  },
+  {
+    path: '/cadastro',
+    element: (
+      <GuestOnly>
+        <SignupPageLazy />
       </GuestOnly>
     ),
   },

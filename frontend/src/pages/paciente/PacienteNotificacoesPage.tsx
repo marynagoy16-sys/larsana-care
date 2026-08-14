@@ -46,16 +46,11 @@ export function PacienteNotificacoesPage() {
   const unreadCount = notifications.filter((n) => !n.read_at).length
 
   return (
-    <PacienteSubpageShell loading={isLoading}>
+    <PacienteSubpageShell title="Notificações" loading={isLoading}>
       <div className="space-y-4 pb-8">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="font-display text-xl font-bold text-foreground">Notificações</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {unreadCount > 0 ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}` : 'Alertas e avisos importantes'}
-            </p>
-          </div>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {unreadCount > 0 ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}` : 'Alertas e avisos importantes'}
+        </p>
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando notificações…</p>

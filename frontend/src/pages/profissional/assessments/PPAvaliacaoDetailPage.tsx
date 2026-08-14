@@ -7,8 +7,11 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { AssessmentDetailView } from '@/components/assessments/AssessmentDetailView'
+import { findSessionPriceCents, resolveCyclePercents } from '@/lib/demandSimulation'
 import { supabase } from '@/lib/supabase'
-import { estimateAssessmentProposalTotalCents } from '@/services/assessmentProposal'
+import { getCurrentProfessional } from '@/services/professionals'
+import { getActivePricingVersion, getPricingBundle } from '@/services/pricing'
+import { getProfessionalPointsProfile, type PpPatente } from '@/services/ppPoints'
 
 type AssessmentDetail = {
   id: string
@@ -37,6 +40,7 @@ type AssessmentDetail = {
   surgeries: unknown
   patients?: {
     full_name: string
+    region_id?: string | null
     regions?: { code: string; name: string } | null
     cities?: { name: string } | null
     patient_responsibles?: Array<{ full_name: string; is_primary: boolean }> | null
@@ -59,6 +63,7 @@ async function getPPAssessmentDetail(id: string): Promise<AssessmentDetail | nul
       prior_conditions, surgeries,
       patients (
         full_name,
+        region_id,
         regions ( code, name ),
         cities ( name ),
         patient_responsibles ( full_name, is_primary )
@@ -86,23 +91,54 @@ export function PPAvaliacaoDetailPage() {
     enabled: !!id,
   })
 
-  const { data: totalAmountCents } = useQuery({
+  const { data: professional } = useQuery({
+    queryKey: ['pp', 'current_professional'],
+    queryFn: getCurrentProfessional,
+  })
+
+  const { data: pointsProfile } = useQuery({
+    queryKey: ['pp', 'points_profile', professional?.id],
+    queryFn: () => getProfessionalPointsProfile(professional!.id),
+    enabled: !!professional?.id,
+  })
+
+  const { data: repasseEstimate } = useQuery({
     queryKey: [
       'pp',
       'assessments',
       id,
-      'proposal_total',
-      assessment?.patient_id,
+      'repasse',
+      assessment?.patients?.region_id,
       assessment?.proposed_patient_level,
       assessment?.proposed_session_count,
+      pointsProfile?.patente,
     ],
-    queryFn: () =>
-      estimateAssessmentProposalTotalCents({
-        patientId: assessment!.patient_id,
-        patientLevel: assessment!.proposed_patient_level,
-        sessionCount: assessment!.proposed_session_count,
-      }),
-    enabled: !!assessment?.patient_id && !!assessment?.proposed_patient_level,
+    queryFn: async () => {
+      const version = await getActivePricingVersion()
+      if (!version) return null
+      const bundle = await getPricingBundle(version.id)
+      const regionId = assessment!.patients?.region_id ?? null
+      const sessionPriceCents = findSessionPriceCents(
+        bundle.entries,
+        regionId,
+        assessment!.proposed_patient_level,
+      )
+      if (sessionPriceCents == null) return null
+      const { cycle2Percent } = resolveCyclePercents({
+        commissions: bundle.commissions,
+        retention: bundle.retention,
+        patente: (pointsProfile?.patente ?? 'ALUMINIO') as PpPatente,
+      })
+      const repassePerSessionCents = Math.round(sessionPriceCents * cycle2Percent / 100)
+      return {
+        repassePerSessionCents,
+        repasseTotalCents: repassePerSessionCents * assessment!.proposed_session_count,
+      }
+    },
+    enabled:
+      !!assessment?.proposed_patient_level
+      && !!assessment?.proposed_session_count
+      && !!assessment?.patients?.region_id,
   })
 
   if (isLoading) {
@@ -154,7 +190,8 @@ export function PPAvaliacaoDetailPage() {
                 ...assessment,
                 patient: assessment.patients,
               }}
-              totalAmountCents={totalAmountCents}
+              repassePerSessionCents={repasseEstimate?.repassePerSessionCents}
+              repasseTotalCents={repasseEstimate?.repasseTotalCents}
             />
           </CascadeItem>
         </CascadeReveal>

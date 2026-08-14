@@ -3,16 +3,14 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, MapPin } from 'lucide-react'
+import { ArrowLeft, ExternalLink, MapPin } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
-import { patientLevelLabels } from '@/constants/labels'
 import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
-import { formatAttendancePeriod } from '@/lib/patientDisplay'
 import { getAgendaStatusConfig } from '@/lib/sessionStatus'
 import { cn } from '@/lib/utils'
 import {
@@ -21,6 +19,11 @@ import {
   ppAgendaQueryKeys,
   type AgendaSessionItem,
 } from '@/services/ppAgenda'
+
+function buildGoogleMapsUrl(address: string, neighborhood?: string | null): string {
+  const query = [address, neighborhood].filter(Boolean).join(', ')
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
 
 function useIsLgUp() {
   const [isLgUp, setIsLgUp] = useState(() =>
@@ -97,6 +100,31 @@ function DetailField({ label, children }: { label: string; children: ReactNode }
   )
 }
 
+function AddressField({ address, neighborhood }: { address: string; neighborhood?: string | null }) {
+  const mapsUrl = buildGoogleMapsUrl(address, neighborhood)
+
+  return (
+    <DetailField label="Endereço do atendimento">
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-start gap-1.5 text-primary hover:underline"
+      >
+        <span>
+          {address}
+          {neighborhood ? (
+            <>
+              <span className="block text-muted-foreground mt-0.5 font-normal">{neighborhood}</span>
+            </>
+          ) : null}
+        </span>
+        <ExternalLink size={14} className="shrink-0 mt-0.5" />
+      </a>
+    </DetailField>
+  )
+}
+
 function SessionDetailBody({
   session,
   isFetching,
@@ -115,7 +143,6 @@ function SessionDetailBody({
   const scheduledLabel = session.scheduledAt
     ? format(new Date(session.scheduledAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
     : format(session.start, "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
-  const timeRange = `${format(session.start, 'HH:mm', { locale: ptBR })} – ${format(session.end, 'HH:mm', { locale: ptBR })}`
   const showEvolutionFooter = session.displayStatus === 'evolucao_pendente'
   const statusCfg = getAgendaStatusConfig(session.displayStatus)
 
@@ -124,22 +151,12 @@ function SessionDetailBody({
       <DetailField label="Data e horário">
         <span className="capitalize">{scheduledLabel}</span>
       </DetailField>
-      <DetailField label="Duração prevista">{timeRange}</DetailField>
       <DetailField label="Tipo">{describeSessionType(session)}</DetailField>
-      <DetailField label="Nível do paciente">
-        {patientLevelLabels[session.patientLevel] ?? (session.patientLevel || '—')}
-      </DetailField>
-      <DetailField label="Período de atendimento">
-        {formatAttendancePeriod(session.attendancePeriod)}
-      </DetailField>
-      {(session.address || session.neighborhood) && (
-        <DetailField label="Endereço do atendimento">
-          {session.address && <span className="block">{session.address}</span>}
-          {session.neighborhood && (
-            <span className="block text-muted-foreground mt-0.5">{session.neighborhood}</span>
-          )}
-        </DetailField>
-      )}
+      {session.address ? (
+        <AddressField address={session.address} neighborhood={session.neighborhood} />
+      ) : session.neighborhood ? (
+        <AddressField address={session.neighborhood} />
+      ) : null}
     </>
   )
 
@@ -156,7 +173,7 @@ function SessionDetailBody({
             <DetailField label="Ciclo e sessão">
               <span className="flex items-center justify-between gap-3">
                 <span className="min-w-0">
-                  Ciclo {session.cycleNumber} · Sessão #{session.sessionNumber}
+                  Ciclo {session.cycleNumber} · Terapia #{session.sessionNumber}
                 </span>
                 <Badge className={cn('shrink-0', statusCfg.badge)}>{statusCfg.label}</Badge>
               </span>
@@ -175,14 +192,7 @@ function SessionDetailBody({
                 <DetailField label="Data e horário">
                   <span className="capitalize">{scheduledLabel}</span>
                 </DetailField>
-                <DetailField label="Duração prevista">{timeRange}</DetailField>
                 <DetailField label="Tipo">{describeSessionType(session)}</DetailField>
-                <DetailField label="Nível do paciente">
-                  {patientLevelLabels[session.patientLevel] ?? (session.patientLevel || '—')}
-                </DetailField>
-                <DetailField label="Período de atendimento">
-                  {formatAttendancePeriod(session.attendancePeriod)}
-                </DetailField>
               </div>
             </div>
           </CascadeItem>
@@ -195,7 +205,17 @@ function SessionDetailBody({
                   <h3 className="font-semibold text-sm">Endereço do atendimento</h3>
                 </div>
                 <div className="p-5 text-sm">
-                  {session.address && <p className="font-medium">{session.address}</p>}
+                  {session.address ? (
+                    <a
+                      href={buildGoogleMapsUrl(session.address, session.neighborhood)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 font-medium text-primary hover:underline"
+                    >
+                      {session.address}
+                      <ExternalLink size={14} className="shrink-0" />
+                    </a>
+                  ) : null}
                   {session.neighborhood && (
                     <p className="text-muted-foreground mt-1">{session.neighborhood}</p>
                   )}
@@ -212,7 +232,7 @@ function SessionDetailBody({
             Ver paciente
           </Button>
           {!mobile && showEvolutionFooter && (
-            <Button onClick={onOpenEvolution}>Registrar evolução</Button>
+            <Button onClick={onOpenEvolution}>Evoluir terapia</Button>
           )}
         </div>
       </CascadeItem>
@@ -244,14 +264,14 @@ export function PPSessionDetailPage() {
     navigate(`/profissional/pacientes/${session.patientId}`)
   }
 
-  const mobileTitle = session?.patientName ?? 'Sessão'
+  const mobileTitle = session?.patientName ?? 'Terapia'
   const showEvolutionFooter = session?.displayStatus === 'evolucao_pendente'
 
   const evolutionFooter = showEvolutionFooter ? (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-background/65 backdrop-blur-xl backdrop-saturate-150 shadow-[0_-8px_32px_rgba(0,0,0,0.08)] supports-[backdrop-filter]:bg-background/55">
       <div className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <Button className="h-12 w-full" onClick={openEvolution}>
-          Registrar evolução
+          Evoluir terapia
         </Button>
       </div>
     </div>
@@ -260,7 +280,7 @@ export function PPSessionDetailPage() {
   if (isLoading) {
     if (!isLgUp) {
       return (
-        <MobileSessionLayout title="Sessão" onBack={goBack} scrollClassName="pb-8">
+        <MobileSessionLayout title="Terapia" onBack={goBack} scrollClassName="pb-8">
           <DetailPageSkeleton fields={5} />
         </MobileSessionLayout>
       )
@@ -273,7 +293,7 @@ export function PPSessionDetailPage() {
             <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
               <ArrowLeft size={20} />
             </Button>
-            <span className="font-display font-bold text-xl">Sessão</span>
+            <span className="font-display font-bold text-xl">Terapia</span>
           </div>
         </PageHeader>
         <CrudScrollPageLayout>
@@ -286,7 +306,7 @@ export function PPSessionDetailPage() {
   if (!session) {
     if (!isLgUp) {
       return (
-        <MobileSessionLayout title="Sessão" onBack={goBack} scrollClassName="pb-8">
+        <MobileSessionLayout title="Terapia" onBack={goBack} scrollClassName="pb-8">
           <p className="text-muted-foreground">Sessão não encontrada ou não alocada a você.</p>
         </MobileSessionLayout>
       )
@@ -299,7 +319,7 @@ export function PPSessionDetailPage() {
             <Button variant="ghost" size="icon" onClick={goBack} className="shrink-0 rounded-xl" aria-label="Voltar">
               <ArrowLeft size={20} />
             </Button>
-            <span className="font-display font-bold text-xl">Sessão</span>
+            <span className="font-display font-bold text-xl">Terapia</span>
           </div>
         </PageHeader>
         <CrudScrollPageLayout>
@@ -343,7 +363,7 @@ export function PPSessionDetailPage() {
             <div className="flex items-center gap-2 flex-wrap mt-0.5">
               <Badge className={statusCfg.badge}>{statusCfg.label}</Badge>
               <span className="text-sm text-muted-foreground">
-                Ciclo {session.cycleNumber} · Sessão #{session.sessionNumber}
+                Ciclo {session.cycleNumber} · Terapia #{session.sessionNumber}
               </span>
             </div>
           </div>

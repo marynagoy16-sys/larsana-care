@@ -191,11 +191,11 @@ export async function acceptDemand(demandId: string): Promise<AcceptDemandResult
 export async function declineDemand({
   demandId,
   professionalId,
-  reason,
+  reason = null,
 }: {
   demandId: string
   professionalId: string
-  reason: string
+  reason?: string | null
 }) {
   const { error } = await (supabase as any).from('demand_responses').insert({
     demand_id: demandId,

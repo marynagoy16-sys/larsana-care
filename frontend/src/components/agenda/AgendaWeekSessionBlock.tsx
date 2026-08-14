@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   AGENDA_DAY_START_HOUR,
   AGENDA_WEEK_HOUR_HEIGHT_PX,
+  firstNameFromPatientName,
   sessionColumnPositionStyle,
   sessionHourCellLayout,
 } from '@/lib/agendaTimeline'
@@ -15,6 +16,8 @@ interface AgendaWeekSessionBlockProps {
   columnIndex?: number
   columnCount?: number
   hourHeightPx?: number
+  draggable?: boolean
+  onDragStart?: (sessionId: string) => void
 }
 
 export function AgendaWeekSessionBlock({
@@ -22,6 +25,8 @@ export function AgendaWeekSessionBlock({
   columnIndex = 0,
   columnCount = 1,
   hourHeightPx = AGENDA_WEEK_HOUR_HEIGHT_PX,
+  draggable = false,
+  onDragStart,
 }: AgendaWeekSessionBlockProps) {
   const navigate = useNavigate()
   const cfg = getAgendaStatusConfig(session.displayStatus)
@@ -34,15 +39,23 @@ export function AgendaWeekSessionBlock({
   const top = Math.round(topPx)
   const height = Math.max(Math.round(heightPx), 1)
   const timeLabel = format(scheduledStart, 'HH:mm')
-  const label = `${session.patientName}, ${timeLabel}`
-  const useDot = height < 24
+  const firstName = firstNameFromPatientName(session.patientName)
+  const label = `${firstName}, ${timeLabel}`
+  const showLabel = height >= 28
 
   return (
     <button
       type="button"
+      draggable={draggable}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/session-id', session.id)
+        e.dataTransfer.effectAllowed = 'move'
+        onDragStart?.(session.id)
+      }}
       className={cn(
         'absolute z-[2] block box-border overflow-hidden border-0 bg-transparent p-0 m-0',
         'appearance-none transition-opacity hover:opacity-80',
+        draggable && 'cursor-grab active:cursor-grabbing',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
       )}
       style={{ top, height, ...sessionColumnPositionStyle(columnIndex, columnCount) }}
@@ -50,7 +63,20 @@ export function AgendaWeekSessionBlock({
       title={`${session.patientName} · ${timeLabel} · Ciclo ${session.cycleNumber} · Sessão #${session.sessionNumber}`}
       aria-label={label}
     >
-      {useDot ? (
+      {showLabel ? (
+        <span
+          className={cn(
+            'absolute inset-x-0.5 inset-y-0.5 flex items-start overflow-hidden rounded-[3px] px-1 py-0.5 text-left',
+            cfg.agendaFill,
+            'ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.08]',
+          )}
+        >
+          <span className={cn('absolute inset-y-0 left-0 w-[3px] rounded-l-[3px]', cfg.agendaBar)} />
+          <span className="relative z-[1] truncate pl-1 text-[9px] font-semibold leading-tight text-foreground sm:text-[10px]">
+            {firstName}
+          </span>
+        </span>
+      ) : (
         <span
           className={cn(
             'absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full',
@@ -58,17 +84,6 @@ export function AgendaWeekSessionBlock({
           )}
           aria-hidden
         />
-      ) : (
-        <span
-          className={cn(
-            'absolute inset-x-0.5 inset-y-1 block rounded-[3px]',
-            cfg.agendaFill,
-            'ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.08]',
-          )}
-          aria-hidden
-        >
-          <span className={cn('absolute inset-y-0 left-0 w-[3px] rounded-l-[3px]', cfg.agendaBar)} />
-        </span>
       )}
     </button>
   )

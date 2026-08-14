@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'next-themes'
 import { Monitor, Moon, Sun } from 'lucide-react'
-import { PacienteSubpageBackButton } from '@/components/paciente/PacienteSubpageShell'
-import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
-import { PageHeader } from '@/components/layout/PageHeader'
+import { PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -68,31 +66,20 @@ export function PacienteAparenciaPage() {
     goBack()
   }
 
-  const backButton = <PacienteSubpageBackButton onBack={handleCancel} />
-
   if (!mounted) {
     return (
-      <>
-        <PageHeader loading>{backButton}</PageHeader>
-        <CrudScrollPageLayout>
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        </CrudScrollPageLayout>
-      </>
+      <PacienteSubpageShell title="Aparência" onBack={handleCancel} loading>
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      </PacienteSubpageShell>
     )
   }
 
   return (
-    <>
-      <PageHeader>{backButton}</PageHeader>
-
-      <CrudScrollPageLayout>
-        <div className="space-y-5 pb-8">
-          <div>
-            <h2 className="font-display text-xl font-bold text-foreground">Aparência</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Tema atual: {resolveThemeLabel(initialTheme, resolvedTheme)}
-            </p>
-          </div>
+    <PacienteSubpageShell title="Aparência" onBack={handleCancel}>
+      <div className="space-y-5 pb-8">
+        <p className="text-sm text-muted-foreground">
+          Tema atual: {resolveThemeLabel(initialTheme, resolvedTheme)}
+        </p>
 
           <div className="space-y-2">
             {THEME_OPTIONS.map(({ value, label, description, icon: Icon }) => {
@@ -142,8 +129,7 @@ export function PacienteAparenciaPage() {
             </Button>
           </div>
         </div>
-      </CrudScrollPageLayout>
-    </>
+    </PacienteSubpageShell>
   )
 }
 

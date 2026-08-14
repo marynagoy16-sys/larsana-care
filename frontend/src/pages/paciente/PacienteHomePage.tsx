@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Logo } from '@/components/shared/Logo'
 import { PatientActiveTreatmentCard } from '@/components/paciente/PatientActiveTreatmentCard'
 import { PatientHomeBanner } from '@/components/paciente/PatientHomeBanner'
+import { PatientHomeSchedulingBanner } from '@/components/paciente/PatientHomeSchedulingBanner'
 import { PatientHomeHelpLink, PatientHomeLarsanaPillTeaser } from '@/components/paciente/PatientHomeExtras'
 import { PatientHomeJourney } from '@/components/paciente/PatientHomeJourney'
 import { PatientHomeKpiRow } from '@/components/paciente/PatientHomeKpiRow'
@@ -110,6 +111,10 @@ export function PacienteHomePage() {
               <PatientHomeBanner context={data} />
             </CascadeItem>
           )}
+
+          <CascadeItem>
+            <PatientHomeSchedulingBanner />
+          </CascadeItem>
 
           <CascadeItem className="hidden lg:block">
             <PatientHomeKpiRow context={data} />

@@ -145,7 +145,7 @@ function HomeEvolutionCard({
         <Trophy className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium">Minha evolução</p>
+        <p className="text-sm font-medium">Minha jornada</p>
         <p className="text-xs text-muted-foreground">
           {points} pts · {patenteLabel} · {repassePercent}% repasse
         </p>

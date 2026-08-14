@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { getThemeDescription } from '@/pages/paciente/PacienteAparenciaPage'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
+import { PatientAccountAvatar } from '@/components/paciente/PatientAccountAvatar'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
@@ -72,8 +73,17 @@ export function PacienteContaPage() {
 
   return (
     <CrudScrollPageLayout>
-      <div className="space-y-4 pb-8">
+      <div className="space-y-3 pb-8">
+        <PatientAccountAvatar />
+
         <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <AccountLinkRow
+            to="/paciente/conta/perfil"
+            label="Perfil"
+            description={profileDescription}
+            icon={User}
+            className="border-b border-border"
+          />
           <AccountLinkRow
             to="/paciente/pagamentos"
             label="Pagamentos"
@@ -100,13 +110,6 @@ export function PacienteContaPage() {
             label="Aparência"
             description={themeDescription}
             icon={Moon}
-            className="border-b border-border"
-          />
-          <AccountLinkRow
-            to="/paciente/conta/perfil"
-            label="Perfil"
-            description={profileDescription}
-            icon={User}
             className="border-b border-border"
           />
           <AccountLinkRow

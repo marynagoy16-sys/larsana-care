@@ -27,6 +27,9 @@ function lazyAdmin(exportName: keyof typeof import('@/pages/admin/modulePages'))
   return lazy(() => import('@/pages/admin/modulePages').then((m) => ({ default: m[exportName] })))
 }
 
+const AdminWaitlistPage = lazy(() =>
+  import('@/pages/admin/waitlist/AdminWaitlistPage').then((m) => ({ default: m.AdminWaitlistPage })),
+)
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then((m) => ({ default: m.DashboardPage })))
 const AssessmentsPage = lazyAdmin('AssessmentsPage')
 const AssessmentDetailPage = lazyAdmin('AssessmentDetailPage')
@@ -132,6 +135,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'credenciamento/:id', element: staffRoute(<LegacyCredenciamentoRedirect />, operacaoRoles) },
       { path: 'demandas', element: staffRoute(<DemandsPage />, operacaoRoles) },
       { path: 'demandas/:id', element: staffRoute(<DemandDetailPage />, operacaoRoles) },
+      { path: 'lista-espera', element: staffRoute(<AdminWaitlistPage />, operacaoRoles) },
       { path: 'cobrancas', element: staffRoute(<ChargesPage />, financeiroRoles) },
       { path: 'cobrancas/:id', element: staffRoute(<ChargeDetailPage />, financeiroRoles) },
       { path: 'repasses', element: staffRoute(<TransfersPage />, financeiroRoles) },

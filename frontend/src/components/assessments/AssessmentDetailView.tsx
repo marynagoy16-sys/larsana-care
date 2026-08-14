@@ -48,6 +48,9 @@ export type AssessmentDetailViewData = {
 type AssessmentDetailViewProps = {
   data: AssessmentDetailViewData
   totalAmountCents?: number | null
+  /** Visão PP: exibe repasse estimado em vez do valor cobrado do paciente. */
+  repassePerSessionCents?: number | null
+  repasseTotalCents?: number | null
 }
 
 
@@ -92,7 +95,12 @@ function formatProfessionalLabel(evaluator: AssessmentDetailViewData['evaluator'
   return ppClass ? `${evaluator.full_name} · ${ppClass}` : evaluator.full_name
 }
 
-export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetailViewProps) {
+export function AssessmentDetailView({
+  data,
+  totalAmountCents,
+  repassePerSessionCents,
+  repasseTotalCents,
+}: AssessmentDetailViewProps) {
   const levelPendingReview = data.level_change_review_status === 'pendente'
   const levelNotConfirmed = data.level_confirmed === false
   const functionality = data.functionality ?? data.mobility ?? '—'
@@ -104,9 +112,12 @@ export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetai
       : '—'
 
   const unitPriceCents =
-    totalAmountCents != null && data.proposed_session_count > 0
+    repassePerSessionCents ??
+    (totalAmountCents != null && data.proposed_session_count > 0
       ? Math.round(totalAmountCents / data.proposed_session_count)
-      : null
+      : null)
+
+  const cycleAmountCents = repasseTotalCents ?? totalAmountCents
 
   const levelLabel = patientLevelLabels[data.proposed_patient_level] ?? data.proposed_patient_level
   const cycleLabel =
@@ -128,7 +139,8 @@ export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetai
     responseDeadlineAt: data.response_deadline_at,
     proposedSessionCount: data.proposed_session_count,
     proposedPatientLevel: data.proposed_patient_level,
-    totalAmountCents,
+    totalAmountCents: repasseTotalCents != null ? null : totalAmountCents,
+    repasseTotalCents,
   }
 
   const regionLabel = formatRegionLabel(data)
@@ -181,15 +193,19 @@ export function AssessmentDetailView({ data, totalAmountCents }: AssessmentDetai
             label="Nível confirmado"
             value={
               unitPriceCents != null
-                ? `${levelLabel} · ${formatCurrency(unitPriceCents)}/sessão`
+                ? repassePerSessionCents != null
+                  ? `${levelLabel} · ${formatCurrency(unitPriceCents)}/terapia (repasse)`
+                  : `${levelLabel} · ${formatCurrency(unitPriceCents)}/sessão`
                 : levelLabel
             }
           />
           <PlanRow
             label="Ciclo proposto"
             value={
-              totalAmountCents != null
-                ? `${cycleLabel} · ${formatCurrency(totalAmountCents)}`
+              cycleAmountCents != null
+                ? repasseTotalCents != null
+                  ? `${cycleLabel} · ${formatCurrency(cycleAmountCents)} repasse estimado`
+                  : `${cycleLabel} · ${formatCurrency(cycleAmountCents)}`
                 : cycleLabel
             }
           />

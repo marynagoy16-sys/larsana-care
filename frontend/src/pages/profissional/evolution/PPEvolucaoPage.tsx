@@ -4,6 +4,7 @@ import { Copy, Trophy, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
@@ -17,7 +18,45 @@ import {
   patenteLabels,
   PATENTE_REPASSE_PERCENT,
   resolveNextPatenteTarget,
+  type PpPatente,
 } from '@/services/ppPoints'
+
+function resolvePatenteProgress(
+  points: number,
+  patente: PpPatente,
+  settings: { bronze_threshold: number; prata_threshold: number; ouro_threshold: number },
+): { current: number; target: number; percent: number; fromPatente: PpPatente } {
+  if (patente === 'OURO') {
+    return { current: points, target: settings.ouro_threshold, percent: 100, fromPatente: 'OURO' }
+  }
+  if (patente === 'PRATA') {
+    const from = settings.prata_threshold
+    const to = settings.ouro_threshold
+    return {
+      current: points,
+      target: to,
+      percent: Math.min(100, Math.round(((points - from) / Math.max(1, to - from)) * 100)),
+      fromPatente: 'PRATA',
+    }
+  }
+  if (patente === 'BRONZE') {
+    const from = settings.bronze_threshold
+    const to = settings.prata_threshold
+    return {
+      current: points,
+      target: to,
+      percent: Math.min(100, Math.round(((points - from) / Math.max(1, to - from)) * 100)),
+      fromPatente: 'BRONZE',
+    }
+  }
+  const to = settings.bronze_threshold
+  return {
+    current: points,
+    target: to,
+    percent: Math.min(100, Math.round((points / Math.max(1, to)) * 100)),
+    fromPatente: 'ALUMINIO',
+  }
+}
 
 export function PPEvolucaoPage() {
   const { data: professional } = useQuery({
@@ -55,6 +94,9 @@ export function PPEvolucaoPage() {
       ? resolveNextPatenteTarget(points, settings, patente)
       : null
 
+  const patenteProgress =
+    settings ? resolvePatenteProgress(points, patente, settings) : null
+
   const copyReferral = async () => {
     if (!referralCode) return
     await navigator.clipboard.writeText(referralCode)
@@ -65,7 +107,7 @@ export function PPEvolucaoPage() {
       <PageHeader>
         <div className="flex items-center gap-3">
           <Trophy className="size-5 text-primary" />
-          <h1 className="font-display font-bold text-xl">Minha evolução</h1>
+          <h1 className="font-display font-bold text-xl">Minha jornada</h1>
         </div>
       </PageHeader>
 
@@ -81,7 +123,23 @@ export function PPEvolucaoPage() {
                 <Badge variant="secondary">{PATENTE_REPASSE_PERCENT[patente]}% repasse</Badge>
               </div>
               <p className="text-3xl font-bold tabular-nums">{points} <span className="text-base font-normal text-muted-foreground">pontos</span></p>
-              {nextTarget && settings?.show_next_tier_hint && (
+              {patenteProgress && nextTarget && settings?.show_next_tier_hint && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span>{patenteLabels[patenteProgress.fromPatente]}</span>
+                    <span>{patenteLabels[nextTarget.patente]}</span>
+                  </div>
+                  <Progress value={patenteProgress.percent} className="h-2.5" />
+                  <p className="text-sm text-muted-foreground">
+                    {points} / {nextTarget.threshold} pts · faltam{' '}
+                    <span className="font-medium text-foreground">
+                      {Math.max(0, nextTarget.threshold - points)} pts
+                    </span>{' '}
+                    para {patenteLabels[nextTarget.patente]} ({PATENTE_REPASSE_PERCENT[nextTarget.patente]}% repasse)
+                  </p>
+                </div>
+              )}
+              {nextTarget && settings?.show_next_tier_hint && !patenteProgress && (
                 <p className="text-sm text-muted-foreground">
                   Faltam {Math.max(0, nextTarget.threshold - points)} pts para {patenteLabels[nextTarget.patente]} (
                   {PATENTE_REPASSE_PERCENT[nextTarget.patente]}% repasse)

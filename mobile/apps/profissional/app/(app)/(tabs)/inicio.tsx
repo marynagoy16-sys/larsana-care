@@ -118,7 +118,7 @@ export default function InicioScreen() {
             <Trophy size={18} color="#B45309" />
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-sm font-medium text-foreground">Minha evolução</Text>
+            <Text className="text-sm font-medium">Minha jornada</Text>
             <Text className="text-xs text-muted-foreground">
               {pointsProfile?.points_total ?? 0} pts · {patenteLabels[pointsProfile?.patente ?? 'ALUMINIO']} ·{' '}
               {PATENTE_REPASSE_PERCENT[pointsProfile?.patente ?? 'ALUMINIO']}% repasse

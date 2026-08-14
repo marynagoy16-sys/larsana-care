@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router'
 import {
   Bell,
   ChevronRight,
-  CreditCard,
   LogOut,
   Shield,
   TrendingUp,
@@ -26,11 +25,10 @@ type MenuItem = {
 }
 
 const MENU_ITEMS: MenuItem[] = [
-  { label: 'Minha evolução', href: '/(app)/minha-evolucao', Icon: Trophy, description: 'Pontos, patente e percentual de repasse' },
+  { label: 'Minha jornada', href: '/(app)/minha-evolucao', Icon: Trophy, description: 'Pontos, patente e percentual de repasse' },
   { label: 'Repasses', href: '/(app)/repasses', Icon: Wallet, description: 'Ganhos por ciclo liberados pela Larsana' },
   { label: 'Simulador de ganhos', href: '/(app)/simulador', Icon: TrendingUp, description: 'Estimativa com base no histórico' },
   { label: 'Credenciamento', href: '/(app)/credenciamento', Icon: Shield, description: 'Documentos, conselho e dados bancários' },
-  { label: 'Cartão de visita', href: '/(app)/cartao', Icon: CreditCard, description: 'Informações do cartão digital' },
   { label: 'Notificações', href: '/(app)/notificacoes', Icon: Bell, description: 'Alertas e avisos importantes' },
   { label: 'Perfil', href: '/(app)/perfil', Icon: User, description: 'Dados do profissional parceiro' },
 ]

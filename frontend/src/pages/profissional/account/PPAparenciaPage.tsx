@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'next-themes'
 import { Monitor, Moon, Sun } from 'lucide-react'
-import { PacienteSubpageBackButton } from '@/components/paciente/PacienteSubpageShell'
+import { SubpageHeaderBar } from '@/components/paciente/PacienteSubpageShell'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -68,14 +68,12 @@ export function PPAparenciaPage() {
     goBack()
   }
 
-  const backButton = (
-    <PacienteSubpageBackButton backTo="/profissional/conta" onBack={handleCancel} />
-  )
-
   if (!mounted) {
     return (
       <>
-        <PageHeader loading>{backButton}</PageHeader>
+        <PageHeader loading>
+          <SubpageHeaderBar title="Aparência" backTo="/profissional/conta" onBack={handleCancel} />
+        </PageHeader>
         <CrudScrollPageLayout>
           <p className="text-sm text-muted-foreground">Carregando…</p>
         </CrudScrollPageLayout>
@@ -85,16 +83,15 @@ export function PPAparenciaPage() {
 
   return (
     <>
-      <PageHeader>{backButton}</PageHeader>
+      <PageHeader>
+        <SubpageHeaderBar title="Aparência" backTo="/profissional/conta" onBack={handleCancel} />
+      </PageHeader>
 
       <CrudScrollPageLayout>
         <div className="space-y-5 pb-8">
-          <div>
-            <h2 className="font-display text-xl font-bold text-foreground">Aparência</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Tema atual: {resolveThemeLabel(initialTheme, resolvedTheme)}
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Tema atual: {resolveThemeLabel(initialTheme, resolvedTheme)}
+          </p>
 
           <div className="space-y-2">
             {THEME_OPTIONS.map(({ value, label, description, icon: Icon }) => {

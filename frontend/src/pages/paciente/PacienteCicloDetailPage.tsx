@@ -42,7 +42,11 @@ export function PacienteCicloDetailPage() {
     : '/paciente/pagamentos'
 
   return (
-    <PacienteSubpageShell backTo="/paciente/tratamento" loading={isLoading}>
+    <PacienteSubpageShell
+      title={cycle ? `Ciclo #${cycle.cycle_number}` : 'Ciclo'}
+      backTo="/paciente/tratamento"
+      loading={isLoading}
+    >
       <div className="space-y-6 pb-8">
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando ciclo…</p>
@@ -50,10 +54,7 @@ export function PacienteCicloDetailPage() {
           <PacienteEmptyState message="Ciclo não encontrado." />
         ) : (
           <>
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground">Ciclo #{cycle.cycle_number}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{statusLabel}</p>
-            </div>
+            <p className="text-sm text-muted-foreground">{statusLabel}</p>
 
             {needsPayment && (
               <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/25 p-4">

@@ -105,6 +105,13 @@ export function LoginForm() {
       </Button>
 
       <DevQuickLogin disabled={loading} onLoadingChange={setLoading} />
+
+      <p className="text-center text-sm text-muted-foreground">
+        Primeiro acesso?{' '}
+        <Link to="/cadastro" className="text-primary hover:underline">
+          Criar conta
+        </Link>
+      </p>
     </form>
   )
 }

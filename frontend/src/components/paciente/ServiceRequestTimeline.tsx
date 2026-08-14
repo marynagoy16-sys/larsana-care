@@ -5,12 +5,14 @@ import type { PatientServiceDemand } from '@/services/patientServiceRequest'
 const STEPS = [
   { key: 'enviada', label: 'Solicitação enviada' },
   { key: 'buscando', label: 'Procurando profissional parceiro' },
+  { key: 'waitlist', label: 'Lista de espera / sem cobertura imediata' },
   { key: 'atribuido', label: 'Profissional parceiro atribuído' },
 ] as const
 
-function resolveStepIndex(demand: PatientServiceDemand | null | undefined): number {
+function resolveStepIndex(demand: PatientServiceDemand | null | undefined, hasWaitlist?: boolean): number {
+  if (hasWaitlist && !demand) return 2
   if (!demand) return -1
-  if (demand.status === 'alocada' || demand.assigned_professional_id) return 2
+  if (demand.status === 'alocada' || demand.assigned_professional_id) return 3
   if (demand.status === 'aberta') return 1
   return 0
 }
@@ -36,19 +38,8 @@ function formatWhen(iso?: string): string {
 }
 
 export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props) {
-  if (hasWaitlist) {
-    return (
-      <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-        <p className="text-sm font-semibold text-foreground">Lista de espera</p>
-        <p className="text-sm text-muted-foreground">
-          Registramos seu interesse. Em breve nossa equipe entrará em contato com mais informações.
-        </p>
-      </div>
-    )
-  }
-
-  const activeIndex = resolveStepIndex(demand)
-  if (activeIndex < 0) return null
+  const activeIndex = resolveStepIndex(demand, hasWaitlist)
+  if (activeIndex < 0 && !hasWaitlist) return null
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-4">
@@ -77,6 +68,11 @@ export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props
               {current && step.key === 'buscando' ? (
                 <p className="text-xs text-muted-foreground">
                   Estamos buscando um profissional parceiro disponível na sua região.
+                </p>
+              ) : null}
+              {current && step.key === 'waitlist' ? (
+                <p className="text-xs text-muted-foreground">
+                  Registramos seu interesse. Nossa equipe avisará quando houver cobertura.
                 </p>
               ) : null}
             </div>

@@ -1,6 +1,6 @@
 # Fase 0 — Checklist de alinhamento (transcrição + PDFs + código)
 
-**Data:** 11/08/2026  
+**Data:** 11/08/2026 · **Atualizado:** 14/08/2026 (review 13/08 + plano transcrição)
 **Fontes:** `Alinhamento_Larsana_Care_Transcricao.md` · `Transcricao_Larsana_Care_Alinhamento_2026-06-30.md` · PDFs Marina · codebase
 
 Legenda: ✅ feito · ⚠️ parcial · ❌ pendente · 🔍 decisão externa
@@ -11,8 +11,8 @@ Legenda: ✅ feito · ⚠️ parcial · ❌ pendente · 🔍 decisão externa
 
 | Item | Status | Evidência / nota |
 |------|--------|------------------|
-| Lançamento app **paciente** nas lojas | ❌ | PRD atualizado §4.3; build/store pendente |
-| PP em validação paralela | ⚠️ | App PP funcional; UX não alinhada |
+| Lançamento app **paciente** nas lojas | ⚠️ | `eas.json` adicionado; submit store pendente |
+| PP em validação paralela | ✅ | UX review 13/08 implementada (Minha jornada, agenda 5–22h, wizard agendamento) |
 | Identidade visual (logo, paleta) | ✅ | Commit `8123656` — `DESIGN_SYSTEM.md` v6 |
 | Academy LMS | ✅ | `docs/ACADEMY.md`, rotas admin/PP/paciente |
 | Academy vendas Asaas | ❌ | Track Elias; sem checkout no código |
@@ -24,17 +24,18 @@ Legenda: ✅ feito · ⚠️ parcial · ❌ pendente · 🔍 decisão externa
 
 | Requisito transcrição | Status | Arquivo / gap |
 |----------------------|--------|---------------|
-| Nav: Início · Agenda · **Demandas (centro)** · Repasses · Academy | ❌ | Atual: Evolução FAB central — `_layout.tsx` |
-| Perfil fora da tab bar (menu ⋮) | ⚠️ | Perfil ainda é tab; drawer existe |
-| Agenda **semanal** (não diária) | ❌ | `agenda/index.tsx` — só dia a dia |
-| Sub-aba evoluções pendentes na agenda | ⚠️ | Tab Evolução separada; falta integrar na agenda |
-| "Criar evolução" / "Evoluir terapia" | ⚠️ | Fluxo create existe; copy "sessão" |
-| "Prontuário" em vez de "Ver paciente" | ❌ | `pacientes/[id].tsx` — resumo sem ciclos |
-| Prontuário agrupado por ciclos (desc) | ❌ | Admin tem flat list; PP sem prontuário |
-| Avaliação inicial destacada no prontuário | ❌ | — |
-| Repasses UX intuitivo | ⚠️ | Lista básica em `repasses.tsx` |
-| Credenciamento/perfil repaginado | ⚠️ | Fluxo existe; Marina pediu simplificação |
-| Demandas: aceitar/recusa + alerta | ✅ | `demandas.tsx`, `[id].tsx` |
+| Nav: Início · Agenda · **Demandas (centro)** · Academy · Conta | ✅ | `_layout.tsx`, `navigation.ts` |
+| Minha **jornada** (não evolução) | ✅ | `PPEvolucaoPage`, mobile `minha-evolucao.tsx` |
+| Cartão de visita oculto | ✅ | Removido de Conta/nav |
+| Recusa demanda sem motivo | ✅ | `PPDemandDetailPage`, mobile `[id].tsx` |
+| Gate credenciamento no aceite | ✅ | Modal redirect credenciamento |
+| Agenda semanal 5h–22h + 1º nome | ✅ | `agendaTimeline.ts`, `AgendaWeekSessionBlock` |
+| Evoluir terapia (copy) | ✅ | Agenda + detalhe sessão |
+| Drag remarcar + notify paciente | ✅ | `AgendaWeekTimeline`, RPC `pp_reschedule_session` |
+| Wizard pós-aceite demanda | ✅ | `PPDemandSchedulePage`, migration scheduling |
+| Prontuário por ciclos (desc) | ✅ | `PPPatientProntuarioSection` |
+| Repasses UX padronizado | ✅ | `PPRepassesPage` |
+| Demandas: aceitar/recusa | ✅ | `demandas.tsx`, `[id].tsx` |
 | Mapa demandas PP | ✅ | `DemandMap.tsx` |
 
 ---
@@ -44,16 +45,17 @@ Legenda: ✅ feito · ⚠️ parcial · ❌ pendente · 🔍 decisão externa
 | Requisito transcrição | Status | Arquivo / gap |
 |----------------------|--------|---------------|
 | LarsanaPill destaque (FAB centro) | ✅ | `(tabs)/_layout.tsx` |
-| Tab "Solicitar atendimento" (não "Tratamento") | ❌ | Ainda `tratamento` tab |
-| Documentos dentro de Conta | ❌ | Tab Docs separada |
-| Pagar como ação (não tab) | ❌ | Tab Pagar separada |
-| Mapa SVG "procurando PP" | ❌ | Não implementado |
-| "Estamos chegando" sem cobertura | ❌ | Sem lógica regional no paciente |
-| Botão "Desejo iniciar tratamento" | ❌ | Sem tabela waitlist |
-| Timeline Correios da solicitação | ❌ | `PatientHomeJourney` = pós-cadastro |
-| Timeline tratamento existente | ⚠️ | Parcial |
+| Tab "Solicitar atendimento" | ✅ | `solicitar.tsx` (+ tab Tratamento mantida) |
+| Documentos dentro de Conta | ✅ | `conta.tsx` |
+| Pagar como ação (não tab) | ✅ | Conta + CTAs |
+| Mapa SVG "procurando PP" | ✅ | `CoverageMapIllustration.tsx` |
+| "Estamos chegando" sem cobertura | ✅ | `PacienteSolicitarPage.tsx` |
+| Botão "Desejo iniciar tratamento" / waitlist | ✅ | RPC `patient_join_waitlist` |
+| Timeline solicitação (Correios) | ⚠️ | `ServiceRequestTimeline.tsx` enriquecida |
+| Confirmação horário pelo paciente | ✅ | `PacienteAgendamentoPage`, RPC confirm/reject |
+| Cadastro / primeiro acesso | ⚠️ | `/cadastro` web; vínculo admin ainda necessário |
+| Aceite legal funcional | ⚠️ | `PacienteAceitePage` reescrita; gate global pendente |
 | LarsanaPill conteúdo PHIL | ✅ | `larsanapill/` |
-| Responsividade mobile paciente web | ⚠️ | Eduardo citou ajustes pendentes |
 
 ---
 
@@ -67,7 +69,7 @@ Legenda: ✅ feito · ⚠️ parcial · ❌ pendente · 🔍 decisão externa
 | Regiões A/B/C | ✅ | Bug `regions.map` corrigido |
 | Atalho prontuário na lista pacientes | ✅ | Transcrição 30/06 confirmada |
 | "Nível confirmado" (não "proposto") | ⚠️ | `AssessmentDetailView` ok; `AssessmentProposalFields` ainda "sugerido/proposto" |
-| Fila lista de espera admin | ❌ | Rota planejada em `PAGES.md` |
+| Fila lista de espera admin | ✅ | `AdminWaitlistPage` — `/admin/lista-espera` |
 
 ---
 

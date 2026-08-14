@@ -72,6 +72,7 @@ export const adminNavSections: NavSection[] = [
       { label: 'Prontuários', href: '/admin/prontuarios', icon: Stethoscope, roles: ['admin', 'gestao'] },
       { label: 'Profissionais', href: '/admin/profissionais', icon: UserCheck, roles: ['admin', 'gestao'] },
       { label: 'Demandas', href: '/admin/demandas', icon: MapPin, roles: ['admin', 'gestao'] },
+      { label: 'Lista de espera', href: '/admin/lista-espera', icon: Users, roles: ['admin', 'gestao'] },
       { label: 'Academy', href: '/admin/academy', icon: GraduationCap, roles: ['admin', 'gestao'] },
       { label: 'LarsanaPill', href: '/admin/larsanapill', icon: Pill, roles: ['admin', 'gestao'] },
     ],
@@ -121,7 +122,7 @@ export const profissionalNavSections: NavSection[] = [
     icon: Calendar,
     items: [
       { label: 'Início', href: '/profissional/inicio', icon: Home, roles: ['pp'], end: true },
-      { label: 'Minha evolução', href: '/profissional/evolucao', icon: Trophy, roles: ['pp'] },
+      { label: 'Minha jornada', href: '/profissional/evolucao', icon: Trophy, roles: ['pp'] },
       { label: 'Agenda', href: '/profissional/agenda', icon: Calendar, roles: ['pp'] },
       { label: 'Demandas', href: '/profissional/demandas', icon: MapPin, roles: ['pp'] },
     ],
@@ -150,7 +151,6 @@ export const profissionalNavSections: NavSection[] = [
       { label: 'Repasses', href: '/profissional/repasses', icon: Wallet, roles: ['pp'] },
       { label: 'Simulador de ganhos', href: '/profissional/simulador', icon: TrendingUp, roles: ['pp'] },
       { label: 'Credenciamento', href: '/profissional/credenciamento', icon: Shield, roles: ['pp'] },
-      { label: 'Cartão de visita', href: '/profissional/cartao', icon: CreditCard, roles: ['pp'] },
       { label: 'Notificações', href: '/profissional/notificacoes', icon: Bell, roles: ['pp'] },
       { label: 'Perfil', href: '/profissional/perfil', icon: User, roles: ['pp'] },
     ],
@@ -167,16 +167,16 @@ export const profissionalBottomNav: NavItem[] = [
 
 export const pacienteHeaderNav: NavItem[] = [
   { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
-  { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
+  { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
 ]
 
 export const pacienteBottomNav: NavItem[] = [
   { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
-  { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
+  { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
 ]
@@ -234,6 +234,7 @@ export const routeTitles: Record<string, string> = {
   '/admin/prontuarios': 'Prontuários',
   '/admin/profissionais': 'Profissionais',
   '/admin/demandas': 'Demandas',
+  '/admin/lista-espera': 'Lista de espera',
   '/admin/academy': 'Academy',
   '/admin/academy/cursos': 'Cursos Academy',
   '/admin/academy/matriculas': 'Matrículas Academy',
@@ -263,7 +264,7 @@ export const routeTitles: Record<string, string> = {
   '/profissional/agenda': 'Agenda',
   '/profissional/demandas': 'Demandas',
   '/profissional/evolucoes': 'Evoluções pendentes',
-  '/profissional/evolucao': 'Minha evolução',
+  '/profissional/evolucao': 'Minha jornada',
   '/profissional/evolucao/nova': 'Nova evolução',
   '/profissional/pacientes': 'Meus pacientes',
   '/profissional/avaliacoes': 'Avaliações',
@@ -283,6 +284,7 @@ export const routeTitles: Record<string, string> = {
   '/paciente/tratamento': 'Meu tratamento',
   '/paciente/pagamentos': 'Pagamentos',
   '/paciente/proposta': 'Responder proposta',
+  '/paciente/agendamento': 'Confirmar horário',
   '/paciente/documentos': 'Documentos',
   '/paciente/aceite-inicial': 'Aceite inicial',
   '/paciente/conta': 'Conta',

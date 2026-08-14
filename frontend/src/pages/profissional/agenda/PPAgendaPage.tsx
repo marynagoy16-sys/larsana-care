@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { addDays, addMonths, isSameDay, subDays, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -29,8 +29,11 @@ import {
   listAgendaSessionsForWeek,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
+import { ppRescheduleSession } from '@/services/scheduling'
+import { useCrudMutation } from '@/hooks/useCrudMutation'
 
 export function PPAgendaPage() {
+  const queryClient = useQueryClient()
   const { setFixedMain } = useImmersiveLayout()
   const scrollRef = useRef<HTMLDivElement>(null)
   const mobileScrollRef = useRef<HTMLDivElement>(null)
@@ -69,8 +72,23 @@ export function PPAgendaPage() {
     enabled: view === 'week',
   })
 
-  const daySessions = dayQuery.data ?? []
   const weekSessions = weekQuery.data ?? []
+
+  const rescheduleMutation = useCrudMutation({
+    mutationFn: ({ sessionId, newScheduledAt }: { sessionId: string; newScheduledAt: Date }) =>
+      ppRescheduleSession(sessionId, newScheduledAt.toISOString()),
+    queryKey: ['pp', 'agenda'],
+    successMessage: 'Terapia remarcada — paciente notificado',
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pp', 'agenda'] })
+    },
+  })
+
+  const handleRescheduleSession = (sessionId: string, newScheduledAt: Date) => {
+    rescheduleMutation.mutate({ sessionId, newScheduledAt })
+  }
+
+  const daySessions = dayQuery.data ?? []
 
   const stripSessionDayKeys = useMemo(() => {
     const keys = new Set<string>()
@@ -291,6 +309,8 @@ export function PPAgendaPage() {
             sessions={weekSessions}
             onSelectDay={selectDayFromWeek}
             scrollContainerRef={mobileScrollRef}
+            enableDragReschedule
+            onRescheduleSession={handleRescheduleSession}
           />
         </div>
       )}
@@ -314,6 +334,8 @@ export function PPAgendaPage() {
             sessions={weekSessions}
             onSelectDay={selectDayFromWeek}
             scrollContainerRef={scrollRef}
+            enableDragReschedule
+            onRescheduleSession={handleRescheduleSession}
           />
         </div>
       )}

@@ -16,6 +16,9 @@ function lazyPaciente(exportName: keyof typeof import('@/pages/paciente/modulePa
   return lazy(() => import('@/pages/paciente/modulePages').then((m) => ({ default: m[exportName] })))
 }
 
+const PacienteAgendamentoPage = lazy(() =>
+  import('@/pages/paciente/PacienteAgendamentoPage').then((m) => ({ default: m.PacienteAgendamentoPage })),
+)
 const PacienteHomePage = lazyPaciente('PacienteHomePage')
 const PacienteTratamentoPage = lazyPaciente('PacienteTratamentoPage')
 const PacienteSolicitarPage = lazy(() =>
@@ -66,6 +69,7 @@ export const pacienteRoutes: RouteObject[] = [
       { path: 'pagamentos', element: pacienteRoute(<PacientePagamentosPage />) },
       { path: 'pagamentos/:id', element: pacienteRoute(<PacientePagamentoDetailPage />) },
       { path: 'proposta', element: pacienteRoute(<PacientePropostaPage />) },
+      { path: 'agendamento', element: pacienteRoute(<PacienteAgendamentoPage />) },
       { path: 'documentos', element: pacienteRoute(<PacienteDocumentosPage />) },
       { path: 'aceite-inicial', element: pacienteRoute(<PacienteAceitePage />) },
       { path: 'nps/:cicloId', element: pacienteRoute(<PacienteNpsPage />) },

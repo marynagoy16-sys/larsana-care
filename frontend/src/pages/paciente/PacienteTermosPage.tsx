@@ -36,12 +36,9 @@ export function PacienteTermosPage() {
   })
 
   return (
-    <PacienteSubpageShell loading={isLoading}>
+    <PacienteSubpageShell title="Termos" loading={isLoading}>
       <div className="space-y-4 pb-8">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Termos</h2>
-          <p className="text-sm text-muted-foreground mt-1">Termos de uso e política de privacidade</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Termos de uso e política de privacidade</p>
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando termos…</p>
@@ -89,16 +86,17 @@ export function PacienteTermoDetailPage() {
   })
 
   return (
-    <PacienteSubpageShell loading={isLoading} backTo="/paciente/termos">
+    <PacienteSubpageShell
+      title={data?.title ?? 'Termo'}
+      loading={isLoading}
+      backTo="/paciente/termos"
+    >
       <div className="space-y-4 pb-8">
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : data ? (
           <>
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground">{data.title}</h2>
-              <p className="text-sm text-muted-foreground mt-1">Versão {data.version}</p>
-            </div>
+            <p className="text-sm text-muted-foreground">Versão {data.version}</p>
             <div className="rounded-xl border border-border bg-muted/30 px-4 py-5">
               <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{data.content}</p>
             </div>

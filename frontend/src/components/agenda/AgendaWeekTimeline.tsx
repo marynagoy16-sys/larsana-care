@@ -28,6 +28,8 @@ interface AgendaWeekTimelineProps {
   onSelectDay?: (day: Date) => void
   scrollContainerRef?: RefObject<HTMLDivElement | null>
   className?: string
+  enableDragReschedule?: boolean
+  onRescheduleSession?: (sessionId: string, newScheduledAt: Date) => void
 }
 
 function WeekDayHeaderRow({
@@ -81,6 +83,8 @@ export function AgendaWeekTimeline({
   onSelectDay,
   scrollContainerRef,
   className,
+  enableDragReschedule = false,
+  onRescheduleSession,
 }: AgendaWeekTimelineProps) {
   const gridScrollRef = useRef<HTMLDivElement | null>(null)
   const [nowTopMobile, setNowTopMobile] = useState<number | null>(null)
@@ -202,6 +206,35 @@ export function AgendaWeekTimeline({
               today && 'bg-primary/[0.04]',
             )}
             style={{ height: totalHeight }}
+            onDragOver={
+              enableDragReschedule
+                ? (e) => {
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                  }
+                : undefined
+            }
+            onDrop={
+              enableDragReschedule && onRescheduleSession
+                ? (e) => {
+                    e.preventDefault()
+                    const sessionId = e.dataTransfer.getData('text/session-id')
+                    if (!sessionId) return
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const offsetY = e.clientY - rect.top
+                    const hourFloat =
+                      AGENDA_DAY_START_HOUR + offsetY / hourHeightPx
+                    const hour = Math.min(
+                      AGENDA_DAY_END_HOUR - 1,
+                      Math.max(AGENDA_DAY_START_HOUR, Math.floor(hourFloat)),
+                    )
+                    const minute = Math.round((hourFloat - hour) * 60 / 15) * 15
+                    const newDate = new Date(day)
+                    newDate.setHours(hour, minute, 0, 0)
+                    onRescheduleSession(sessionId, newDate)
+                  }
+                : undefined
+            }
           >
             {hours
               .filter((hour) => hour > AGENDA_DAY_START_HOUR)
@@ -242,6 +275,7 @@ export function AgendaWeekTimeline({
                   columnIndex={columnLayout?.columnIndex}
                   columnCount={columnLayout?.columnCount}
                   hourHeightPx={hourHeightPx}
+                  draggable={enableDragReschedule}
                 />
               )
             })}

@@ -1,12 +1,16 @@
 import { addMinutes, differenceInMinutes, format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
+export function firstNameFromPatientName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] || fullName
+}
+
 /** Altura em px de cada hora na grade da agenda. */
 export const AGENDA_HOUR_HEIGHT_PX = 72
 
 /** Início e fim visíveis do dia (horário local). */
-export const AGENDA_DAY_START_HOUR = 7
-export const AGENDA_DAY_END_HOUR = 19
+export const AGENDA_DAY_START_HOUR = 5
+export const AGENDA_DAY_END_HOUR = 22
 
 /** Espaço no topo da grade para labels de hora não serem cortados. */
 export const AGENDA_TIMELINE_TOP_INSET_PX = 10

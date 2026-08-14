@@ -7,13 +7,13 @@ import { Home, Heart, Pill, User, UserPlus } from 'lucide-react-native'
 import { cn } from '@/lib/cn'
 
 type TabItem =
-  | { name: string; label: string; Icon: LucideIcon; kind: 'tab' }
+  | { name: string; label: string; Icon: LucideIcon; kind: 'tab'; href?: string }
   | { name: string; label: string; Icon: LucideIcon; kind: 'fab'; href: string }
 
 const TAB_ITEMS: TabItem[] = [
   { name: 'inicio', label: 'Início', Icon: Home, kind: 'tab' },
-  { name: 'solicitar', label: 'Solicitar', Icon: UserPlus, kind: 'tab' },
-  { name: 'larsanapill', label: 'LarsanaPill', Icon: Pill, kind: 'fab', href: '/(app)/larsanapill' },
+  { name: 'larsanapill', label: 'LarsanaPill', Icon: Pill, kind: 'tab', href: '/(app)/larsanapill' },
+  { name: 'solicitar', label: 'Solicitar', Icon: UserPlus, kind: 'fab', href: '/(app)/(tabs)/solicitar' },
   { name: 'tratamento', label: 'Tratam.', Icon: Heart, kind: 'tab' },
   { name: 'conta', label: 'Conta', Icon: User, kind: 'tab' },
 ]
@@ -43,14 +43,14 @@ function PacienteTabBar({ state, navigation }: BottomTabBarProps) {
             const TabIcon = item.Icon
 
             if (item.kind === 'fab') {
-              const isActive = pathname.includes('larsanapill')
+              const isActive = pathname.includes('solicitar')
               return (
                 <View key={item.name} className="flex-1 items-center">
                   <Pressable
-                    onPress={() => router.push(item.href as '/(app)/larsanapill')}
+                    onPress={() => router.push(item.href as '/(app)/(tabs)/solicitar')}
                     className="-mt-7 items-center"
                     accessibilityRole="button"
-                    accessibilityLabel="LarsanaPill"
+                    accessibilityLabel={item.label}
                   >
                     <View
                       className={cn(
@@ -76,12 +76,12 @@ function PacienteTabBar({ state, navigation }: BottomTabBarProps) {
               )
             }
 
-            const isFocused = activeRoute === item.name
+            const isFocused = item.href ? pathname.includes(item.name) : activeRoute === item.name
 
             return (
               <Pressable
                 key={item.name}
-                onPress={() => navigation.navigate(item.name)}
+                onPress={() => (item.href ? router.push(item.href as '/(app)/larsanapill') : navigation.navigate(item.name))}
                 className="flex-1 items-center gap-1 pb-0.5"
                 accessibilityRole="button"
                 accessibilityLabel={item.label}

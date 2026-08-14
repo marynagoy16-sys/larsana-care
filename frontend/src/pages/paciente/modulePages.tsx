@@ -62,22 +62,4 @@ export function PacienteNpsPage() {
   )
 }
 
-export function PacienteAceitePage() {
-  return (
-    <EntityListPage
-      title="Aceite inicial"
-      description="Termos de adesão e LGPD"
-      queryKey={['paciente', 'terms']}
-      queryFn={async () => {
-        const { data, error } = await supabase.from('legal_terms').select('id, term_type, version, is_current')
-        if (error) throw error
-        return { data: data ?? [], count: data?.length ?? 0 }
-      }}
-      columns={[
-        { key: 'type', header: 'Tipo', cell: (r) => String(r.term_type) },
-        { key: 'version', header: 'Versão', cell: (r) => String(r.version) },
-        { key: 'current', header: 'Vigente', cell: (r) => (r.is_current ? 'Sim' : 'Não') },
-      ]}
-    />
-  )
-}
+export { PacienteAceitePage } from '@/pages/paciente/PacienteAceitePage'

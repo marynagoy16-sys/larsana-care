@@ -26,12 +26,9 @@ const FAQ_ITEMS = [
 
 export function PacienteAjudaPage() {
   return (
-    <PacienteSubpageShell>
+    <PacienteSubpageShell title="Ajuda">
       <div className="space-y-5 pb-8">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Ajuda</h2>
-          <p className="text-sm text-muted-foreground mt-1">Suporte e perguntas frequentes</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Suporte e perguntas frequentes</p>
 
         <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
           <a

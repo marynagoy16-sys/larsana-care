@@ -64,7 +64,7 @@ export function PacientePagamentoDetailPage() {
 
   if (isLoading) {
     return (
-      <PacienteSubpageShell loading backTo="/paciente/pagamentos">
+      <PacienteSubpageShell title="Pagamento" loading backTo="/paciente/pagamentos">
         <div className="animate-pulse h-48 rounded-xl bg-muted" />
       </PacienteSubpageShell>
     )
@@ -72,7 +72,7 @@ export function PacientePagamentoDetailPage() {
 
   if (isError || !data) {
     return (
-      <PacienteSubpageShell backTo="/paciente/pagamentos">
+      <PacienteSubpageShell title="Pagamento" backTo="/paciente/pagamentos">
         <p className="text-muted-foreground">Cobrança não encontrada.</p>
       </PacienteSubpageShell>
     )
@@ -82,12 +82,9 @@ export function PacientePagamentoDetailPage() {
   const statusLabel = paymentStatusLabels[data.payment_status] ?? data.payment_status
 
   return (
-    <PacienteSubpageShell backTo="/paciente/pagamentos">
+    <PacienteSubpageShell title="Pagamento" backTo="/paciente/pagamentos">
       <div className="space-y-4 pb-8">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Pagamento</h2>
-          <p className="text-sm text-muted-foreground mt-1">{data.description ?? 'Detalhe da cobrança'}</p>
-        </div>
+        <p className="text-sm text-muted-foreground">{data.description ?? 'Detalhe da cobrança'}</p>
 
         {isPaid && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 dark:border-emerald-900/50 dark:bg-emerald-950/30 p-5">

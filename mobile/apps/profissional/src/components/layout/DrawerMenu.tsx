@@ -51,7 +51,7 @@ const DRAWER_SECTIONS: DrawerSection[] = [
     icon: Calendar,
     items: [
       { label: 'Início', href: '/(app)/(tabs)/inicio', icon: Calendar },
-      { label: 'Minha evolução', href: '/(app)/minha-evolucao', icon: Trophy },
+      { label: 'Minha jornada', href: '/(app)/minha-evolucao', icon: Trophy },
       { label: 'Agenda', href: '/(app)/(tabs)/agenda', icon: Calendar },
       { label: 'Demandas', href: '/(app)/(tabs)/demandas', icon: MapPin },
     ],

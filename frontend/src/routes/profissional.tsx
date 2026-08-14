@@ -25,6 +25,9 @@ const PPDemandsPage = lazyPP('PPDemandsPage')
 const PPDemandDetailPage = lazy(() =>
   import('@/pages/profissional/demands/PPDemandDetailPage').then((m) => ({ default: m.PPDemandDetailPage })),
 )
+const PPDemandSchedulePage = lazy(() =>
+  import('@/pages/profissional/demands/PPDemandSchedulePage').then((m) => ({ default: m.PPDemandSchedulePage })),
+)
 const PPEvolucaoPage = lazy(() =>
   import('@/pages/profissional/evolution/PPEvolucaoPage').then((m) => ({ default: m.PPEvolucaoPage })),
 )
@@ -80,6 +83,7 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'agenda/:id', element: ppRoute(<PPSessionDetailPage />) },
       { path: 'demandas', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandsPage /></RequireAcademyGate>) },
       { path: 'demandas/:id', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandDetailPage /></RequireAcademyGate>) },
+      { path: 'demandas/:id/agendar', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandSchedulePage /></RequireAcademyGate>) },
       { path: 'evolucoes', element: ppRoute(<PPEvolucoesPage />) },
       { path: 'evolucao/nova', element: ppRoute(<PPEvolucaoNovaPage />) },
       { path: 'evolucao/:id', element: ppRoute(<PPEvolucoesPage />) },

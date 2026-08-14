@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 
 type PacienteSubpageShellProps = {
   children: ReactNode
+  title: string
   backTo?: string
   onBack?: () => void
   loading?: boolean
@@ -18,21 +19,42 @@ export function PacienteSubpageBackButton({ backTo = '/paciente/conta', onBack }
   return (
     <Button
       variant="ghost"
-      size="sm"
-      className="-ml-2 gap-1 px-2 text-primary hover:text-primary"
+      size="icon"
+      className="-ml-2 shrink-0 rounded-xl text-primary hover:text-primary"
       onClick={onBack ?? (() => navigate(backTo))}
+      aria-label="Voltar"
     >
       <ChevronLeft className="size-5" />
-      Voltar
     </Button>
   )
 }
 
-export function PacienteSubpageShell({ children, backTo, onBack, loading }: PacienteSubpageShellProps) {
+export function SubpageHeaderBar({
+  title,
+  backTo,
+  onBack,
+}: {
+  title: string
+  backTo?: string
+  onBack?: () => void
+}) {
+  return (
+    <div className="relative flex w-full min-h-9 items-center justify-center">
+      <div className="absolute left-0">
+        <PacienteSubpageBackButton backTo={backTo} onBack={onBack} />
+      </div>
+      <h1 className="max-w-[min(100%,16rem)] truncate px-10 text-center font-display text-xl font-bold leading-tight tracking-tight">
+        {title}
+      </h1>
+    </div>
+  )
+}
+
+export function PacienteSubpageShell({ children, title, backTo, onBack, loading }: PacienteSubpageShellProps) {
   return (
     <>
       <PageHeader loading={loading}>
-        <PacienteSubpageBackButton backTo={backTo} onBack={onBack} />
+        <SubpageHeaderBar title={title} backTo={backTo} onBack={onBack} />
       </PageHeader>
       <CrudScrollPageLayout>{children}</CrudScrollPageLayout>
     </>

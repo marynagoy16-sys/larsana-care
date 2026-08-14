@@ -14,6 +14,8 @@ Extensão educacional da plataforma Larsana Care (DELUMA — Saúde e Educação
 
 ### Formação PP (M1–M5)
 
+Status implementação (14/08/2026): rotas, player, certificados e gates operacionais. **Conteúdo editorial** (vídeos/aulas completas por módulo) em curadoria — estrutura técnica pronta em `/profissional/academy/*`.
+
 - **M1** Boas práticas de atendimento
 - **M2** Método LARSANA
 - **M3** Plano de carreira

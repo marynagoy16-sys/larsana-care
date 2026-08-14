@@ -12,6 +12,7 @@ import {
 import {
   AGENDA_DAY_START_HOUR,
   AGENDA_HOUR_HEIGHT_PX,
+  firstNameFromPatientName,
   sessionColumnPositionStyle,
   sessionHourCellLayout,
 } from '@/lib/agendaTimeline'
@@ -43,6 +44,7 @@ export function AgendaSessionBlock({
   const top = Math.round(topPx)
   const height = Math.max(Math.round(heightPx), 1)
   const timeLabel = format(scheduledStart, 'HH:mm')
+  const firstName = firstNameFromPatientName(session.patientName)
   const stacked = columnCount > 1
   const compact = height < 56 || stacked
 
@@ -84,7 +86,7 @@ export function AgendaSessionBlock({
                 stacked ? 'line-clamp-1' : 'line-clamp-2',
               )}
             >
-              {session.patientName}
+              {firstName}
             </p>
             {!compact && (
               <p className="text-[10px] leading-none text-muted-foreground truncate sm:text-xs">
@@ -118,7 +120,7 @@ export function AgendaSessionBlock({
                 <DropdownMenuItem
                   onClick={() => navigate(`/profissional/evolucao/nova?session=${session.id}`)}
                 >
-                  Registrar evolução
+                  Evoluir terapia
                 </DropdownMenuItem>
               </>
             )}

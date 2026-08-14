@@ -6,7 +6,6 @@ import {
   Bell,
   ChevronRight,
   ClipboardList,
-  CreditCard,
   LogOut,
   Moon,
   Shield,
@@ -97,7 +96,7 @@ export function PPContaPage() {
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <AccountLinkRow
             to="/profissional/evolucao"
-            label="Minha evolução"
+            label="Minha jornada"
             description="Pontos, patente e percentual de repasse"
             icon={Trophy}
             className="border-b border-border"
@@ -135,13 +134,6 @@ export function PPContaPage() {
             label="Credenciamento"
             description="Documentos, conselho e dados bancários"
             icon={Shield}
-            className="border-b border-border"
-          />
-          <AccountLinkRow
-            to="/profissional/cartao"
-            label="Cartão de visita"
-            description="Informações do cartão digital"
-            icon={CreditCard}
             className="border-b border-border"
           />
           <AccountLinkRow

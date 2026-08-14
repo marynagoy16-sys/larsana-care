@@ -28,12 +28,9 @@ export function PacienteDocumentosPage() {
   const documents = Array.isArray(data) ? data : []
 
   return (
-    <PacienteSubpageShell loading={isLoading}>
+    <PacienteSubpageShell title="Documentos" loading={isLoading}>
       <div className="space-y-4 pb-8">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Documentos</h2>
-          <p className="text-sm text-muted-foreground mt-1">Termos aceitos, comprovantes e recibos</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Termos aceitos, comprovantes e recibos</p>
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando documentos…</p>

@@ -28,6 +28,8 @@ export type AssessmentTrackingData = {
   proposedSessionCount?: number
   proposedPatientLevel?: string
   totalAmountCents?: number | null
+  /** Quando definido, exibe repasse em vez do valor total ao paciente (visão PP). */
+  repasseTotalCents?: number | null
 }
 
 function resolveWorkflowIndex(status: string): number {
@@ -84,12 +86,16 @@ function StepDescription({ stepKey, data }: { stepKey: string; data: AssessmentT
     const cycleLabel =
       proposedSessionCountLabels[sessionCount as 4 | 8 | 12] ?? `${sessionCount} sessões`
     const levelLabel = patientLevelLabels[level] ?? level
-    const totalLabel =
-      data.totalAmountCents != null ? formatCurrency(data.totalAmountCents) : '—'
+    const amountLabel =
+      data.repasseTotalCents != null
+        ? `${formatCurrency(data.repasseTotalCents)} repasse/ciclo`
+        : data.totalAmountCents != null
+          ? formatCurrency(data.totalAmountCents)
+          : '—'
 
     return (
       <p className="text-xs text-muted-foreground mt-0.5">
-        {cycleLabel} · {levelLabel} · {totalLabel}
+        {cycleLabel} · {levelLabel} · {amountLabel}
       </p>
     )
   }

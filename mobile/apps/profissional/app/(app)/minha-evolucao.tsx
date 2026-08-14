@@ -58,7 +58,7 @@ export default function MinhaEvolucaoScreen() {
       <PageHeader>
         <View className="flex-row items-center gap-2">
           <Trophy size={20} color="#095742" />
-          <Text className="font-display text-xl font-bold text-foreground">Minha evolução</Text>
+          <Text className="font-display text-xl font-bold text-foreground">Minha jornada</Text>
         </View>
       </PageHeader>
 

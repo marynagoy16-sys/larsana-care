@@ -75,12 +75,9 @@ export function PacientePerfilPage() {
   }
 
   return (
-    <PacienteSubpageShell loading={isLoading} onBack={handleCancel}>
+    <PacienteSubpageShell title="Perfil" loading={isLoading} onBack={handleCancel}>
       <div className="space-y-5 pb-8">
-        <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Perfil</h2>
-          <p className="text-sm text-muted-foreground mt-1">Dados do responsável pelo paciente</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Dados do responsável pelo paciente</p>
 
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando perfil…</p>

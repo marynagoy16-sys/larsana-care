@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -75,8 +74,8 @@ export default function DemandDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const queryClient = useQueryClient()
 
-  const [declineModalOpen, setDeclineModalOpen] = useState(false)
-  const [declineReason, setDeclineReason] = useState('')
+  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false)
+  const [credentialingGateOpen, setCredentialingGateOpen] = useState(false)
 
   const { data: demand, isLoading } = useQuery({
     queryKey: ['pp', 'demand_detail', id],
@@ -94,13 +93,15 @@ export default function DemandDetailScreen() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from('professionals')
-        .select('pp_class')
+        .select('pp_class, credentialing_status')
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
         .maybeSingle()
       if (error) throw error
       return data
     },
   })
+
+  const isCredentialed = professional?.credentialing_status === 'ativo'
 
   const { data: pricingContext } = useQuery({
     queryKey: ['demand_pricing', id, demand?.region_id, demand?.patients?.patient_level, professional?.pp_class],
@@ -131,11 +132,7 @@ export default function DemandDetailScreen() {
     mutationFn: () => acceptDemand(id!),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['pp', 'demands'] })
-      if (result.demand_type === 'continuidade') {
-        router.push('/(app)/agenda')
-      } else {
-        router.push(`/(app)/pacientes/${result.patient_id}`)
-      }
+      router.push(`/(app)/demandas/${result.demand_id}/agendar`)
     },
   })
 
@@ -144,13 +141,11 @@ export default function DemandDetailScreen() {
       declineDemand({
         demandId: id!,
         professionalId: professionalId!,
-        reason: declineReason,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pp', 'demands'] })
       queryClient.invalidateQueries({ queryKey: ['pp', 'demand_detail', id] })
-      setDeclineModalOpen(false)
-      setDeclineReason('')
+      setDeclineConfirmOpen(false)
       router.back()
     },
   })
@@ -317,9 +312,6 @@ export default function DemandDetailScreen() {
                 {existingResponse?.response === 'accepted' ? 'Aceita' : 'Recusada'}
               </Text>
             </Text>
-            {existingResponse?.decline_reason && (
-              <Text className="text-xs text-muted-foreground">Motivo: {existingResponse.decline_reason}</Text>
-            )}
             {existingResponse?.response === 'accepted' && (
               <Button
                 variant="default"
@@ -344,7 +336,7 @@ export default function DemandDetailScreen() {
           <View className="flex-row gap-3">
             <Button
               variant="outline"
-              onPress={() => setDeclineModalOpen(true)}
+              onPress={() => setDeclineConfirmOpen(true)}
               className="flex-1 border-red-300 bg-red-50 text-red-700"
               disabled={acceptMutation.isPending || declineMutation.isPending}
             >
@@ -352,7 +344,13 @@ export default function DemandDetailScreen() {
             </Button>
             <Button
               variant="default"
-              onPress={() => acceptMutation.mutate()}
+              onPress={() => {
+                if (!isCredentialed) {
+                  setCredentialingGateOpen(true)
+                  return
+                }
+                acceptMutation.mutate()
+              }}
               className="flex-1 bg-emerald-600"
               loading={acceptMutation.isPending}
               disabled={declineMutation.isPending}
@@ -364,51 +362,66 @@ export default function DemandDetailScreen() {
       )}
 
       <Modal
-        visible={declineModalOpen}
+        visible={credentialingGateOpen}
         transparent
-        animationType="slide"
-        onRequestClose={() => setDeclineModalOpen(false)}
+        animationType="fade"
+        onRequestClose={() => setCredentialingGateOpen(false)}
       >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="rounded-t-2xl bg-card p-5 pb-10">
-            <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-foreground">Recusar demanda</Text>
-              <Pressable onPress={() => setDeclineModalOpen(false)} className="p-2">
+        <View className="flex-1 justify-center bg-black/50 px-6">
+          <View className="rounded-2xl bg-card p-5 gap-4">
+            <Text className="text-lg font-semibold text-foreground text-center">Finalizar credenciamento</Text>
+            <Text className="text-sm text-muted-foreground text-center">
+              Você precisa concluir seu credenciamento antes de aceitar demandas.
+            </Text>
+            <Button
+              variant="default"
+              onPress={() => {
+                setCredentialingGateOpen(false)
+                router.push('/(app)/credenciamento')
+              }}
+            >
+              Ir ao credenciamento
+            </Button>
+            <Button variant="outline" onPress={() => setCredentialingGateOpen(false)}>
+              Voltar
+            </Button>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={declineConfirmOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeclineConfirmOpen(false)}
+      >
+        <View className="flex-1 justify-center bg-black/50 px-6">
+          <View className="rounded-2xl bg-card p-5 gap-4">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-lg font-semibold text-foreground">Recusar demanda?</Text>
+              <Pressable onPress={() => setDeclineConfirmOpen(false)} className="p-2">
                 <X size={20} color="#49796B" />
               </Pressable>
             </View>
-            <Text className="mb-3 text-sm text-muted-foreground">
-              Descreva por que não pode assumir este atendimento
+            <Text className="text-sm text-muted-foreground">
+              A demanda será removida da sua lista de oportunidades.
             </Text>
-            <TextInput
-              value={declineReason}
-              onChangeText={setDeclineReason}
-              placeholder="Motivo da recusa"
-              multiline
-              numberOfLines={4}
-              className="mb-4 rounded-xl border border-border bg-background p-3 text-sm text-foreground"
-              textAlignVertical="top"
-              style={{ height: 100 }}
-            />
             <View className="flex-row gap-3">
               <Button
                 variant="outline"
-                onPress={() => setDeclineModalOpen(false)}
+                onPress={() => setDeclineConfirmOpen(false)}
                 className="flex-1"
                 disabled={declineMutation.isPending}
               >
-                Voltar
+                Cancelar
               </Button>
               <Button
                 variant="default"
-                onPress={() => {
-                  if (declineReason.trim().length < 3) return
-                  declineMutation.mutate()
-                }}
-                className="flex-1"
+                onPress={() => declineMutation.mutate()}
+                className="flex-1 bg-red-600"
                 loading={declineMutation.isPending}
               >
-                Confirmar recusa
+                Sim, recusar
               </Button>
             </View>
           </View>
