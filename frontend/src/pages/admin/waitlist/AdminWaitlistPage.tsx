@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { EntityListPage } from '@/components/crud/EntityListPage'
@@ -17,7 +16,7 @@ type WaitlistRow = {
 
 async function listWaitlist(): Promise<{ data: WaitlistRow[]; count: number }> {
   const { data, error, count } = await supabase
-    .from('patient_waitlist')
+    .from('patient_waitlist' as 'demands')
     .select(`
       id, patient_id, region_id, status, created_at,
       patients ( full_name ),

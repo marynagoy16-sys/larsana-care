@@ -48,7 +48,7 @@ function parseCellKey(key: CellKey): { day: Date; hour: number } {
 }
 
 function slotStartsAt(day: Date, hour: number): Date {
-  return setMinutes(setHours(day, hour), 0, 0, 0)
+  return setMinutes(setHours(day, hour), 0)
 }
 
 function buildSelectedSlots(selected: Set<CellKey>): AvailabilitySlotInput[] {

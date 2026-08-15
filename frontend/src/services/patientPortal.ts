@@ -201,6 +201,7 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
     pendingProposal,
     activeCycle,
     pendingCharge,
+    serviceRequest: null,
   }
 }
 

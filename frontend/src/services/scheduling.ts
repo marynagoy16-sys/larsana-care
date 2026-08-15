@@ -119,7 +119,7 @@ export async function listPendingSchedulingProposalsForPatient(): Promise<Schedu
     .order('created_at', { ascending: false })
 
   if (error) throw error
-  return (data ?? []) as SchedulingProposal[]
+  return (data ?? []) as unknown as SchedulingProposal[]
 }
 
 export async function getSchedulingProposal(id: string): Promise<SchedulingProposal | null> {
@@ -135,7 +135,7 @@ export async function getSchedulingProposal(id: string): Promise<SchedulingPropo
     .maybeSingle()
 
   if (error) throw error
-  return data as SchedulingProposal | null
+  return data as unknown as SchedulingProposal | null
 }
 
 export type DemandSchedulingFollowUp =

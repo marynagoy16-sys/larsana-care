@@ -52,7 +52,10 @@ export function PPNotificacoesPage() {
         showToolbar={false}
         mobileVariant="compact"
         queryKey={['pp', 'notifications']}
-        queryFn={() => notificationsService.list('id, title, read_at, created_at')}
+        queryFn={async () => {
+          const result = await notificationsService.list('id, title, read_at, created_at')
+          return { data: result.data as NotificationRow[], count: result.count }
+        }}
         emptyMessage={EMPTY_MESSAGES[notificationFilter]}
         emptyIcon={Bell}
         filterResetKey={notificationFilter}

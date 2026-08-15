@@ -14,7 +14,7 @@ import {
   type DemandHighlightTag,
   type DemandListItemWithHighlights,
 } from '@/lib/demandHighlights'
-import { formatDistanceKm, haversineDistanceKm, resolvePointsCenter, type GeoPoint } from '@/lib/geo'
+import { formatDistanceKm, haversineDistanceKm, MAUA_CENTER, resolvePointsCenter } from '@/lib/geo'
 import { usePpDistanceOrigin } from '@/hooks/usePpDistanceOrigin'
 import { demandsService, type DemandListItem } from '@/services/demands'
 import { useQuery } from '@tanstack/react-query'

@@ -136,4 +136,12 @@ export type FinancialDatabaseFunctions = {
       is_valid_justification: boolean
     }
   }
+  submit_pp_transfer_invoice: {
+    Args: {
+      p_transfer_id: string
+      p_storage_path: string
+      p_file_name: string
+    }
+    Returns: undefined
+  }
 }

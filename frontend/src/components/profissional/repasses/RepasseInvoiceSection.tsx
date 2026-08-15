@@ -55,7 +55,7 @@ export function RepasseInvoiceSection({
       const url = await getPPTransferInvoiceSignedUrl(invoice.storage_path)
       window.open(url, '_blank', 'noopener,noreferrer')
     } catch (error) {
-      toast.error(mapSupabaseError(error))
+      toast.error(mapSupabaseError(error instanceof Error ? error : null))
     } finally {
       setOpeningInvoice(false)
     }
