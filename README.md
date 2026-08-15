@@ -1,6 +1,129 @@
-# LarsanaCare — Fisioterapia Domiciliar
+<p align="center">
+  <img src="frontend/public/brand/logo-horizontal-v1-dark.svg" alt="LarsanaCare" width="300" />
+</p>
 
-Ecossistema de gestão de fisioterapia domiciliar (DELUMA) — ABC/SP.
+<p align="center">
+  <strong>Fisioterapia Domiciliar</strong><br />
+  Ecossistema de gestão de fisioterapia domiciliar (DELUMA) — ABC/SP.
+</p>
+
+---
+
+## Roadmap
+
+Legenda de status:
+
+| Ícone | Significado |
+|-------|-------------|
+| ✅ | Concluído |
+| 🔄 | Em andamento |
+| ⚠️ | Parcial / precisa validação |
+| ❌ | Pendente |
+| 🔍 | Decisão externa ou spike |
+
+> Referências: [PRD](docs/PRD.md) · [Mapa de páginas](docs/PAGES.md) · [Checklist Fase 0](docs/FASE0_CHECKLIST_ALINHAMENTO.md)
+
+### Fase 0 — Fundação e alinhamento
+
+| Módulo / entrega | Web | Mobile | Status |
+|------------------|:---:|:------:|:------:|
+| Identidade visual (logo, paleta, design system) | ✅ | ✅ | ✅ |
+| Schema Supabase + migrations + RLS | ✅ | ✅ | ✅ |
+| Monorepo (web + apps nativos + shared) | ✅ | ✅ | ✅ |
+| Academy LMS (admin / PP / paciente) | ✅ | ⚠️ | ✅ |
+| Documentação (PRD, páginas, módulos, spikes) | ✅ | — | ✅ |
+
+### Fase 1 — Portal web completo (Admin · Gestão · Financeiro)
+
+| Módulo / funcionalidade | Status | Notas |
+|-------------------------|:------:|-------|
+| Dashboard e KPIs operacionais | ✅ | Pacientes, ciclos, alertas |
+| Cadastro de pacientes (wizard multi-etapas) | ✅ | Dados, responsável, endereço, docs |
+| Profissionais e credenciamento (gestão) | ✅ | Aprovação, categorias técnicas |
+| Avaliações iniciais e proposta comercial | ⚠️ | Workflow ok; copy “nível confirmado” parcial |
+| Ciclos de atendimento e sessões | ✅ | Abertura, grade, status |
+| Demandas e matching geográfico | ✅ | Admin + mapa |
+| Pausas e encerramentos | ⚠️ | Regras PDF v6 em validação |
+| Cobranças e caixa (recebido vs a repassar) | ⚠️ | Schema ok; Asaas produção pendente |
+| Repasses pós-ciclo (liberação + NF) | ⚠️ | Fluxo admin; validação financeira pendente |
+| Lista de espera regional (admin) | ✅ | `/admin/lista-espera` |
+| Regiões A/B/C e tabela de preços V1-2026 | ✅ | |
+| Exportação contábil DELUMA | ❌ | Planejado pós-go-live |
+| Prontuário e imutabilidade de evoluções | ⚠️ | Assinatura textual; ICP-Brasil em spike |
+
+### Fase 2 — Portal Profissional Parceiro (PP)
+
+| Módulo / funcionalidade | Web | Mobile | Status |
+|-------------------------|:---:|:------:|:------:|
+| Agenda (semanal 5h–22h, detalhe sessão) | ✅ | ✅ | ✅ |
+| Demandas (aceitar / recusar, mapa) | ✅ | ✅ | ✅ |
+| Minha jornada (rastreio avaliação → proposta) | ✅ | ✅ | ✅ |
+| Wizard pós-aceite (disponibilidade / agendamento) | ✅ | ⚠️ | ✅ |
+| Remarcar sessão (drag) + notificar paciente | ✅ | ❌ | ⚠️ |
+| Evolução / prontuário por ciclos | ✅ | ✅ | ✅ |
+| Credenciamento self-service | ✅ | ✅ | ✅ |
+| Categorias técnicas + habilitação cardio | ✅ | ⚠️ | ✅ |
+| Repasses (lista, detalhe, upload NF) | ✅ | ⚠️ | ✅ |
+| Patentes / pontos / gamificação | ✅ | ❌ | ⚠️ |
+| Academy (trilhas M1–M5 + gates) | ✅ | ✅ | ✅ |
+| Notificações in-app | ✅ | ⚠️ | ⚠️ |
+
+### Fase 3 — Portal Paciente / Responsável
+
+| Módulo / funcionalidade | Web | Mobile | Status |
+|-------------------------|:---:|:------:|:------:|
+| Auth: login, cadastro dual (paciente / PP) | ✅ | ⚠️ | ⚠️ |
+| Recuperar / redefinir senha | ✅ | ❌ | ⚠️ |
+| Onboarding pós-cadastro (endereço + região) | ✅ | ❌ | 🔄 |
+| Início / timeline do tratamento | ✅ | ✅ | ✅ |
+| Solicitar atendimento (demanda + mapa SVG) | ✅ | ✅ | ✅ |
+| Lista de espera (“Desejo iniciar tratamento”) | ✅ | ✅ | ✅ |
+| Timeline solicitação (estilo Correios) | ⚠️ | ⚠️ | ⚠️ |
+| Confirmação de horário (pós-agendamento PP) | ✅ | ⚠️ | ✅ |
+| Resposta à proposta de avaliação (SIM/NÃO) | ✅ | ⚠️ | ✅ |
+| Tratamento / detalhe do ciclo | ✅ | ✅ | ✅ |
+| Pagamentos antecipados (PIX/boleto Asaas) | ⚠️ | ⚠️ | ⚠️ |
+| Aceite legal (Termo + LGPD) | ⚠️ | ⚠️ | ⚠️ |
+| LarsanaPill (conteúdo PHIL + planos) | ✅ | ✅ | ✅ |
+| Documentos, conta, ajuda, NPS | ✅ | ⚠️ | ⚠️ |
+
+### Fase 4 — Financeiro e integrações
+
+| Módulo / funcionalidade | Status | Notas |
+|-------------------------|:------:|-------|
+| Asaas: cobrança PIX/boleto (produção) | ❌ | Stub / dev; webhook pendente |
+| Pagamento antecipado antes da 1ª sessão do ciclo | ⚠️ | Regra de negócio definida; integração pendente |
+| Split PF/PJ + retenção 1º ciclo (PDF v6) | ⚠️ | Migrations parciais; auditoria Fase 4 |
+| Pausa justificada / injustificada + reembolso | ⚠️ | Lógica DB; edge cases em validação |
+| Wallet Asaas PP (credenciamento) | ⚠️ | |
+| App Financeiro (mobile) | ⚠️ | App ativo; escopo operacional limitado |
+| Exportação DELUMA (NF + recibos por ciclo) | ❌ | |
+| Academy vendas (checkout Asaas — track Elias) | ❌ | Não bloqueia soft launch |
+
+### Fase 5 — Go-live e evolução
+
+| Módulo / entrega | Status | Notas |
+|------------------|:------:|-------|
+| Publicação app Paciente (App Store / Play) | ❌ | `eas.json` pronto; submit pendente |
+| Publicação app Profissional | 🔄 | Validação paralela com PP |
+| App Gestão (mobile) | ❌ | Placeholder |
+| Backend API dedicada (`backend/`) | ❌ | Supabase + RPCs hoje |
+| Assinatura digital ICP (evoluções CREFITO) | 🔍 | [Spike](docs/SPIKE_ASSINATURA_DIGITAL.md) |
+| Check-in GPS / cartão de visita PP | ❌ | P2 |
+| Suporte (tickets pós-go-live) | ❌ | P2 |
+
+### Fluxo comercial (referência)
+
+```
+Cadastro → Solicitar atendimento (sem pagamento)
+    → Demanda → PP aceita → Avaliação → Proposta
+    → Família responde SIM → Gestão abre ciclo → Pagamento antecipado
+    → Sessões liberadas → Repasse pós-ciclo (com NF do PP)
+```
+
+Pagamento **não** é exigido na solicitação inicial — apenas antes das sessões do ciclo, após aceite da proposta.
+
+---
 
 ## Estrutura
 
@@ -118,3 +241,5 @@ Edite o host em `docker/stack.yml` (padrão: `larsana.sagittadigital.com.br`) an
 - [Mapa de páginas](docs/PAGES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
 - [Módulos](docs/modulos.md)
+- [Checklist Fase 0](docs/FASE0_CHECKLIST_ALINHAMENTO.md)
+- [Academy](docs/ACADEMY.md)

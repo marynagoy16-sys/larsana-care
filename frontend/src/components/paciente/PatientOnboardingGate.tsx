@@ -7,6 +7,23 @@ import {
 
 const ONBOARDING_PATH = '/paciente/onboarding'
 
+/** Rotas que exigem endereço/região preenchidos no cadastro. */
+const ONBOARDING_REQUIRED_PREFIXES = [
+  '/paciente/solicitar',
+  '/paciente/tratamento',
+  '/paciente/pagamentos',
+  '/paciente/proposta',
+  '/paciente/agendamento',
+  '/paciente/documentos',
+  '/paciente/aceite-inicial',
+]
+
+function requiresOnboarding(pathname: string): boolean {
+  return ONBOARDING_REQUIRED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  )
+}
+
 export function PatientOnboardingGate({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const [ready, setReady] = useState(false)
@@ -51,8 +68,8 @@ export function PatientOnboardingGate({ children }: { children: React.ReactNode 
     )
   }
 
-  if (needsOnboarding && !isOnboardingRoute) {
-    return <Navigate to={ONBOARDING_PATH} replace />
+  if (needsOnboarding && requiresOnboarding(location.pathname) && !isOnboardingRoute) {
+    return <Navigate to={ONBOARDING_PATH} replace state={{ from: location.pathname }} />
   }
 
   if (!needsOnboarding && isOnboardingRoute) {
