@@ -54,6 +54,7 @@ export async function geocodeAddress(query: string): Promise<GeoPoint | null> {
     {
       headers: {
         'Accept-Language': 'pt-BR,pt',
+        'User-Agent': 'LarsanaCare/1.0 (contact: dev@larsanacare.com.br)',
       },
     },
   )
@@ -65,6 +66,62 @@ export async function geocodeAddress(query: string): Promise<GeoPoint | null> {
   if (!hit) return null
 
   return { lat: Number(hit.lat), lng: Number(hit.lon) }
+}
+
+export type AddressGeocodeInput = {
+  fullAddress?: string | null
+  street?: string | null
+  number?: string | null
+  neighborhood?: string | null
+  postalCode?: string | null
+  cityName?: string | null
+  cityState?: string | null
+}
+
+export function buildAddressGeocodeQueries(input: AddressGeocodeInput): string[] {
+  const city = input.cityName?.trim()
+  const state = input.cityState?.trim()
+  const queries: string[] = []
+
+  if (input.fullAddress?.trim()) queries.push(`${input.fullAddress.trim()}, Brasil`)
+
+  const streetLine = [input.street, input.number].filter(Boolean).join(', ').trim()
+  if (streetLine && city) {
+    queries.push([streetLine, input.neighborhood, `${city}/${state}`, 'Brasil'].filter(Boolean).join(', '))
+  }
+
+  const cep = String(input.postalCode ?? '').replace(/\D/g, '')
+  if (cep.length === 8 && city) {
+    queries.push(`${cep}, ${city}, ${state}, Brasil`)
+  }
+
+  if (input.neighborhood?.trim() && city) {
+    queries.push(`${input.neighborhood.trim()}, ${city}, ${state}, Brasil`)
+  }
+
+  if (city) {
+    queries.push(`${city}, ${state}, Brasil`)
+  }
+
+  return [...new Set(queries.filter(Boolean))]
+}
+
+export async function resolveAddressCoordinates(
+  input: AddressGeocodeInput,
+  options?: { delayMs?: number },
+): Promise<GeoPoint | null> {
+  const delayMs = options?.delayMs ?? 0
+  const queries = buildAddressGeocodeQueries(input)
+
+  for (const query of queries) {
+    const point = await geocodeAddress(query)
+    if (point) return point
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
+
+  return null
 }
 
 export function buildGoogleMapsSearchUrl(

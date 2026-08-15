@@ -4,12 +4,20 @@ import { ChevronRight } from 'lucide-react'
 import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { supabase } from '@/lib/supabase'
 
-const PATIENT_TERM_TYPES = ['TERMO_ADESAO', 'DIRETRIZES', 'LGPD'] as const
+const PATIENT_TERM_TYPES = [
+  'CONTRATO_INTERMEDIACAO',
+  'TERMO_CONSENTIMENTO',
+  'LGPD',
+  'TERMO_ADESAO',
+  'DIRETRIZES',
+] as const
 
 const TERM_LABELS: Record<(typeof PATIENT_TERM_TYPES)[number], string> = {
+  CONTRATO_INTERMEDIACAO: 'Contrato de Intermediação',
+  TERMO_CONSENTIMENTO: 'Termo de Consentimento',
+  LGPD: 'Políticas de Privacidade',
   TERMO_ADESAO: 'Termo de adesão',
   DIRETRIZES: 'Diretrizes de uso',
-  LGPD: 'Política de privacidade',
 }
 
 type LegalTerm = {

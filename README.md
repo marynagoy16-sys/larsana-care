@@ -59,7 +59,7 @@ Legenda de status:
 | Demandas (aceitar / recusar, mapa) | ✅ | ✅ | ✅ |
 | Minha jornada (rastreio avaliação → proposta) | ✅ | ✅ | ✅ |
 | Wizard pós-aceite (disponibilidade / agendamento) | ✅ | ⚠️ | ✅ |
-| Remarcar sessão (drag) + notificar paciente | ✅ | ❌ | ⚠️ |
+| Remarcar sessão (12h/14d, aceite paciente, SUB) | ✅ | ❌ | ⚠️ |
 | Evolução / prontuário por ciclos | ✅ | ✅ | ✅ |
 | Credenciamento self-service | ✅ | ✅ | ✅ |
 | Categorias técnicas + habilitação cardio | ✅ | ⚠️ | ✅ |
@@ -76,14 +76,16 @@ Legenda de status:
 | Recuperar / redefinir senha | ✅ | ❌ | ⚠️ |
 | Onboarding pós-cadastro (endereço + região) | ✅ | ❌ | 🔄 |
 | Início / timeline do tratamento | ✅ | ✅ | ✅ |
-| Solicitar atendimento (demanda + mapa SVG) | ✅ | ✅ | ✅ |
+| Solicitar atendimento (formulário + demanda + mapa) | ✅ | ✅ | ✅ |
+| Remarcar sessão (mesmo PP 14d; menos de 12h: atestado + 50%) | ✅ | ❌ | ⚠️ |
+| Aceite/recusa remarcação e oferta SUB | ✅ | ❌ | ⚠️ |
 | Lista de espera (“Desejo iniciar tratamento”) | ✅ | ✅ | ✅ |
 | Timeline solicitação (estilo Correios) | ⚠️ | ⚠️ | ⚠️ |
 | Confirmação de horário (pós-agendamento PP) | ✅ | ⚠️ | ✅ |
 | Resposta à proposta de avaliação (SIM/NÃO) | ✅ | ⚠️ | ✅ |
 | Tratamento / detalhe do ciclo | ✅ | ✅ | ✅ |
 | Pagamentos antecipados (PIX/boleto Asaas) | ⚠️ | ⚠️ | ⚠️ |
-| Aceite legal (Termo + LGPD) | ⚠️ | ⚠️ | ⚠️ |
+| Aceite legal (Contrato intermediação + Termo consentimento) | ✅ | ⚠️ | ⚠️ |
 | LarsanaPill (conteúdo PHIL + planos) | ✅ | ✅ | ✅ |
 | Documentos, conta, ajuda, NPS | ✅ | ⚠️ | ⚠️ |
 
@@ -122,6 +124,18 @@ Cadastro → Solicitar atendimento (sem pagamento)
 ```
 
 Pagamento **não** é exigido na solicitação inicial — apenas antes das sessões do ciclo, após aceite da proposta.
+
+### Remarcação e SUB (regras V1)
+
+| Regra | Comportamento |
+|-------|---------------|
+| Antecedência mínima | **12h** (antes era 2h) |
+| Janela paciente (mesmo PP) | Até **14 dias** à frente |
+| PP ≥12h | Proposta de novo horário → paciente **aceita ou recusa** antes de confirmar |
+| Paciente (menos de 12h) | Exige **atestado**; repõe sessão e cobra **50%** (taxa tardia) |
+| PP (menos de 12h) | Oferta de **SUB** (substituto); se recusado, PP titular remarca em 14d |
+
+Migrations aplicadas no remoto: `20260815180000`, `20260815180100`, `20260815190000`.
 
 ---
 
@@ -195,6 +209,16 @@ cd mobile/apps/financeiro && npm install
 Configure `mobile/apps/<app>/.env` com `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (mesmos valores da web). O script `dev:mobile` copia automaticamente de `profissional/.env` quando o arquivo não existir.
 
 Veja também [mobile/README.md](mobile/README.md) para o mapa completo dos apps mobile.
+
+### Supabase (migrations remotas)
+
+O histórico local de migrations foi consolidado; o `db push` pode falhar por versões antigas no remoto. Para aplicar uma migration nova:
+
+```powershell
+cd data
+npx supabase db query --linked -f supabase/migrations/<arquivo>.sql
+npx supabase migration repair --status applied <versao>
+```
 
 Login de teste PP: `parceiro@larsanacare.com.br` / `LarsanaCare2026!`
 

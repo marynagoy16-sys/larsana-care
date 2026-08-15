@@ -9,8 +9,13 @@ export function CoverageMapIllustration({ variant = 'searching', className }: Pr
   const pulse = variant === 'searching'
 
   return (
-    <div className={cn('flex items-center justify-center', className)}>
-      <svg width={280} height={160} viewBox="0 0 280 160" aria-label="Mapa ilustrativo" className="max-w-full">
+    <div className={cn('w-full', className)}>
+      <svg
+        viewBox="0 0 280 160"
+        aria-label="Mapa ilustrativo"
+        className="h-auto w-full"
+        preserveAspectRatio="xMidYMid meet"
+      >
         <rect x={0} y={0} width={280} height={160} rx={16} fill="#E8F0EC" />
         <path
           d="M40 110 C 60 90, 80 120, 100 95 S 140 85, 160 100 S 200 115, 240 90"

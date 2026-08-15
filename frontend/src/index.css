@@ -240,6 +240,26 @@ body {
   padding-bottom: calc(var(--shell-gap) + var(--bottom-nav-clearance));
 }
 
+@media (max-width: 1023px) {
+  main.shell-with-bottom-nav {
+    padding-bottom: calc(var(--shell-gap) + var(--bottom-nav-clearance));
+    transition: padding-bottom 300ms ease-in-out;
+  }
+
+  html[data-bottom-nav-collapsed='true'] main.shell-with-bottom-nav {
+    padding-bottom: var(--shell-gap);
+  }
+
+  .shell-scroll-with-bottom-nav {
+    padding-bottom: var(--bottom-nav-clearance);
+    transition: padding-bottom 300ms ease-in-out;
+  }
+
+  html[data-bottom-nav-collapsed='true'] .shell-scroll-with-bottom-nav {
+    padding-bottom: 0.5rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .shell-bottom-nav-clearance {
     padding-bottom: var(--shell-gap);

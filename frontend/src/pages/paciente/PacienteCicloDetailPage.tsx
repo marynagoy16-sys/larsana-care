@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CycleSessionsProgress } from '@/components/cycles/CycleSessionsProgress'
+import { PatientRescheduleSessionDialog } from '@/components/paciente/PatientRescheduleSessionDialog'
 import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { sessionStatusLabels } from '@/constants/labels'
 import { formatDateTime } from '@/lib/formatters'
@@ -13,7 +15,7 @@ function sessionStatusBadgeClass(status: string) {
   if (status === 'realizada') {
     return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
   }
-  if (status === 'prevista') {
+  if (status === 'prevista' || status === 'remarcada') {
     return 'bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-300'
   }
   if (status === 'falta' || status === 'cancelada_sem_justificativa') {
@@ -24,8 +26,10 @@ function sessionStatusBadgeClass(status: string) {
 
 export function PacienteCicloDetailPage() {
   const { id = '' } = useParams()
+  const [rescheduleSessionId, setRescheduleSessionId] = useState<string | null>(null)
+  const [rescheduleScheduledAt, setRescheduleScheduledAt] = useState<string | null>(null)
 
-  const { data: cycle, isLoading } = useQuery({
+  const { data: cycle, isLoading, refetch } = useQuery({
     queryKey: patientTreatmentQueryKeys.detail(id),
     queryFn: () => loadPatientCycleDetail(id),
     enabled: !!id,
@@ -39,6 +43,8 @@ export function PacienteCicloDetailPage() {
   const payHref = cycle?.pendingChargeId
     ? `/paciente/pagamentos/${cycle.pendingChargeId}`
     : '/paciente/pagamentos'
+
+  const canReschedule = cycle?.payment_status === 'pago' && cycle.status === 'ativo'
 
   return (
     <PacienteSubpageShell
@@ -101,6 +107,10 @@ export function PacienteCicloDetailPage() {
                 <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                   {cycle.sessions.map((session) => {
                     const sessionLabel = sessionStatusLabels[session.status] ?? session.status
+                    const showReschedule =
+                      canReschedule
+                      && session.scheduled_at
+                      && (session.status === 'prevista' || session.status === 'remarcada')
 
                     return (
                       <div key={session.id} className="flex items-start gap-3 px-4 py-4">
@@ -112,6 +122,19 @@ export function PacienteCicloDetailPage() {
                               : 'Data a definir'}
                             {session.professionalName ? ` · ${session.professionalName}` : ''}
                           </p>
+                          {showReschedule && (
+                            <Button
+                              type="button"
+                              variant="link"
+                              className="h-auto p-0 mt-2 text-xs"
+                              onClick={() => {
+                                setRescheduleSessionId(session.id)
+                                setRescheduleScheduledAt(session.scheduled_at)
+                              }}
+                            >
+                              Remarcar
+                            </Button>
+                          )}
                         </div>
                         <span
                           className={cn(
@@ -127,6 +150,22 @@ export function PacienteCicloDetailPage() {
                 </div>
               )}
             </section>
+
+            {rescheduleSessionId && rescheduleScheduledAt && (
+              <PatientRescheduleSessionDialog
+                open
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setRescheduleSessionId(null)
+                    setRescheduleScheduledAt(null)
+                  }
+                }}
+                sessionId={rescheduleSessionId}
+                patientId={cycle.patient_id}
+                scheduledAt={rescheduleScheduledAt}
+                onSuccess={() => refetch()}
+              />
+            )}
           </>
         )}
       </div>

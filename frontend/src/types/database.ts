@@ -2,6 +2,7 @@ import type { Database as GeneratedDatabase } from './database.types.generated'
 import type { AcademyDatabaseFunctions, AcademyDatabaseTables } from './database.academy.extension'
 import type { FinancialDatabaseFunctions, FinancialDatabaseTables } from './database.financial.extension'
 import type { GamificationDatabaseFunctions, GamificationDatabaseTables } from './database.gamification.extension'
+import type { SchedulingDatabaseFunctions, SchedulingDatabaseTables } from './database.scheduling.extension'
 
 export type { Json, Tables, TablesInsert, TablesUpdate, Enums } from './database.types.generated'
 
@@ -27,12 +28,13 @@ export type Database = Omit<GeneratedDatabase, 'public'> & {
   public: Omit<GeneratedDatabase['public'], 'Tables' | 'Functions'> & {
     Tables: Omit<GeneratedDatabase['public']['Tables'], 'professionals'> & {
       professionals: PatchedProfessionalsTable
-    } & AcademyDatabaseTables & FinancialDatabaseTables & GamificationDatabaseTables
+    } & AcademyDatabaseTables & FinancialDatabaseTables & GamificationDatabaseTables & SchedulingDatabaseTables
     Functions: Omit<
       GeneratedDatabase['public']['Functions'],
       'review_assessment_level_change'
     > & AcademyDatabaseFunctions &
       FinancialDatabaseFunctions &
-      GamificationDatabaseFunctions
+      GamificationDatabaseFunctions &
+      SchedulingDatabaseFunctions
   }
 }

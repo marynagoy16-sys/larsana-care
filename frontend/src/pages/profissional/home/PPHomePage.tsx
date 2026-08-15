@@ -13,7 +13,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Logo } from '@/components/shared/Logo'
 import { Button } from '@/components/ui/button'
 import { ACADEMY_FORMATION_SLIDE } from '@/constants/academySlides'
-import { useMapOrigin } from '@/hooks/useMapOrigin'
+import { usePpDistanceOrigin } from '@/hooks/usePpDistanceOrigin'
 import {
   countDemandsWithinRadius,
   MAUA_CENTER,
@@ -247,7 +247,7 @@ export function PPHomePage() {
     return resolvePointsCenter(points.length > 0 ? points : [MAUA_CENTER])
   }, [demands])
 
-  const { origin } = useMapOrigin(mapFallbackCenter)
+  const { origin } = usePpDistanceOrigin(mapFallbackCenter)
 
   const nearbyCount = useMemo(
     () => countDemandsWithinRadius(demands, origin),

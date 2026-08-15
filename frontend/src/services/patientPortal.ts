@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase'
+import { getPatientServiceStatus } from '@/services/patientServiceRequest'
+import type { PatientServiceDemand } from '@/services/patientServiceRequest'
 
 export type LinkedPatient = {
   patientId: string
@@ -39,12 +41,19 @@ export type PendingChargeSummary = {
   cycle_id: string | null
 }
 
+export type PatientServiceRequestSummary = {
+  activeDemand: PatientServiceDemand | null
+  waitlist: { id: string; status: string; created_at: string } | null
+  regionLabel: string | null
+}
+
 export type PatientHomeContext = {
   linkedPatient: LinkedPatient | null
   latestAssessment: PatientAssessmentSummary | null
   pendingProposal: PatientAssessmentSummary | null
   activeCycle: ActiveCycleSummary | null
   pendingCharge: PendingChargeSummary | null
+  serviceRequest: PatientServiceRequestSummary | null
 }
 
 type ResponsibleRow = {
@@ -195,6 +204,27 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
   }
 }
 
+function formatRegionLabel(regionCode?: string | null, regionName?: string | null): string | null {
+  if (!regionName) return null
+  if (regionCode && regionCode !== regionName) return `${regionCode} · ${regionName}`
+  return regionName
+}
+
+async function getPatientServiceRequestSummary(): Promise<PatientServiceRequestSummary | null> {
+  const status = await getPatientServiceStatus()
+  if (!status.linked) return null
+
+  const hasActiveDemand = Boolean(status.active_demand)
+  const hasWaitlist = Boolean(status.waitlist)
+  if (!hasActiveDemand && !hasWaitlist) return null
+
+  return {
+    activeDemand: status.active_demand ?? null,
+    waitlist: status.waitlist ?? null,
+    regionLabel: formatRegionLabel(status.region_code, status.region_name),
+  }
+}
+
 export async function loadPatientHome(): Promise<PatientHomeContext> {
   const linkedPatient = await getLinkedPatient()
   if (!linkedPatient) {
@@ -204,11 +234,16 @@ export async function loadPatientHome(): Promise<PatientHomeContext> {
       pendingProposal: null,
       activeCycle: null,
       pendingCharge: null,
+      serviceRequest: null,
     }
   }
 
-  const context = await getPatientHomeContext(linkedPatient.patientId)
-  return { linkedPatient, ...context }
+  const [context, serviceRequest] = await Promise.all([
+    getPatientHomeContext(linkedPatient.patientId),
+    getPatientServiceRequestSummary(),
+  ])
+
+  return { linkedPatient, ...context, serviceRequest }
 }
 
 export const patientPortalQueryKeys = {

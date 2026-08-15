@@ -4,11 +4,9 @@ import 'leaflet/dist/leaflet.css'
 import { MapPin, Navigation } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { demandTypeLabels } from '@/constants/labels'
-import { useMapOrigin } from '@/hooks/useMapOrigin'
 import {
   formatDistanceKm,
   haversineDistanceKm,
-  MAUA_CENTER,
   resolvePointsCenter,
   type GeoPoint,
 } from '@/lib/geo'
@@ -63,8 +61,24 @@ function createOriginIcon() {
   })
 }
 
+function resolveMapFitOptions(markerCount: number): { padding: L.FitBoundsOptions; padFactor: number } {
+  if (markerCount <= 1) {
+    return { padding: { animate: true, maxZoom: 14, padding: [32, 32] }, padFactor: 0.08 }
+  }
+  if (markerCount <= 8) {
+    return { padding: { animate: true, maxZoom: 13, padding: [28, 28] }, padFactor: 0.12 }
+  }
+  if (markerCount <= 25) {
+    return { padding: { animate: true, maxZoom: 12, padding: [24, 24] }, padFactor: 0.15 }
+  }
+  return { padding: { animate: true, maxZoom: 11, padding: [20, 20] }, padFactor: 0.18 }
+}
+
 interface DemandsMapProps {
   demands: DemandListItem[]
+  origin: GeoPoint
+  usingProfessionalAddress?: boolean
+  totalDemandCount?: number
   selectedId?: string | null
   onSelectDemand?: (demandId: string) => void
   className?: string
@@ -72,6 +86,9 @@ interface DemandsMapProps {
 
 export function DemandsMap({
   demands,
+  origin,
+  usingProfessionalAddress = false,
+  totalDemandCount,
   selectedId,
   onSelectDemand,
   className,
@@ -90,11 +107,9 @@ export function DemandsMap({
   )
 
   const mapFallbackCenter = useMemo(
-    () => resolvePointsCenter(demandPoints.length > 0 ? demandPoints : [MAUA_CENTER]),
-    [demandPoints],
+    () => resolvePointsCenter(demandPoints.length > 0 ? demandPoints : [origin]),
+    [demandPoints, origin],
   )
-
-  const { origin, usingDeviceLocation } = useMapOrigin(mapFallbackCenter)
 
   const markers = useMemo(() => buildDemandMarkers(demands, origin), [demands, origin])
 
@@ -131,7 +146,9 @@ export function DemandsMap({
     layer.clearLayers()
     originMarkerRef.current?.remove()
     originMarkerRef.current = L.marker([origin.lat, origin.lng], { icon: createOriginIcon() })
-      .bindTooltip(usingDeviceLocation ? 'Sua localização' : 'Referência de distância', {
+      .bindTooltip(
+        usingProfessionalAddress ? 'Seu endereço cadastrado' : 'Referência de distância',
+        {
         direction: 'top',
         offset: [0, -8],
       })
@@ -164,13 +181,19 @@ export function DemandsMap({
     }
 
     if (markers.length > 0) {
-      map.fitBounds(bounds.pad(0.22), { animate: false, maxZoom: 14 })
+      const { padding, padFactor } = resolveMapFitOptions(markers.length)
+      map.fitBounds(bounds.pad(padFactor), padding)
     } else {
       map.setView([origin.lat, origin.lng], 12)
     }
-  }, [markers, origin, selectedId, onSelectDemand, usingDeviceLocation])
+  }, [markers, origin, selectedId, onSelectDemand, usingProfessionalAddress])
 
   const missingLocationCount = demands.length - markers.length
+  const totalCount = totalDemandCount ?? demands.length
+  const mapSummary =
+    totalCount > demands.length
+      ? `${markers.length} no mapa · ${demands.length} carregadas de ${totalCount}`
+      : `${markers.length} com localização`
 
   return (
     <div
@@ -186,8 +209,10 @@ export function DemandsMap({
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-tight">Mapa das demandas</p>
             <p className="text-xs text-muted-foreground truncate">
-              {markers.length} com localização
-              {usingDeviceLocation ? ' · distâncias a partir de você' : ' · referência Mauá/SP'}
+              {mapSummary}
+              {usingProfessionalAddress
+                ? ' · distâncias a partir do seu endereço'
+                : ' · referência Mauá/SP'}
             </p>
           </div>
         </div>

@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronRight, Wallet } from 'lucide-react'
 import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
 import { RepasseStatusBadge, RepasseStatusIcon } from '@/components/profissional/repasses/RepasseStatusVisual'
 import { CrudEmptyState } from '@/components/crud/CrudEmptyState'
-import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { Toggle } from '@/components/ui/toggle'
+import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
+import { useBottomNavAutoHide } from '@/hooks/useBottomNavAutoHide'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import {
@@ -50,7 +51,33 @@ function matchesRepasseFilter(row: RepasseRow, filter: RepasseFilter): boolean {
 
 export function PPRepassesPage() {
   const navigate = useNavigate()
+  const { setFixedMain } = useImmersiveLayout()
   const [repasseFilter, setRepasseFilter] = useState<RepasseFilter>('all')
+  const [splitScrollMobile, setSplitScrollMobile] = useState(false)
+  const [listScrollElement, setListScrollElement] = useState<HTMLDivElement | null>(null)
+  const listScrollRef = useCallback((node: HTMLDivElement | null) => {
+    setListScrollElement(node)
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const sync = () => {
+      setFixedMain(mq.matches)
+      setSplitScrollMobile(mq.matches)
+    }
+    sync()
+    mq.addEventListener('change', sync)
+    return () => {
+      mq.removeEventListener('change', sync)
+      setFixedMain(false)
+    }
+  }, [setFixedMain])
+
+  useBottomNavAutoHide(listScrollElement, splitScrollMobile)
+
+  useEffect(() => {
+    listScrollElement?.scrollTo({ top: 0 })
+  }, [repasseFilter, listScrollElement])
 
   const { data, isLoading } = useQuery({
     queryKey: ['pp', 'transfers'],
@@ -66,47 +93,51 @@ export function PPRepassesPage() {
     <>
       <PPAccountSubpageHeader title="Repasses" loading={isLoading && !data} />
 
-      <CrudScrollPageLayout>
-        <div className="space-y-4 pb-8">
-          <div
-            className={cn(
-              'overflow-x-auto overscroll-x-contain py-1 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-              'max-lg:-mx-[var(--shell-gap)] max-lg:w-[calc(100%+2*var(--shell-gap))]',
-            )}
-          >
-            <div className="flex w-max flex-nowrap gap-2">
-              {REPASSE_FILTERS.map((filter, index) => (
-                <Toggle
-                  key={filter.id}
-                  variant="outline"
-                  pressed={repasseFilter === filter.id}
-                  onPressedChange={(pressed) => {
-                    if (pressed) setRepasseFilter(filter.id)
-                  }}
-                  className={cn(
-                    'h-11 shrink-0 rounded-full px-5 text-sm whitespace-nowrap data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
-                    index === 0 && 'max-lg:ml-[var(--shell-gap)]',
-                    index === REPASSE_FILTERS.length - 1 && 'max-lg:mr-[var(--shell-gap)]',
-                  )}
-                >
-                  {filter.label}
-                </Toggle>
-              ))}
-            </div>
+      <div className="flex min-h-0 flex-1 flex-col max-lg:h-full max-lg:overflow-hidden max-lg:px-[var(--shell-gap)] lg:pb-8">
+        <div
+          className={cn(
+            'shrink-0 overflow-x-auto overscroll-x-contain py-1 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+            'max-lg:-mx-[var(--shell-gap)] max-lg:w-[calc(100%+2*var(--shell-gap))]',
+            'lg:mb-4',
+          )}
+        >
+          <div className="flex w-max flex-nowrap gap-2">
+            {REPASSE_FILTERS.map((filter, index) => (
+              <Toggle
+                key={filter.id}
+                variant="outline"
+                pressed={repasseFilter === filter.id}
+                onPressedChange={(pressed) => {
+                  if (pressed) setRepasseFilter(filter.id)
+                }}
+                className={cn(
+                  'h-11 shrink-0 rounded-full px-5 text-sm whitespace-nowrap data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+                  index === 0 && 'max-lg:ml-[var(--shell-gap)]',
+                  index === REPASSE_FILTERS.length - 1 && 'max-lg:mr-[var(--shell-gap)]',
+                )}
+              >
+                {filter.label}
+              </Toggle>
+            ))}
           </div>
+        </div>
 
+        <div
+          ref={listScrollRef}
+          className="min-h-0 flex-1 max-lg:overflow-y-auto max-lg:pt-3 max-lg:scrollbar-sidebar max-lg:shell-scroll-with-bottom-nav"
+        >
           {isLoading && !data ? (
             <p className="text-sm text-muted-foreground">Carregando repasses…</p>
           ) : rows.length === 0 ? (
             <CrudEmptyState message={EMPTY_MESSAGES[repasseFilter]} icon={Wallet} muted />
           ) : (
-            <div className="space-y-2">
+            <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
               {rows.map((row) => (
                 <button
                   key={row.id}
                   type="button"
                   onClick={() => navigate(`/profissional/repasses/${row.id}`)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-left transition-colors hover:bg-muted/30 active:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/30 active:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <RepasseStatusIcon status={row.status} />
                   <div className="min-w-0 flex-1">
@@ -130,7 +161,7 @@ export function PPRepassesPage() {
             </div>
           )}
         </div>
-      </CrudScrollPageLayout>
+      </div>
     </>
   )
 }

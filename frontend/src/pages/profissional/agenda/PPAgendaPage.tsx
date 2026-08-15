@@ -30,6 +30,8 @@ import {
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
 import { ppRescheduleSession } from '@/services/scheduling'
+import { listPpRescheduleWindowsForProfessional } from '@/services/sessionReschedule'
+import { PpRescheduleWindowCard } from '@/components/profissional/agenda/PpRescheduleWindowCard'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 
 export function PPAgendaPage() {
@@ -72,15 +74,21 @@ export function PPAgendaPage() {
     enabled: view === 'week',
   })
 
+  const ppRescheduleWindowsQuery = useQuery({
+    queryKey: ['pp', 'reschedule-windows'],
+    queryFn: listPpRescheduleWindowsForProfessional,
+  })
+
   const weekSessions = weekQuery.data ?? []
 
   const rescheduleMutation = useCrudMutation({
     mutationFn: ({ sessionId, newScheduledAt }: { sessionId: string; newScheduledAt: Date }) =>
       ppRescheduleSession(sessionId, newScheduledAt.toISOString()),
     queryKey: ['pp', 'agenda'],
-    successMessage: 'Terapia remarcada — paciente notificado',
+    successMessage: 'Solicitação enviada ao paciente',
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pp', 'agenda'] })
+      queryClient.invalidateQueries({ queryKey: ['pp', 'reschedule-windows'] })
     },
   })
 
@@ -289,6 +297,21 @@ export function PPAgendaPage() {
           </div>
         )}
       </div>
+
+      {(ppRescheduleWindowsQuery.data?.length ?? 0) > 0 && (
+        <div className="shrink-0 space-y-2 shell-content-x py-3">
+          {ppRescheduleWindowsQuery.data!.map((request) => (
+            <PpRescheduleWindowCard
+              key={request.id}
+              request={request}
+              onCompleted={() => {
+                ppRescheduleWindowsQuery.refetch()
+                queryClient.invalidateQueries({ queryKey: ['pp', 'agenda'] })
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Mobile — dia ou semana */}
       {view === 'day' ? (

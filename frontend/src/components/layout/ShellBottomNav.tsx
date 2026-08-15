@@ -8,7 +8,7 @@ interface ShellBottomNavProps {
 }
 
 export function ShellBottomNav({ items, fabIndex }: ShellBottomNavProps) {
-  const { suppressBottomNav } = usePageFooter()
+  const { suppressBottomNav, bottomNavCollapsed } = usePageFooter()
   if (suppressBottomNav) return null
-  return <BottomNav items={items} fabIndex={fabIndex} />
+  return <BottomNav items={items} fabIndex={fabIndex} collapsed={bottomNavCollapsed} />
 }

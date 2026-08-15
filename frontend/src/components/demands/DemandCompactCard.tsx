@@ -82,16 +82,28 @@ export function DemandCompactCard({
   )
 }
 
+function resolveDemandDistanceKm(row: DemandListItem, origin: GeoPoint): number {
+  if (row.location_lat == null || row.location_lng == null) return Number.POSITIVE_INFINITY
+  return haversineDistanceKm(origin, { lat: row.location_lat, lng: row.location_lng })
+}
+
 export function sortDemandsByDistance(demands: DemandListItem[], origin: GeoPoint): DemandListItem[] {
   return [...demands].sort((a, b) => {
-    const distanceA =
-      a.location_lat != null && a.location_lng != null
-        ? haversineDistanceKm(origin, { lat: a.location_lat, lng: a.location_lng })
-        : Number.POSITIVE_INFINITY
-    const distanceB =
-      b.location_lat != null && b.location_lng != null
-        ? haversineDistanceKm(origin, { lat: b.location_lat, lng: b.location_lng })
-        : Number.POSITIVE_INFINITY
-    return distanceA - distanceB
+    const distanceA = resolveDemandDistanceKm(a, origin)
+    const distanceB = resolveDemandDistanceKm(b, origin)
+    if (distanceA !== distanceB) return distanceA - distanceB
+    return (b.preference_match_score ?? 0) - (a.preference_match_score ?? 0)
   })
+}
+
+export function isDemandListSortedByDistance(
+  demands: DemandListItem[],
+  origin: GeoPoint,
+): boolean {
+  for (let index = 1; index < demands.length; index += 1) {
+    const previous = resolveDemandDistanceKm(demands[index - 1]!, origin)
+    const current = resolveDemandDistanceKm(demands[index]!, origin)
+    if (current < previous) return false
+  }
+  return true
 }

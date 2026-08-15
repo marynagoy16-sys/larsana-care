@@ -25,6 +25,7 @@ import { ShellBottomNav } from '@/components/layout/ShellBottomNav'
 import { PageFooterProvider, usePageFooter } from '@/contexts/PageFooterContext'
 import { PageHeaderProvider } from '@/contexts/PageHeaderContext'
 import { ImmersiveLayoutProvider, useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
+import { useBottomNavAutoHide } from '@/hooks/useBottomNavAutoHide'
 import type { UserRole } from '@/types/auth'
 import { cn } from '@/lib/utils'
 
@@ -69,6 +70,8 @@ function AppShellContent({
     !immersive && isMobile && shouldHideShellHeader(location.pathname, variant)
   const showNav = showBottomNav && !suppressBottomNav
   const lockScroll = immersive || fixedMain
+
+  useBottomNavAutoHide(scrollRef, showNav && isMobile && !lockScroll)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1023px)')
@@ -132,7 +135,7 @@ function AppShellContent({
                     hideShellHeader ? 'max-lg:px-0' : 'shell-content-x',
                     showNav && !hideShellHeader && 'shell-content-scroll-top',
                     showNav && hideShellHeader && 'shell-content-scroll-top-compact',
-                    showNav ? 'shell-bottom-nav-clearance' : hideShellHeader ? 'pb-0' : 'shell-content-y-bottom',
+                    showNav ? 'shell-with-bottom-nav' : hideShellHeader ? 'pb-0' : 'shell-content-y-bottom',
                   )
             }
           >

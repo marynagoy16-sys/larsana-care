@@ -42,43 +42,58 @@ export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props
   if (activeIndex < 0 && !hasWaitlist) return null
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-4">
-      <p className="text-sm font-semibold text-foreground">Acompanhe sua solicitação</p>
-      {STEPS.map((step, index) => {
-        const done = index < activeIndex
-        const current = index === activeIndex
-        const Icon = done ? CheckCircle2 : current ? CircleDot : Circle
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="mb-4 text-sm font-semibold text-foreground">Acompanhe sua solicitação</p>
+      <div className="space-y-0">
+        {STEPS.map((step, index) => {
+          const done = index < activeIndex
+          const current = index === activeIndex
+          const isLast = index === STEPS.length - 1
+          const Icon = done ? CheckCircle2 : current ? CircleDot : Circle
 
-        return (
-          <div key={step.key} className="flex gap-3">
-            <Icon className={cn('size-5 shrink-0', done || current ? 'text-primary' : 'text-muted-foreground/60')} />
-            <div className="min-w-0 space-y-0.5">
-              <p
-                className={cn(
-                  'text-sm',
-                  current ? 'font-semibold text-foreground' : 'text-muted-foreground',
-                  done && 'text-foreground',
-                )}
-              >
-                {step.label}
-              </p>
-              {index === 0 && createdAt ? (
-                <p className="text-xs text-muted-foreground">{formatWhen(createdAt)}</p>
-              ) : null}
-              {current && step.key === 'buscando' ? (
-                <p className="text-xs text-muted-foreground">
-                  Estamos buscando um profissional parceiro disponível na sua região.
+          return (
+            <div key={step.key} className="flex gap-3">
+              <div className="flex flex-col items-center self-stretch">
+                <Icon
+                  className={cn('size-5 shrink-0', done || current ? 'text-primary' : 'text-muted-foreground/60')}
+                />
+                {!isLast ? (
+                  <div
+                    className={cn(
+                      'mt-1 w-px flex-1 min-h-4',
+                      done ? 'bg-primary/35' : 'bg-border',
+                    )}
+                  />
+                ) : null}
+              </div>
+              <div className={cn('min-w-0 flex-1 space-y-0.5', !isLast && 'pb-4')}>
+                <p
+                  className={cn(
+                    'text-sm',
+                    current ? 'font-semibold text-foreground' : 'text-muted-foreground',
+                    done && 'text-foreground',
+                  )}
+                >
+                  {step.label}
                 </p>
-              ) : null}
-              {current && step.key === 'waitlist' ? (
-                <p className="text-xs text-muted-foreground">
-                  Registramos seu interesse. Nossa equipe avisará quando houver cobertura.
-                </p>
-              ) : null}
+                {index === 0 && createdAt ? (
+                  <p className="text-xs text-muted-foreground">{formatWhen(createdAt)}</p>
+                ) : null}
+                {current && step.key === 'buscando' ? (
+                  <p className="text-xs text-muted-foreground">
+                    Estamos buscando um profissional parceiro disponível na sua região.
+                  </p>
+                ) : null}
+                {current && step.key === 'waitlist' ? (
+                  <p className="text-xs text-muted-foreground">
+                    Registramos seu interesse. Nossa equipe avisará quando houver cobertura.
+                  </p>
+                ) : null}
+              </div>
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }

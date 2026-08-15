@@ -27,6 +27,7 @@ export type PatientCycleSession = {
 
 export type PatientCycleDetail = {
   id: string
+  patient_id: string
   cycle_number: number
   status: string
   payment_status: string
@@ -49,6 +50,7 @@ type CycleListRow = {
 
 type CycleDetailRow = {
   id: string
+  patient_id: string
   cycle_number: number
   status: string
   payment_status: string
@@ -133,7 +135,7 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
     supabase
       .from('care_cycles')
       .select(
-        `id, cycle_number, status, payment_status, session_count,
+        `id, patient_id, cycle_number, status, payment_status, session_count,
       professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name ),
       care_sessions (
         id, session_number, scheduled_at, status,
@@ -154,6 +156,7 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
 
   return {
     id: row.id,
+    patient_id: row.patient_id,
     cycle_number: row.cycle_number,
     status: row.status,
     payment_status: row.payment_status,

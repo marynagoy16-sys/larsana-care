@@ -6,6 +6,7 @@ import { COMING_SOON_BADGE } from '@/config/navigation'
 interface BottomNavProps {
   items: NavItem[]
   fabIndex?: number
+  collapsed?: boolean
 }
 
 function glassNavItemClass(isActive: boolean) {
@@ -17,20 +18,32 @@ function glassNavItemClass(isActive: boolean) {
   )
 }
 
-export function BottomNav({ items, fabIndex }: BottomNavProps) {
+export function BottomNav({ items, fabIndex, collapsed = false }: BottomNavProps) {
+  const hasFab = fabIndex !== undefined
+
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 lg:hidden pointer-events-none"
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-40 lg:hidden pointer-events-none',
+        'transition-transform duration-300 ease-in-out will-change-transform',
+        hasFab && 'pt-7',
+        collapsed && 'translate-y-full overflow-hidden',
+      )}
       aria-label="Navegação principal"
+      aria-hidden={collapsed}
     >
       {/* Esmaecimento suave — conteúdo some ao rolar por trás do menu */}
       <div
         aria-hidden
         className={cn(
           'pointer-events-none absolute inset-x-0 bottom-0',
-          'h-[calc(7rem+env(safe-area-inset-bottom))]',
+          hasFab
+            ? 'h-[calc(9rem+env(safe-area-inset-bottom))]'
+            : 'h-[calc(7rem+env(safe-area-inset-bottom))]',
           'bg-gradient-to-t from-background/95 via-background/55 to-transparent',
           'dark:from-background/98 dark:via-background/60',
+          'transition-opacity duration-300 ease-in-out',
+          collapsed && 'opacity-0',
         )}
       />
 

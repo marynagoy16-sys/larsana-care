@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Logo } from '@/components/shared/Logo'
 import { PatientActiveTreatmentCard } from '@/components/paciente/PatientActiveTreatmentCard'
 import { PatientHomeBanner } from '@/components/paciente/PatientHomeBanner'
+import { PatientHomeServiceRequestCard } from '@/components/paciente/PatientHomeServiceRequestCard'
 import { PatientHomeSchedulingBanner } from '@/components/paciente/PatientHomeSchedulingBanner'
 import { PatientHomeHelpLink, PatientHomeLarsanaPillTeaser } from '@/components/paciente/PatientHomeExtras'
 import { PatientHomeJourney } from '@/components/paciente/PatientHomeJourney'
@@ -89,7 +90,8 @@ export function PacienteHomePage() {
     )
   }
 
-  const { activeCycle, latestAssessment, linkedPatient } = data
+  const { activeCycle, latestAssessment, linkedPatient, serviceRequest } = data
+  const hasOpenServiceRequest = Boolean(serviceRequest)
 
   const sidebarContent = (
     <>
@@ -109,6 +111,12 @@ export function PacienteHomePage() {
           {(data.pendingProposal || data.pendingCharge) && (
             <CascadeItem>
               <PatientHomeBanner context={data} />
+            </CascadeItem>
+          )}
+
+          {serviceRequest && (
+            <CascadeItem>
+              <PatientHomeServiceRequestCard serviceRequest={serviceRequest} />
             </CascadeItem>
           )}
 
@@ -135,7 +143,7 @@ export function PacienteHomePage() {
                   }
                 />
 
-                {!data.pendingProposal && !data.pendingCharge && !latestAssessment && !activeCycle && (
+                {!data.pendingProposal && !data.pendingCharge && !latestAssessment && !activeCycle && !hasOpenServiceRequest && (
                   <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6 text-sm text-muted-foreground text-center">
                     Em breve você verá aqui o andamento do tratamento e avisos importantes.
                   </div>

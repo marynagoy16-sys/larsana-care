@@ -47,7 +47,14 @@ export function DataTable<T extends Record<string, unknown>>({
   getMobileTags,
 }: DataTableProps<T>) {
   if (isLoading) {
-    return <CrudTableSkeleton columns={columns.length} />
+    return (
+      <CrudTableSkeleton
+        columns={columns.length}
+        variant={mobileVariant === 'compact' ? 'compact' : 'default'}
+        flush={mobileFlush}
+        rows={mobileVariant === 'compact' ? 8 : 5}
+      />
+    )
   }
 
   if (data.length === 0) {

@@ -2699,6 +2699,9 @@ export type Database = {
           is_valor_social: boolean
           last_session_at: string | null
           patient_level: Database["public"]["Enums"]["patient_level"]
+          referral_source:
+            | Database["public"]["Enums"]["patient_referral_source"]
+            | null
           region_id: string | null
           sex: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency: number | null
@@ -2726,6 +2729,9 @@ export type Database = {
           is_valor_social?: boolean
           last_session_at?: string | null
           patient_level?: Database["public"]["Enums"]["patient_level"]
+          referral_source?:
+            | Database["public"]["Enums"]["patient_referral_source"]
+            | null
           region_id?: string | null
           sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
@@ -2753,6 +2759,9 @@ export type Database = {
           is_valor_social?: boolean
           last_session_at?: string | null
           patient_level?: Database["public"]["Enums"]["patient_level"]
+          referral_source?:
+            | Database["public"]["Enums"]["patient_referral_source"]
+            | null
           region_id?: string | null
           sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
@@ -4332,6 +4341,8 @@ export type Database = {
         | "LGPD"
         | "DIRETRIZES_PP"
         | "LGPD_PP"
+        | "CONTRATO_INTERMEDIACAO"
+        | "TERMO_CONSENTIMENTO"
       lgpd_request_status: "pendente" | "em_analise" | "concluido" | "rejeitado"
       lgpd_request_type: "portabilidade" | "revogacao" | "exclusao" | "acesso"
       medical_record_type: "avaliacao" | "evolucao" | "alta"
@@ -4349,6 +4360,12 @@ export type Database = {
       nps_rated_entity_type: "professional" | "patient" | "platform"
       nps_rater_type: "paciente" | "pp"
       patient_attendance_period: "MANHA" | "TARDE" | "NOITE"
+      patient_referral_source:
+        | "INDICACAO"
+        | "GOOGLE"
+        | "INSTAGRAM"
+        | "FACEBOOK"
+        | "OUTROS"
       patient_care_status:
         | "ATIVO"
         | "PAUSA"
@@ -4626,6 +4643,8 @@ export const Constants = {
         "LGPD",
         "DIRETRIZES_PP",
         "LGPD_PP",
+        "CONTRATO_INTERMEDIACAO",
+        "TERMO_CONSENTIMENTO",
       ],
       lgpd_request_status: ["pendente", "em_analise", "concluido", "rejeitado"],
       lgpd_request_type: ["portabilidade", "revogacao", "exclusao", "acesso"],
@@ -4645,6 +4664,13 @@ export const Constants = {
       nps_rated_entity_type: ["professional", "patient", "platform"],
       nps_rater_type: ["paciente", "pp"],
       patient_attendance_period: ["MANHA", "TARDE", "NOITE"],
+      patient_referral_source: [
+        "INDICACAO",
+        "GOOGLE",
+        "INSTAGRAM",
+        "FACEBOOK",
+        "OUTROS",
+      ],
       patient_care_status: [
         "ATIVO",
         "PAUSA",

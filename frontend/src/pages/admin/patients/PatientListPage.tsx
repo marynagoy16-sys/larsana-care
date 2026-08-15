@@ -304,7 +304,10 @@ export function PatientListPage() {
         )}
     </CrudListPageLayout>
 
-    <PageFooter loading={isInitialLoad}>
+    <PageFooter
+      loading={isInitialLoad}
+      contentKey={`${page}-${pageSize}-${listTotal}-${isInitialLoad}`}
+    >
       {isInitialLoad ? (
         <PaginationSkeleton />
       ) : (

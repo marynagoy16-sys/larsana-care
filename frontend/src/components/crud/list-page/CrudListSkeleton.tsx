@@ -44,6 +44,23 @@ export function ToolbarSkeleton({ actions = 3 }: { actions?: number }) {
   )
 }
 
+function CompactMobileCardSkeleton({ flush = false }: { flush?: boolean }) {
+  return (
+    <div
+      className={cn(
+        'flex min-h-[4.25rem] items-center gap-3 bg-card px-4 py-4',
+        flush ? 'rounded-none border-0' : 'rounded-xl border border-border py-3',
+      )}
+    >
+      <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <Skeleton className="h-4 w-32 max-w-[70%]" />
+        <Skeleton className="h-3 w-20" />
+      </div>
+      <Skeleton className="h-4 w-12 shrink-0" />
+    </div>
+  )
+}
 function SimpleMobileCardSkeleton() {
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-3">
@@ -125,15 +142,23 @@ export function CrudTableSkeleton({
   rows = 5,
   columns = 4,
   variant = 'default',
+  flush = false,
 }: {
   rows?: number
   columns?: number
-  variant?: 'default' | 'rich'
+  variant?: 'default' | 'rich' | 'compact'
+  flush?: boolean
 }) {
-  const Mobile = variant === 'rich' ? RichMobileCardSkeleton : SimpleMobileCardSkeleton
+  const Mobile =
+    variant === 'rich'
+      ? RichMobileCardSkeleton
+      : variant === 'compact'
+        ? () => <CompactMobileCardSkeleton flush={flush} />
+        : SimpleMobileCardSkeleton
+
   return (
     <>
-      <div className="space-y-2.5 md:hidden">
+      <div className={cn('md:hidden', variant === 'compact' && flush ? '' : 'space-y-2.5')}>
         {Array.from({ length: rows }).map((_, i) => (
           <Mobile key={i} />
         ))}

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, type ReactNode } from 'react'
+import { useMemo, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { ListToolbar } from '@/components/crud/list-page/ListToolbar'
 import { StatsCardRow, type StatCardItem } from '@/components/crud/list-page/StatsCardRow'
 import {
   CrudListPageSkeleton,
+  CrudTableSkeleton,
   PaginationSkeleton,
 } from '@/components/crud/list-page/CrudListSkeleton'
 import { TablePagination } from '@/components/crud/list-page/TablePagination'
@@ -19,6 +20,7 @@ import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { buildEntityListStats } from '@/lib/buildEntityListStats'
 import { exportToCsv } from '@/lib/exportCsv'
 import { cn } from '@/lib/utils'
+import { useBottomNavAutoHide } from '@/hooks/useBottomNavAutoHide'
 
 interface EntityListPageProps<T extends Record<string, unknown> & { id: string }> {
   title: string
@@ -61,6 +63,12 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   layoutClassName?: string
   tableSectionClassName?: string
   splitScrollOnMobile?: boolean
+  rowsTransform?: (rows: T[]) => T[]
+  loadMorePageSize?: number
+  loadMoreLabel?: string
+  keepBeforeTableOnLoad?: boolean
+  collapseBottomNavOnScroll?: boolean
+  onVisibleRowsChange?: (rows: T[]) => void
 }
 
 function filterRows<T extends Record<string, unknown>>(
@@ -119,11 +127,27 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   layoutClassName,
   tableSectionClassName,
   splitScrollOnMobile = false,
+  rowsTransform,
+  loadMorePageSize,
+  loadMoreLabel = 'Carregar mais',
+  keepBeforeTableOnLoad = false,
+  collapseBottomNavOnScroll = false,
+  onVisibleRowsChange,
 }: EntityListPageProps<T>) {
   const [deleteTarget, setDeleteTarget] = useState<T | null>(null)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(pageSizeDefault)
+  const [visibleCount, setVisibleCount] = useState(loadMorePageSize ?? Number.POSITIVE_INFINITY)
+  const [listScrollElement, setListScrollElement] = useState<HTMLDivElement | null>(null)
+  const listScrollRef = useCallback((node: HTMLDivElement | null) => {
+    setListScrollElement(node)
+  }, [])
+
+  useBottomNavAutoHide(
+    listScrollElement,
+    collapseBottomNavOnScroll && splitScrollOnMobile,
+  )
 
   useEffect(() => {
     if (filterResetKey !== undefined) setPage(0)
@@ -135,6 +159,12 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
     placeholderData: (previous) => previous,
   })
 
+  const allRows = data?.data ?? []
+
+  useEffect(() => {
+    if (loadMorePageSize) setVisibleCount(loadMorePageSize)
+  }, [loadMorePageSize, filterResetKey, allRows.length])
+
   const deleteMutation = useCrudMutation({
     mutationFn: (id: string) => onDelete!(id).then(() => id),
     queryKey: deleteQueryKey ?? queryKey,
@@ -142,18 +172,30 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
     onSuccess: () => setDeleteTarget(null),
   })
 
-  const allRows = data?.data ?? []
   const filteredRows = useMemo(() => {
     const searched = searchable ? filterRows(allRows, search, getSearchText) : allRows
-    return rowFilter ? searched.filter(rowFilter) : searched
-  }, [allRows, search, searchable, rowFilter, getSearchText])
+    const filtered = rowFilter ? searched.filter(rowFilter) : searched
+    return rowsTransform ? rowsTransform(filtered) : filtered
+  }, [allRows, search, searchable, rowFilter, getSearchText, rowsTransform])
 
   const listTotal = filteredRows.length
   const pageData = showPagination
     ? filteredRows.slice(page * pageSize, (page + 1) * pageSize)
-    : filteredRows
+    : loadMorePageSize
+      ? filteredRows.slice(0, visibleCount)
+      : filteredRows
+  const hasMoreRows = Boolean(loadMorePageSize && !showPagination && visibleCount < listTotal)
+  const remainingRows = hasMoreRows ? listTotal - visibleCount : 0
   const isInitialLoad = isLoading && !data
   const isTableRefreshing = isFetching && !isLoading
+  const showListSkeleton = isInitialLoad || (isTableRefreshing && pageData.length === 0)
+  const usePartialInitialLayout = keepBeforeTableOnLoad && isInitialLoad
+  const visibleRowIds = useMemo(() => pageData.map((row) => row.id).join('|'), [pageData])
+
+  useEffect(() => {
+    if (!onVisibleRowsChange) return
+    onVisibleRowsChange(pageData)
+  }, [visibleRowIds, onVisibleRowsChange, pageData])
 
   const statCards = useMemo(() => {
     if (buildStats) return buildStats(allRows, filteredRows)
@@ -232,7 +274,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
         splitScrollOnMobile && 'flex flex-1 flex-col min-h-0 max-lg:h-full max-lg:overflow-hidden',
       )}
     >
-      {isInitialLoad ? (
+      {isInitialLoad && !usePartialInitialLayout ? (
         <CrudListPageSkeleton
           showStats={showStats}
           statsCount={statsColumns}
@@ -282,31 +324,72 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
             className={cn(splitScrollOnMobile && 'flex min-h-0 flex-1 flex-col overflow-hidden max-lg:min-h-0')}
           >
             <div
+              ref={listScrollRef}
               className={cn(
                 'transition-opacity duration-300',
-                isTableRefreshing && 'opacity-50 pointer-events-none',
+                isTableRefreshing && pageData.length > 0 && 'opacity-50 pointer-events-none',
                 tableSectionClassName,
                 splitScrollOnMobile &&
-                  'min-h-0 flex-1 overflow-y-auto scrollbar-sidebar max-lg:pb-2',
+                  'min-h-0 flex-1 overflow-y-auto scrollbar-sidebar',
+                splitScrollOnMobile &&
+                  collapseBottomNavOnScroll &&
+                  'shell-scroll-with-bottom-nav',
+                splitScrollOnMobile &&
+                  !collapseBottomNavOnScroll &&
+                  'max-lg:pb-2',
               )}
             >
-              <DataTable
-                isLoading={isLoading && pageData.length === 0}
-                data={pageData}
-                getRowKey={(r) => r.id}
-                onRowClick={onRowClick}
-                columns={allColumns.map((col) => ({
-                  ...col,
-                  mobilePrimary: col.key === primaryCol?.key,
-                }))}
-                emptyMessage={emptyMessage}
-                emptyIcon={emptyIcon}
-                mobileVariant={mobileVariant}
-                mobileFlush={mobileFlush}
-                mobileGrouped={mobileGrouped}
-                getMobileAvatarLabel={getMobileAvatarLabel}
-                getMobileTags={getMobileTags}
-              />
+              {showListSkeleton ? (
+                <CrudTableSkeleton
+                  columns={columns.length}
+                  variant={mobileVariant === 'compact' ? 'compact' : 'default'}
+                  flush={mobileFlush}
+                  rows={mobileVariant === 'compact' ? 8 : 5}
+                />
+              ) : (
+                <>
+                  <DataTable
+                    isLoading={false}
+                    data={pageData}
+                    getRowKey={(r) => r.id}
+                    onRowClick={onRowClick}
+                    columns={allColumns.map((col) => ({
+                      ...col,
+                      mobilePrimary: col.key === primaryCol?.key,
+                    }))}
+                    emptyMessage={emptyMessage}
+                    emptyIcon={emptyIcon}
+                    mobileVariant={mobileVariant}
+                    mobileFlush={mobileFlush}
+                    mobileGrouped={mobileGrouped}
+                    getMobileAvatarLabel={getMobileAvatarLabel}
+                    getMobileTags={getMobileTags}
+                  />
+
+                  {hasMoreRows && (
+                    <div
+                      className={cn(
+                        'flex justify-center border-t border-border px-4 py-4',
+                        mobileFlush && 'max-sm:px-4',
+                      )}
+                    >
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full max-w-sm"
+                        onClick={() => {
+                          if (loadMorePageSize) {
+                            setVisibleCount((current) => current + loadMorePageSize)
+                          }
+                        }}
+                      >
+                        {loadMoreLabel}
+                        {remainingRows > 0 ? ` (${remainingRows} restantes)` : ''}
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </CascadeItem>
         </CascadeReveal>
@@ -315,7 +398,10 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
     </CrudListPageLayout>
 
     {showPagination && (
-      <PageFooter loading={isInitialLoad}>
+      <PageFooter
+        loading={isInitialLoad}
+        contentKey={`${page}-${pageSize}-${listTotal}-${isInitialLoad}`}
+      >
         {isInitialLoad ? (
           <PaginationSkeleton />
         ) : (

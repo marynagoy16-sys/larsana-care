@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { sortDemandsByDistance } from '@/components/demands/DemandCompactCard'
 import { useNavigate } from 'react-router-dom'
 import { EntityListPage } from '@/components/crud/EntityListPage'
 import { DemandsMap } from '@/components/demands/DemandsMap'
@@ -13,8 +14,8 @@ import {
   type DemandHighlightTag,
   type DemandListItemWithHighlights,
 } from '@/lib/demandHighlights'
-import { formatDistanceKm, haversineDistanceKm, MAUA_CENTER, resolvePointsCenter } from '@/lib/geo'
-import { useMapOrigin } from '@/hooks/useMapOrigin'
+import { formatDistanceKm, haversineDistanceKm, resolvePointsCenter, type GeoPoint } from '@/lib/geo'
+import { usePpDistanceOrigin } from '@/hooks/usePpDistanceOrigin'
 import { demandsService, type DemandListItem } from '@/services/demands'
 import { useQuery } from '@tanstack/react-query'
 
@@ -68,10 +69,25 @@ function DemandHighlightBadges({ tags }: { tags: DemandHighlightTag[] }) {
   )
 }
 
+const PP_DEMANDS_PAGE_SIZE = 50
+
 export function PPDemandsPage() {
   const navigate = useNavigate()
   const { setFixedMain } = useImmersiveLayout()
   const [selectedDemandId, setSelectedDemandId] = useState<string | null>(null)
+  const [visibleDemands, setVisibleDemands] = useState<DemandListItem[]>([])
+
+  const handleVisibleRowsChange = useCallback((rows: DemandListItem[]) => {
+    setVisibleDemands((current) => {
+      if (
+        current.length === rows.length &&
+        current.every((row, index) => row.id === rows[index]?.id)
+      ) {
+        return current
+      }
+      return rows
+    })
+  }, [])
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1023px)')
@@ -92,13 +108,18 @@ export function PPDemandsPage() {
   const demands = data?.data ?? []
 
   const mapFallbackCenter = useMemo(() => {
-    const points = demands
+    const source = visibleDemands.length > 0 ? visibleDemands : demands
+    const points = source
       .filter((demand) => demand.location_lat != null && demand.location_lng != null)
       .map((demand) => ({ lat: demand.location_lat!, lng: demand.location_lng! }))
     return resolvePointsCenter(points.length > 0 ? points : [MAUA_CENTER])
-  }, [demands])
+  }, [visibleDemands, demands])
 
-  const { origin } = useMapOrigin(mapFallbackCenter)
+  const { origin, usingProfessionalAddress } = usePpDistanceOrigin(mapFallbackCenter)
+  const rowsTransform = useCallback(
+    (rows: DemandListItem[]) => sortDemandsByDistance(rows, origin),
+    [origin],
+  )
   const columns = useMemo(() => buildDemandColumns(origin), [origin])
 
   const highlightTagsByDemandId = useMemo(() => {
@@ -119,6 +140,9 @@ export function PPDemandsPage() {
         queryKey={PP_DEMANDS_QUERY_KEY}
         queryFn={() => demandsService.listOpenForPp()}
         columns={columns}
+        rowsTransform={rowsTransform}
+        loadMorePageSize={PP_DEMANDS_PAGE_SIZE}
+        keepBeforeTableOnLoad
         showStats={false}
         showToolbar={false}
         showPagination={false}
@@ -126,6 +150,7 @@ export function PPDemandsPage() {
         mobileVariant="compact"
         mobileFlush
         splitScrollOnMobile
+        collapseBottomNavOnScroll
         layoutClassName="max-lg:space-y-0"
         tableSectionClassName="max-lg:px-0 lg:shell-content-x lg:pt-0"
         getMobileAvatarLabel={(row) => row.patient_abbreviation}
@@ -134,9 +159,13 @@ export function PPDemandsPage() {
           return tags?.length ? <DemandHighlightBadges tags={tags} /> : null
         }}
         onRowClick={(row) => navigate(`/profissional/demandas/${row.id}`)}
+        onVisibleRowsChange={handleVisibleRowsChange}
         beforeTable={
           <DemandsMap
-            demands={demands}
+            demands={visibleDemands}
+            origin={origin}
+            usingProfessionalAddress={usingProfessionalAddress}
+            totalDemandCount={demands.length}
             selectedId={selectedDemandId}
             onSelectDemand={(id) => {
               setSelectedDemandId(id)

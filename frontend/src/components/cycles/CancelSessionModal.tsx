@@ -34,7 +34,7 @@ export function CancelSessionModal({
       open={open}
       onOpenChange={onOpenChange}
       title={`Cancelar sessão #${sessionNumber}`}
-      description="Desmarque sem justificativa com menos de 2h de antecedência. Aplica regra de 50%: metade reembolsada à família e metade repassada ao profissional (split proporcional)."
+      description="Desmarque sem justificativa com menos de 12h de antecedência. Aplica regra de 50%: metade reembolsada à família e metade repassada ao profissional (split proporcional)."
     >
       <div className="space-y-4">
         {scheduledAt && (

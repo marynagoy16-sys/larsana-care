@@ -73,6 +73,7 @@ export type FinancialDatabaseTables = {
     session_value_cents: number
     partial_percent: number
     refund_family_cents: number
+    family_charge_cents: number
     pp_transfer_cents: number
     larsana_cents: number
     cancelled_at: string

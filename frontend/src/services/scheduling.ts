@@ -87,13 +87,23 @@ export async function patientRejectSlot(
 export async function ppRescheduleSession(
   sessionId: string,
   newScheduledAt: string,
-): Promise<Record<string, unknown>> {
+): Promise<{
+  flow?: 'patient_acceptance' | 'sub_offer'
+  proposal_id?: string
+  request_id?: string
+  status?: string
+}> {
   const { data, error } = await supabase.rpc('pp_reschedule_session', {
     p_session_id: sessionId,
     p_new_scheduled_at: newScheduledAt,
   })
   if (error) throw error
-  return data as Record<string, unknown>
+  return data as {
+    flow?: 'patient_acceptance' | 'sub_offer'
+    proposal_id?: string
+    request_id?: string
+    status?: string
+  }
 }
 
 export async function listPendingSchedulingProposalsForPatient(): Promise<SchedulingProposal[]> {
