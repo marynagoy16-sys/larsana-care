@@ -47,3 +47,16 @@ coverage/
 # Seed scripts (local only)
 data/supabase/scripts/.seed-sp-geography.checkpoint.json
 data/supabase/scripts/seed-sp-geography.log
+data/supabase/.temp/
+
+# Capacitor
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/local.properties
+frontend/android/key.properties
+frontend/android/app/*.keystore
+frontend/android/app/*.jks
+frontend/ios/App/Pods/
+frontend/ios/App/build/
+frontend/capacitor.config.dev.ts

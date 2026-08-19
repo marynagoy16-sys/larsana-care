@@ -16,6 +16,9 @@
     "typecheck:mobile:profissional": "node scripts/typecheck-mobile.mjs profissional",
     "typecheck:mobile:paciente": "node scripts/typecheck-mobile.mjs paciente",
     "typecheck:mobile:financeiro": "node scripts/typecheck-mobile.mjs financeiro",
-    "build:web": "npm run build --workspace=frontend"
+    "build:web": "npm run build --workspace=frontend",
+    "cap:sync": "npm run cap:sync --workspace=frontend",
+    "cap:android": "npm run cap:android --workspace=frontend",
+    "cap:ios": "npm run cap:ios --workspace=frontend"
   }
 }

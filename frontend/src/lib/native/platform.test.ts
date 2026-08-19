@@ -1,22 +1,22 @@
 /** @vitest-environment jsdom */
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { Capacitor } from '@capacitor/core'
 import { currentPlatform, isNativeApp } from '@/lib/native/platform'
 
 describe('isNativeApp', () => {
   afterEach(() => {
-    delete (window as Window & { Capacitor?: unknown }).Capacitor
+    vi.restoreAllMocks()
   })
 
   it('é falso no navegador', () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false)
     expect(isNativeApp()).toBe(false)
     expect(currentPlatform()).toBe('web')
   })
 
   it('é verdadeiro só quando Capacitor reporta plataforma nativa', () => {
-    ;(window as Window & { Capacitor?: { isNativePlatform: () => boolean; getPlatform: () => string } }).Capacitor = {
-      isNativePlatform: () => true,
-      getPlatform: () => 'android',
-    }
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true)
+    vi.spyOn(Capacitor, 'getPlatform').mockReturnValue('android')
     expect(isNativeApp()).toBe(true)
     expect(currentPlatform()).toBe('android')
   })
