@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
-import { getHomePathForRole } from '@/types/auth'
+import { getAppHomePathForRole } from '@/lib/native/routing'
 
 export function NotFoundPage() {
   const { role } = useAuth()
-  const homePath = role ? getHomePathForRole(role) : '/login'
+  const homePath = role ? getAppHomePathForRole(role) : '/login'
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">

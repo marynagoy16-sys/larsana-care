@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { getHomePathForRole } from '@/types/auth'
+import { getAppHomePathForRole } from '@/lib/native/routing'
 
 export function RoleRedirect() {
   const { session, role, loading } = useAuth()
@@ -14,6 +14,6 @@ export function RoleRedirect() {
   }
 
   if (!session) return <Navigate to="/login" replace />
-  if (role) return <Navigate to={getHomePathForRole(role)} replace />
+  if (role) return <Navigate to={getAppHomePathForRole(role)} replace />
   return <Navigate to="/login" replace />
 }

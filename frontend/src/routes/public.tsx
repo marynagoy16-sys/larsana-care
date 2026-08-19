@@ -1,8 +1,10 @@
 import type { RouteObject } from 'react-router-dom'
 import { lazy } from 'react'
 import { GuestOnly } from '@/routes/guards/GuestOnly'
+import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { comingSoonElement } from '@/routes/createComingSoonElement'
 import { LoginPageLazy } from '@/pages/auth/LoginPageLazy'
+import { StaffWebOnlyRoute } from '@/routes/guards/StaffWebOnlyRoute'
 
 const SignupPageLazy = lazy(() =>
   import('@/pages/auth/SignupPage').then((m) => ({ default: m.SignupPage })),
@@ -42,6 +44,14 @@ export const publicRoutes: RouteObject[] = [
   {
     path: '/redefinir-senha',
     element: <ResetPasswordPageLazy />,
+  },
+  {
+    path: '/acesso-plataforma-web',
+    element: (
+      <RequireAuth>
+        <StaffWebOnlyRoute />
+      </RequireAuth>
+    ),
   },
   { path: '/aceite-termos', element: comingSoonElement() },
   { path: '/credenciamento-pendente', element: comingSoonElement() },

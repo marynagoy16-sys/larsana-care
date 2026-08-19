@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { getHomePathForRole, type UserRole } from '@/types/auth'
+import { getAppHomePathForRole } from '@/lib/native/routing'
+import type { UserRole } from '@/types/auth'
 
 interface RequireRoleProps {
   allowed: UserRole[]
@@ -20,7 +21,7 @@ export function RequireRole({ allowed, children }: RequireRoleProps) {
 
   if (!role || !allowed.includes(role)) {
     if (role) {
-      return <Navigate to={getHomePathForRole(role)} replace />
+      return <Navigate to={getAppHomePathForRole(role)} replace />
     }
     return <Navigate to="/login" replace />
   }
