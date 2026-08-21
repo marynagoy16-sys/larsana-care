@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm'
 
 export function ForgotPasswordPage() {
   return (
-    <div className="relative box-border flex h-dvh flex-col overflow-hidden bg-background p-4 sm:p-5">
+    <div className="relative box-border flex h-dvh flex-col overflow-hidden bg-background px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-5 sm:pb-5">
       <div className="mx-auto grid h-full min-h-0 w-full max-w-6xl flex-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <div className="relative hidden h-full min-h-0 overflow-hidden rounded-3xl bg-brand-care p-8 text-brand-light lg:flex lg:flex-col lg:justify-between">
           <Logo variant="dark" layout="horizontal" size="sm" subtitle="Fisioterapia Domiciliar" />

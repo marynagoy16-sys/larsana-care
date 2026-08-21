@@ -1,0 +1,6 @@
+export { bootstrapNativeShell } from '@/lib/native/bootstrap'
+export { PLATFORM_WEB_URL, STAFF_WEB_ONLY_PATH } from '@/lib/native/constants'
+export { openExternalUrl, openPlatformWeb } from '@/lib/native/links'
+export { currentPlatform, isNativeApp } from '@/lib/native/platform'
+export { getAppHomePathForRole } from '@/lib/native/routing'
+export { createAuthStorage } from '@/lib/native/storage'

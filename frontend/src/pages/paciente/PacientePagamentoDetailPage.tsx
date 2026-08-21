@@ -1,14 +1,11 @@
 import { Link, useParams } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { CheckCircle2 } from 'lucide-react'
 import { PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { Button } from '@/components/ui/button'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { paymentStatusLabels } from '@/constants/labels'
-import { simulateChargePayment } from '@/services/patientPayments'
-import { patientPortalQueryKeys } from '@/services/patientPortal'
 import { supabase } from '@/lib/supabase'
-import { toast } from 'sonner'
 
 type ChargeRow = {
   id: string
@@ -22,7 +19,6 @@ type ChargeRow = {
 
 export function PacientePagamentoDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['paciente', 'charges', id],
@@ -36,30 +32,6 @@ export function PacientePagamentoDetailPage() {
       return row as ChargeRow
     },
     enabled: !!id,
-  })
-
-  const simulateMutation = useMutation({
-    mutationFn: () => simulateChargePayment(id!),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['paciente', 'charges', id] })
-      queryClient.invalidateQueries({ queryKey: ['paciente', 'charges-list'] })
-      queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
-      queryClient.invalidateQueries({ queryKey: ['paciente', 'cycles'] })
-
-      if (result.already_paid) {
-        toast.info('Este pagamento já estava confirmado.')
-        return
-      }
-
-      toast.success(
-        result.sessions_count > 0
-          ? `Pagamento confirmado! ${result.sessions_count} sessões liberadas.`
-          : 'Pagamento confirmado!',
-      )
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || 'Não foi possível simular o pagamento.')
-    },
   })
 
   if (isLoading) {
@@ -128,23 +100,14 @@ export function PacientePagamentoDetailPage() {
             </div>
 
             {!isPaid && (
-              <>
-                <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-center text-sm text-muted-foreground">
-                  <p className="font-medium text-foreground mb-1">Pagamento via PIX ou boleto</p>
-                  <p>O QR Code e o boleto serão exibidos aqui assim que a integração Asaas estiver ativa.</p>
-                </div>
-
-                <Button
-                  className="w-full h-12 lg:h-10"
-                  onClick={() => simulateMutation.mutate()}
-                  disabled={simulateMutation.isPending}
-                >
-                  {simulateMutation.isPending ? 'Confirmando…' : 'Simular pagamento confirmado'}
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Ambiente de demonstração — confirma o PIX e libera as sessões do ciclo.
+              <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-center text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Pagamento PIX e boleto em preparação</p>
+                <p>
+                  A cobrança já está registrada. QR Code e boleto serão exibidos aqui quando a
+                  integração Asaas estiver ativa. Este aplicativo não confirma pagamento de
+                  demonstração.
                 </p>
-              </>
+              </div>
             )}
 
             {isPaid && data.cycle_id && (

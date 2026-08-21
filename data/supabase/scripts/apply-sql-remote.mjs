@@ -64,7 +64,8 @@ async function main() {
   if (!file) throw new Error('Usage: node apply-sql-remote.mjs <sql-file>')
 
   const sql = readFileSync(resolve(process.cwd(), file), 'utf8')
-  const statements = splitStatements(sql)
+  // Dollar-quoted function bodies contain inner semicolons. Split only when asked.
+  const statements = process.argv.includes('--split') ? splitStatements(sql) : [sql]
   console.log(`Applying ${statements.length} statement(s) from ${file}...`)
 
   for (let i = 0; i < statements.length; i++) {

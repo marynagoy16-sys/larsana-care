@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Navigate, useParams, type RouteObject } from 'react-router-dom'
 import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
+import { NativeAdminGuard } from '@/routes/guards/NativeAdminGuard'
 import { AppShell } from '@/components/layout/AppShell'
 import type { UserRole } from '@/types/auth'
 
@@ -14,7 +15,9 @@ const adminOnly: UserRole[] = ['admin']
 function staffRoute(children: ReactNode, allowed: UserRole[] = staffRoles) {
   return (
     <RequireAuth>
-      <RequireRole allowed={allowed}>{children}</RequireRole>
+      <NativeAdminGuard>
+        <RequireRole allowed={allowed}>{children}</RequireRole>
+      </NativeAdminGuard>
     </RequireAuth>
   )
 }

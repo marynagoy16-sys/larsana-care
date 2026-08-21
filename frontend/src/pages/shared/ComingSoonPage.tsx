@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getPageTitle } from '@/config/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { getHomePathForRole } from '@/types/auth'
+import { getAppHomePathForRole } from '@/lib/native/routing'
 import { COMING_SOON_BADGE } from '@/config/navigation'
 
 export function ComingSoonPage() {
   const location = useLocation()
   const { role } = useAuth()
   const title = getPageTitle(location.pathname)
-  const homePath = role ? getHomePathForRole(role) : '/login'
+  const homePath = role ? getAppHomePathForRole(role) : '/login'
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh]">

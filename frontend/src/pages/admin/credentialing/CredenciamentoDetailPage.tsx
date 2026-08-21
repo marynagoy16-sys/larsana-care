@@ -185,7 +185,7 @@ export function CredenciamentoDetailPage() {
   })
 
   const approve = useCrudMutation({
-    mutationFn: (_: void) => approveCredentialing(id!),
+    mutationFn: () => approveCredentialing(id!),
     queryKey: adminCredentialingQueryKeys.list,
     successMessage: 'Profissional aprovado e ativado',
     onSuccess: () => {
@@ -194,7 +194,7 @@ export function CredenciamentoDetailPage() {
   })
 
   const revision = useCrudMutation({
-    mutationFn: (_: void) => requestCredentialingRevision(id!),
+    mutationFn: () => requestCredentialingRevision(id!),
     queryKey: adminCredentialingQueryKeys.list,
     successMessage: 'Devolvido ao profissional para correção',
     onSuccess: () => {

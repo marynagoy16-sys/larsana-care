@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { digitsOnly, sanitizeEmail } from '@/lib/sanitize'
+import { resolvePublicSignupRole } from '@/lib/signupRole'
 
 export type SignupAccountType = 'paciente' | 'pp'
 
@@ -33,7 +34,7 @@ export async function signUpAccount(payload: SignupPayload): Promise<void> {
 
   const metadata: Record<string, string> = {
     full_name: fullName,
-    primary_role: payload.accountType === 'pp' ? 'pp' : 'paciente',
+    primary_role: resolvePublicSignupRole(payload.accountType),
   }
 
   if (payload.accountType === 'pp') {

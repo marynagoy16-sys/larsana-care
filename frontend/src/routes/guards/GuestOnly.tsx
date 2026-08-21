@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { getHomePathForRole } from '@/types/auth'
+import { getAppHomePathForRole } from '@/lib/native/routing'
 
 export function GuestOnly({ children }: { children: React.ReactNode }) {
   const { session, role, loading } = useAuth()
@@ -14,7 +14,7 @@ export function GuestOnly({ children }: { children: React.ReactNode }) {
   }
 
   if (session && role) {
-    return <Navigate to={getHomePathForRole(role)} replace />
+    return <Navigate to={getAppHomePathForRole(role)} replace />
   }
 
   return <>{children}</>

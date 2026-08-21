@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/useAuth'
-import { getHomePathForRole } from '@/types/auth'
+import { getAppHomePathForRole } from '@/lib/native/routing'
 import { softFieldButtonClass, softFieldInputClass, softFieldLabelClass } from '@/lib/formFieldStyles'
 import { cn } from '@/lib/utils'
 
@@ -20,7 +20,7 @@ export function LoginForm() {
 
   useEffect(() => {
     if (role) {
-      navigate(getHomePathForRole(role), { replace: true })
+      navigate(getAppHomePathForRole(role), { replace: true })
     }
   }, [role, navigate])
 
