@@ -101,7 +101,11 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
+  -- Seed, migrations and service_role (no JWT / auth.uid() IS NULL) may
+  -- bootstrap staff after handle_new_user creates a paciente profile.
+  -- Authenticated non-admin clients cannot escalate primary_role.
   IF NEW.primary_role IS DISTINCT FROM OLD.primary_role
+     AND auth.uid() IS NOT NULL
      AND NOT public.is_staff_role(ARRAY['admin']::public.user_role[]) THEN
     RAISE EXCEPTION 'Não é permitido alterar o perfil da conta';
   END IF;

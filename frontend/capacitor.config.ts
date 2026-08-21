@@ -14,16 +14,21 @@ const config: CapacitorConfig = {
   appId: 'br.com.larsanacare.app',
   appName: 'LarsanaCare',
   webDir: 'dist',
+  backgroundColor: '#FCFBF7',
   server: {
     androidScheme: 'https',
     iosScheme: 'https',
   },
+  android: {
+    allowMixedContent: false,
+    backgroundColor: '#FCFBF7',
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 1200,
-      backgroundColor: '#FCFBF7',
+      backgroundColor: '#095742',
       showSpinner: false,
-      androidScaleType: 'CENTER_CROP',
+      androidScaleType: 'CENTER_INSIDE',
       splashFullScreen: true,
       splashImmersive: true,
     },

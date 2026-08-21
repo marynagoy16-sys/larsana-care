@@ -41,3 +41,9 @@ enable_anonymous_sign_ins = false
 [auth.email]
 enable_signup = true
 enable_confirmations = false
+
+[functions.create-charge]
+verify_jwt = true
+
+[functions.payment-webhook]
+verify_jwt = false

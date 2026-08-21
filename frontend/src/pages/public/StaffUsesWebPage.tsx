@@ -9,7 +9,7 @@ export function StaffUsesWebPage() {
   const { signOut, profile } = useAuth()
 
   return (
-    <div className="relative box-border flex h-dvh flex-col overflow-auto bg-background p-4 sm:p-5">
+    <div className="relative box-border flex h-dvh flex-col overflow-auto bg-background px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top,0px))] sm:px-5 sm:pb-5">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 py-8">
         <div className="flex justify-center">
           <Logo

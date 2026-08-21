@@ -133,5 +133,9 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.simulate_charge_payment(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.simulate_charge_payment(uuid) FROM authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.simulate_charge_payment(uuid) TO service_role;
+
 COMMENT ON FUNCTION public.simulate_charge_payment(uuid) IS
   'Uso interno (service_role) apenas. Clientes autenticados não podem simular pagamento; Asaas produção é o gate da v1 pública.';

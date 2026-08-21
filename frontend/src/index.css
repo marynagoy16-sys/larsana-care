@@ -221,7 +221,7 @@ body {
 }
 
 .shell-content-y-top {
-  padding-top: var(--shell-gap);
+  padding-top: calc(var(--shell-gap) + env(safe-area-inset-top, 0px));
 }
 
 .shell-content-y-bottom {
