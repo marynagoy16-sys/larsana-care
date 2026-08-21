@@ -6,6 +6,10 @@ import { useRouter } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
+import {
+  buildFrequencyDisclaimer,
+  PatientWeeklyFrequencyPicker,
+} from '@/components/paciente/PatientWeeklyFrequencyPicker'
 import { formatCurrency } from '@/lib/formatters'
 import {
   acceptAssessmentProposal,
@@ -29,7 +33,9 @@ export default function PropostaScreen() {
   })
 
   const recommended = previewQuery.data?.proposed_weekly_frequency ?? pendingAssessment?.proposed_weekly_frequency ?? 2
+  const options = previewQuery.data?.options ?? []
   const selectedFrequency = chosenFrequency ?? recommended
+  const selectedOption = options.find((o) => o.weekly_frequency === selectedFrequency)
 
   const acceptMutation = useMutation({
     mutationFn: (response: 'SIM' | 'NAO') =>
@@ -44,13 +50,28 @@ export default function PropostaScreen() {
         router.replace(`/(app)/pagamentos/${result.charge_id}`)
         return
       }
-      Alert.alert('Proposta recusada', 'Foi gerada uma cobrança de R$ 50 referente à avaliação.')
+      Alert.alert('Proposta recusada', 'Obrigado pelo retorno.')
       router.replace('/(app)/(tabs)/inicio')
     },
     onError: (err: Error) => Alert.alert('Erro', err.message),
   })
 
   const loading = homeQuery.isLoading || (pendingAssessment && previewQuery.isLoading)
+
+  const handleAccept = () => {
+    if (selectedFrequency < recommended) {
+      Alert.alert(
+        'Frequência menor que a recomendada',
+        buildFrequencyDisclaimer(recommended),
+        [
+          { text: 'Voltar', style: 'cancel' },
+          { text: 'Sim, desejo seguir', onPress: () => acceptMutation.mutate('SIM') },
+        ],
+      )
+      return
+    }
+    acceptMutation.mutate('SIM')
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
@@ -74,62 +95,58 @@ export default function PropostaScreen() {
       ) : (
         <>
           <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 py-4 pb-36">
-            <View className="rounded-xl border border-border bg-card p-5 gap-2">
+            <View className="rounded-xl border border-border bg-card p-5 gap-3">
+              <Text className="font-semibold text-sm">Resumo da proposta</Text>
               <Text className="font-semibold">{previewQuery.data.patient_name}</Text>
-              <Text className="text-sm text-muted-foreground">
-                {previewQuery.data.proposed_session_count} sessões · {previewQuery.data.proposed_patient_level} · {previewQuery.data.proposed_weekly_frequency}x/sem
-              </Text>
-              {previewQuery.data.total_amount_cents != null ? (
-                <Text className="text-lg font-bold text-primary">
-                  {formatCurrency(previewQuery.data.total_amount_cents)}
+              {previewQuery.data.professional_name ? (
+                <Text className="text-sm text-muted-foreground">
+                  Profissional: {previewQuery.data.professional_name}
                 </Text>
               ) : null}
-            </View>
-            <View className="rounded-xl border border-border bg-card p-5 gap-3">
-              <Text className="font-medium">Frequência semanal</Text>
-              <Text className="text-sm text-muted-foreground">Recomendado: {recommended}x/semana</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {[1, 2, 3, 4, 5].map((freq) => (
-                  <Pressable
-                    key={freq}
-                    onPress={() => setChosenFrequency(freq)}
-                    className={`rounded-full border px-4 py-2 ${selectedFrequency === freq ? 'border-primary bg-primary/10' : 'border-border'}`}
-                  >
-                    <Text className={selectedFrequency === freq ? 'font-semibold text-primary' : 'text-foreground'}>
-                      {freq}x
+              <Text className="text-sm text-muted-foreground">
+                {previewQuery.data.proposed_session_count} sessões · {previewQuery.data.proposed_patient_level} ·{' '}
+                {previewQuery.data.proposed_weekly_frequency}x/sem recomendado
+              </Text>
+              {selectedOption ? (
+                <View className="rounded-lg bg-muted/40 px-4 py-3">
+                  <Text className="text-xs text-muted-foreground">Valor do ciclo escolhido</Text>
+                  <Text className="text-xl font-bold text-primary">
+                    {formatCurrency(selectedOption.total_amount_cents)}
+                  </Text>
+                  {selectedOption.assessment_credit_cents > 0 ? (
+                    <Text className="text-xs text-primary mt-0.5">
+                      Inclui desconto de {formatCurrency(selectedOption.assessment_credit_cents)} da avaliação paga
                     </Text>
-                  </Pressable>
-                ))}
-              </View>
+                  ) : null}
+                </View>
+              ) : null}
             </View>
+            {options.length > 0 ? (
+              <View className="rounded-xl border border-border bg-card p-5">
+                <PatientWeeklyFrequencyPicker
+                  value={selectedFrequency}
+                  recommended={recommended}
+                  options={options}
+                  onChange={setChosenFrequency}
+                />
+              </View>
+            ) : null}
           </ScrollView>
           <View className="border-t border-border bg-card px-4 py-4 gap-2">
-            <Button
-              onPress={() => {
-                if (selectedFrequency < recommended) {
-                  Alert.alert(
-                    'Frequência menor que a recomendada',
-                    'Seguir com frequência abaixo da recomendada pode impactar os resultados. Deseja continuar?',
-                    [
-                      { text: 'Voltar', style: 'cancel' },
-                      { text: 'Sim, desejo seguir', onPress: () => acceptMutation.mutate('SIM') },
-                    ],
-                  )
-                  return
-                }
-                acceptMutation.mutate('SIM')
-              }}
-              loading={acceptMutation.isPending}
-            >
+            <Button onPress={handleAccept} loading={acceptMutation.isPending}>
               Aceitar e pagar
             </Button>
             <Button
               variant="outline"
               onPress={() =>
-                Alert.alert('Recusar proposta?', 'Será gerada cobrança de R$ 50 da avaliação.', [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Confirmar', style: 'destructive', onPress: () => acceptMutation.mutate('NAO') },
-                ])
+                Alert.alert(
+                  'Recusar proposta?',
+                  'Ao recusar, você não dará continuidade ao tratamento proposto. A taxa de avaliação já paga na solicitação não será reembolsada conforme os termos.',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Confirmar recusa', style: 'destructive', onPress: () => acceptMutation.mutate('NAO') },
+                  ],
+                )
               }
               loading={acceptMutation.isPending}
             >

@@ -1,23 +1,38 @@
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format, parseISO } from 'date-fns'
 import { ArrowLeft } from 'lucide-react-native'
-import { Pressable } from 'react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Card'
 import { getAgendaStatusConfig } from '@/lib/sessionStatus'
 import { getAgendaSessionById, ppAgendaQueryKeys } from '@/services/ppAgenda'
+import { ppSessionCheckIn, ppSessionCheckOut } from '@/services/ppSessions'
 
 export default function SessionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const { data: session, isLoading } = useQuery({
     queryKey: ppAgendaQueryKeys.session(id ?? ''),
     queryFn: () => getAgendaSessionById(id!),
     enabled: !!id,
+  })
+
+  const checkMutation = useMutation({
+    mutationFn: async (action: 'in' | 'out') => {
+      if (!id) throw new Error('Sessão inválida')
+      if (action === 'in') await ppSessionCheckIn(id)
+      else await ppSessionCheckOut(id)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ppAgendaQueryKeys.session(id!) })
+      Alert.alert('Sucesso', 'Registro atualizado')
+    },
+    onError: (err: Error) => Alert.alert('Erro', err.message),
   })
 
   if (isLoading || !session) {
@@ -76,6 +91,22 @@ export default function SessionDetailScreen() {
               {session.isAssessment ? 'Avaliação inicial' : 'Evolução clínica'} · domiciliar
             </Text>
           </View>
+        </View>
+
+        <View className="gap-2">
+          {!session.checkInAt ? (
+            <Button onPress={() => checkMutation.mutate('in')} loading={checkMutation.isPending}>
+              Check-in
+            </Button>
+          ) : !session.checkOutAt ? (
+            <Button
+              variant="outline"
+              onPress={() => checkMutation.mutate('out')}
+              loading={checkMutation.isPending}
+            >
+              Check-out
+            </Button>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

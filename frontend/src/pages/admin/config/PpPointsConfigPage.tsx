@@ -7,9 +7,12 @@ import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPage
 import { PageHeader } from '@/components/layout/PageHeader'
 import {
   getPpPointsSettings,
+  listPpPatenteTiers,
   listPpPointsRules,
+  updatePpPatenteTierPercent,
   updatePpPointsRule,
   updatePpPointsSettings,
+  type PpPatente,
 } from '@/services/ppPoints'
 
 export function PpPointsConfigPage() {
@@ -23,6 +26,17 @@ export function PpPointsConfigPage() {
   const { data: rules = [] } = useQuery({
     queryKey: ['pp_points_rules'],
     queryFn: listPpPointsRules,
+  })
+
+  const { data: tiers = [] } = useQuery({
+    queryKey: ['pp_patente_tiers'],
+    queryFn: listPpPatenteTiers,
+  })
+
+  const saveTier = useMutation({
+    mutationFn: ({ patente, base_pp_percent }: { patente: PpPatente; base_pp_percent: number }) =>
+      updatePpPatenteTierPercent(patente, base_pp_percent),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pp_patente_tiers'] }),
   })
 
   const saveSettings = useMutation({
@@ -48,7 +62,38 @@ export function PpPointsConfigPage() {
       <CrudScrollPageLayout>
         <div className="space-y-6 pb-8 max-w-2xl">
           <section className="rounded-xl border border-border bg-card p-5 space-y-4">
-            <h2 className="font-semibold text-sm">Patentes (thresholds)</h2>
+            <h2 className="font-semibold text-sm">Repasse por patente</h2>
+            <p className="text-xs text-muted-foreground">
+              Percentual base repassado ao PP (ciclos após o 1º mês). Alumínio inicia em 60%.
+            </p>
+            <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+              {tiers.map((tier) => (
+                <div key={tier.patente} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-sm">{tier.label}</p>
+                    <p className="text-xs text-muted-foreground">{tier.patente}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      className="w-20"
+                      defaultValue={tier.base_pp_percent}
+                      onBlur={(e) =>
+                        saveTier.mutate({
+                          patente: tier.patente,
+                          base_pp_percent: Number(e.target.value) || tier.base_pp_percent,
+                        })
+                      }
+                    />
+                    <span className="text-sm text-muted-foreground">%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <h2 className="font-semibold text-sm">Patentes (thresholds de pontos)</h2>
             {settings && (
               <>
                 <div className="grid gap-4 sm:grid-cols-3">

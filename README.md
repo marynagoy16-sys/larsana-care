@@ -247,7 +247,7 @@ Deploy da stack (rede `sagitta` externa):
 docker stack deploy -c docker/stack.yml larsana-care
 ```
 
-Edite o host em `docker/stack.yml` (padrão: `larsana.sagittadigital.com.br`) antes do deploy.
+Produção: `app.larsanacare.com.br` (ver hosts em `docker/stack.yml`). Atualize Supabase Auth (Site URL + Redirect URLs) após mudar o domínio.
 
 ### Usuários dev (senha: `LarsanaCare2026!`)
 

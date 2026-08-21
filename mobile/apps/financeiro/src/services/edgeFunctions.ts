@@ -19,7 +19,9 @@ export interface DelumaExportPayload {
 }
 
 export interface TransferWalletPayload {
-  transfer_id: string
+  transfer_id?: string
+  assessment_repasse_id?: string
+  sub_repasse_id?: string
 }
 
 export const edgeFunctions = {
@@ -30,5 +32,5 @@ export const edgeFunctions = {
     invoke<{ export_id: string; storage_path: string }>('generate-deluma-export', payload),
 
   transferWallet: (payload: TransferWalletPayload) =>
-    invoke<{ status: string }>('transfer-wallet', payload),
+    invoke<{ status: string; asaas_transfer_id?: string }>('transfer-wallet', payload),
 }

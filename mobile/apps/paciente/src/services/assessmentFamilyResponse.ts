@@ -1,5 +1,14 @@
 import { supabase } from '@/lib/supabase'
 
+export type ProposalOption = {
+  weekly_frequency: number
+  session_count: number
+  total_amount_cents: number
+  gross_amount_cents: number
+  assessment_credit_cents: number
+  is_recommended: boolean
+}
+
 export type PatientProposalPreview = {
   assessment_id: string
   patient_id: string
@@ -11,14 +20,17 @@ export type PatientProposalPreview = {
   proposal_sent_at: string | null
   response_deadline_at: string | null
   status: string
-  total_amount_cents: number | null
+  options: ProposalOption[]
+  early_cycle_discount_pct: number
+  /** @deprecated use options */
+  total_amount_cents?: number | null
 }
 
 export type AcceptProposalResult = {
   assessment_id: string
   family_response: 'SIM' | 'NAO'
   cycle_id?: string
-  charge_id: string
+  charge_id?: string
 }
 
 export async function getPatientProposalPreview(
@@ -41,6 +53,7 @@ export async function acceptAssessmentProposal(input: {
     p_assessment_id: input.assessmentId,
     p_response: input.response,
     p_chosen_weekly_frequency: input.chosenWeeklyFrequency ?? null,
+    p_payment_timing: 'antecipado',
   })
 
   if (error) throw error

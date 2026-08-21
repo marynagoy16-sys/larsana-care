@@ -1,17 +1,34 @@
-import { Text, View } from 'react-native'
+import { Text, View, Pressable } from 'react-native'
+import { useRouter } from 'expo-router'
 import { CheckCircle2, Circle, CircleDot } from 'lucide-react-native'
 import { cn } from '@/lib/cn'
 import type { PatientServiceDemand } from '@/services/patientServiceRequest'
 
-const STEPS = [
+const BASE_STEPS = [
   { key: 'enviada', label: 'Solicitação enviada' },
   { key: 'buscando', label: 'Procurando profissional parceiro' },
+  { key: 'waitlist', label: 'Lista de espera / sem cobertura imediata' },
   { key: 'atribuido', label: 'Profissional parceiro atribuído' },
+  { key: 'horario', label: 'Escolha um horário' },
 ] as const
 
-function resolveStepIndex(demand: PatientServiceDemand | null | undefined, hasWaitlist: boolean): number {
-  if (hasWaitlist) return -1
+type StepKey = (typeof BASE_STEPS)[number]['key']
+
+function resolveVisibleSteps(hasWaitlist?: boolean, pendingScheduling?: boolean): StepKey[] {
+  if (hasWaitlist && pendingScheduling) return ['enviada', 'waitlist', 'atribuido', 'horario']
+  if (hasWaitlist) return ['enviada', 'waitlist']
+  if (pendingScheduling) return ['enviada', 'buscando', 'atribuido', 'horario']
+  return ['enviada', 'buscando', 'atribuido']
+}
+
+function resolveStepIndex(
+  demand: PatientServiceDemand | null | undefined,
+  hasWaitlist?: boolean,
+  pendingScheduling?: boolean,
+): number {
+  if (hasWaitlist && !demand) return 1
   if (!demand) return -1
+  if (pendingScheduling) return 3
   if (demand.status === 'alocada' || demand.assigned_professional_id) return 2
   if (demand.status === 'aberta') return 1
   return 0
@@ -20,7 +37,9 @@ function resolveStepIndex(demand: PatientServiceDemand | null | undefined, hasWa
 type Props = {
   demand?: PatientServiceDemand | null
   hasWaitlist?: boolean
+  pendingScheduling?: boolean
   createdAt?: string
+  assignedProfessionalName?: string | null
 }
 
 function formatWhen(iso?: string): string {
@@ -37,8 +56,16 @@ function formatWhen(iso?: string): string {
   }
 }
 
-export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props) {
-  if (hasWaitlist) {
+export function ServiceRequestTimeline({
+  demand,
+  hasWaitlist,
+  pendingScheduling,
+  createdAt,
+  assignedProfessionalName,
+}: Props) {
+  const router = useRouter()
+
+  if (hasWaitlist && !demand) {
     return (
       <View className="rounded-xl border border-border bg-card p-4 gap-2">
         <Text className="text-sm font-semibold text-foreground">Lista de espera</Text>
@@ -49,13 +76,16 @@ export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props
     )
   }
 
-  const activeIndex = resolveStepIndex(demand, false)
-  if (activeIndex < 0) return null
+  const visibleKeys = resolveVisibleSteps(hasWaitlist, pendingScheduling)
+  const steps = BASE_STEPS.filter((step) => visibleKeys.includes(step.key))
+  const activeIndex = resolveStepIndex(demand, hasWaitlist, pendingScheduling)
+
+  if (activeIndex < 0 && !hasWaitlist) return null
 
   return (
     <View className="rounded-xl border border-border bg-card p-4 gap-4">
       <Text className="text-sm font-semibold text-foreground">Acompanhe sua solicitação</Text>
-      {STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const done = index < activeIndex
         const current = index === activeIndex
         const Icon = done ? CheckCircle2 : current ? CircleDot : Circle
@@ -81,6 +111,19 @@ export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props
                 <Text className="text-xs text-muted-foreground">
                   Estamos buscando um profissional parceiro disponível na sua região.
                 </Text>
+              ) : null}
+              {current && step.key === 'atribuido' && assignedProfessionalName ? (
+                <Text className="text-xs text-muted-foreground">{assignedProfessionalName}</Text>
+              ) : null}
+              {current && step.key === 'horario' ? (
+                <View className="gap-2 pt-1">
+                  <Text className="text-xs text-muted-foreground">
+                    O profissional enviou horários. Confirme o melhor para você.
+                  </Text>
+                  <Pressable onPress={() => router.push('/(app)/agendamento')}>
+                    <Text className="text-sm font-semibold text-primary">Escolher horário →</Text>
+                  </Pressable>
+                </View>
               ) : null}
             </View>
           </View>

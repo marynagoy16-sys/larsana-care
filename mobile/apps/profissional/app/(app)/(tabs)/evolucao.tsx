@@ -55,7 +55,7 @@ export default function EvolucaoScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
       <PageHeader
         title="Evoluções pendentes"
-        subtitle="Terapias realizadas aguardando registro (prazo 24h)"
+        subtitle="Terapias realizadas aguardando registro (prazo 7 dias)"
       />
 
       {isLoading ? (
@@ -69,7 +69,7 @@ export default function EvolucaoScreen() {
               label="Total"
               value={String(count)}
               icon={SquareStack}
-              description="Terapias realizadas aguardando registro clínico (prazo 24h)"
+              description="Terapias realizadas aguardando registro clínico (prazo 7 dias)"
             />
             <KpiCard
               label="Registros"

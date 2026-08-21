@@ -42,6 +42,7 @@ import {
   adminCredentialingQueryKeys,
   approveCredentialing,
   getProfessionalDocumentViewUrl,
+  linkAsaasSubaccount,
   loadAdminCredentialingSnapshot,
   requestCredentialingRevision,
   reviewCardiorrespiratoryHabilitation,
@@ -209,6 +210,12 @@ export function CredenciamentoDetailPage() {
     successMessage: 'Status de habilitação Cardiorrespiratória atualizado',
   })
 
+  const linkAsaas = useCrudMutation({
+    mutationFn: (_: void) => linkAsaasSubaccount(id!),
+    queryKey: adminCredentialingQueryKeys.detail(id ?? ''),
+    successMessage: 'Wallet Asaas vinculado',
+  })
+
   if (isLoading) {
     return (
       <>
@@ -342,7 +349,29 @@ export function CredenciamentoDetailPage() {
             />
             <DetailRow
               label="Wallet Asaas"
-              value={proExtended.asaas_wallet_id ?? '—'}
+              value={
+                proExtended.asaas_wallet_id ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Badge variant="secondary">Vinculado</Badge>
+                    <span className="font-mono text-xs break-all">{proExtended.asaas_wallet_id}</span>
+                  </span>
+                ) : isCredentialingActive(proExtended.credentialing_status) ? (
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">Pendente</Badge>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={linkAsaas.isPending}
+                      onClick={() => linkAsaas.mutate(undefined)}
+                    >
+                      Criar subconta Asaas
+                    </Button>
+                  </span>
+                ) : (
+                  '—'
+                )
+              }
             />
             <DetailRow
               label="Cadastro em"

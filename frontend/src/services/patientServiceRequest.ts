@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { PatientServiceRequestValues } from '@/schemas/patientServiceRequest'
+import { ensurePatientPrimaryAddressGeocoded } from '@/services/patientAddressGeocode'
+import { edgeFunctions } from '@/services/edgeFunctions'
 
 export type PatientServiceDemand = {
   id: string
@@ -29,7 +31,7 @@ export type PatientRequestPrefill = {
   birthDate: string
   responsibleFullName: string
   responsibleCpf: string
-  attendancePeriod: '' | 'MANHA' | 'TARDE' | 'NOITE'
+  attendancePeriod: '' | 'MANHA' | 'TARDE' | 'NOITE' | 'INDIFERENTE'
   diagnosticHypothesis: string
   referralSource: '' | PatientServiceRequestValues['referralSource']
 }
@@ -124,10 +126,57 @@ export async function getPatientServiceLegalTerms(): Promise<PatientServiceLegal
   return (data ?? []) as PatientServiceLegalTerm[]
 }
 
-export async function submitServiceRequest(
+export type PrepareServiceRequestResult = {
+  success: boolean
+  reason?: 'no_coverage'
+  message?: string
+  patient_id?: string
+  can_checkout?: boolean
+  assessment_fee_cents?: number
+  assessment_fee_message?: string
+  already_paid_assessment?: boolean
+}
+
+export type CreateAssessmentChargeResult = {
+  charge_id?: string
+  amount_cents?: number
+  already_exists?: boolean
+  already_paid?: boolean
+  message?: string
+}
+
+export type SyncAssessmentChargeResult = {
+  synced: boolean
+  asaasEnabled: boolean
+  chargeId: string
+  pixQrCode: string | null
+  pixCopyPaste: string | null
+  error?: string
+}
+
+export type CompleteAssessmentCheckoutResult = {
+  chargeId: string
+  alreadyPaid: boolean
+  asaasSyncFailed: boolean
+  syncError?: string
+}
+
+const ASAAS_SYNC_MAX_RETRIES = 3
+const ASAAS_SYNC_RETRY_MS = 800
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export async function prepareServiceRequest(
   values: PatientServiceRequestValues,
-): Promise<RequestAttendanceResult> {
-  const { data, error } = await supabase.rpc('patient_submit_service_request' as never, {
+): Promise<PrepareServiceRequestResult> {
+  const status = await getPatientServiceStatus()
+  if (status.patient_id) {
+    await ensurePatientPrimaryAddressGeocoded(status.patient_id)
+  }
+
+  const { data, error } = await supabase.rpc('patient_prepare_service_request' as never, {
     p_patient_full_name: values.patientFullName,
     p_patient_cpf: values.patientCpf,
     p_birth_date: values.birthDate,
@@ -136,11 +185,131 @@ export async function submitServiceRequest(
     p_referral_source: values.referralSource,
     p_responsible_full_name: values.responsibleFullName || null,
     p_responsible_cpf: values.responsibleCpf || null,
+    p_birth_place: values.birthPlace,
+    p_marital_status: values.maritalStatus,
+    p_gender: values.gender,
     p_terms_accepted: values.termsAccepted,
   } as never)
 
   if (error) throw error
-  return data as RequestAttendanceResult
+  return data as PrepareServiceRequestResult
+}
+
+export async function createAssessmentRequestCharge(
+  paymentMethod: 'PIX' | 'BOLETO' = 'PIX',
+): Promise<CreateAssessmentChargeResult> {
+  const { data, error } = await supabase.rpc('patient_create_assessment_request_charge' as never, {
+    p_payment_method: paymentMethod,
+  } as never)
+  if (error) throw error
+  return data as CreateAssessmentChargeResult
+}
+
+export async function syncAssessmentChargeWithAsaas(
+  patientId: string,
+  chargeId: string,
+  amountCents: number,
+  paymentMethod: 'PIX' | 'BOLETO' = 'PIX',
+): Promise<SyncAssessmentChargeResult> {
+  const today = new Date().toISOString().slice(0, 10)
+  let lastError: Error | null = null
+
+  for (let attempt = 1; attempt <= ASAAS_SYNC_MAX_RETRIES; attempt += 1) {
+    try {
+      const result = await edgeFunctions.createCharge({
+        patient_id: patientId,
+        charge_id: chargeId,
+        amount_cents: amountCents,
+        due_date: today,
+        payment_method: paymentMethod,
+        description: 'Taxa de avaliação domiciliar Larsana Care',
+      })
+      return {
+        synced: true,
+        asaasEnabled: result.asaas_enabled,
+        chargeId,
+        pixQrCode: result.pix_qr_code,
+        pixCopyPaste: result.pix_copy_paste,
+      }
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      if (attempt < ASAAS_SYNC_MAX_RETRIES) {
+        await sleep(ASAAS_SYNC_RETRY_MS * attempt)
+      }
+    }
+  }
+
+  return {
+    synced: false,
+    asaasEnabled: true,
+    chargeId,
+    pixQrCode: null,
+    pixCopyPaste: null,
+    error: lastError?.message ?? 'Falha ao sincronizar cobrança',
+  }
+}
+
+export async function completeAssessmentCheckout(
+  patientId: string,
+  assessmentFeeCents: number,
+  paymentMethod: 'PIX' | 'BOLETO' = 'PIX',
+): Promise<CompleteAssessmentCheckoutResult> {
+  const charge = await createAssessmentRequestCharge(paymentMethod)
+  if (charge.already_paid) {
+    return { chargeId: charge.charge_id ?? '', alreadyPaid: true, asaasSyncFailed: false }
+  }
+
+  const chargeId = charge.charge_id
+  if (!chargeId) throw new Error('Não foi possível gerar a cobrança')
+
+  const sync = await syncAssessmentChargeWithAsaas(
+    patientId,
+    chargeId,
+    charge.amount_cents ?? assessmentFeeCents,
+    paymentMethod,
+  )
+
+  return {
+    chargeId,
+    alreadyPaid: false,
+    asaasSyncFailed: !sync.synced,
+    syncError: sync.error,
+  }
+}
+
+export async function submitServiceRequest(
+  values: PatientServiceRequestValues,
+): Promise<RequestAttendanceResult> {
+  const prep = await prepareServiceRequest(values)
+  if (!prep.success) {
+    return {
+      success: false,
+      reason: prep.reason === 'no_coverage' ? 'no_coverage' : undefined,
+      message: prep.message,
+    }
+  }
+
+  if (prep.already_paid_assessment) {
+    const { data, error } = await supabase.rpc('patient_submit_service_request' as never, {
+      p_patient_full_name: values.patientFullName,
+      p_patient_cpf: values.patientCpf,
+      p_birth_date: values.birthDate,
+      p_attendance_period: values.attendancePeriod,
+      p_diagnostic_hypothesis: values.diagnosticHypothesis,
+      p_referral_source: values.referralSource,
+      p_responsible_full_name: values.responsibleFullName || null,
+      p_responsible_cpf: values.responsibleCpf || null,
+      p_terms_accepted: values.termsAccepted,
+    } as never)
+    if (error) throw error
+    return data as RequestAttendanceResult
+  }
+
+  return {
+    success: false,
+    reason: undefined,
+    message: 'payment_required',
+  }
 }
 
 /** @deprecated Use submitServiceRequest */

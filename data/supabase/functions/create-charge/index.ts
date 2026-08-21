@@ -1,5 +1,7 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { asaasRequest, isAsaasEnabled } from '../_shared/asaas.ts'
+import { ensureAsaasCustomer, fetchPixQrCode } from '../_shared/charges.ts'
 
 interface CreateChargeBody {
   patient_id: string
@@ -7,6 +9,8 @@ interface CreateChargeBody {
   due_date: string
   payment_method: 'PIX' | 'BOLETO'
   description?: string
+  cycle_id?: string
+  charge_id?: string
 }
 
 const ALLOWED_ROLES = new Set(['admin', 'financeiro'])
@@ -108,23 +112,100 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
-  // PIX/boleto Asaas remain unset until production payment is enabled.
-  const { data, error } = await admin
-    .from('charges')
-    .insert({
-      patient_id: body.patient_id,
-      amount_cents: amount,
-      due_date: body.due_date,
-      payment_method: body.payment_method,
-      payment_status: 'pendente',
-      description,
+  try {
+    let asaasPaymentId: string | null = null
+    let pixQrCode: string | null = null
+    let pixCopyPaste: string | null = null
+    let boletoUrl: string | null = null
+
+    const hasAsaas = isAsaasEnabled()
+
+    if (hasAsaas) {
+      const customerId = await ensureAsaasCustomer(admin, body.patient_id)
+      if (customerId) {
+        const billingType = body.payment_method === 'PIX' ? 'PIX' : 'BOLETO'
+        const payment = await asaasRequest('/payments', {
+          method: 'POST',
+          body: JSON.stringify({
+            customer: customerId,
+            billingType,
+            value: amount / 100,
+            dueDate: body.due_date,
+            description: description ?? 'Ciclo de tratamento Larsana Care',
+          }),
+        })
+
+        asaasPaymentId = payment?.id ? String(payment.id) : null
+        pixQrCode = payment?.encodedImage ?? payment?.pixQrCode ?? null
+        boletoUrl = payment?.bankSlipUrl ?? payment?.invoiceUrl ?? null
+        pixCopyPaste = payment?.payload ?? payment?.pixCopyPaste ?? null
+
+        if (body.payment_method === 'PIX' && asaasPaymentId && (!pixQrCode || !pixCopyPaste)) {
+          const pix = await fetchPixQrCode(asaasPaymentId)
+          pixQrCode = pixQrCode ?? pix.encodedImage
+          pixCopyPaste = pixCopyPaste ?? pix.payload
+        }
+      }
+    }
+
+    let data: {
+      id: string
+      asaas_payment_id: string | null
+      pix_qr_code: string | null
+      pix_copy_paste: string | null
+      boleto_url: string | null
+    }
+
+    if (body.charge_id) {
+      const { data: updated, error: updateError } = await admin
+        .from('charges')
+        .update({
+          asaas_payment_id: asaasPaymentId,
+          pix_qr_code: pixQrCode,
+          pix_copy_paste: pixCopyPaste,
+          boleto_url: boletoUrl,
+          payment_method: body.payment_method,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', body.charge_id)
+        .select('id, asaas_payment_id, pix_qr_code, pix_copy_paste, boleto_url')
+        .single()
+
+      if (updateError) throw updateError
+      data = updated
+    } else {
+      const { data: inserted, error } = await admin
+        .from('charges')
+        .insert({
+          patient_id: body.patient_id,
+          cycle_id: body.cycle_id ?? null,
+          amount_cents: amount,
+          due_date: body.due_date,
+          payment_method: body.payment_method,
+          payment_status: 'pendente',
+          description,
+          asaas_payment_id: asaasPaymentId,
+          pix_qr_code: pixQrCode,
+          pix_copy_paste: pixCopyPaste,
+          boleto_url: boletoUrl,
+        })
+        .select('id, asaas_payment_id, pix_qr_code, pix_copy_paste, boleto_url')
+        .single()
+
+      if (error) throw error
+      data = inserted
+    }
+
+    return json(200, {
+      charge_id: data.id,
+      asaas_payment_id: data.asaas_payment_id,
+      pix_qr_code: data.pix_qr_code,
+      pix_copy_paste: data.pix_copy_paste,
+      boleto_url: data.boleto_url,
+      asaas_enabled: hasAsaas,
     })
-    .select('id')
-    .single()
-
-  if (error) {
-    return json(400, { error: error.message })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro ao criar cobrança'
+    return json(400, { error: message })
   }
-
-  return json(200, { charge_id: data.id })
 })

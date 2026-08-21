@@ -119,9 +119,15 @@ export function hoursSinceSession(row: PendingEvolutionRow): number | null {
   return Math.floor((Date.now() - new Date(ref).getTime()) / (1000 * 60 * 60))
 }
 
+const EVOLUTION_DEADLINE_HOURS = 7 * 24
+
 export function pendingEvolutionDeadlineLabel(row: PendingEvolutionRow): string {
   const hours = hoursSinceSession(row)
   if (hours === null) return '—'
-  if (hours >= 24) return `Atrasada · ${hours}h`
-  return `Restam ${24 - hours}h`
+  const days = Math.floor(hours / 24)
+  if (hours >= EVOLUTION_DEADLINE_HOURS) {
+    return days >= 7 ? `Atrasada · ${days}d` : `Atrasada · ${hours}h`
+  }
+  const remainingDays = Math.ceil((EVOLUTION_DEADLINE_HOURS - hours) / 24)
+  return remainingDays <= 1 ? `Restam ${EVOLUTION_DEADLINE_HOURS - hours}h` : `Restam ${remainingDays}d`
 }

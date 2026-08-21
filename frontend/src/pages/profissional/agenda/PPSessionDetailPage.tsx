@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, ExternalLink, MapPin } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,8 @@ import {
   ppAgendaQueryKeys,
   type AgendaSessionItem,
 } from '@/services/ppAgenda'
+import { ppSessionCheckIn, ppSessionCheckOut } from '@/services/ppSessions'
+import { toast } from 'sonner'
 
 function buildGoogleMapsUrl(
   address: string,
@@ -187,6 +189,9 @@ function SessionDetailBody({
   mobile,
   onOpenEvolution,
   onOpenPatient,
+  onCheckIn,
+  onCheckOut,
+  checkInPending,
 }: {
   session: AgendaSessionItem
   isFetching: boolean
@@ -194,6 +199,9 @@ function SessionDetailBody({
   mobile: boolean
   onOpenEvolution: () => void
   onOpenPatient: () => void
+  onCheckIn: () => void
+  onCheckOut: () => void
+  checkInPending: boolean
 }) {
   const scheduledLabel = session.scheduledAt
     ? format(new Date(session.scheduledAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
@@ -279,6 +287,15 @@ function SessionDetailBody({
 
       <CascadeItem>
         <div className="flex flex-col gap-2">
+          {!session.checkInAt ? (
+            <Button onClick={onCheckIn} disabled={checkInPending} className="h-12 w-full">
+              Check-in
+            </Button>
+          ) : !session.checkOutAt ? (
+            <Button onClick={onCheckOut} disabled={checkInPending} variant="secondary" className="h-12 w-full">
+              Check-out
+            </Button>
+          ) : null}
           {showEvolutionFooter && (
             <Button onClick={onOpenEvolution} className="h-12 w-full">
               Evoluir terapia
@@ -296,6 +313,7 @@ function SessionDetailBody({
 export function PPSessionDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const isLgUp = useIsLgUp()
   useMobileImmersive(true)
   const goBack = () => navigate('/profissional/agenda')
@@ -305,6 +323,19 @@ export function PPSessionDetailPage() {
     queryFn: () => getAgendaSessionById(id!),
     enabled: !!id,
     placeholderData: (prev) => prev,
+  })
+
+  const checkMutation = useMutation({
+    mutationFn: async (action: 'in' | 'out') => {
+      if (!id) throw new Error('Sessão inválida')
+      if (action === 'in') await ppSessionCheckIn(id)
+      else await ppSessionCheckOut(id)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ppAgendaQueryKeys.session(id!) })
+      toast.success('Registro atualizado')
+    },
+    onError: (err: Error) => toast.error(err.message),
   })
 
   const openEvolution = () => {
@@ -387,6 +418,9 @@ export function PPSessionDetailPage() {
           mobile
           onOpenEvolution={openEvolution}
           onOpenPatient={openPatient}
+          onCheckIn={() => checkMutation.mutate('in')}
+          onCheckOut={() => checkMutation.mutate('out')}
+          checkInPending={checkMutation.isPending}
         />
       </MobileSessionLayout>
     )
@@ -419,6 +453,9 @@ export function PPSessionDetailPage() {
           mobile={false}
           onOpenEvolution={openEvolution}
           onOpenPatient={openPatient}
+          onCheckIn={() => checkMutation.mutate('in')}
+          onCheckOut={() => checkMutation.mutate('out')}
+          checkInPending={checkMutation.isPending}
         />
       </CrudScrollPageLayout>
     </>

@@ -52,7 +52,9 @@ export function PacientePropostaPage() {
   })
 
   const recommended = previewQuery.data?.proposed_weekly_frequency ?? pendingAssessment?.proposed_weekly_frequency ?? 2
+  const options = previewQuery.data?.options ?? []
   const selectedFrequency = chosenFrequency ?? recommended
+  const selectedOption = options.find((o) => o.weekly_frequency === selectedFrequency)
 
   const hasProposalContent =
     !homeQuery.isLoading
@@ -82,7 +84,7 @@ export function PacientePropostaPage() {
         return
       }
 
-      toast.info('Proposta recusada. Foi gerada uma cobrança de R$ 50 referente à avaliação.')
+      toast.info('Proposta recusada. Obrigado pelo retorno.')
       navigate('/paciente')
     },
     onError: (err: Error) => {
@@ -163,13 +165,14 @@ export function PacientePropostaPage() {
       <CrudScrollPageLayout>
         <CascadeReveal className="space-y-5 pb-36">
           <CascadeItem>
-            <PatientProposalSummary preview={preview} />
+            <PatientProposalSummary preview={preview} selectedOption={selectedOption} />
           </CascadeItem>
 
           <CascadeItem>
             <PatientWeeklyFrequencyPicker
               value={selectedFrequency}
               recommended={recommended}
+              options={options}
               onChange={setChosenFrequency}
             />
           </CascadeItem>
@@ -220,7 +223,7 @@ export function PacientePropostaPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Recusar proposta?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ao recusar, será gerada uma cobrança de R$ 50 referente à avaliação domiciliar, com vencimento em 30 dias.
+              Ao recusar, você não dará continuidade ao tratamento proposto. A taxa de avaliação já paga na solicitação não será reembolsada conforme os termos.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -5,9 +5,14 @@ import { SubScreenHeader } from '@/components/layout/SubScreenHeader'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { getTransferDetail } from '@/services/transfers'
-import { edgeFunctions } from '@/services/edgeFunctions'
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/formatters'
+import {
+  getTransferDetail,
+  rejectTransferInvoice,
+  releaseTransferToWallet,
+  simulateTransferWallet,
+  validateTransferInvoice,
+} from '@/services/transfers'
+import { formatCurrency, formatDateTime } from '@/lib/formatters'
 
 export default function TransferDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -19,15 +24,45 @@ export default function TransferDetailScreen() {
     enabled: !!id,
   })
 
-  const releaseMutation = useMutation({
-    mutationFn: () => edgeFunctions.transferWallet({ transfer_id: id! }),
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ['transfer', id] })
+    void queryClient.invalidateQueries({ queryKey: ['transfers'] })
+  }
+
+  const validateMutation = useMutation({
+    mutationFn: () => validateTransferInvoice(id!),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['transfer', id] })
-      void queryClient.invalidateQueries({ queryKey: ['transfers'] })
-      void queryClient.invalidateQueries({ queryKey: ['finance-dashboard'] })
-      Alert.alert('Sucesso', 'Repasse liberado via Wallet.')
+      invalidate()
+      Alert.alert('NF validada', 'Repasse liberado para transferência.')
     },
-    onError: (e: Error) => Alert.alert('Erro', e.message ?? 'Falha ao liberar repasse.'),
+    onError: (e: Error) => Alert.alert('Erro', e.message),
+  })
+
+  const rejectMutation = useMutation({
+    mutationFn: () => rejectTransferInvoice(id!, 'NF rejeitada'),
+    onSuccess: () => {
+      invalidate()
+      Alert.alert('NF rejeitada', 'O PP precisa enviar novamente.')
+    },
+    onError: (e: Error) => Alert.alert('Erro', e.message),
+  })
+
+  const walletMutation = useMutation({
+    mutationFn: () => releaseTransferToWallet(id!),
+    onSuccess: () => {
+      invalidate()
+      Alert.alert('Sucesso', 'Repasse enviado via Wallet Asaas.')
+    },
+    onError: (e: Error) => Alert.alert('Erro', e.message),
+  })
+
+  const simulateMutation = useMutation({
+    mutationFn: () => simulateTransferWallet(id!),
+    onSuccess: () => {
+      invalidate()
+      Alert.alert('Simulado', 'Repasse marcado como transferido.')
+    },
+    onError: (e: Error) => Alert.alert('Erro', e.message),
   })
 
   if (isLoading) {
@@ -49,6 +84,11 @@ export default function TransferDetailScreen() {
   }
 
   const professional = data.professionals as { full_name: string; email: string; id: string } | null
+  const busy =
+    validateMutation.isPending ||
+    rejectMutation.isPending ||
+    walletMutation.isPending ||
+    simulateMutation.isPending
 
   return (
     <View className="flex-1 bg-background">
@@ -76,10 +116,32 @@ export default function TransferDetailScreen() {
           />
         </Card>
 
-        {data.status !== 'transferido' ? (
-          <Button loading={releaseMutation.isPending} onPress={() => releaseMutation.mutate()}>
-            Liberar repasse (Wallet)
-          </Button>
+        {data.status === 'aguardando_validacao' ? (
+          <View className="gap-2">
+            <Button loading={busy} onPress={() => validateMutation.mutate()}>
+              Validar NF e liberar
+            </Button>
+            <Button variant="outline" loading={busy} onPress={() => rejectMutation.mutate()}>
+              Rejeitar NF
+            </Button>
+          </View>
+        ) : null}
+
+        {data.status === 'liberado' ? (
+          <View className="gap-2">
+            <Button loading={busy} onPress={() => walletMutation.mutate()}>
+              Transferir via Wallet Asaas
+            </Button>
+            <Button variant="secondary" loading={busy} onPress={() => simulateMutation.mutate()}>
+              Simular transferência (dev)
+            </Button>
+          </View>
+        ) : null}
+
+        {data.status === 'aguardando_nf' ? (
+          <Text className="text-center text-sm text-muted-foreground">
+            Aguardando o PP enviar a nota fiscal.
+          </Text>
         ) : null}
       </ScrollView>
     </View>

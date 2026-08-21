@@ -2,13 +2,12 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
-import { useLocation } from 'react-router-dom'
 
 interface PageHeaderState {
   content: ReactNode
@@ -17,27 +16,26 @@ interface PageHeaderState {
 
 interface PageHeaderContextValue {
   header: PageHeaderState | null
-  registerHeader: (state: PageHeaderState) => void
-  unregisterHeader: () => void
+  registerHeader: (id: number, state: PageHeaderState) => void
+  unregisterHeader: (id: number) => void
 }
 
 const PageHeaderContext = createContext<PageHeaderContextValue | null>(null)
 
 export function PageHeaderProvider({ children }: { children: ReactNode }) {
   const [header, setHeader] = useState<PageHeaderState | null>(null)
-  const location = useLocation()
+  const activeRegistrationRef = useRef(0)
 
-  const registerHeader = useCallback((state: PageHeaderState) => {
+  const registerHeader = useCallback((id: number, state: PageHeaderState) => {
+    activeRegistrationRef.current = id
     setHeader(state)
   }, [])
 
-  const unregisterHeader = useCallback(() => {
+  const unregisterHeader = useCallback((id: number) => {
+    if (activeRegistrationRef.current !== id) return
+    activeRegistrationRef.current = 0
     setHeader(null)
   }, [])
-
-  useEffect(() => {
-    setHeader(null)
-  }, [location.pathname])
 
   const value = useMemo(
     () => ({ header, registerHeader, unregisterHeader }),
@@ -59,6 +57,8 @@ export function usePageHeader() {
   return ctx
 }
 
+let nextRegistrationId = 0
+
 export function PageHeaderRegistrar({
   children,
   loading = false,
@@ -67,14 +67,17 @@ export function PageHeaderRegistrar({
   loading?: boolean
 }) {
   const { registerHeader, unregisterHeader } = usePageHeader()
+  const registrationIdRef = useRef<number | null>(null)
 
   useLayoutEffect(() => {
-    registerHeader({ content: children, loading })
-  }, [children, loading, registerHeader])
+    const id = ++nextRegistrationId
+    registrationIdRef.current = id
+    registerHeader(id, { content: children, loading })
 
-  useEffect(() => {
-    return unregisterHeader
-  }, [unregisterHeader])
+    return () => {
+      unregisterHeader(id)
+    }
+  }, [children, loading, registerHeader, unregisterHeader])
 
   return null
 }

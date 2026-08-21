@@ -1,44 +1,69 @@
 import { ActivityIndicator, Alert, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { MapPin, Sparkles } from 'lucide-react-native'
+import { useRouter } from 'expo-router'
+import { Sparkles } from 'lucide-react-native'
 import { Button } from '@/components/ui/Button'
 import { CoverageMapIllustration } from '@/components/paciente/CoverageMapIllustration'
+import { ServiceRequestForm } from '@/components/paciente/ServiceRequestForm'
 import { ServiceRequestTimeline } from '@/components/paciente/ServiceRequestTimeline'
 import {
+  completeAssessmentCheckout,
   getPatientServiceStatus,
   joinWaitlist,
   patientServiceQueryKeys,
-  requestAttendance,
+  prepareServiceRequest,
 } from '@/services/patientServiceRequest'
-
-function formatRegionLabel(regionCode?: string | null, regionName?: string | null): string | null {
-  if (!regionName) return null
-  if (regionCode && regionCode !== regionName) return `${regionCode} · ${regionName}`
-  return regionName
-}
+import { listPendingSchedulingProposalsForPatient } from '@/services/scheduling'
+import { patientPortalQueryKeys } from '@/services/patientPortal'
 
 export default function SolicitarScreen() {
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: patientServiceQueryKeys.status,
     queryFn: getPatientServiceStatus,
   })
 
-  const requestMutation = useMutation({
-    mutationFn: () => requestAttendance(),
+  const { data: pendingProposals = [] } = useQuery({
+    queryKey: ['paciente', 'scheduling_proposals'],
+    queryFn: listPendingSchedulingProposalsForPatient,
+    enabled: Boolean(data?.linked),
+  })
+
+  const pendingScheduling = pendingProposals.some((p) => p.proposal_type !== 'remarcacao')
+
+  const prepareMutation = useMutation({
+    mutationFn: prepareServiceRequest,
     onSuccess: (result) => {
       if (!result.success && result.reason === 'no_coverage') {
         Alert.alert('Estamos chegando', result.message ?? 'Sua região ainda não possui cobertura.')
+      }
+    },
+    onError: (err: Error) => Alert.alert('Erro', err.message),
+  })
+
+  const checkoutMutation = useMutation({
+    mutationFn: async (input: { patientId: string; assessmentFeeCents: number }) =>
+      completeAssessmentCheckout(input.patientId, input.assessmentFeeCents, 'PIX'),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
+      queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
+      if (result.alreadyPaid) {
+        Alert.alert(
+          'Solicitação enviada',
+          'Estamos procurando um profissional parceiro para você.',
+        )
         return
       }
-      queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
-      if (result.already_exists) {
-        Alert.alert('Solicitação em andamento', 'Você já possui uma solicitação ativa.')
-      } else {
-        Alert.alert('Solicitação enviada', 'Estamos procurando um profissional parceiro para você.')
+      if (result.asaasSyncFailed) {
+        Alert.alert(
+          'Cobrança criada',
+          'O PIX ainda não foi gerado. Na tela de pagamento, toque em "Gerar PIX" para tentar novamente.',
+        )
       }
+      router.push(`/(app)/pagamentos/${result.chargeId}`)
     },
     onError: (err: Error) => Alert.alert('Erro', err.message),
   })
@@ -51,6 +76,7 @@ export default function SolicitarScreen() {
         return
       }
       queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
+      queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
       Alert.alert(
         'Interesse registrado',
         'Em breve nossa equipe entrará em contato. Obrigado por confiar na Larsana Care.',
@@ -90,21 +116,13 @@ export default function SolicitarScreen() {
   const hasWaitlist = Boolean(data.waitlist)
   const serviceAvailable = data.service_available === true
   const showComingSoon = !serviceAvailable
-  const busy = requestMutation.isPending || waitlistMutation.isPending || isRefetching
-
-  const regionLabel = formatRegionLabel(data.region_code, data.region_name)
+  const busy =
+    prepareMutation.isPending || checkoutMutation.isPending || waitlistMutation.isPending || isRefetching
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
       <ScrollView className="flex-1 px-4" contentContainerClassName="gap-5 py-4 pb-28">
         <CoverageMapIllustration variant={showComingSoon ? 'coming_soon' : 'searching'} />
-
-        {regionLabel ? (
-          <View className="flex-row items-center justify-center gap-2">
-            <MapPin size={16} color="#49796B" />
-            <Text className="text-sm text-muted-foreground">Região {regionLabel}</Text>
-          </View>
-        ) : null}
 
         {showComingSoon ? (
           <View className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-5 gap-3">
@@ -124,28 +142,38 @@ export default function SolicitarScreen() {
               <Text className="text-sm font-medium text-primary">Você já está na nossa lista de espera.</Text>
             )}
           </View>
-        ) : (
-          <View className="gap-3">
-            {!hasActiveDemand ? (
-              <>
-                <Text className="text-sm text-muted-foreground">
-                  Ao confirmar, enviaremos sua solicitação para profissionais parceiros disponíveis. Você não escolhe
-                  o profissional — quem aceitar primeiro iniciará o contato com a Larsana.
-                </Text>
-                <Button onPress={() => requestMutation.mutate()} loading={requestMutation.isPending} disabled={busy}>
-                  Solicitar profissional parceiro
-                </Button>
-              </>
-            ) : (
-              <Text className="text-sm font-medium text-primary">Sua solicitação já está em andamento.</Text>
-            )}
+        ) : !hasActiveDemand ? (
+          <View className="gap-4">
+            <Text className="text-sm text-muted-foreground">
+              Preencha os dados abaixo para enviar sua solicitação. Você não escolhe o profissional — quem aceitar
+              primeiro iniciará o contato com a Larsana.
+            </Text>
+            <ServiceRequestForm
+              submitting={busy}
+              onPrepare={async (values) => {
+                const result = await prepareMutation.mutateAsync(values)
+                return {
+                  canCheckout: Boolean(result.success && result.can_checkout),
+                  noCoverage: result.reason === 'no_coverage',
+                  assessmentFeeCents: result.assessment_fee_cents,
+                  assessmentFeeMessage: result.assessment_fee_message,
+                  patientId: result.patient_id,
+                }
+              }}
+              onCheckout={async ({ patientId, assessmentFeeCents }) => {
+                await checkoutMutation.mutateAsync({ patientId, assessmentFeeCents })
+              }}
+            />
           </View>
+        ) : (
+          <Text className="text-sm font-medium text-primary">Sua solicitação já está em andamento.</Text>
         )}
 
         {(hasActiveDemand || hasWaitlist) && (
           <ServiceRequestTimeline
             demand={data.active_demand}
             hasWaitlist={hasWaitlist}
+            pendingScheduling={pendingScheduling}
             createdAt={data.active_demand?.created_at ?? data.waitlist?.created_at}
           />
         )}

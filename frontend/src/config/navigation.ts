@@ -29,6 +29,7 @@ import {
   GraduationCap,
   Pill,
   Trophy,
+  Upload,
   UserPlus,
 } from 'lucide-react'
 import type { UserRole } from '@/types/auth'
@@ -73,6 +74,8 @@ export const adminNavSections: NavSection[] = [
       { label: 'Profissionais', href: '/admin/profissionais', icon: UserCheck, roles: ['admin', 'gestao'] },
       { label: 'Demandas', href: '/admin/demandas', icon: MapPin, roles: ['admin', 'gestao'] },
       { label: 'Lista de espera', href: '/admin/lista-espera', icon: Users, roles: ['admin', 'gestao'] },
+      { label: 'Importar pacientes', href: '/admin/importacao/pacientes', icon: Upload, roles: ['admin'] },
+      { label: 'Importar profissionais', href: '/admin/importacao/profissionais', icon: Upload, roles: ['admin'] },
       { label: 'Academy', href: '/admin/academy', icon: GraduationCap, roles: ['admin', 'gestao'] },
       { label: 'LarsanaPill', href: '/admin/larsanapill', icon: Pill, roles: ['admin', 'gestao'] },
     ],

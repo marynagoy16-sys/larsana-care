@@ -20,7 +20,7 @@ export function getHomePathForRole(role: UserRole): string {
     case 'gestao':
       return '/admin'
     case 'pp':
-      return '/profissional/inicio'
+      return '/profissional/demandas'
     case 'paciente':
       return '/paciente'
     default:
@@ -35,7 +35,7 @@ export function isStaffRole(role: UserRole): role is StaffRole {
 export function getMobileHomePathForRole(role: UserRole): string {
   switch (role) {
     case 'pp':
-      return '/(app)/(tabs)/inicio'
+      return '/(app)/(tabs)/demandas'
     case 'paciente':
       return '/(app)/(tabs)/inicio'
     case 'financeiro':

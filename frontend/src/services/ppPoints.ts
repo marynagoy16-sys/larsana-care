@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 export type PpPatente = 'ALUMINIO' | 'BRONZE' | 'PRATA' | 'OURO'
 
 export const PATENTE_REPASSE_PERCENT: Record<PpPatente, number> = {
-  ALUMINIO: 65,
+  ALUMINIO: 60,
   BRONZE: 70,
   PRATA: 75,
   OURO: 80,
@@ -68,6 +68,30 @@ export async function listPpPointsRules(): Promise<PpPointsRule[]> {
   const { data, error } = await supabase.from('pp_points_rules').select('*').order('rule_code')
   if (error) throw error
   return (data ?? []) as PpPointsRule[]
+}
+
+export type PpPatenteTierRow = {
+  patente: PpPatente
+  base_pp_percent: number
+  label: string
+  sort_order: number
+}
+
+export async function listPpPatenteTiers(): Promise<PpPatenteTierRow[]> {
+  const { data, error } = await supabase
+    .from('pp_patente_tiers')
+    .select('patente, base_pp_percent, label, sort_order')
+    .order('sort_order')
+  if (error) throw error
+  return (data ?? []) as PpPatenteTierRow[]
+}
+
+export async function updatePpPatenteTierPercent(patente: PpPatente, base_pp_percent: number): Promise<void> {
+  const { error } = await supabase
+    .from('pp_patente_tiers')
+    .update({ base_pp_percent })
+    .eq('patente', patente)
+  if (error) throw error
 }
 
 export async function updatePpPointsRule(id: string, values: Partial<Pick<PpPointsRule, 'points_delta' | 'is_active' | 'label'>>): Promise<void> {

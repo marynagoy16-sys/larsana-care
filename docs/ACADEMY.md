@@ -52,10 +52,12 @@ Configuração em `/admin/academy/config` (somente role `admin`).
 | `credenciamento_m5` | M5 + credenciamento | Demandas M1–M5 + credenciamento M5 |
 | `phil_onboarding` | PHIL onboarding | Paciente P1 obrigatório |
 
-### Regra operacional
+### Regra operacional (atualizado 18/08/2026 — transcrição 17/08)
 
-- **Demandas** pode ser bloqueado pela Academy
-- **Agenda, evolução e repasses** nunca são bloqueados
+- **Demandas** são bloqueadas apenas por **credenciamento PP ativo** (`credentialing_status = ativo`), não pela Academy
+- **Academy** contribui para patente/pontuação; módulos podem ser obrigatórios para evolução de classe, mas **não impedem assumir pacientes**
+- Preset padrão recomendado: `optional` (`gates_master_enabled = false`)
+- **Agenda, evolução e repasses** nunca são bloqueados pela Academy
 
 ## RBAC
 

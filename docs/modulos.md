@@ -83,6 +83,7 @@ Histórico por profissional e paciente
 1º ciclo vs subsequentes (comissão diferenciada)
 Exportação DELUMA: cada repasse com NF anexada + recibo do paciente do mesmo ciclo
 Distinção: valor cobrado do paciente (tabela Região × Nível) vs repasse ao PP (comissionamento)
+Repasse avulso PPSUB: substituto recebe por sessão realizada (liberado após check-out, sem NF); PP titular recebe repasse de ciclo apenas pelas sessões que ele realizou
 App do Profissional Parceiro
 Motor Bronze 70% / Prata 75% / Ouro 80% sobre o valor do ciclo pago pelo paciente (tabela V1-2026), com taxa 40% no 1º mês de paciente novo.
 

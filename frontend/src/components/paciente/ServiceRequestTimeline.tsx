@@ -1,18 +1,45 @@
+import { Link } from 'react-router-dom'
 import { CheckCircle2, Circle, CircleDot } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { PatientServiceDemand } from '@/services/patientServiceRequest'
 
-const STEPS = [
+const BASE_STEPS = [
+  { key: 'pagamento', label: 'Pagamento da avaliação' },
   { key: 'enviada', label: 'Solicitação enviada' },
   { key: 'buscando', label: 'Procurando profissional parceiro' },
   { key: 'waitlist', label: 'Lista de espera / sem cobertura imediata' },
+  { key: 'avaliacao', label: 'Avaliação domiciliar' },
+  { key: 'plano', label: 'Escolha do plano de tratamento' },
+  { key: 'ciclo', label: 'Pagamento do ciclo' },
   { key: 'atribuido', label: 'Profissional parceiro atribuído' },
+  { key: 'horario', label: 'Escolha um horário' },
 ] as const
 
-function resolveStepIndex(demand: PatientServiceDemand | null | undefined, hasWaitlist?: boolean): number {
-  if (hasWaitlist && !demand) return 2
+type StepKey = (typeof BASE_STEPS)[number]['key']
+
+function resolveVisibleSteps(hasWaitlist?: boolean, pendingScheduling?: boolean): StepKey[] {
+  if (hasWaitlist && pendingScheduling) {
+    return ['enviada', 'waitlist', 'atribuido', 'horario']
+  }
+  if (hasWaitlist) {
+    return ['enviada', 'waitlist']
+  }
+  if (pendingScheduling) {
+    return ['enviada', 'buscando', 'atribuido', 'horario']
+  }
+  return ['enviada', 'buscando', 'atribuido']
+}
+
+function resolveStepIndex(
+  demand: PatientServiceDemand | null | undefined,
+  hasWaitlist?: boolean,
+  pendingScheduling?: boolean,
+): number {
+  if (hasWaitlist && !demand) return 1
   if (!demand) return -1
-  if (demand.status === 'alocada' || demand.assigned_professional_id) return 3
+  if (pendingScheduling) return 3
+  if (demand.status === 'alocada' || demand.assigned_professional_id) return 2
   if (demand.status === 'aberta') return 1
   return 0
 }
@@ -20,7 +47,9 @@ function resolveStepIndex(demand: PatientServiceDemand | null | undefined, hasWa
 type Props = {
   demand?: PatientServiceDemand | null
   hasWaitlist?: boolean
+  pendingScheduling?: boolean
   createdAt?: string
+  assignedProfessional?: { name: string; rating?: number | null } | null
 }
 
 function formatWhen(iso?: string): string {
@@ -37,18 +66,27 @@ function formatWhen(iso?: string): string {
   }
 }
 
-export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props) {
-  const activeIndex = resolveStepIndex(demand, hasWaitlist)
+export function ServiceRequestTimeline({
+  demand,
+  hasWaitlist,
+  pendingScheduling,
+  createdAt,
+  assignedProfessional,
+}: Props) {
+  const visibleKeys = resolveVisibleSteps(hasWaitlist, pendingScheduling)
+  const steps = BASE_STEPS.filter((step) => visibleKeys.includes(step.key))
+  const activeIndex = resolveStepIndex(demand, hasWaitlist, pendingScheduling)
+
   if (activeIndex < 0 && !hasWaitlist) return null
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <p className="mb-4 text-sm font-semibold text-foreground">Acompanhe sua solicitação</p>
       <div className="space-y-0">
-        {STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const done = index < activeIndex
           const current = index === activeIndex
-          const isLast = index === STEPS.length - 1
+          const isLast = index === steps.length - 1
           const Icon = done ? CheckCircle2 : current ? CircleDot : Circle
 
           return (
@@ -58,12 +96,7 @@ export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props
                   className={cn('size-5 shrink-0', done || current ? 'text-primary' : 'text-muted-foreground/60')}
                 />
                 {!isLast ? (
-                  <div
-                    className={cn(
-                      'mt-1 w-px flex-1 min-h-4',
-                      done ? 'bg-primary/35' : 'bg-border',
-                    )}
-                  />
+                  <div className={cn('mt-1 w-px flex-1 min-h-4', done ? 'bg-primary/35' : 'bg-border')} />
                 ) : null}
               </div>
               <div className={cn('min-w-0 flex-1 space-y-0.5', !isLast && 'pb-4')}>
@@ -88,6 +121,24 @@ export function ServiceRequestTimeline({ demand, hasWaitlist, createdAt }: Props
                   <p className="text-xs text-muted-foreground">
                     Registramos seu interesse. Nossa equipe avisará quando houver cobertura.
                   </p>
+                ) : null}
+                {current && step.key === 'atribuido' && assignedProfessional ? (
+                  <p className="text-xs text-muted-foreground">
+                    {assignedProfessional.name}
+                    {assignedProfessional.rating != null
+                      ? ` · Nota ${assignedProfessional.rating.toFixed(1)}/10`
+                      : ''}
+                  </p>
+                ) : null}
+                {current && step.key === 'horario' ? (
+                  <div className="space-y-2 pt-1">
+                    <p className="text-xs text-muted-foreground">
+                      O profissional enviou horários disponíveis. Escolha o melhor para você.
+                    </p>
+                    <Button asChild size="sm" className="h-8">
+                      <Link to="/paciente/agendamento">Escolher horário</Link>
+                    </Button>
+                  </div>
                 ) : null}
               </div>
             </div>

@@ -1,5 +1,6 @@
 import { Redirect } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
+import { getMobileHomePathForRole } from '@larsana/shared'
 import { useAuth } from '@/providers/AuthProvider'
 
 export default function Index() {
@@ -23,7 +24,7 @@ export default function Index() {
     )
   }
 
-  if (role === 'pp') return <Redirect href="/(app)/(tabs)/inicio" />
+  if (role === 'pp') return <Redirect href={getMobileHomePathForRole(role)} />
 
   return <Redirect href="/(auth)/wrong-role" />
 }

@@ -1,6 +1,6 @@
 # Fase 0 — Checklist de alinhamento (transcrição + PDFs + código)
 
-**Data:** 11/08/2026 · **Atualizado:** 14/08/2026 (review 13/08 + plano transcrição)
+**Data:** 11/08/2026 · **Atualizado:** 18/08/2026 (gaps transcrição 17/08)
 **Fontes:** `Alinhamento_Larsana_Care_Transcricao.md` · `Transcricao_Larsana_Care_Alinhamento_2026-06-30.md` · PDFs Marina · codebase
 
 Legenda: ✅ feito · ⚠️ parcial · ❌ pendente · 🔍 decisão externa
@@ -114,6 +114,29 @@ Fonte: `regra_negocio_larsana_pagamento_split_retencao_pausas_v6_comissao.pdf`
 | Textos login ("Cuidado domiciliar…") | ✅ |
 | Página inicial admin — detalhes Marina | 🔍 | Revisar PDF visual item a item |
 | Home paciente — LarsanaPill vs tratamento | ⚠️ | FAB ok; tratamento ainda tab separada |
+
+---
+
+## G. Gaps transcrição 17/08/2026 (implementado)
+
+| Item | Status | Evidência |
+|------|--------|-----------|
+| Gate credenciamento (não Academy) nas demandas PP | ✅ | `RequireCredentialingGate`, mobile `demandas.tsx` |
+| Paciente escolhe horário (timeline + agendamento) | ✅ | `ServiceRequestTimeline`, `PacienteAgendamentoPage`, mobile `agendamento.tsx` |
+| Demandas recusadas somem da lista | ✅ | `listOpenForPp` web + mobile |
+| Km/repasse na demanda | ✅ | `PPDemandsPage`, geocoding endereço |
+| GPS do PP no mapa/ranking | ✅ | `ppLocation`, `usePpDistanceOrigin`, migration live location |
+| Proposta 1–5x/semana + repasse estimado | ✅ | `assessmentProposal`, `AssessmentProposalFields`, `pp_finalize_assessment` |
+| Admin só se nível alterado | ✅ | RPC + `modulePages` |
+| Alumínio 60% repasse | ✅ | `ppPoints`, `pp_patente_tiers`, admin config |
+| Prazo evolução 7 dias | ✅ | `ppEvolutions`, alertas DB |
+| Confirmação drag remarcar | ✅ | `PPAgendaPage` AlertDialog |
+| Importação CSV pacientes/PPs | ✅ | `/admin/importacao/*`, RPC `bulk_import_*` |
+| Asaas create-charge inicial | ✅ | Edge function + `ASAAS_API_KEY` |
+| Formulário solicitação stepper + INDIFERENTE | ✅ | `ServiceRequestForm`, enum migration |
+| NPS pós-sessão | ✅ | trigger DB + `PacienteNpsPage` |
+| NF dupla pagamentos | ✅ | `patient_receipts.receipt_kind`, UI pagamento |
+| Paridade mobile remarc/SUB | ⚠️ | Janelas SUB na agenda mobile; drag remarcar web only |
 
 ---
 

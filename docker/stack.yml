@@ -6,9 +6,13 @@ version: "3.8"
 #   1. Imagem publicada: sagittadigital/larsana-care-frontend:latest
 #      (build com VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no Dockerfile)
 #   2. Rede externa sagitta + Traefik com certresolver letsencryptresolver
+#   3. DNS: app.larsanacare.com.br → A → 148.230.73.8 (Cloudflare, DNS only)
+#   4. Supabase Auth: Site URL https://app.larsanacare.com.br
 #
 # Deploy:
 #   docker stack deploy -c docker/stack.yml larsana-care
+#
+# Domínio: app.larsanacare.com.br (larsanacare.com.br = landing page, Worker Cloudflare)
 
 services:
   larsana_care_frontend:
@@ -23,7 +27,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=sagitta"
-        - "traefik.http.routers.larsana-care.rule=Host(`larsana.sagittadigital.com.br`)"
+        - "traefik.http.routers.larsana-care.rule=Host(`app.larsanacare.com.br`)"
         - "traefik.http.routers.larsana-care.entrypoints=websecure"
         - "traefik.http.routers.larsana-care.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.larsana-care.service=larsana-care-svc"

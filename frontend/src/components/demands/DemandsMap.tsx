@@ -147,7 +147,7 @@ export function DemandsMap({
     originMarkerRef.current?.remove()
     originMarkerRef.current = L.marker([origin.lat, origin.lng], { icon: createOriginIcon() })
       .bindTooltip(
-        usingProfessionalAddress ? 'Seu endereço cadastrado' : 'Referência de distância',
+        usingProfessionalAddress ? 'Sua localização atual' : 'Referência de distância',
         {
         direction: 'top',
         offset: [0, -8],
@@ -211,7 +211,7 @@ export function DemandsMap({
             <p className="text-xs text-muted-foreground truncate">
               {mapSummary}
               {usingProfessionalAddress
-                ? ' · distâncias a partir do seu endereço'
+                ? ' · distâncias a partir da sua localização'
                 : ' · referência Mauá/SP'}
             </p>
           </div>

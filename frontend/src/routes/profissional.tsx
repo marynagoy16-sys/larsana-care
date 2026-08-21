@@ -2,7 +2,7 @@ import { lazy } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
-import { RequireAcademyGate } from '@/routes/guards/RequireAcademyGate'
+import { RequireCredentialingGate } from '@/routes/guards/RequireCredentialingGate'
 import { ProfissionalEntryRedirect } from '@/routes/ProfissionalEntryRedirect'
 import { AppShell } from '@/components/layout/AppShell'
 
@@ -38,6 +38,11 @@ const PPRepassesPage = lazy(() =>
 )
 const PPRepasseDetailPage = lazy(() =>
   import('@/pages/profissional/account/PPRepasseDetailPage').then((m) => ({ default: m.PPRepasseDetailPage })),
+)
+const PPSubRepasseDetailPage = lazy(() =>
+  import('@/pages/profissional/account/PPSubRepasseDetailPage').then((m) => ({
+    default: m.PPSubRepasseDetailPage,
+  })),
 )
 const PPPacientesPage = lazy(() =>
   import('@/pages/profissional/patients/PPPacientesPage').then((m) => ({ default: m.PPPacientesPage })),
@@ -86,9 +91,9 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'evolucao', element: ppRoute(<PPEvolucaoPage />) },
       { path: 'agenda', element: ppRoute(<PPAgendaPage />) },
       { path: 'agenda/:id', element: ppRoute(<PPSessionDetailPage />) },
-      { path: 'demandas', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandsPage /></RequireAcademyGate>) },
-      { path: 'demandas/:id', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandDetailPage /></RequireAcademyGate>) },
-      { path: 'demandas/:id/agendar', element: ppRoute(<RequireAcademyGate gateTarget="demands"><PPDemandSchedulePage /></RequireAcademyGate>) },
+      { path: 'demandas', element: ppRoute(<PPDemandsPage />) },
+      { path: 'demandas/:id', element: ppRoute(<PPDemandDetailPage />) },
+      { path: 'demandas/:id/agendar', element: ppRoute(<RequireCredentialingGate><PPDemandSchedulePage /></RequireCredentialingGate>) },
       { path: 'evolucoes', element: ppRoute(<PPEvolucoesPage />) },
       { path: 'evolucao/nova', element: ppRoute(<PPEvolucaoNovaPage />) },
       { path: 'evolucao/:id', element: ppRoute(<PPEvolucoesPage />) },
@@ -98,6 +103,7 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'avaliacoes', element: ppRoute(<PPAvaliacoesPage />) },
       { path: 'avaliacoes/:id', element: ppRoute(<PPAvaliacaoDetailPage />) },
       { path: 'repasses', element: ppRoute(<PPRepassesPage />) },
+      { path: 'repasses/sub/:id', element: ppRoute(<PPSubRepasseDetailPage />) },
       { path: 'repasses/:id', element: ppRoute(<PPRepasseDetailPage />) },
       { path: 'conta', element: ppRoute(<PPContaPage />) },
       { path: 'conta/aparencia', element: ppRoute(<PPAparenciaPage />) },

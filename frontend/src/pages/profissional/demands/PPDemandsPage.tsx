@@ -15,21 +15,45 @@ import {
   type DemandListItemWithHighlights,
 } from '@/lib/demandHighlights'
 import { formatDistanceKm, haversineDistanceKm, MAUA_CENTER, resolvePointsCenter } from '@/lib/geo'
+import {
+  buildAvaliacaoSimulation,
+  buildContinuidadeSimulation,
+  findSessionPriceCents,
+} from '@/lib/demandSimulation'
+import { formatCurrency } from '@/lib/formatters'
 import { usePpDistanceOrigin } from '@/hooks/usePpDistanceOrigin'
+import { useDemandNotificationSound } from '@/hooks/useDemandNotificationSound'
 import { demandsService, type DemandListItem } from '@/services/demands'
+import { getActivePricingVersion, getPricingBundle } from '@/services/pricing'
+import { getCurrentProfessional } from '@/services/professionals'
 import { useQuery } from '@tanstack/react-query'
 
 const PP_DEMANDS_QUERY_KEY = ['pp', 'demands'] as const
 
-function buildDemandColumns(origin: { lat: number; lng: number }): DataTableColumn<DemandListItem>[] {
+function buildDemandColumns(
+  origin: { lat: number; lng: number },
+  repasseByDemandId: Map<string, number | null>,
+): DataTableColumn<DemandListItem>[] {
   const distanceColumn: DataTableColumn<DemandListItem> = {
     key: 'distance_km',
     header: 'Distância',
     mobileBadge: true,
     cell: (row) => {
-      if (row.location_lat == null || row.location_lng == null) return '—'
+      if (row.location_lat == null || row.location_lng == null) {
+        return <span className="text-xs text-muted-foreground">Loc. pendente</span>
+      }
       const km = haversineDistanceKm(origin, { lat: row.location_lat, lng: row.location_lng })
       return formatDistanceKm(km)
+    },
+  }
+
+  const repasseColumn: DataTableColumn<DemandListItem> = {
+    key: 'repasse_per_session',
+    header: 'Repasse/atend.',
+    cell: (row) => {
+      const cents = repasseByDemandId.get(String(row.id))
+      if (cents == null) return '—'
+      return `${formatCurrency(cents)}/atend.`
     },
   }
 
@@ -51,7 +75,7 @@ function buildDemandColumns(origin: { lat: number; lng: number }): DataTableColu
 
   const baseWithoutStatus = demandListColumns.filter((col) => col.key !== 'status')
 
-  return [distanceColumn, neighborhoodColumn, levelColumn, ...baseWithoutStatus]
+  return [distanceColumn, repasseColumn, neighborhoodColumn, levelColumn, ...baseWithoutStatus]
 }
 
 function DemandHighlightBadges({ tags }: { tags: DemandHighlightTag[] }) {
@@ -107,6 +131,48 @@ export function PPDemandsPage() {
 
   const demands = data?.data ?? []
 
+  const { data: pricingListContext } = useQuery({
+    queryKey: ['pp', 'demands', 'pricing-list'],
+    queryFn: async () => {
+      const [version, professional] = await Promise.all([
+        getActivePricingVersion(),
+        getCurrentProfessional(),
+      ])
+      if (!version) return null
+      const bundle = await getPricingBundle(version.id)
+      return { bundle, ppClass: professional?.pp_class ?? null }
+    },
+  })
+
+  const repasseByDemandId = useMemo(() => {
+    const map = new Map<string, number | null>()
+    if (!pricingListContext) return map
+    for (const demand of demands) {
+      const sessionPriceCents = findSessionPriceCents(
+        pricingListContext.bundle.entries,
+        demand.region_id,
+        demand.patient_level,
+      )
+      const simulation =
+        demand.demand_type === 'avaliacao'
+          ? buildAvaliacaoSimulation({
+              sessionPriceCents,
+              commissions: pricingListContext.bundle.commissions,
+              retention: pricingListContext.bundle.retention,
+              ppClass: pricingListContext.ppClass,
+            })
+          : buildContinuidadeSimulation({
+              sessionPriceCents,
+              commissions: pricingListContext.bundle.commissions,
+              retention: pricingListContext.bundle.retention,
+              weeklyFrequency: null,
+              ppClass: pricingListContext.ppClass,
+            })
+      map.set(String(demand.id), simulation?.rules.cycle2RepassePerSessionCents ?? null)
+    }
+    return map
+  }, [demands, pricingListContext])
+
   const mapFallbackCenter = useMemo(() => {
     const source = visibleDemands.length > 0 ? visibleDemands : demands
     const points = source
@@ -115,12 +181,15 @@ export function PPDemandsPage() {
     return resolvePointsCenter(points.length > 0 ? points : [MAUA_CENTER])
   }, [visibleDemands, demands])
 
-  const { origin, usingProfessionalAddress } = usePpDistanceOrigin(mapFallbackCenter)
+  const { origin, usingLiveLocation } = usePpDistanceOrigin(mapFallbackCenter)
   const rowsTransform = useCallback(
     (rows: DemandListItem[]) => sortDemandsByDistance(rows, origin),
     [origin],
   )
-  const columns = useMemo(() => buildDemandColumns(origin), [origin])
+  const columns = useMemo(
+    () => buildDemandColumns(origin, repasseByDemandId),
+    [origin, repasseByDemandId],
+  )
 
   const highlightTagsByDemandId = useMemo(() => {
     const annotated = annotateDemandsWithHighlights(demands, origin)
@@ -132,6 +201,8 @@ export function PPDemandsPage() {
         .map((demand) => [demand.id, demand.highlight_tags]),
     )
   }, [demands, origin])
+
+  useDemandNotificationSound(demands.length)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden max-lg:h-full">
@@ -164,7 +235,7 @@ export function PPDemandsPage() {
           <DemandsMap
             demands={visibleDemands}
             origin={origin}
-            usingProfessionalAddress={usingProfessionalAddress}
+            usingProfessionalAddress={usingLiveLocation}
             totalDemandCount={demands.length}
             selectedId={selectedDemandId}
             onSelectDemand={(id) => {

@@ -20,7 +20,7 @@ export function getHomePathForRole(role: UserRole): string {
     case 'gestao':
       return '/admin'
     case 'pp':
-      return '/profissional/agenda'
+      return '/profissional/demandas'
     case 'paciente':
       return '/paciente'
     default:

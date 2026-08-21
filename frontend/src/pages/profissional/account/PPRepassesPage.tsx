@@ -6,25 +6,22 @@ import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAcco
 import { RepasseStatusBadge, RepasseStatusIcon } from '@/components/profissional/repasses/RepasseStatusVisual'
 import { CrudEmptyState } from '@/components/crud/CrudEmptyState'
 import { Toggle } from '@/components/ui/toggle'
+import { Badge } from '@/components/ui/badge'
 import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import { useBottomNavAutoHide } from '@/hooks/useBottomNavAutoHide'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import {
+  listPPRepassesCombined,
   TRANSFER_STATUS_LABELS,
   TRANSFER_STATUS_ORDER,
   type TransferStatus,
+  type PPRepasseListItem,
 } from '@/services/ppTransfers'
-import { transfersService } from '@/services/index'
 
 type RepasseFilter = 'all' | TransferStatus
 
-type RepasseRow = Record<string, unknown> & {
-  id: string
-  pp_transfer_amount_cents?: number | null
-  status?: string | null
-  created_at?: string | null
-}
+type RepasseRow = PPRepasseListItem
 
 const REPASSE_FILTERS: { id: RepasseFilter; label: string }[] = [
   { id: 'all', label: 'Todos' },
@@ -46,7 +43,7 @@ const EMPTY_MESSAGES: Record<RepasseFilter, string> = {
 
 function matchesRepasseFilter(row: RepasseRow, filter: RepasseFilter): boolean {
   if (filter === 'all') return true
-  return String(row.status ?? '') === filter
+  return row.status === filter
 }
 
 export function PPRepassesPage() {
@@ -80,14 +77,14 @@ export function PPRepassesPage() {
   }, [repasseFilter, listScrollElement])
 
   const { data, isLoading } = useQuery({
-    queryKey: ['pp', 'transfers'],
-    queryFn: () => transfersService.list('id, pp_transfer_amount_cents, status, created_at'),
+    queryKey: ['pp', 'repasses', 'combined'],
+    queryFn: listPPRepassesCombined,
   })
 
   const rows = useMemo(() => {
-    const all = (data?.data ?? []) as RepasseRow[]
+    const all = data ?? []
     return all.filter((row) => matchesRepasseFilter(row, repasseFilter))
-  }, [data?.data, repasseFilter])
+  }, [data, repasseFilter])
 
   return (
     <>
@@ -134,26 +131,36 @@ export function PPRepassesPage() {
             <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
               {rows.map((row) => (
                 <button
-                  key={row.id}
+                  key={`${row.kind}-${row.id}`}
                   type="button"
-                  onClick={() => navigate(`/profissional/repasses/${row.id}`)}
+                  onClick={() =>
+                    navigate(
+                      row.kind === 'sub'
+                        ? `/profissional/repasses/sub/${row.id}`
+                        : `/profissional/repasses/${row.id}`,
+                    )
+                  }
                   className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/30 active:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <RepasseStatusIcon status={row.status} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium tabular-nums">
-                      {formatCurrency(Number(row.pp_transfer_amount_cents ?? 0))}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium tabular-nums">
+                        {formatCurrency(row.amount_cents)}
+                      </p>
+                      {row.kind === 'sub' ? (
+                        <Badge variant="secondary" className="text-[10px]">
+                          SUB
+                        </Badge>
+                      ) : null}
+                    </div>
                     <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-                      {formatDateTime(row.created_at)}
+                      {row.label} · {formatDateTime(row.created_at)}
                     </p>
                   </div>
                   <RepasseStatusBadge
                     status={row.status}
-                    label={
-                      TRANSFER_STATUS_LABELS[String(row.status ?? '') as TransferStatus] ??
-                      String(row.status ?? '—').replace(/_/g, ' ')
-                    }
+                    label={TRANSFER_STATUS_LABELS[row.status] ?? row.status}
                   />
                   <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
                 </button>

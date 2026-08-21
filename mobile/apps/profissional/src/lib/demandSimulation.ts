@@ -4,7 +4,7 @@ import type { CommissionRule, PricingEntry, RetentionRule } from '@/services/pri
 export type PpPatente = 'ALUMINIO' | 'BRONZE' | 'PRATA' | 'OURO'
 
 export const PATENTE_REPASSE_PERCENT: Record<PpPatente, number> = {
-  ALUMINIO: 65,
+  ALUMINIO: 60,
   BRONZE: 70,
   PRATA: 75,
   OURO: 80,

@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { defaultPriorConditions } from '@/lib/assessmentPriorConditions'
 
 export const PROPOSAL_PATIENT_LEVELS = ['N1', 'N2', 'N3'] as const
-export const PROPOSAL_WEEKLY_FREQUENCIES = [1, 2, 3] as const
-export const PROPOSAL_SESSION_COUNTS = [4, 8, 12] as const
+export const PROPOSAL_WEEKLY_FREQUENCIES = [1, 2, 3, 4, 5] as const
+export const PROPOSAL_SESSION_COUNTS = [4, 8, 12, 16, 20, 25] as const
 
 export type ProposalPatientLevel = (typeof PROPOSAL_PATIENT_LEVELS)[number]
 export type ProposalWeeklyFrequency = (typeof PROPOSAL_WEEKLY_FREQUENCIES)[number]
@@ -31,16 +31,21 @@ const surgerySchema = z.object({
 export function normalizeWeeklyFrequency(value: number | null | undefined): ProposalWeeklyFrequency {
   const rounded = Math.round(Number(value ?? 2))
   if (rounded <= 1) return 1
-  if (rounded >= 3) return 3
-  return 2
+  if (rounded >= 5) return 5
+  return rounded as ProposalWeeklyFrequency
 }
 
 export function sessionCountForWeeklyFrequency(
   frequency: ProposalWeeklyFrequency,
 ): ProposalSessionCount {
-  if (frequency === 1) return 4
-  if (frequency === 3) return 12
-  return 8
+  const map: Record<ProposalWeeklyFrequency, ProposalSessionCount> = {
+    1: 4,
+    2: 8,
+    3: 12,
+    4: 16,
+    5: 25,
+  }
+  return map[frequency]
 }
 
 export function normalizeProposalPatientLevel(
@@ -57,19 +62,20 @@ export const assessmentProposalSchema = z
     proposed_weekly_frequency: z
       .number()
       .refine((v) => PROPOSAL_WEEKLY_FREQUENCIES.includes(v as ProposalWeeklyFrequency), {
-        message: 'Selecione 1x, 2x ou 3x por semana',
+        message: 'Selecione a frequência semanal (1 a 5)',
       }),
     proposed_session_count: z
       .number()
       .refine((v) => PROPOSAL_SESSION_COUNTS.includes(v as ProposalSessionCount), {
-        message: 'Selecione ciclo de 4, 8 ou 12 sessões',
+        message: 'Ciclo inconsistente com a frequência semanal',
       }),
     patient_level_change_reason: z.string().trim().optional(),
     primary_diagnosis: z.string().trim().min(3, 'Informe o diagnóstico principal'),
     functionality: z.string().trim().min(3, 'Descreva a funcionalidade do paciente'),
     prior_conditions: priorConditionsSchema,
     surgeries: z.array(surgerySchema),
-    crefito_number: z.string().trim().min(3, 'Informe o número CREFITO'),
+    crefito_number: z.string().trim().min(3, 'CREFITO não cadastrado no perfil'),
+    patient_occupation: z.string().trim().min(2, 'Informe a profissão do paciente'),
     clinical_content: z.string().trim().min(10, 'Descreva a avaliação clínica (mínimo 10 caracteres)'),
   })
   .superRefine((data, ctx) => {
@@ -133,6 +139,7 @@ export function buildAssessmentProposalDefaults(input: {
     prior_conditions: defaultPriorConditions(),
     surgeries: [],
     crefito_number: input.defaultCrefito?.trim() ?? '',
+    patient_occupation: '',
     clinical_content: '',
   }
 }

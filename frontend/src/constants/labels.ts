@@ -15,15 +15,20 @@ export const patientLevelLabels: Record<string, string> = {
 }
 
 export const weeklyFrequencyLabels: Record<number, string> = {
-  1: '1x por semana',
-  2: '2x por semana',
-  3: '3x por semana',
+  1: '1',
+  2: '2',
+  3: '3',
+  4: '4',
+  5: '5',
 }
 
 export const proposedSessionCountLabels: Record<number, string> = {
-  4: '4 sessões',
-  8: '8 sessões',
-  12: '12 sessões',
+  4: 'Serão 4 terapias',
+  8: 'Serão 8 terapias',
+  12: 'Serão 12 terapias',
+  16: 'Serão 16 terapias',
+  20: 'Serão 20 terapias',
+  25: 'Serão 25 terapias',
 }
 
 export const patientSexLabels: Record<string, string> = {
@@ -151,6 +156,7 @@ export const attendancePeriodLabels: Record<string, string> = {
   MANHA: 'Manhã',
   TARDE: 'Tarde',
   NOITE: 'Noite',
+  INDIFERENTE: 'Indiferente',
 }
 
 export const medicalRecordTypeLabels: Record<string, string> = {

@@ -126,11 +126,19 @@ Deno.serve(async (req) => {
         .maybeSingle()
 
       if (charge?.id && charge.payment_status !== 'pago') {
-        const { error: rpcError } = await supabase.rpc('simulate_charge_payment', {
+        const { error: confirmError } = await supabase.rpc('confirm_charge_payment', {
           p_charge_id: charge.id,
         })
-        if (rpcError) throw rpcError
+        if (confirmError) throw confirmError
       }
+    }
+
+    if (paymentId && eventType === 'PAYMENT_OVERDUE') {
+      await supabase
+        .from('charges')
+        .update({ payment_status: 'vencido', updated_at: new Date().toISOString() })
+        .eq('asaas_payment_id', paymentId)
+        .in('payment_status', ['pendente'])
     }
 
     await supabase

@@ -21,11 +21,16 @@ import { softFieldButtonClass, softFieldInputClass, softFieldLabelClass } from '
 import { formatCpf } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import {
+  patientGenderLabels,
+  patientGenderValues,
+  patientMaritalStatusLabels,
+  patientMaritalStatusValues,
   patientReferralSourceLabels,
   patientServiceRequestSchema,
   requiresResponsibleByBirthDate,
   type PatientServiceRequestValues,
 } from '@/schemas/patientServiceRequest'
+import { formatCurrency } from '@/lib/formatters'
 import {
   getPatientRequestPrefill,
   getPatientServiceLegalTerms,
@@ -35,21 +40,36 @@ import {
 const TERMS_DECLARATION =
   'Declaro que li integralmente e concordo com o Contrato de Intermediação, Termo de Consentimento e Políticas de Privacidade, compreendendo a natureza da atuação da plataforma, a autonomia dos profissionais e as limitações de responsabilidade envolvidas.'
 
-interface ServiceRequestFormProps {
-  onSubmit: (values: PatientServiceRequestValues) => Promise<void>
-  submitting?: boolean
-}
-
 function fieldError(errors: Record<string, string>, key: string) {
   const message = errors[key]
   if (!message) return null
   return <p className="text-xs text-destructive">{message}</p>
 }
 
-export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormProps) {
+interface ServiceRequestFormProps {
+  onPrepare: (values: PatientServiceRequestValues) => Promise<{
+    canCheckout: boolean
+    noCoverage?: boolean
+    assessmentFeeCents?: number
+    assessmentFeeMessage?: string
+    patientId?: string
+  }>
+  onCheckout: (input: {
+    values: PatientServiceRequestValues
+    patientId: string
+    assessmentFeeCents: number
+  }) => Promise<void>
+  submitting?: boolean
+}
+
+export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: ServiceRequestFormProps) {
+  const [step, setStep] = useState<1 | 2 | 3>(1)
   const [patientFullName, setPatientFullName] = useState('')
   const [patientCpf, setPatientCpf] = useState('')
   const [birthDate, setBirthDate] = useState('')
+  const [birthPlace, setBirthPlace] = useState('')
+  const [maritalStatus, setMaritalStatus] = useState<PatientServiceRequestValues['maritalStatus'] | ''>('')
+  const [gender, setGender] = useState<PatientServiceRequestValues['gender'] | ''>('')
   const [responsibleFullName, setResponsibleFullName] = useState('')
   const [responsibleCpf, setResponsibleCpf] = useState('')
   const [attendancePeriod, setAttendancePeriod] = useState<PatientServiceRequestValues['attendancePeriod'] | ''>('')
@@ -57,6 +77,11 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
   const [referralSource, setReferralSource] = useState<PatientServiceRequestValues['referralSource'] | ''>('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [checkoutMeta, setCheckoutMeta] = useState<{
+    patientId: string
+    assessmentFeeCents: number
+    assessmentFeeMessage?: string
+  } | null>(null)
 
   const { data: prefill } = useQuery({
     queryKey: patientServiceQueryKeys.prefill,
@@ -94,23 +119,97 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
   const consentTerm = termsByType.get('TERMO_CONSENTIMENTO')
   const privacyTerm = termsByType.get('LGPD')
 
+  const buildValues = (): PatientServiceRequestValues => ({
+    patientFullName,
+    patientCpf,
+    birthDate,
+    birthPlace,
+    maritalStatus: maritalStatus as PatientServiceRequestValues['maritalStatus'],
+    gender: gender as PatientServiceRequestValues['gender'],
+    responsibleFullName,
+    responsibleCpf: responsibleCpf || undefined,
+    attendancePeriod: attendancePeriod as PatientServiceRequestValues['attendancePeriod'],
+    diagnosticHypothesis,
+    referralSource: referralSource as PatientServiceRequestValues['referralSource'],
+    termsAccepted: true,
+  })
+
+  const handlePrepareStep = async () => {
+    setErrors({})
+    try {
+      const parsed = patientServiceRequestSchema.parse(buildValues())
+      const result = await onPrepare(parsed)
+      if (result.noCoverage || !result.canCheckout) return
+      setCheckoutMeta({
+        patientId: result.patientId!,
+        assessmentFeeCents: result.assessmentFeeCents ?? 15000,
+        assessmentFeeMessage: result.assessmentFeeMessage,
+      })
+      setStep(3)
+    } catch (err) {
+      if (err instanceof ZodError) {
+        const next: Record<string, string> = {}
+        for (const issue of err.issues) {
+          const key = issue.path[0]
+          if (typeof key === 'string' && !next[key]) next[key] = issue.message
+        }
+        setErrors(next)
+      } else {
+        throw err
+      }
+    }
+  }
+
+  const handleCheckout = async () => {
+    if (!checkoutMeta) return
+    await onCheckout({
+      values: buildValues(),
+      patientId: checkoutMeta.patientId,
+      assessmentFeeCents: checkoutMeta.assessmentFeeCents,
+    })
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setErrors({})
+    if (step === 2) await handlePrepareStep()
+  }
 
+  const validateStepOne = (): boolean => {
+    setErrors({})
     try {
-      const parsed = patientServiceRequestSchema.parse({
-        patientFullName,
-        patientCpf,
-        birthDate,
-        responsibleFullName,
-        responsibleCpf: responsibleCpf || undefined,
-        attendancePeriod,
-        diagnosticHypothesis,
-        referralSource,
-        termsAccepted,
-      })
-      await onSubmit(parsed)
+      patientServiceRequestSchema
+        .pick({
+          patientFullName: true,
+          patientCpf: true,
+          birthDate: true,
+          responsibleFullName: true,
+          responsibleCpf: true,
+        })
+        .superRefine((data, ctx) => {
+          if (!requiresResponsibleByBirthDate(data.birthDate)) return
+          if (!data.responsibleFullName?.trim()) {
+            ctx.addIssue({
+              code: 'custom',
+              path: ['responsibleFullName'],
+              message: 'Nome do responsável é obrigatório para menores de 18 anos',
+            })
+          }
+          if (!data.responsibleCpf) {
+            ctx.addIssue({
+              code: 'custom',
+              path: ['responsibleCpf'],
+              message: 'CPF do responsável é obrigatório para menores de 18 anos',
+            })
+          }
+        })
+        .parse({
+          patientFullName,
+          patientCpf,
+          birthDate,
+          responsibleFullName,
+          responsibleCpf: responsibleCpf || undefined,
+        })
+      return true
     } catch (err) {
       if (err instanceof ZodError) {
         const next: Record<string, string> = {}
@@ -121,14 +220,34 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
           }
         }
         setErrors(next)
-        return
       }
-      throw err
+      return false
     }
   }
 
+  const goToStepTwo = () => {
+    if (validateStepOne()) setStep(2)
+  }
+
+  const progressPercent = step === 1 ? 33 : step === 2 ? 66 : 100
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Passo {step} de 3</span>
+          <span>{progressPercent}%</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
+      {step === 1 ? (
+        <>
       <section className="space-y-4 rounded-xl border border-border bg-card p-4">
         <h2 className="text-sm font-semibold text-foreground">Dados do paciente</h2>
 
@@ -174,19 +293,70 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
           />
           {fieldError(errors, 'birthDate')}
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="birthPlace" className={softFieldLabelClass}>Naturalidade</Label>
+          <Input
+            id="birthPlace"
+            value={birthPlace}
+            onChange={(e) => setBirthPlace(e.target.value)}
+            disabled={submitting}
+            className={softFieldInputClass}
+            placeholder="Cidade/UF de nascimento"
+          />
+          {fieldError(errors, 'birthPlace')}
+        </div>
+
+        <div className="space-y-2">
+          <Label className={softFieldLabelClass}>Estado civil</Label>
+          <Select
+            value={maritalStatus}
+            onValueChange={(v) => setMaritalStatus(v as PatientServiceRequestValues['maritalStatus'])}
+            disabled={submitting}
+          >
+            <SelectTrigger className={softFieldInputClass}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {patientMaritalStatusValues.map((key) => (
+                <SelectItem key={key} value={key}>{patientMaritalStatusLabels[key]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {fieldError(errors, 'maritalStatus')}
+        </div>
+
+        <div className="space-y-2">
+          <Label className={softFieldLabelClass}>Gênero</Label>
+          <Select
+            value={gender}
+            onValueChange={(v) => setGender(v as PatientServiceRequestValues['gender'])}
+            disabled={submitting}
+          >
+            <SelectTrigger className={softFieldInputClass}>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {patientGenderValues.map((key) => (
+                <SelectItem key={key} value={key}>{patientGenderLabels[key]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {fieldError(errors, 'gender')}
+        </div>
       </section>
 
       <section className="space-y-4 rounded-xl border border-border bg-card p-4">
         <div className="space-y-1">
           <h2 className="text-sm font-semibold text-foreground">Responsável</h2>
           <p className="text-xs text-muted-foreground">
-            Se aplicável (idosos acima de 60 anos e menores de 18 anos)
+            Obrigatório apenas para menores de 18 anos. Demais casos, preenchimento opcional.
           </p>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="responsibleFullName" className={softFieldLabelClass}>
-            Nome do responsável{responsibleRequired ? ' *' : ''}
+            Nome do responsável{responsibleRequired ? ' *' : ' (opcional)'}
           </Label>
           <Input
             id="responsibleFullName"
@@ -200,7 +370,7 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
 
         <div className="space-y-2">
           <Label htmlFor="responsibleCpf" className={softFieldLabelClass}>
-            CPF do responsável{responsibleRequired ? ' *' : ''}
+            CPF do responsável{responsibleRequired ? ' *' : ' (opcional)'}
           </Label>
           <MaskedInput
             id="responsibleCpf"
@@ -214,6 +384,12 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
         </div>
       </section>
 
+      <Button type="button" className={softFieldButtonClass} onClick={goToStepTwo} disabled={submitting}>
+        Continuar
+      </Button>
+        </>
+      ) : step === 2 ? (
+        <>
       <section className="space-y-4 rounded-xl border border-border bg-card p-4">
         <h2 className="text-sm font-semibold text-foreground">Atendimento</h2>
 
@@ -250,6 +426,7 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
             onChange={(e) => setDiagnosticHypothesis(e.target.value)}
             disabled={submitting}
             rows={3}
+            placeholder="Ex.: dor no ombro após queda, dificuldade para caminhar após cirurgia…"
             className="min-h-24 rounded-xl border-0 bg-muted px-4 py-3 text-base shadow-none focus-visible:ring-2 focus-visible:ring-primary/30 lg:text-sm"
           />
           {fieldError(errors, 'diagnosticHypothesis')}
@@ -314,9 +491,46 @@ export function ServiceRequestForm({ onSubmit, submitting }: ServiceRequestFormP
         </div>
       </section>
 
-      <Button type="submit" className={softFieldButtonClass} disabled={submitting || !termsAccepted}>
-        {submitting ? 'Enviando solicitação...' : 'Solicitar profissional parceiro'}
-      </Button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button type="button" variant="outline" className="sm:flex-1" onClick={() => setStep(1)} disabled={submitting}>
+          Voltar
+        </Button>
+        <Button type="submit" className={cn(softFieldButtonClass, 'sm:flex-1')} disabled={submitting || !termsAccepted}>
+          {submitting ? 'Validando…' : 'Ir para pagamento'}
+        </Button>
+      </div>
+        </>
+      ) : (
+        <>
+          <section className="space-y-4 rounded-xl border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold text-foreground">Pagamento da avaliação</h2>
+            <p className="text-sm text-muted-foreground">
+              {checkoutMeta?.assessmentFeeMessage ??
+                'Valor da avaliação domiciliar. Se você fechar o pacote de tratamento, este valor será descontado no primeiro ciclo.'}
+            </p>
+            <div className="rounded-lg bg-muted/40 px-4 py-3">
+              <p className="text-xs text-muted-foreground">Total a pagar agora</p>
+              <p className="font-display text-2xl font-bold">
+                {formatCurrency(checkoutMeta?.assessmentFeeCents ?? 15000)}
+              </p>
+            </div>
+          </section>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button type="button" variant="outline" className="sm:flex-1" onClick={() => setStep(2)} disabled={submitting}>
+              Voltar
+            </Button>
+            <Button
+              type="button"
+              className={cn(softFieldButtonClass, 'sm:flex-1')}
+              disabled={submitting}
+              onClick={() => void handleCheckout()}
+            >
+              {submitting ? 'Gerando pagamento…' : 'Pagar avaliação (PIX)'}
+            </Button>
+          </div>
+        </>
+      )}
     </form>
   )
 }

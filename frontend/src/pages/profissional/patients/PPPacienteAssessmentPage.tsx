@@ -18,6 +18,7 @@ import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { cn } from '@/lib/utils'
 import { getPPPatientDetail, getPPProfessionalCrefito } from '@/services/ppPatients'
 import { getCurrentProfessional } from '@/services/professionals'
+import { supabase } from '@/lib/supabase'
 import { initialAssessmentsService } from '@/services/index'
 import {
   assessmentProposalSchema,
@@ -25,6 +26,11 @@ import {
   normalizeWeeklyFrequency,
   type AssessmentProposalFormValues,
 } from '@/schemas/assessmentProposal'
+import {
+  estimateAssessmentRepasseTotalCents,
+  finalizeAssessmentForPp,
+} from '@/services/assessmentProposal'
+import { toast } from 'sonner'
 
 const ASSESSMENT_FORM_ID = 'pp-assessment-form'
 
@@ -58,8 +64,21 @@ export function PPPacienteAssessmentPage() {
   })
 
   const suggestedLevel = form.watch('suggested_patient_level')
+  const sessionCount = form.watch('proposed_session_count')
   const levelConfirmed = form.watch('level_confirmed')
   const showLevelChangeReason = levelConfirmed === false
+
+  const { data: estimatedRepasseTotalCents } = useQuery({
+    queryKey: ['pp', 'assessment-repasse-estimate', id, suggestedLevel, sessionCount, professional?.pp_class],
+    queryFn: () =>
+      estimateAssessmentRepasseTotalCents({
+        patientId: id!,
+        patientLevel: suggestedLevel,
+        sessionCount,
+        ppClass: professional?.pp_class,
+      }),
+    enabled: Boolean(id && patient && sessionCount > 0),
+  })
 
   useEffect(() => {
     if (!patient) return
@@ -76,7 +95,7 @@ export function PPPacienteAssessmentPage() {
   const createAssessment = useCrudMutation({
     mutationFn: async (values: AssessmentProposalFormValues) => {
       if (!professional?.id || !id) throw new Error('Profissional não encontrado')
-      return initialAssessmentsService.create({
+      const created = await initialAssessmentsService.create({
         patient_id: id,
         evaluator_professional_id: professional.id,
         crefito_number: values.crefito_number,
@@ -94,12 +113,27 @@ export function PPPacienteAssessmentPage() {
         prior_conditions: values.prior_conditions,
         surgeries: values.surgeries.filter((s) => s.name.trim().length > 0),
         comorbidities: null,
+        patient_occupation: values.patient_occupation,
         status: 'avaliacao_feita',
       } as Record<string, unknown>)
+      await supabase
+        .from('patients')
+        .update({ occupation: values.patient_occupation.trim() } as never)
+        .eq('id', id!)
+      return finalizeAssessmentForPp(String(created.id))
     },
     queryKey: ['pp'],
-    successMessage: 'Avaliação registrada com sucesso',
-    onSuccess: () => {
+    successMessage: 'Avaliação registrada',
+    onSuccess: (result) => {
+      if (result.requires_admin_review) {
+        toast.message('Avaliação enviada para revisão da Larsana', {
+          description: 'A proposta será encaminhada à família após análise do nível sugerido.',
+        })
+      } else {
+        toast.success('Proposta enviada à família', {
+          description: 'A família tem até 5 dias úteis para responder.',
+        })
+      }
       navigate(`/profissional/pacientes/${id}`)
     },
   })
@@ -164,6 +198,9 @@ export function PPPacienteAssessmentPage() {
               control={form.control}
               suggestedLevelLabel={patientLevelLabels[suggestedLevel] ?? suggestedLevel}
               showLevelChangeReason={showLevelChangeReason}
+              estimatedRepasseTotalCents={estimatedRepasseTotalCents}
+              ppFullName={professional?.full_name}
+              crefitoReadonly={defaultCrefito ?? form.watch('crefito_number')}
             />
           </form>
         </Form>

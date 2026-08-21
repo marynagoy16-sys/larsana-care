@@ -4,6 +4,16 @@ import { addDays, addMonths, isSameDay, subDays, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { AgendaDayTimeline } from '@/components/agenda/AgendaDayTimeline'
 import { AgendaLegend } from '@/components/agenda/AgendaLegend'
 import { AgendaMobileDayStrip } from '@/components/agenda/AgendaMobileDayStrip'
@@ -87,13 +97,24 @@ export function PPAgendaPage() {
     queryKey: ['pp', 'agenda'],
     successMessage: 'Solicitação enviada ao paciente',
     onSuccess: () => {
+      setPendingReschedule(null)
       queryClient.invalidateQueries({ queryKey: ['pp', 'agenda'] })
       queryClient.invalidateQueries({ queryKey: ['pp', 'reschedule-windows'] })
     },
   })
 
+  const [pendingReschedule, setPendingReschedule] = useState<{
+    sessionId: string
+    newScheduledAt: Date
+  } | null>(null)
+
   const handleRescheduleSession = (sessionId: string, newScheduledAt: Date) => {
-    rescheduleMutation.mutate({ sessionId, newScheduledAt })
+    setPendingReschedule({ sessionId, newScheduledAt })
+  }
+
+  const confirmReschedule = () => {
+    if (!pendingReschedule) return
+    rescheduleMutation.mutate(pendingReschedule)
   }
 
   const daySessions = dayQuery.data ?? []
@@ -363,6 +384,24 @@ export function PPAgendaPage() {
         </div>
       )}
       </div>
+
+      <AlertDialog open={!!pendingReschedule} onOpenChange={(open) => !open && setPendingReschedule(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar remarcação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O paciente receberá uma notificação e poderá aceitar ou recusar o novo horário antes da alteração
+              definitiva na agenda.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={rescheduleMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReschedule} disabled={rescheduleMutation.isPending}>
+              {rescheduleMutation.isPending ? 'Enviando…' : 'Enviar solicitação'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

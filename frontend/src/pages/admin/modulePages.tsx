@@ -9,6 +9,8 @@ import { EntityListPage } from '@/components/crud/EntityListPage'
 import { CrudModal } from '@/components/crud/CrudModal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Toggle } from '@/components/ui/toggle'
+import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { PatientSearchField } from '@/components/forms/PatientSearchField'
 import { ProfessionalSearchField } from '@/components/forms/ProfessionalSearchField'
@@ -39,6 +41,7 @@ import {
   contractTemplatesService,
   npsSurveysService,
 } from '@/services/index'
+import { listSubRepassesStaff, type SubRepasseDetail } from '@/services/transfers'
 import { edgeFunctions } from '@/services/edgeFunctions'
 import { supabase } from '@/lib/supabase'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
@@ -324,7 +327,10 @@ export function AssessmentDetailPage() {
           </CascadeItem>
         )}
 
-        {assessmentRecord.status === 'avaliacao_feita' && hasProposal && (
+        {(assessmentRecord.status === 'em_analise' ||
+          (assessmentRecord.status === 'avaliacao_feita' &&
+            assessmentRecord.level_change_review_status !== 'pendente')) &&
+          hasProposal && (
           <CascadeItem>
             <AssessmentSendProposalCard
               assessment={{
@@ -663,34 +669,111 @@ export function ChargeDetailPage() {
 
 export function TransfersPage() {
   const navigate = useNavigate()
-  return (
-    <EntityListPage title="Repasses" queryKey={qk.transfers} queryFn={() => transfersService.list('id, pp_transfer_amount_cents, status, created_at')}
-      onRowClick={(r) => navigate(`/admin/repasses/${r.id}`)}
-      columns={[
-        { key: 'amount', header: 'Repasse PP', cell: (r) => formatCurrency(Number(r.pp_transfer_amount_cents)) },
-        { key: 'status', header: 'Status', cell: (r) => String(r.status) },
-      ]}
-    />
-  )
-}
+  const [tab, setTab] = useState<'ciclo' | 'sub'>('ciclo')
 
-export function TransferDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const release = useCrudMutation({
-    mutationFn: () => edgeFunctions.transferWallet({ transfer_id: id ?? '' }),
-    queryKey: qk.transfers,
+  const { data: subRows, isLoading: subLoading } = useQuery({
+    queryKey: ['sub-repasses'],
+    queryFn: listSubRepassesStaff,
+    enabled: tab === 'sub',
   })
+
+  if (tab === 'sub') {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+          <div>
+            <h1 className="font-display text-xl font-semibold">Repasses</h1>
+            <p className="text-sm text-muted-foreground">Repasse avulso SUB por sessão</p>
+          </div>
+          <div className="flex gap-2">
+            <Toggle
+              variant="outline"
+              pressed={tab === 'ciclo'}
+              onPressedChange={() => setTab('ciclo')}
+              className="rounded-full px-4"
+            >
+              Ciclo
+            </Toggle>
+            <Toggle
+              variant="outline"
+              pressed={tab === 'sub'}
+              onPressedChange={() => setTab('sub')}
+              className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              SUB avulso
+            </Toggle>
+          </div>
+        </div>
+        {subLoading ? (
+          <p className="p-6 text-sm text-muted-foreground">Carregando repasses SUB…</p>
+        ) : !subRows?.length ? (
+          <p className="p-6 text-sm text-muted-foreground">Nenhum repasse SUB registrado.</p>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
+            {subRows.map((row: SubRepasseDetail) => (
+              <button
+                key={row.id}
+                type="button"
+                onClick={() => navigate(`/admin/repasses/sub/${row.id}`)}
+                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/30"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium tabular-nums">{formatCurrency(row.amount_cents)}</p>
+                    <Badge variant="secondary" className="text-[10px]">
+                      SUB
+                    </Badge>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {row.substitute?.full_name ?? 'Substituto'} · Sessão {row.session_number} ·{' '}
+                    {formatDateTime(row.created_at)}
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground">{String(row.status)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
-      <GenericDetailPage title="Repasse" backPath="/admin/repasses" queryKey={qk.transfers} queryFn={(i) => transfersService.getById(i)}
-        fields={[{ key: 'pp_transfer_amount_cents', label: 'Valor PP', format: 'currency' }, { key: 'status', label: 'Status' }]} />
-      {id && (
-        <div className="px-6">
-          <button type="button" className="text-sm text-primary" disabled={release.isPending} onClick={() => release.mutate(undefined)}>
-            Liberar repasse (Wallet)
-          </button>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <div>
+          <h1 className="font-display text-xl font-semibold">Repasses</h1>
+          <p className="text-sm text-muted-foreground">Repasse pós-ciclo com NF</p>
         </div>
-      )}
+        <div className="flex gap-2">
+          <Toggle
+            variant="outline"
+            pressed={tab === 'ciclo'}
+            onPressedChange={() => setTab('ciclo')}
+            className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          >
+            Ciclo
+          </Toggle>
+          <Toggle
+            variant="outline"
+            pressed={tab === 'sub'}
+            onPressedChange={() => setTab('sub')}
+            className="rounded-full px-4"
+          >
+            SUB avulso
+          </Toggle>
+        </div>
+      </div>
+      <EntityListPage
+        title=""
+        queryKey={qk.transfers}
+        queryFn={() => transfersService.list('id, pp_transfer_amount_cents, status, created_at')}
+        onRowClick={(r) => navigate(`/admin/repasses/${r.id}`)}
+        columns={[
+          { key: 'amount', header: 'Repasse PP', cell: (r) => formatCurrency(Number(r.pp_transfer_amount_cents)) },
+          { key: 'status', header: 'Status', cell: (r) => String(r.status) },
+        ]}
+      />
     </div>
   )
 }

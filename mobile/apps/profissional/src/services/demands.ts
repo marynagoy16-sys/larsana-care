@@ -127,6 +127,26 @@ function abbreviateName(fullName: string): string {
 }
 
 export async function listOpenDemandsForPp(): Promise<{ data: DemandListItem[]; count: number }> {
+  const { data: { user } } = await supabase.auth.getUser()
+  let declinedDemandIds = new Set<string>()
+
+  if (user) {
+    const { data: pro } = await (supabase as any)
+      .from('professionals')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (pro?.id) {
+      const { data: declined } = await (supabase as any)
+        .from('demand_responses')
+        .select('demand_id')
+        .eq('professional_id', pro.id)
+        .eq('response', 'declined')
+      declinedDemandIds = new Set((declined ?? []).map((row: { demand_id: string }) => row.demand_id))
+    }
+  }
+
   const { data, error } = await supabase
     .from('demands')
     .select(DEMAND_LIST_SELECT)
@@ -154,7 +174,9 @@ export async function listOpenDemandsForPp(): Promise<{ data: DemandListItem[]; 
     } | null
   }>
 
-  const mapped: DemandListItem[] = rows.map((row) => ({
+  const mapped: DemandListItem[] = rows
+    .filter((row) => !declinedDemandIds.has(row.id))
+    .map((row) => ({
     id: row.id,
     demand_type: row.demand_type,
     status: row.status,

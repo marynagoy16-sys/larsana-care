@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { Button } from '@/components/ui/button'
@@ -11,11 +12,42 @@ type NotificationRow = {
   id: string
   title: string
   body: string | null
+  type: string | null
+  payload: Record<string, unknown> | null
   read_at: string | null
   created_at: string
 }
 
+function resolveNotificationHref(notification: NotificationRow): string | null {
+  const type = notification.type ?? ''
+  if (type.includes('agendamento') || type.includes('horario') || type === 'scheduling') {
+    return '/paciente/agendamento'
+  }
+  if (type === 'proposta' || type.includes('proposta')) {
+    return '/paciente/proposta'
+  }
+  if (type.includes('pagamento') || type === 'cobranca') {
+    return '/paciente/pagamentos'
+  }
+  if (type === 'nps_sessao') {
+    const href = notification.payload?.href
+    return typeof href === 'string' ? href : null
+  }
+  const payload = notification.payload
+  if (payload?.proposal_id || payload?.scheduling_proposal_id) {
+    return '/paciente/agendamento'
+  }
+  if (payload?.assessment_id) {
+    return '/paciente/proposta'
+  }
+  if (typeof payload?.href === 'string') {
+    return payload.href
+  }
+  return null
+}
+
 export function PacienteNotificacoesPage() {
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -23,7 +55,7 @@ export function PacienteNotificacoesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notifications')
-        .select('id, title, body, read_at, created_at')
+        .select('id, title, body, type, payload, read_at, created_at')
         .order('created_at', { ascending: false })
       if (error) throw error
       return (data ?? []) as NotificationRow[]
@@ -44,6 +76,14 @@ export function PacienteNotificacoesPage() {
     },
   })
 
+  const handleOpen = (notification: NotificationRow) => {
+    const href = resolveNotificationHref(notification)
+    if (!notification.read_at) {
+      markRead.mutate(notification.id)
+    }
+    if (href) navigate(href)
+  }
+
   const notifications = data ?? []
   const unreadCount = notifications.filter((n) => !n.read_at).length
 
@@ -62,13 +102,17 @@ export function PacienteNotificacoesPage() {
           <div className="space-y-2">
             {notifications.map((notification) => {
               const isUnread = !notification.read_at
+              const href = resolveNotificationHref(notification)
 
               return (
-                <div
+                <button
                   key={notification.id}
+                  type="button"
+                  onClick={() => handleOpen(notification)}
                   className={cn(
-                    'rounded-xl border px-4 py-4',
+                    'w-full rounded-xl border px-4 py-4 text-left transition-colors',
                     isUnread ? 'border-primary/25 bg-primary/5' : 'border-border bg-card',
+                    href && 'hover:bg-muted/40 cursor-pointer',
                   )}
                 >
                   <div className="flex items-start gap-3">
@@ -83,19 +127,24 @@ export function PacienteNotificacoesPage() {
                       <p className="text-xs text-muted-foreground mt-2">
                         {formatDateTime(notification.created_at)}
                       </p>
-                      {isUnread ? (
+                      {href ? (
+                        <p className="text-xs font-medium text-primary mt-2">Toque para abrir</p>
+                      ) : isUnread ? (
                         <Button
                           variant="link"
                           size="sm"
                           className="h-auto p-0 mt-2 text-primary"
-                          onClick={() => markRead.mutate(notification.id)}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            markRead.mutate(notification.id)
+                          }}
                         >
                           Marcar como lida
                         </Button>
                       ) : null}
                     </div>
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>

@@ -53,7 +53,12 @@ const DemandsPage = lazy(() =>
 const ChargesPage = lazyAdmin('ChargesPage')
 const ChargeDetailPage = lazyAdmin('ChargeDetailPage')
 const TransfersPage = lazyAdmin('TransfersPage')
-const TransferDetailPage = lazyAdmin('TransferDetailPage')
+const TransferDetailPage = lazy(() =>
+  import('@/pages/admin/finance/TransferDetailPage').then((m) => ({ default: m.TransferDetailPage })),
+)
+const SubRepasseDetailPage = lazy(() =>
+  import('@/pages/admin/finance/SubRepasseDetailPage').then((m) => ({ default: m.SubRepasseDetailPage })),
+)
 const CaixaPage = lazyAdmin('CaixaPage')
 const DelumaExportPage = lazyAdmin('DelumaExportPage')
 const ReportsHubPage = lazyAdmin('ReportsHubPage')
@@ -66,6 +71,15 @@ const RegionsConfigPage = lazy(() =>
 )
 const PpPointsConfigPage = lazy(() =>
   import('@/pages/admin/config/PpPointsConfigPage').then((m) => ({ default: m.PpPointsConfigPage })),
+)
+const PlatformSettingsPage = lazy(() =>
+  import('@/pages/admin/config/PlatformSettingsPage').then((m) => ({ default: m.PlatformSettingsPage })),
+)
+const AdminImportPatientsPage = lazy(() =>
+  import('@/pages/admin/import/AdminImportPatientsPage').then((m) => ({ default: m.AdminImportPatientsPage })),
+)
+const AdminImportProfessionalsPage = lazy(() =>
+  import('@/pages/admin/import/AdminImportProfessionalsPage').then((m) => ({ default: m.AdminImportProfessionalsPage })),
 )
 const PricingConfigPage = lazy(() =>
   import('@/pages/admin/pricing/PricingConfigPage').then((m) => ({ default: m.PricingConfigPage })),
@@ -139,9 +153,12 @@ export const adminRoutes: RouteObject[] = [
       { path: 'demandas', element: staffRoute(<DemandsPage />, operacaoRoles) },
       { path: 'demandas/:id', element: staffRoute(<DemandDetailPage />, operacaoRoles) },
       { path: 'lista-espera', element: staffRoute(<AdminWaitlistPage />, operacaoRoles) },
+      { path: 'importacao/pacientes', element: staffRoute(<AdminImportPatientsPage />, adminOnly) },
+      { path: 'importacao/profissionais', element: staffRoute(<AdminImportProfessionalsPage />, adminOnly) },
       { path: 'cobrancas', element: staffRoute(<ChargesPage />, financeiroRoles) },
       { path: 'cobrancas/:id', element: staffRoute(<ChargeDetailPage />, financeiroRoles) },
       { path: 'repasses', element: staffRoute(<TransfersPage />, financeiroRoles) },
+      { path: 'repasses/sub/:id', element: staffRoute(<SubRepasseDetailPage />, financeiroRoles) },
       { path: 'repasses/:id', element: staffRoute(<TransferDetailPage />, financeiroRoles) },
       { path: 'caixa', element: staffRoute(<CaixaPage />, financeiroRoles) },
       { path: 'exportacao-deluma', element: staffRoute(<DelumaExportPage />, financeiroRoles) },
@@ -153,6 +170,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'relatorios/repasses-aging', element: staffRoute(<RepassesAgingReportPage />, financeiroRoles) },
       { path: 'config/precos', element: staffRoute(<PricingConfigPage />, adminOnly) },
       { path: 'config/pontos-pp', element: staffRoute(<PpPointsConfigPage />, adminOnly) },
+      { path: 'config/plataforma', element: staffRoute(<PlatformSettingsPage />, adminOnly) },
       { path: 'config/termos', element: staffRoute(<TermsConfigPage />, adminOnly) },
       { path: 'config/contratos', element: staffRoute(<ContractsConfigPage />, adminOnly) },
       { path: 'config/regioes', element: staffRoute(<RegionsConfigPage />, operacaoRoles) },

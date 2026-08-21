@@ -200,14 +200,26 @@ export const demandsService = {
   async listOpenForPp() {
     const { data: { user } } = await supabase.auth.getUser()
     let preferences: PpTechnicalCategory[] | null = null
+    let professionalId: string | null = null
+    let declinedDemandIds = new Set<string>()
 
     if (user) {
       const { data: pro } = await supabase
         .from('professionals')
-        .select('patient_preferences')
+        .select('id, patient_preferences')
         .eq('user_id', user.id)
         .maybeSingle()
       preferences = (pro?.patient_preferences ?? null) as PpTechnicalCategory[] | null
+      professionalId = pro?.id ?? null
+
+      if (professionalId) {
+        const { data: declined } = await supabase
+          .from('demand_responses')
+          .select('demand_id')
+          .eq('professional_id', professionalId)
+          .eq('response', 'declined')
+        declinedDemandIds = new Set((declined ?? []).map((row) => row.demand_id as string))
+      }
     }
 
     const { data, error } = await supabase
@@ -226,6 +238,7 @@ export const demandsService = {
       }
     >
     const mapped = rows
+      .filter((row) => !declinedDemandIds.has(String(row.id)))
       .map((row) => mapDemandRow(row, preferences))
       .sort((a, b) => (b.preference_match_score ?? 0) - (a.preference_match_score ?? 0))
 

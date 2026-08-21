@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { edgeFunctions } from '@/services/edgeFunctions'
 import { PROFESSIONAL_DOCS_BUCKET } from '@/services/credentialing'
 import type { Tables } from '@/types/database'
 import {
@@ -162,6 +163,8 @@ export async function getProfessionalDocumentViewUrl(
 }
 
 export async function approveCredentialing(professionalId: string) {
+  await edgeFunctions.createAsaasSubaccount({ professional_id: professionalId })
+
   const { error } = await supabase
     .from('professionals')
     .update({
@@ -171,6 +174,10 @@ export async function approveCredentialing(professionalId: string) {
     .eq('id', professionalId)
 
   if (error) throw error
+}
+
+export async function linkAsaasSubaccount(professionalId: string) {
+  return edgeFunctions.createAsaasSubaccount({ professional_id: professionalId })
 }
 
 export async function requestCredentialingRevision(professionalId: string) {

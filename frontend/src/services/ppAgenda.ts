@@ -82,6 +82,8 @@ export type AgendaSessionItem = {
   start: Date
   end: Date
   hasEvolution: boolean
+  checkInAt: string | null
+  checkOutAt: string | null
 }
 
 export type AgendaDaySummary = {
@@ -153,6 +155,8 @@ function mapSessionRow(row: AgendaSessionRow): AgendaSessionItem | null {
     start: times.start,
     end: times.end,
     hasEvolution,
+    checkInAt: row.check_in_at,
+    checkOutAt: row.check_out_at,
   }
 }
 

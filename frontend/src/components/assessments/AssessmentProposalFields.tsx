@@ -1,7 +1,8 @@
 import type { Control } from 'react-hook-form'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useWatch } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@/lib/formatters'
 import { weeklyFrequencyLabels, proposedSessionCountLabels } from '@/constants/labels'
 import type { AssessmentProposalFormValues } from '@/schemas/assessmentProposal'
 import {
@@ -25,67 +27,86 @@ type AssessmentProposalFieldsProps = {
   control: Control<AssessmentProposalFormValues>
   suggestedLevelLabel: string
   showLevelChangeReason: boolean
+  estimatedRepasseTotalCents?: number | null
+  ppFullName?: string | null
+  crefitoReadonly?: string | null
 }
 
 export function AssessmentProposalFields({
   control,
   suggestedLevelLabel,
   showLevelChangeReason,
+  estimatedRepasseTotalCents,
+  ppFullName,
+  crefitoReadonly,
 }: AssessmentProposalFieldsProps) {
   const { setValue } = useFormContext<AssessmentProposalFormValues>()
+  const sessionCount = useWatch({ control, name: 'proposed_session_count' })
 
   return (
     <div className="space-y-4">
-      <FormField
-        control={control}
-        name="proposed_weekly_frequency"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Frequência semanal sugerida</FormLabel>
-            <Select
-              value={String(field.value)}
-              onValueChange={(v) => {
-                const frequency = Number(v) as ProposalWeeklyFrequency
-                field.onChange(frequency)
-                setValue('proposed_session_count', sessionCountForWeeklyFrequency(frequency), {
-                  shouldValidate: true,
-                })
-              }}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a frequência" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {PROPOSAL_WEEKLY_FREQUENCIES.map((freq) => (
-                  <SelectItem key={freq} value={String(freq)}>
-                    {weeklyFrequencyLabels[freq]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField
+          control={control}
+          name="proposed_weekly_frequency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Frequência semanal sugerida</FormLabel>
+              <Select
+                value={String(field.value)}
+                onValueChange={(v) => {
+                  const frequency = Number(v) as ProposalWeeklyFrequency
+                  field.onChange(frequency)
+                  setValue('proposed_session_count', sessionCountForWeeklyFrequency(frequency), {
+                    shouldValidate: true,
+                  })
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {PROPOSAL_WEEKLY_FREQUENCIES.map((freq) => (
+                    <SelectItem key={freq} value={String(freq)}>
+                      {weeklyFrequencyLabels[freq]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={control}
-        name="proposed_session_count"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Ciclo proposto</FormLabel>
-            <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground">
-              {proposedSessionCountLabels[field.value as ProposalSessionCount] ?? `${field.value} sessões`}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Calculado automaticamente: 1x/semana → 4 sessões · 2x → 8 · 3x → 12
-            </p>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={control}
+          name="proposed_session_count"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ciclo</FormLabel>
+              <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground min-h-10 flex items-center">
+                {proposedSessionCountLabels[field.value as ProposalSessionCount] ??
+                  `Serão ${field.value} terapias`}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Serão realizadas {field.value} terapias para que o pagamento seja efetivado.
+              </p>
+              {estimatedRepasseTotalCents != null ? (
+                <p className="text-xs font-medium text-foreground">
+                  Repasse estimado: {formatCurrency(estimatedRepasseTotalCents)}
+                  <span className="font-normal text-muted-foreground">
+                    {' '}
+                    (se todas as terapias forem realizadas pelo mesmo profissional parceiro)
+                  </span>
+                </p>
+              ) : null}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 space-y-3">
         <div>
@@ -181,12 +202,33 @@ export function AssessmentProposalFields({
 
       <FormField
         control={control}
+        name="patient_occupation"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Profissão do paciente</FormLabel>
+            <FormControl>
+              <Textarea rows={1} placeholder="Ex.: aposentado, autônomo, estudante…" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {ppFullName ? (
+        <div className="rounded-lg border bg-muted/30 px-4 py-3 text-sm space-y-1">
+          <p className="text-xs text-muted-foreground">Profissional responsável (CREFITO)</p>
+          <p className="font-medium">{ppFullName}</p>
+        </div>
+      ) : null}
+
+      <FormField
+        control={control}
         name="crefito_number"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Número CREFITO</FormLabel>
             <FormControl>
-              <Textarea rows={1} placeholder="Ex.: 308315-F" {...field} />
+              <Input readOnly className="bg-muted" value={crefitoReadonly ?? field.value} />
             </FormControl>
             <FormMessage />
           </FormItem>

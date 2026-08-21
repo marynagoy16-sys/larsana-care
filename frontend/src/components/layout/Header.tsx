@@ -9,6 +9,11 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { COMING_SOON_BADGE } from '@/config/navigation'
 import { usePageHeader } from '@/contexts/PageHeaderContext'
+import { Logo } from '@/components/shared/Logo'
+
+function DefaultShellHeaderLogo() {
+  return <Logo layout="horizontal" adaptToTheme style="v1" size="xs" />
+}
 
 interface HeaderProps {
   pageTitle: string
@@ -45,13 +50,14 @@ export function Header({
             <Menu size={22} />
           </Button>
         )}
-        {header?.content ?? (
-          pageTitle ? (
+        {header?.content ??
+          (pageTitle ? (
             <h1 className="font-display font-bold text-2xl lg:text-[1.75rem] leading-tight tracking-tight truncate min-w-0">
               {pageTitle}
             </h1>
-          ) : null
-        )}
+          ) : (
+            <DefaultShellHeaderLogo />
+          ))}
       </div>
 
       {horizontalNav && horizontalNav.length > 0 && (

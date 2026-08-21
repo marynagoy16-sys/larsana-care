@@ -1,11 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { ChevronRight, MapPin, Navigation } from 'lucide-react-native'
+import { useDemandNotificationSound } from '@/hooks/useDemandNotificationSound'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { listOpenDemandsForPp } from '@/services/demands'
+import { resolvePpProfessionalOrigin } from '@/services/ppLocation'
+import { supabase } from '@/lib/supabase'
 import {
   haversineDistanceKm,
   formatDistanceKm,
@@ -31,13 +34,44 @@ function getInitialRegion(points: GeoPoint[]) {
 
 export default function DemandasScreen() {
   const router = useRouter()
+
+  const { data: professional, isLoading: credLoading } = useQuery({
+    queryKey: ['pp', 'credentialing_gate'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return null
+      const { data, error } = await (supabase as any)
+        .from('professionals')
+        .select('credentialing_status')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (error) throw error
+      return data as { credentialing_status: string } | null
+    },
+  })
+
+  useEffect(() => {
+    if (credLoading) return
+    if (professional && professional.credentialing_status !== 'ativo') {
+      router.replace('/(app)/credenciamento')
+    }
+  }, [credLoading, professional, router])
+
   const { data, isLoading } = useQuery({
     queryKey: ['pp', 'demands'],
     queryFn: listOpenDemandsForPp,
   })
 
+  const { data: originPoint } = useQuery({
+    queryKey: ['pp', 'distance-origin'],
+    queryFn: resolvePpProfessionalOrigin,
+    staleTime: 1000 * 60 * 5,
+  })
+
   const demands = data?.data ?? []
-  const origin = useMemo(() => MAUA_CENTER, [])
+  const origin = originPoint ?? MAUA_CENTER
+
+  useDemandNotificationSound(demands.length)
 
   const mapPoints = useMemo(
     () =>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { addDays, subDays } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon } from 'lucide-react-native'
@@ -29,6 +29,10 @@ import {
   ppEvolutionsQueryKeys,
   type PendingEvolutionRow,
 } from '@/services/ppEvolutions'
+import {
+  listPpRescheduleWindowsForProfessional,
+  ppRescheduleAfterSubRejection,
+} from '@/services/sessionReschedule'
 
 type AgendaSubTab = 'semana' | 'pendentes'
 
@@ -156,6 +160,13 @@ export default function AgendaTabScreen() {
     queryFn: listPendingEvolutionsForPp,
   })
 
+  const rescheduleWindowsQuery = useQuery({
+    queryKey: ['pp', 'reschedule-windows'],
+    queryFn: listPpRescheduleWindowsForProfessional,
+  })
+
+  const queryClient = useQueryClient()
+
   const sessions = weekQuery.data ?? []
   const grouped = useMemo(
     () => groupSessionsByDay(sessions, weekRange.days),
@@ -174,6 +185,21 @@ export default function AgendaTabScreen() {
 
       {subTab === 'semana' ? (
         <>
+          {(rescheduleWindowsQuery.data?.length ?? 0) > 0 ? (
+            <View className="mx-4 mb-3 gap-2">
+              {rescheduleWindowsQuery.data!.map((request) => (
+                <RescheduleWindowCard
+                  key={request.id}
+                  request={request}
+                  onCompleted={() => {
+                    rescheduleWindowsQuery.refetch()
+                    queryClient.invalidateQueries({ queryKey: ppAgendaQueryKeys.week(weekKey) })
+                  }}
+                />
+              ))}
+            </View>
+          ) : null}
+
           <View className="flex-row items-center justify-between px-4 pb-3">
             <Pressable onPress={() => setAnchorDate((d) => subDays(d, 7))} className="p-2">
               <ChevronLeft size={22} color="#095742" />
@@ -249,11 +275,115 @@ export default function AgendaTabScreen() {
       ) : (
         <ScrollView className="flex-1" contentContainerClassName="gap-3 pb-28 pt-1">
           <Text className="px-4 text-xs text-muted-foreground">
-            Terapias realizadas aguardando registro clínico (prazo 24h)
+            Terapias realizadas aguardando registro clínico (prazo 7 dias)
           </Text>
           <PendingEvolutionsList items={pendingItems} />
         </ScrollView>
       )}
     </SafeAreaView>
+  )
+}
+
+function RescheduleWindowCard({
+  request,
+  onCompleted,
+}: {
+  request: { id: string; original_scheduled_at: string; reschedule_deadline: string }
+  onCompleted: () => void
+}) {
+  const [value, setValue] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const submit = async () => {
+    if (!value.trim()) {
+      Alert.alert('Informe o novo horário')
+      return
+    }
+    setLoading(true)
+    try {
+      await ppRescheduleAfterSubRejection(request.id, new Date(value).toISOString())
+      onCompleted()
+      Alert.alert('Remarcação enviada', 'O paciente será notificado.')
+    } catch (err) {
+      Alert.alert('Erro', err instanceof Error ? err.message : 'Falha ao remarcar')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <View className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 gap-2">
+      <Text className="text-sm font-semibold text-foreground">Reposição após recusa de substituto</Text>
+      <Text className="text-xs text-muted-foreground">
+        Original: {formatDateTime(request.original_scheduled_at)}
+      </Text>
+      <TextInput
+        className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+        placeholder="Novo horário (ISO)"
+        value={value}
+        onChangeText={setValue}
+      />
+      <Pressable
+        onPress={submit}
+        disabled={loading}
+        className="rounded-lg bg-primary px-4 py-2.5 items-center"
+      >
+        <Text className="text-sm font-semibold text-primary-foreground">
+          {loading ? 'Salvando…' : 'Confirmar remarcação'}
+        </Text>
+      </Pressable>
+    </View>
+  )
+}
+
+function RescheduleWindowCard({
+  request,
+  onCompleted,
+}: {
+  request: { id: string; original_scheduled_at: string; reschedule_deadline: string }
+  onCompleted: () => void
+}) {
+  const [value, setValue] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const submit = async () => {
+    if (!value.trim()) {
+      Alert.alert('Informe o novo horário')
+      return
+    }
+    setLoading(true)
+    try {
+      await ppRescheduleAfterSubRejection(request.id, new Date(value).toISOString())
+      onCompleted()
+      Alert.alert('Remarcação enviada', 'O paciente será notificado.')
+    } catch (err) {
+      Alert.alert('Erro', err instanceof Error ? err.message : 'Falha ao remarcar')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <View className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 gap-2">
+      <Text className="text-sm font-semibold text-foreground">Reposição após recusa de substituto</Text>
+      <Text className="text-xs text-muted-foreground">
+        Original: {formatDateTime(request.original_scheduled_at)}
+      </Text>
+      <TextInput
+        className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+        placeholder="Novo horário (ISO)"
+        value={value}
+        onChangeText={setValue}
+      />
+      <Pressable
+        onPress={submit}
+        disabled={loading}
+        className="rounded-lg bg-primary px-4 py-2.5 items-center"
+      >
+        <Text className="text-sm font-semibold text-primary-foreground">
+          {loading ? 'Salvando…' : 'Confirmar remarcação'}
+        </Text>
+      </Pressable>
+    </View>
   )
 }

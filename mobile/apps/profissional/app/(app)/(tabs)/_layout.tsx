@@ -109,7 +109,11 @@ function ProfissionalTabBar({ state, navigation }: BottomTabBarProps) {
 
 export default function TabsLayout() {
   return (
-    <Tabs tabBar={(props) => <ProfissionalTabBar {...props} />} screenOptions={{ headerShown: false }}>
+    <Tabs
+      initialRouteName="demandas"
+      tabBar={(props) => <ProfissionalTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
       <Tabs.Screen name="inicio" options={{ title: 'Início' }} />
       <Tabs.Screen name="agenda" options={{ title: 'Agenda' }} />
       <Tabs.Screen name="demandas" options={{ title: 'Demandas' }} />

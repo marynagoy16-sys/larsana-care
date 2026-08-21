@@ -5,9 +5,10 @@ import type { PatientProposalPreview } from '@/services/assessmentFamilyResponse
 
 type PatientProposalSummaryProps = {
   preview: PatientProposalPreview
+  selectedOption?: import('@/services/assessmentFamilyResponse').ProposalOption | null
 }
 
-export function PatientProposalSummary({ preview }: PatientProposalSummaryProps) {
+export function PatientProposalSummary({ preview, selectedOption }: PatientProposalSummaryProps) {
   const deadline = formatFamilyDeadline({
     status: preview.status,
     proposal_sent_at: preview.proposal_sent_at,
@@ -55,15 +56,20 @@ export function PatientProposalSummary({ preview }: PatientProposalSummaryProps)
             {patientLevelLabels[preview.proposed_patient_level] ?? preview.proposed_patient_level}
           </p>
         </div>
-        {preview.total_amount_cents != null && (
+        {selectedOption ? (
           <div className="rounded-lg bg-muted/40 px-4 py-3">
-            <p className="text-xs text-muted-foreground">Valor do ciclo</p>
+            <p className="text-xs text-muted-foreground">Valor do ciclo escolhido</p>
             <p className="font-display text-xl font-bold">
-              {formatCurrency(preview.total_amount_cents)}
+              {formatCurrency(selectedOption.total_amount_cents)}
             </p>
+            {selectedOption.assessment_credit_cents > 0 ? (
+              <p className="text-xs text-primary mt-0.5">
+                Inclui desconto de {formatCurrency(selectedOption.assessment_credit_cents)} da avaliação paga
+              </p>
+            ) : null}
             <p className="text-xs text-muted-foreground mt-0.5">Pagamento antecipado via PIX ou boleto</p>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   )

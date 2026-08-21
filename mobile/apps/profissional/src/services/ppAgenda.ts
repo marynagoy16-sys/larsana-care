@@ -69,6 +69,8 @@ export type AgendaSessionItem = {
   displayStatus: ReturnType<typeof resolveAgendaDisplayStatus>
   isAssessment: boolean
   scheduledAt: string | null
+  checkInAt: string | null
+  checkOutAt: string | null
   start: Date
   end: Date
   hasEvolution: boolean
@@ -123,6 +125,8 @@ function mapSessionRow(row: AgendaSessionRow): AgendaSessionItem | null {
     displayStatus: resolveAgendaDisplayStatus(row.status, hasEvolution),
     isAssessment: row.is_assessment_session,
     scheduledAt: row.scheduled_at,
+    checkInAt: row.check_in_at,
+    checkOutAt: row.check_out_at,
     start: times.start,
     end: times.end,
     hasEvolution,

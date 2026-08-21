@@ -211,3 +211,97 @@ export async function uploadPPTransferInvoice(
     await supabase.storage.from(INVOICES_NF_BUCKET).remove([previousStoragePath])
   }
 }
+
+export type PPSubRepasseDetail = {
+  id: string
+  session_id: string
+  cycle_id: string
+  session_number: number
+  session_unit_price_cents: number
+  amount_cents: number
+  pp_percentage: number
+  status: TransferStatus
+  transferred_at: string | null
+  created_at: string
+  patients?: { full_name: string } | null
+  care_cycles?: {
+    cycle_number: number
+    patients?: { full_name: string } | null
+  } | null
+}
+
+export type PPRepasseListItem = {
+  id: string
+  kind: 'cycle' | 'sub'
+  amount_cents: number
+  status: TransferStatus
+  created_at: string
+  label: string
+}
+
+export async function getPPSubRepasseDetail(id: string): Promise<PPSubRepasseDetail | null> {
+  const { data, error } = await supabase
+    .from('sub_pp_repasses')
+    .select(
+      `
+      id, session_id, cycle_id, session_number, session_unit_price_cents,
+      amount_cents, pp_percentage, status, transferred_at, created_at,
+      patients ( full_name ),
+      care_cycles ( cycle_number, patients ( full_name ) )
+    `,
+    )
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) throw error
+  return data as PPSubRepasseDetail | null
+}
+
+export async function listPPRepassesCombined(): Promise<PPRepasseListItem[]> {
+  const professional = await getCurrentProfessional()
+  if (!professional?.id) return []
+
+  const [transfersRes, subRes] = await Promise.all([
+    supabase
+      .from('transfers')
+      .select('id, pp_transfer_amount_cents, status, created_at, care_cycles ( cycle_number )')
+      .eq('professional_id', professional.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('sub_pp_repasses')
+      .select('id, amount_cents, status, created_at, session_number, care_cycles ( cycle_number )')
+      .eq('substitute_professional_id', professional.id)
+      .order('created_at', { ascending: false }),
+  ])
+
+  if (transfersRes.error) throw transfersRes.error
+  if (subRes.error) throw subRes.error
+
+  const cycleItems: PPRepasseListItem[] = (transfersRes.data ?? []).map((row) => {
+    const cycle = row.care_cycles as { cycle_number: number } | null
+    return {
+      id: row.id,
+      kind: 'cycle' as const,
+      amount_cents: row.pp_transfer_amount_cents,
+      status: row.status as TransferStatus,
+      created_at: row.created_at,
+      label: cycle ? `Ciclo ${cycle.cycle_number}` : 'Ciclo',
+    }
+  })
+
+  const subItems: PPRepasseListItem[] = (subRes.data ?? []).map((row) => {
+    const cycle = row.care_cycles as { cycle_number: number } | null
+    return {
+      id: row.id,
+      kind: 'sub' as const,
+      amount_cents: row.amount_cents,
+      status: row.status as TransferStatus,
+      created_at: row.created_at,
+      label: `SUB · Sessão ${row.session_number}${cycle ? ` · Ciclo ${cycle.cycle_number}` : ''}`,
+    }
+  })
+
+  return [...cycleItems, ...subItems].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )
+}

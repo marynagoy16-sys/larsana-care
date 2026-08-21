@@ -21,7 +21,7 @@ export const patientReferralSourceLabels: Record<PatientReferralSource, string> 
   OUTROS: 'Outros',
 }
 
-export const attendancePeriodValues = ['MANHA', 'TARDE', 'NOITE'] as const
+export const attendancePeriodValues = ['MANHA', 'TARDE', 'NOITE', 'INDIFERENTE'] as const
 
 function parseBirthDate(value: string): Date | null {
   const date = value.includes('T') ? parseISO(value) : parseISO(`${value}T12:00:00`)
@@ -31,8 +31,36 @@ function parseBirthDate(value: string): Date | null {
 export function requiresResponsibleByBirthDate(birthDate: string): boolean {
   const date = parseBirthDate(birthDate)
   if (!date) return false
-  const age = differenceInYears(new Date(), date)
-  return age < 18 || age >= 60
+  return differenceInYears(new Date(), date) < 18
+}
+
+export const patientGenderValues = ['FEMININO', 'MASCULINO', 'OUTRO', 'NAO_INFORMADO'] as const
+export type PatientGender = (typeof patientGenderValues)[number]
+
+export const patientGenderLabels: Record<PatientGender, string> = {
+  FEMININO: 'Feminino',
+  MASCULINO: 'Masculino',
+  OUTRO: 'Outro',
+  NAO_INFORMADO: 'Prefiro não informar',
+}
+
+export const patientMaritalStatusValues = [
+  'SOLTEIRO',
+  'CASADO',
+  'DIVORCIADO',
+  'VIUVO',
+  'UNIAO_ESTAVEL',
+  'NAO_INFORMADO',
+] as const
+export type PatientMaritalStatus = (typeof patientMaritalStatusValues)[number]
+
+export const patientMaritalStatusLabels: Record<PatientMaritalStatus, string> = {
+  SOLTEIRO: 'Solteiro(a)',
+  CASADO: 'Casado(a)',
+  DIVORCIADO: 'Divorciado(a)',
+  VIUVO: 'Viúvo(a)',
+  UNIAO_ESTAVEL: 'União estável',
+  NAO_INFORMADO: 'Prefiro não informar',
 }
 
 export const patientServiceRequestSchema = z
@@ -49,6 +77,13 @@ export const patientServiceRequestSchema = z
     referralSource: z.enum(patientReferralSourceValues, {
       message: 'Selecione como nos conheceu',
     }),
+    birthPlace: requiredString('Naturalidade'),
+    maritalStatus: z.enum(patientMaritalStatusValues, {
+      message: 'Selecione o estado civil',
+    }),
+    gender: z.enum(patientGenderValues, {
+      message: 'Selecione o gênero',
+    }),
     termsAccepted: z.literal(true, {
       message: 'É necessário aceitar os termos para continuar',
     }),
@@ -60,7 +95,7 @@ export const patientServiceRequestSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['responsibleFullName'],
-        message: 'Nome do responsável é obrigatório para menores de 18 ou idosos acima de 60 anos',
+        message: 'Nome do responsável é obrigatório para menores de 18 anos',
       })
     }
 
@@ -68,7 +103,7 @@ export const patientServiceRequestSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['responsibleCpf'],
-        message: 'CPF do responsável é obrigatório para menores de 18 ou idosos acima de 60 anos',
+        message: 'CPF do responsável é obrigatório para menores de 18 anos',
       })
     }
   })
