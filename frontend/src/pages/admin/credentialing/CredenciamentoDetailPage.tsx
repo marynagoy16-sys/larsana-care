@@ -211,7 +211,7 @@ export function CredenciamentoDetailPage() {
   })
 
   const linkAsaas = useCrudMutation({
-    mutationFn: (_: void) => linkAsaasSubaccount(id!),
+    mutationFn: () => linkAsaasSubaccount(id!),
     queryKey: adminCredentialingQueryKeys.detail(id ?? ''),
     successMessage: 'Wallet Asaas vinculado',
   })

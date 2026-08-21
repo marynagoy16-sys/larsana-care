@@ -53,7 +53,6 @@ import { AssessmentProposalSummary } from '@/components/assessments/AssessmentPr
 import { AssessmentSendProposalCard } from '@/components/assessments/AssessmentSendProposalCard'
 import { AssessmentLevelReviewCard } from '@/components/assessments/AssessmentLevelReviewCard'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { estimateAssessmentProposalTotalCents } from '@/services/assessmentProposal'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
@@ -688,7 +687,7 @@ export function TransfersPage() {
           <div className="flex gap-2">
             <Toggle
               variant="outline"
-              pressed={tab === 'ciclo'}
+              pressed={false}
               onPressedChange={() => setTab('ciclo')}
               className="rounded-full px-4"
             >
@@ -696,7 +695,7 @@ export function TransfersPage() {
             </Toggle>
             <Toggle
               variant="outline"
-              pressed={tab === 'sub'}
+              pressed={true}
               onPressedChange={() => setTab('sub')}
               className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
@@ -748,7 +747,7 @@ export function TransfersPage() {
         <div className="flex gap-2">
           <Toggle
             variant="outline"
-            pressed={tab === 'ciclo'}
+            pressed={true}
             onPressedChange={() => setTab('ciclo')}
             className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
           >
@@ -756,7 +755,7 @@ export function TransfersPage() {
           </Toggle>
           <Toggle
             variant="outline"
-            pressed={tab === 'sub'}
+            pressed={false}
             onPressedChange={() => setTab('sub')}
             className="rounded-full px-4"
           >

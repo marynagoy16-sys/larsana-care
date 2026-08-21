@@ -200,7 +200,6 @@ export const demandsService = {
   async listOpenForPp() {
     const { data: { user } } = await supabase.auth.getUser()
     let preferences: PpTechnicalCategory[] | null = null
-    let professionalId: string | null = null
     let declinedDemandIds = new Set<string>()
 
     if (user) {
@@ -210,7 +209,7 @@ export const demandsService = {
         .eq('user_id', user.id)
         .maybeSingle()
       preferences = (pro?.patient_preferences ?? null) as PpTechnicalCategory[] | null
-      professionalId = pro?.id ?? null
+      const professionalId = pro?.id ?? null
 
       if (professionalId) {
         const { data: declined } = await supabase

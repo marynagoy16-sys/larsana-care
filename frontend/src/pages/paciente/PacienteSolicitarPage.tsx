@@ -16,7 +16,6 @@ import {
   joinWaitlist,
   patientServiceQueryKeys,
   prepareServiceRequest,
-  syncAssessmentChargeWithAsaas,
 } from '@/services/patientServiceRequest'
 import { listPendingSchedulingProposalsForPatient } from '@/services/scheduling'
 import { getAssignedProfessionalSummary } from '@/services/professionalRating'
