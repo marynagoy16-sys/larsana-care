@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronDown, Play } from 'lucide-react'
-import { getContentIcon } from '@/lib/content/contentIcons'
+import { ContentTypeIcon } from '@/lib/content/contentIcons'
 import { getGroupProgress } from '@/lib/content/lessonNavigation'
 import type { ContentPlayerGroup } from '@/types/academy'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -97,7 +97,6 @@ function GroupAccordion({
     const item = items[0]
     const isActive = item.id === activeItemId
     const isCompleted = completedItemIds.has(item.id)
-    const Icon = getContentIcon(item.contentType)
     return (
       <button
         ref={isActive ? activeRef : undefined}
@@ -118,7 +117,11 @@ function GroupAccordion({
                 : 'border-border text-muted-foreground',
           )}
         >
-          {isCompleted ? <Check className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
+          {isCompleted ? (
+            <Check className="h-3.5 w-3.5" />
+          ) : (
+            <ContentTypeIcon type={item.contentType} className="h-3.5 w-3.5" />
+          )}
         </span>
         <span className="min-w-0 flex-1 truncate font-medium">{group.title}</span>
         <ModuleStatusBadge {...progress} />
@@ -141,7 +144,6 @@ function GroupAccordion({
             {items.map((item) => {
               const isActive = item.id === activeItemId
               const isCompleted = completedItemIds.has(item.id)
-              const Icon = getContentIcon(item.contentType)
               return (
                 <button
                   key={item.id}
@@ -168,7 +170,7 @@ function GroupAccordion({
                     ) : item.contentType === 'video' ? (
                       <Play className="h-3 w-3" fill={isActive ? 'currentColor' : 'none'} />
                     ) : (
-                      <Icon className="h-3.5 w-3.5" />
+                      <ContentTypeIcon type={item.contentType} className="h-3.5 w-3.5" />
                     )}
                   </span>
                   <span className="min-w-0 flex-1 truncate">{item.title}</span>

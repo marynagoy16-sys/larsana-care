@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { getContentIcon } from '@/lib/content/contentIcons'
+import { ContentTypeIcon } from '@/lib/content/contentIcons'
 import { getContentTypeLabel } from '@/lib/content/contentMeta'
 import type { AcademyContentType } from '@/types/academy'
 import { cn } from '@/lib/utils'
@@ -28,7 +28,6 @@ export function ContentLessonCard({
   onClick,
   icon,
 }: ContentLessonCardProps) {
-  const Icon = icon ?? (contentType ? getContentIcon(contentType) : getContentIcon('richtext'))
   const label = badgeLabel ?? (contentType ? getContentTypeLabel(contentType) : undefined)
   const body = (
     <article
@@ -45,7 +44,11 @@ export function ContentLessonCard({
           </span>
         )}
         <div className="flex aspect-[4/3] items-center justify-center bg-muted/50">
-          <Icon className="h-10 w-10 text-muted-foreground/40 transition-colors group-hover:text-primary/60" />
+          <ContentTypeIcon
+            icon={icon}
+            type={contentType}
+            className="h-10 w-10 text-muted-foreground/40 transition-colors group-hover:text-primary/60"
+          />
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">

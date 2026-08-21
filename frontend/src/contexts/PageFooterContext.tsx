@@ -117,7 +117,10 @@ export function PageFooterRegistrar({
 }) {
   const { registerFooter, unregisterFooter } = usePageFooter()
   const childrenRef = useRef(children)
-  childrenRef.current = children
+
+  useLayoutEffect(() => {
+    childrenRef.current = children
+  })
 
   useLayoutEffect(() => {
     return unregisterFooter

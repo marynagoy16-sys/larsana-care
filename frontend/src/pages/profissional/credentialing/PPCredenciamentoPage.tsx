@@ -38,7 +38,6 @@ import {
 } from '@/services/credentialing'
 import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import { toast } from 'sonner'
-import type { ContratoAcceptValues } from '@/schemas/credentialing'
 
 export function PPCredenciamentoPage() {
   const queryClient = useQueryClient()
@@ -159,7 +158,7 @@ export function PPCredenciamentoPage() {
     }
   }
 
-  const handleContratoSubmit = async (_values: ContratoAcceptValues) => {
+  const handleContratoSubmit = async () => {
     try {
       await submitMutation.mutateAsync()
     } catch {

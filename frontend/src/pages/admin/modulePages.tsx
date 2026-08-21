@@ -677,7 +677,7 @@ export function TransfersPage() {
 export function TransferDetailPage() {
   const { id } = useParams<{ id: string }>()
   const release = useCrudMutation({
-    mutationFn: (_: void) => edgeFunctions.transferWallet({ transfer_id: id ?? '' }),
+    mutationFn: () => edgeFunctions.transferWallet({ transfer_id: id ?? '' }),
     queryKey: qk.transfers,
   })
   return (
