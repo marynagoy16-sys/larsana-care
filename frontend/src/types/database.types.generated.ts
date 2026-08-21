@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -10,7 +10,32 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -525,6 +550,51 @@ export type Database = {
           },
         ]
       }
+      assessment_attachments: {
+        Row: {
+          assessment_id: string
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_attachments_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "initial_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_charges: {
         Row: {
           amount_cents: number
@@ -570,6 +640,74 @@ export type Database = {
             columns: ["charge_id"]
             isOneToOne: false
             referencedRelation: "charges_patient"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_pp_repasses: {
+        Row: {
+          amount_cents: number
+          asaas_transfer_id: string | null
+          charge_id: string
+          created_at: string
+          demand_id: string | null
+          id: string
+          professional_id: string
+          status: Database["public"]["Enums"]["transfer_status"]
+          transferred_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          asaas_transfer_id?: string | null
+          charge_id: string
+          created_at?: string
+          demand_id?: string | null
+          id?: string
+          professional_id: string
+          status?: Database["public"]["Enums"]["transfer_status"]
+          transferred_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          asaas_transfer_id?: string | null
+          charge_id?: string
+          created_at?: string
+          demand_id?: string | null
+          id?: string
+          professional_id?: string
+          status?: Database["public"]["Enums"]["transfer_status"]
+          transferred_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_pp_repasses_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: true
+            referencedRelation: "charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_pp_repasses_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: true
+            referencedRelation: "charges_patient"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_pp_repasses_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_pp_repasses_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
             referencedColumns: ["id"]
           },
         ]
@@ -749,19 +887,74 @@ export type Database = {
           },
         ]
       }
+      cardiorrespiratory_habilitation_log: {
+        Row: {
+          admin_notes: string | null
+          changed_by: string | null
+          created_at: string
+          from_status:
+            | Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+            | null
+          id: string
+          professional_id: string
+          to_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+        }
+        Insert: {
+          admin_notes?: string | null
+          changed_by?: string | null
+          created_at?: string
+          from_status?:
+            | Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+            | null
+          id?: string
+          professional_id: string
+          to_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+        }
+        Update: {
+          admin_notes?: string | null
+          changed_by?: string | null
+          created_at?: string
+          from_status?:
+            | Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+            | null
+          id?: string
+          professional_id?: string
+          to_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cardiorrespiratory_habilitation_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cardiorrespiratory_habilitation_log_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_cycles: {
         Row: {
+          active_pause_id: string | null
           assigned_professional_id: string
           closed_at: string | null
           created_at: string
           cycle_number: number
           id: string
           is_first_month_capture: boolean
+          larsana_percentage: number | null
           patient_id: string
           patient_level: Database["public"]["Enums"]["patient_level"]
           payment_status: Database["public"]["Enums"]["payment_status"]
+          pp_percentage: number | null
           pricing_version_id: string
           region_id: string | null
+          reschedule_count_consecutive: number
           session_count: number
           session_unit_price_cents: number
           started_at: string | null
@@ -770,17 +963,21 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_pause_id?: string | null
           assigned_professional_id: string
           closed_at?: string | null
           created_at?: string
           cycle_number: number
           id?: string
           is_first_month_capture?: boolean
+          larsana_percentage?: number | null
           patient_id: string
           patient_level: Database["public"]["Enums"]["patient_level"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          pp_percentage?: number | null
           pricing_version_id: string
           region_id?: string | null
+          reschedule_count_consecutive?: number
           session_count: number
           session_unit_price_cents: number
           started_at?: string | null
@@ -789,17 +986,21 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_pause_id?: string | null
           assigned_professional_id?: string
           closed_at?: string | null
           created_at?: string
           cycle_number?: number
           id?: string
           is_first_month_capture?: boolean
+          larsana_percentage?: number | null
           patient_id?: string
           patient_level?: Database["public"]["Enums"]["patient_level"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          pp_percentage?: number | null
           pricing_version_id?: string
           region_id?: string | null
+          reschedule_count_consecutive?: number
           session_count?: number
           session_unit_price_cents?: number
           started_at?: string | null
@@ -808,6 +1009,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "care_cycles_active_pause_id_fkey"
+            columns: ["active_pause_id"]
+            isOneToOne: false
+            referencedRelation: "pause_events"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "care_cycles_assigned_professional_id_fkey"
             columns: ["assigned_professional_id"]
@@ -856,6 +1064,10 @@ export type Database = {
           id: string
           intercorrencia_notes: string | null
           is_assessment_session: boolean
+          pp_unconfirmed_alert_sent_at: string | null
+          presence_confirmed_at: string | null
+          presence_confirmed_by: string | null
+          presence_reminder_sent_at: string | null
           professional_id: string
           scheduled_at: string | null
           session_number: number
@@ -872,6 +1084,10 @@ export type Database = {
           id?: string
           intercorrencia_notes?: string | null
           is_assessment_session?: boolean
+          pp_unconfirmed_alert_sent_at?: string | null
+          presence_confirmed_at?: string | null
+          presence_confirmed_by?: string | null
+          presence_reminder_sent_at?: string | null
           professional_id: string
           scheduled_at?: string | null
           session_number: number
@@ -888,6 +1104,10 @@ export type Database = {
           id?: string
           intercorrencia_notes?: string | null
           is_assessment_session?: boolean
+          pp_unconfirmed_alert_sent_at?: string | null
+          presence_confirmed_at?: string | null
+          presence_confirmed_by?: string | null
+          presence_reminder_sent_at?: string | null
           professional_id?: string
           scheduled_at?: string | null
           session_number?: number
@@ -910,6 +1130,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "care_sessions_presence_confirmed_by_fkey"
+            columns: ["presence_confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "care_sessions_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
@@ -922,10 +1149,13 @@ export type Database = {
         Row: {
           amount_cents: number
           asaas_payment_id: string | null
+          assessment_credit_cents: number
           assessment_id: string | null
           boleto_url: string | null
+          charge_kind: Database["public"]["Enums"]["charge_kind"]
           created_at: string
           cycle_id: string | null
+          demand_id: string | null
           description: string | null
           due_date: string | null
           id: string
@@ -933,6 +1163,10 @@ export type Database = {
           patient_id: string
           payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          payment_timing:
+            | Database["public"]["Enums"]["cycle_payment_timing"]
+            | null
+          pix_copy_paste: string | null
           pix_qr_code: string | null
           receipt_storage_path: string | null
           updated_at: string
@@ -940,10 +1174,13 @@ export type Database = {
         Insert: {
           amount_cents: number
           asaas_payment_id?: string | null
+          assessment_credit_cents?: number
           assessment_id?: string | null
           boleto_url?: string | null
+          charge_kind?: Database["public"]["Enums"]["charge_kind"]
           created_at?: string
           cycle_id?: string | null
+          demand_id?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
@@ -951,6 +1188,10 @@ export type Database = {
           patient_id: string
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          payment_timing?:
+            | Database["public"]["Enums"]["cycle_payment_timing"]
+            | null
+          pix_copy_paste?: string | null
           pix_qr_code?: string | null
           receipt_storage_path?: string | null
           updated_at?: string
@@ -958,10 +1199,13 @@ export type Database = {
         Update: {
           amount_cents?: number
           asaas_payment_id?: string | null
+          assessment_credit_cents?: number
           assessment_id?: string | null
           boleto_url?: string | null
+          charge_kind?: Database["public"]["Enums"]["charge_kind"]
           created_at?: string
           cycle_id?: string | null
+          demand_id?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
@@ -969,6 +1213,10 @@ export type Database = {
           patient_id?: string
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          payment_timing?:
+            | Database["public"]["Enums"]["cycle_payment_timing"]
+            | null
+          pix_copy_paste?: string | null
           pix_qr_code?: string | null
           receipt_storage_path?: string | null
           updated_at?: string
@@ -993,6 +1241,13 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charges_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demands"
             referencedColumns: ["id"]
           },
           {
@@ -1055,6 +1310,7 @@ export type Database = {
       }
       commission_rules: {
         Row: {
+          bonus_pp_percent: number
           created_at: string
           id: string
           larsana_percent: number
@@ -1063,6 +1319,7 @@ export type Database = {
           version_id: string
         }
         Insert: {
+          bonus_pp_percent?: number
           created_at?: string
           id?: string
           larsana_percent: number
@@ -1071,6 +1328,7 @@ export type Database = {
           version_id: string
         }
         Update: {
+          bonus_pp_percent?: number
           created_at?: string
           id?: string
           larsana_percent?: number
@@ -1353,9 +1611,12 @@ export type Database = {
           notes: string | null
           patient_id: string
           region_id: string | null
+          request_source: Database["public"]["Enums"]["demand_request_source"]
           required_profession: Database["public"]["Enums"]["profession_type"]
           status: Database["public"]["Enums"]["demand_status"]
-          technical_category: Database["public"]["Enums"]["pp_technical_category"] | null
+          technical_category:
+            | Database["public"]["Enums"]["pp_technical_category"]
+            | null
           updated_at: string
         }
         Insert: {
@@ -1367,9 +1628,12 @@ export type Database = {
           notes?: string | null
           patient_id: string
           region_id?: string | null
+          request_source?: Database["public"]["Enums"]["demand_request_source"]
           required_profession?: Database["public"]["Enums"]["profession_type"]
           status?: Database["public"]["Enums"]["demand_status"]
-          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
+          technical_category?:
+            | Database["public"]["Enums"]["pp_technical_category"]
+            | null
           updated_at?: string
         }
         Update: {
@@ -1381,9 +1645,12 @@ export type Database = {
           notes?: string | null
           patient_id?: string
           region_id?: string | null
+          request_source?: Database["public"]["Enums"]["demand_request_source"]
           required_profession?: Database["public"]["Enums"]["profession_type"]
           status?: Database["public"]["Enums"]["demand_status"]
-          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
+          technical_category?:
+            | Database["public"]["Enums"]["pp_technical_category"]
+            | null
           updated_at?: string
         }
         Relationships: [
@@ -1496,6 +1763,140 @@ export type Database = {
           },
         ]
       }
+      financial_closures: {
+        Row: {
+          completed_amount_cents: number
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          family_refund_amount_cents: number
+          gross_cycle_amount_cents: number
+          id: string
+          larsana_commission_amount_cents: number
+          larsana_percentage: number
+          operational_fee_cents: number
+          pause_type: Database["public"]["Enums"]["pause_type"]
+          pp_percentage: number
+          pp_release_amount_cents: number
+          remaining_amount_cents: number
+          sessions_completed: number
+          sessions_contracted: number
+          snapshot: Json
+        }
+        Insert: {
+          completed_amount_cents: number
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          family_refund_amount_cents?: number
+          gross_cycle_amount_cents: number
+          id?: string
+          larsana_commission_amount_cents: number
+          larsana_percentage: number
+          operational_fee_cents?: number
+          pause_type?: Database["public"]["Enums"]["pause_type"]
+          pp_percentage: number
+          pp_release_amount_cents: number
+          remaining_amount_cents: number
+          sessions_completed: number
+          sessions_contracted: number
+          snapshot?: Json
+        }
+        Update: {
+          completed_amount_cents?: number
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          family_refund_amount_cents?: number
+          gross_cycle_amount_cents?: number
+          id?: string
+          larsana_commission_amount_cents?: number
+          larsana_percentage?: number
+          operational_fee_cents?: number
+          pause_type?: Database["public"]["Enums"]["pause_type"]
+          pp_percentage?: number
+          pp_release_amount_cents?: number
+          remaining_amount_cents?: number
+          sessions_completed?: number
+          sessions_contracted?: number
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_closures_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_closures_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_closures_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: true
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_ledger: {
+        Row: {
+          amount_cents: number
+          closure_id: string | null
+          created_at: string
+          cycle_id: string
+          entry_type: Database["public"]["Enums"]["financial_ledger_entry_type"]
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          amount_cents: number
+          closure_id?: string | null
+          created_at?: string
+          cycle_id: string
+          entry_type: Database["public"]["Enums"]["financial_ledger_entry_type"]
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          amount_cents?: number
+          closure_id?: string | null
+          created_at?: string
+          cycle_id?: string
+          entry_type?: Database["public"]["Enums"]["financial_ledger_entry_type"]
+          id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_ledger_closure_id_fkey"
+            columns: ["closure_id"]
+            isOneToOne: false
+            referencedRelation: "financial_closures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       first_month_retention_rules: {
         Row: {
           created_at: string
@@ -1534,28 +1935,30 @@ export type Database = {
           crefito_number: string
           evaluator_professional_id: string
           family_response: Database["public"]["Enums"]["family_response"] | null
-          functionality: string | null
+          functionality: string
           id: string
+          level_change_review_status: Database["public"]["Enums"]["assessment_level_review_status"]
           level_confirmed: boolean
-          level_change_review_status:
-            | Database["public"]["Enums"]["level_change_review_status"]
-            | null
           mobility: string
-          prior_conditions: Json | null
           patient_id: string
           patient_level_change_reason: string | null
+          patient_occupation: string | null
           primary_diagnosis: string
+          prior_conditions: Json
           proposal_sent_at: string | null
           proposed_patient_level: Database["public"]["Enums"]["patient_level"]
           proposed_session_count: number
           proposed_weekly_frequency: number
+          requested_patient_level:
+            | Database["public"]["Enums"]["patient_level"]
+            | null
           responded_at: string | null
           responded_by_user_id: string | null
           response_deadline_at: string | null
           status: Database["public"]["Enums"]["assessment_status"]
           suggested_patient_level: Database["public"]["Enums"]["patient_level"]
           suggested_weekly_frequency: number | null
-          surgeries: Json | null
+          surgeries: Json
           updated_at: string
         }
         Insert: {
@@ -1568,21 +1971,30 @@ export type Database = {
           family_response?:
             | Database["public"]["Enums"]["family_response"]
             | null
+          functionality?: string
           id?: string
+          level_change_review_status?: Database["public"]["Enums"]["assessment_level_review_status"]
+          level_confirmed?: boolean
           mobility: string
           patient_id: string
           patient_level_change_reason?: string | null
+          patient_occupation?: string | null
           primary_diagnosis: string
+          prior_conditions?: Json
           proposal_sent_at?: string | null
           proposed_patient_level: Database["public"]["Enums"]["patient_level"]
           proposed_session_count: number
           proposed_weekly_frequency: number
+          requested_patient_level?:
+            | Database["public"]["Enums"]["patient_level"]
+            | null
           responded_at?: string | null
           responded_by_user_id?: string | null
           response_deadline_at?: string | null
           status?: Database["public"]["Enums"]["assessment_status"]
           suggested_patient_level: Database["public"]["Enums"]["patient_level"]
           suggested_weekly_frequency?: number | null
+          surgeries?: Json
           updated_at?: string
         }
         Update: {
@@ -1595,21 +2007,30 @@ export type Database = {
           family_response?:
             | Database["public"]["Enums"]["family_response"]
             | null
+          functionality?: string
           id?: string
+          level_change_review_status?: Database["public"]["Enums"]["assessment_level_review_status"]
+          level_confirmed?: boolean
           mobility?: string
           patient_id?: string
           patient_level_change_reason?: string | null
+          patient_occupation?: string | null
           primary_diagnosis?: string
+          prior_conditions?: Json
           proposal_sent_at?: string | null
           proposed_patient_level?: Database["public"]["Enums"]["patient_level"]
           proposed_session_count?: number
           proposed_weekly_frequency?: number
+          requested_patient_level?:
+            | Database["public"]["Enums"]["patient_level"]
+            | null
           responded_at?: string | null
           responded_by_user_id?: string | null
           response_deadline_at?: string | null
           status?: Database["public"]["Enums"]["assessment_status"]
           suggested_patient_level?: Database["public"]["Enums"]["patient_level"]
           suggested_weekly_frequency?: number | null
+          surgeries?: Json
           updated_at?: string
         }
         Relationships: [
@@ -2329,6 +2750,7 @@ export type Database = {
           rater_type: Database["public"]["Enums"]["nps_rater_type"]
           rater_user_id: string | null
           score: number
+          session_id: string | null
           submitted_at: string
         }
         Insert: {
@@ -2340,6 +2762,7 @@ export type Database = {
           rater_type: Database["public"]["Enums"]["nps_rater_type"]
           rater_user_id?: string | null
           score: number
+          session_id?: string | null
           submitted_at?: string
         }
         Update: {
@@ -2351,6 +2774,7 @@ export type Database = {
           rater_type?: Database["public"]["Enums"]["nps_rater_type"]
           rater_user_id?: string | null
           score?: number
+          session_id?: string | null
           submitted_at?: string
         }
         Relationships: [
@@ -2373,6 +2797,13 @@ export type Database = {
             columns: ["rater_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_surveys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "care_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -2558,6 +2989,9 @@ export type Database = {
           cycle_id: string | null
           id: string
           issued_at: string
+          receipt_kind:
+            | Database["public"]["Enums"]["patient_receipt_kind"]
+            | null
           storage_path: string | null
           template_id: string | null
         }
@@ -2566,6 +3000,9 @@ export type Database = {
           cycle_id?: string | null
           id?: string
           issued_at?: string
+          receipt_kind?:
+            | Database["public"]["Enums"]["patient_receipt_kind"]
+            | null
           storage_path?: string | null
           template_id?: string | null
         }
@@ -2574,6 +3011,9 @@ export type Database = {
           cycle_id?: string | null
           id?: string
           issued_at?: string
+          receipt_kind?:
+            | Database["public"]["Enums"]["patient_receipt_kind"]
+            | null
           storage_path?: string | null
           template_id?: string | null
         }
@@ -2679,14 +3119,81 @@ export type Database = {
           },
         ]
       }
+      patient_waitlist: {
+        Row: {
+          contacted_at: string | null
+          created_at: string
+          created_by_user_id: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          region_id: string | null
+          status: Database["public"]["Enums"]["patient_waitlist_status"]
+          updated_at: string
+        }
+        Insert: {
+          contacted_at?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          region_id?: string | null
+          status?: Database["public"]["Enums"]["patient_waitlist_status"]
+          updated_at?: string
+        }
+        Update: {
+          contacted_at?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          region_id?: string | null
+          status?: Database["public"]["Enums"]["patient_waitlist_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_waitlist_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_waitlist_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_waitlist_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_waitlist_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           allocated_professional_id: string | null
           asaas_customer_id: string | null
+          assessment_fee_paid_charge_id: string | null
           attendance_period:
             | Database["public"]["Enums"]["patient_attendance_period"]
             | null
           birth_date: string | null
+          birth_place: string | null
           care_status: Database["public"]["Enums"]["patient_care_status"]
           city_id: string | null
           clinical_summary: string | null
@@ -2694,10 +3201,15 @@ export type Database = {
           created_at: string
           diagnostic_hypothesis: string | null
           full_name: string
+          gender: Database["public"]["Enums"]["patient_gender"] | null
           id: string
           is_data_complete: boolean
           is_valor_social: boolean
           last_session_at: string | null
+          marital_status:
+            | Database["public"]["Enums"]["patient_marital_status"]
+            | null
+          occupation: string | null
           patient_level: Database["public"]["Enums"]["patient_level"]
           referral_source:
             | Database["public"]["Enums"]["patient_referral_source"]
@@ -2705,7 +3217,9 @@ export type Database = {
           region_id: string | null
           sex: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency: number | null
-          technical_category: Database["public"]["Enums"]["pp_technical_category"] | null
+          technical_category:
+            | Database["public"]["Enums"]["pp_technical_category"]
+            | null
           updated_at: string
           valor_social_amount_cents: number | null
           valor_social_approved_by: string | null
@@ -2713,10 +3227,12 @@ export type Database = {
         Insert: {
           allocated_professional_id?: string | null
           asaas_customer_id?: string | null
+          assessment_fee_paid_charge_id?: string | null
           attendance_period?:
             | Database["public"]["Enums"]["patient_attendance_period"]
             | null
           birth_date?: string | null
+          birth_place?: string | null
           care_status?: Database["public"]["Enums"]["patient_care_status"]
           city_id?: string | null
           clinical_summary?: string | null
@@ -2724,10 +3240,15 @@ export type Database = {
           created_at?: string
           diagnostic_hypothesis?: string | null
           full_name: string
+          gender?: Database["public"]["Enums"]["patient_gender"] | null
           id?: string
           is_data_complete?: boolean
           is_valor_social?: boolean
           last_session_at?: string | null
+          marital_status?:
+            | Database["public"]["Enums"]["patient_marital_status"]
+            | null
+          occupation?: string | null
           patient_level?: Database["public"]["Enums"]["patient_level"]
           referral_source?:
             | Database["public"]["Enums"]["patient_referral_source"]
@@ -2735,7 +3256,9 @@ export type Database = {
           region_id?: string | null
           sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
-          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
+          technical_category?:
+            | Database["public"]["Enums"]["pp_technical_category"]
+            | null
           updated_at?: string
           valor_social_amount_cents?: number | null
           valor_social_approved_by?: string | null
@@ -2743,10 +3266,12 @@ export type Database = {
         Update: {
           allocated_professional_id?: string | null
           asaas_customer_id?: string | null
+          assessment_fee_paid_charge_id?: string | null
           attendance_period?:
             | Database["public"]["Enums"]["patient_attendance_period"]
             | null
           birth_date?: string | null
+          birth_place?: string | null
           care_status?: Database["public"]["Enums"]["patient_care_status"]
           city_id?: string | null
           clinical_summary?: string | null
@@ -2754,10 +3279,15 @@ export type Database = {
           created_at?: string
           diagnostic_hypothesis?: string | null
           full_name?: string
+          gender?: Database["public"]["Enums"]["patient_gender"] | null
           id?: string
           is_data_complete?: boolean
           is_valor_social?: boolean
           last_session_at?: string | null
+          marital_status?:
+            | Database["public"]["Enums"]["patient_marital_status"]
+            | null
+          occupation?: string | null
           patient_level?: Database["public"]["Enums"]["patient_level"]
           referral_source?:
             | Database["public"]["Enums"]["patient_referral_source"]
@@ -2765,7 +3295,9 @@ export type Database = {
           region_id?: string | null
           sex?: Database["public"]["Enums"]["patient_sex"] | null
           suggested_weekly_frequency?: number | null
-          technical_category?: Database["public"]["Enums"]["pp_technical_category"] | null
+          technical_category?:
+            | Database["public"]["Enums"]["pp_technical_category"]
+            | null
           updated_at?: string
           valor_social_amount_cents?: number | null
           valor_social_approved_by?: string | null
@@ -2776,6 +3308,20 @@ export type Database = {
             columns: ["allocated_professional_id"]
             isOneToOne: false
             referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patients_assessment_fee_paid_charge_id_fkey"
+            columns: ["assessment_fee_paid_charge_id"]
+            isOneToOne: false
+            referencedRelation: "charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patients_assessment_fee_paid_charge_id_fkey"
+            columns: ["assessment_fee_paid_charge_id"]
+            isOneToOne: false
+            referencedRelation: "charges_patient"
             referencedColumns: ["id"]
           },
           {
@@ -2801,8 +3347,101 @@ export type Database = {
           },
         ]
       }
+      pause_events: {
+        Row: {
+          admin_decision: string | null
+          closed_at: string | null
+          created_at: string
+          cycle_id: string
+          financial_closure_id: string | null
+          id: string
+          initiated_by: string | null
+          justification: string | null
+          patient_id: string
+          pause_type: Database["public"]["Enums"]["pause_type"]
+          treatment_pause_id: string | null
+        }
+        Insert: {
+          admin_decision?: string | null
+          closed_at?: string | null
+          created_at?: string
+          cycle_id: string
+          financial_closure_id?: string | null
+          id?: string
+          initiated_by?: string | null
+          justification?: string | null
+          patient_id: string
+          pause_type: Database["public"]["Enums"]["pause_type"]
+          treatment_pause_id?: string | null
+        }
+        Update: {
+          admin_decision?: string | null
+          closed_at?: string | null
+          created_at?: string
+          cycle_id?: string
+          financial_closure_id?: string | null
+          id?: string
+          initiated_by?: string | null
+          justification?: string | null
+          patient_id?: string
+          pause_type?: Database["public"]["Enums"]["pause_type"]
+          treatment_pause_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pause_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pause_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pause_events_financial_closure_id_fkey"
+            columns: ["financial_closure_id"]
+            isOneToOne: false
+            referencedRelation: "financial_closures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pause_events_initiated_by_fkey"
+            columns: ["initiated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pause_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pause_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pause_events_treatment_pause_id_fkey"
+            columns: ["treatment_pause_id"]
+            isOneToOne: false
+            referencedRelation: "treatment_pauses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_webhook_events: {
         Row: {
+          asaas_event_id: string | null
           asaas_event_type: string
           asaas_payment_id: string | null
           asaas_transfer_id: string | null
@@ -2813,6 +3452,7 @@ export type Database = {
           processed_at: string | null
         }
         Insert: {
+          asaas_event_id?: string | null
           asaas_event_type: string
           asaas_payment_id?: string | null
           asaas_transfer_id?: string | null
@@ -2823,6 +3463,7 @@ export type Database = {
           processed_at?: string | null
         }
         Update: {
+          asaas_event_id?: string | null
           asaas_event_type?: string
           asaas_payment_id?: string | null
           asaas_transfer_id?: string | null
@@ -2831,6 +3472,72 @@ export type Database = {
           id?: string
           payload?: Json
           processed_at?: string | null
+        }
+        Relationships: []
+      }
+      platform_operational_settings: {
+        Row: {
+          cancellation_min_hours_notice: number
+          cancellation_partial_percent: number
+          id: string
+          late_reschedule_partial_percent: number
+          late_reschedule_requires_certificate: boolean
+          reschedule_max_days_ahead: number
+          reschedule_requires_same_pp_for_patient: boolean
+          updated_at: string
+        }
+        Insert: {
+          cancellation_min_hours_notice?: number
+          cancellation_partial_percent?: number
+          id?: string
+          late_reschedule_partial_percent?: number
+          late_reschedule_requires_certificate?: boolean
+          reschedule_max_days_ahead?: number
+          reschedule_requires_same_pp_for_patient?: boolean
+          updated_at?: string
+        }
+        Update: {
+          cancellation_min_hours_notice?: number
+          cancellation_partial_percent?: number
+          id?: string
+          late_reschedule_partial_percent?: number
+          late_reschedule_requires_certificate?: boolean
+          reschedule_max_days_ahead?: number
+          reschedule_requires_same_pp_for_patient?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          assessment_fee_cents: number
+          assessment_pp_share_cents: number
+          early_cycle_discount_pct: number
+          id: string
+          late_fine_pct: number
+          late_interest_pct_month: number
+          max_weekly_sessions_pp: number
+          updated_at: string
+        }
+        Insert: {
+          assessment_fee_cents?: number
+          assessment_pp_share_cents?: number
+          early_cycle_discount_pct?: number
+          id?: string
+          late_fine_pct?: number
+          late_interest_pct_month?: number
+          max_weekly_sessions_pp?: number
+          updated_at?: string
+        }
+        Update: {
+          assessment_fee_cents?: number
+          assessment_pp_share_cents?: number
+          early_cycle_discount_pct?: number
+          id?: string
+          late_fine_pct?: number
+          late_interest_pct_month?: number
+          max_weekly_sessions_pp?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2877,6 +3584,194 @@ export type Database = {
           {
             foreignKeyName: "pp_academy_exemptions_professional_id_fkey"
             columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pp_patente_tiers: {
+        Row: {
+          base_pp_percent: number
+          label: string
+          patente: Database["public"]["Enums"]["pp_patente"]
+          sort_order: number
+        }
+        Insert: {
+          base_pp_percent: number
+          label: string
+          patente: Database["public"]["Enums"]["pp_patente"]
+          sort_order: number
+        }
+        Update: {
+          base_pp_percent?: number
+          label?: string
+          patente?: Database["public"]["Enums"]["pp_patente"]
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      pp_points_ledger: {
+        Row: {
+          balance_after: number
+          created_at: string
+          id: string
+          notes: string | null
+          points_delta: number
+          professional_id: string
+          reference_id: string | null
+          reference_type: string | null
+          rule_code: string
+        }
+        Insert: {
+          balance_after: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          points_delta: number
+          professional_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          rule_code: string
+        }
+        Update: {
+          balance_after?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          points_delta?: number
+          professional_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          rule_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pp_points_ledger_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pp_points_ledger_rule_code_fkey"
+            columns: ["rule_code"]
+            isOneToOne: false
+            referencedRelation: "pp_points_rules"
+            referencedColumns: ["rule_code"]
+          },
+        ]
+      }
+      pp_points_rules: {
+        Row: {
+          id: string
+          is_active: boolean
+          label: string
+          max_applications: number | null
+          only_patente: Database["public"]["Enums"]["pp_patente"] | null
+          points_delta: number
+          rule_code: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          label: string
+          max_applications?: number | null
+          only_patente?: Database["public"]["Enums"]["pp_patente"] | null
+          points_delta: number
+          rule_code: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          label?: string
+          max_applications?: number | null
+          only_patente?: Database["public"]["Enums"]["pp_patente"] | null
+          points_delta?: number
+          rule_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pp_points_settings: {
+        Row: {
+          bronze_threshold: number
+          id: string
+          ouro_threshold: number
+          prata_threshold: number
+          show_next_tier_hint: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          bronze_threshold?: number
+          id?: string
+          ouro_threshold?: number
+          prata_threshold?: number
+          show_next_tier_hint?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          bronze_threshold?: number
+          id?: string
+          ouro_threshold?: number
+          prata_threshold?: number
+          show_next_tier_hint?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pp_points_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pp_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          points_awarded_at: string | null
+          referral_code: string
+          referred_professional_id: string | null
+          referrer_professional_id: string
+          status: Database["public"]["Enums"]["pp_referral_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points_awarded_at?: string | null
+          referral_code: string
+          referred_professional_id?: string | null
+          referrer_professional_id: string
+          status?: Database["public"]["Enums"]["pp_referral_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points_awarded_at?: string | null
+          referral_code?: string
+          referred_professional_id?: string | null
+          referrer_professional_id?: string
+          status?: Database["public"]["Enums"]["pp_referral_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pp_referrals_referred_professional_id_fkey"
+            columns: ["referred_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pp_referrals_referrer_professional_id_fkey"
+            columns: ["referrer_professional_id"]
             isOneToOne: false
             referencedRelation: "professionals"
             referencedColumns: ["id"]
@@ -3216,6 +4111,11 @@ export type Database = {
           address: string | null
           asaas_wallet_id: string | null
           birth_date: string | null
+          cardiorrespiratory_experience_description: string | null
+          cardiorrespiratory_habilitation_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          cardiorrespiratory_request_basis:
+            | Database["public"]["Enums"]["cardiorrespiratory_request_basis"]
+            | null
           cpf_cnpj: string | null
           created_at: string
           credentialing_status: Database["public"]["Enums"]["credentialing_status"]
@@ -3225,21 +4125,19 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean
+          patente: Database["public"]["Enums"]["pp_patente"]
+          patient_preferences: Database["public"]["Enums"]["pp_technical_category"][]
           person_type: Database["public"]["Enums"]["person_type"]
           phone: string | null
+          points_grandfathered: boolean
+          points_total: number
           pp_class: Database["public"]["Enums"]["pp_class"]
           profession: Database["public"]["Enums"]["profession_type"]
+          referral_code: string | null
+          referral_count_pre_bronze: number
           referral_source: string | null
           specialty: string | null
           technical_categories: Database["public"]["Enums"]["pp_technical_category"][]
-          patient_preferences: Database["public"]["Enums"]["pp_technical_category"][]
-          points_total: number
-          patente: Database["public"]["Enums"]["pp_patente"]
-          referral_code: string | null
-          referral_count_pre_bronze: number
-          cardiorrespiratory_habilitation_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
-          cardiorrespiratory_request_basis: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
-          cardiorrespiratory_experience_description: string | null
           updated_at: string
           user_id: string | null
           weekly_hour_limit: number
@@ -3248,6 +4146,11 @@ export type Database = {
           address?: string | null
           asaas_wallet_id?: string | null
           birth_date?: string | null
+          cardiorrespiratory_experience_description?: string | null
+          cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          cardiorrespiratory_request_basis?:
+            | Database["public"]["Enums"]["cardiorrespiratory_request_basis"]
+            | null
           cpf_cnpj?: string | null
           created_at?: string
           credentialing_status?: Database["public"]["Enums"]["credentialing_status"]
@@ -3257,21 +4160,19 @@ export type Database = {
           full_name: string
           id?: string
           is_active?: boolean
+          patente?: Database["public"]["Enums"]["pp_patente"]
+          patient_preferences?: Database["public"]["Enums"]["pp_technical_category"][]
           person_type?: Database["public"]["Enums"]["person_type"]
           phone?: string | null
+          points_grandfathered?: boolean
+          points_total?: number
           pp_class?: Database["public"]["Enums"]["pp_class"]
           profession?: Database["public"]["Enums"]["profession_type"]
+          referral_code?: string | null
+          referral_count_pre_bronze?: number
           referral_source?: string | null
           specialty?: string | null
           technical_categories?: Database["public"]["Enums"]["pp_technical_category"][]
-          patient_preferences?: Database["public"]["Enums"]["pp_technical_category"][]
-          points_total?: number
-          patente?: Database["public"]["Enums"]["pp_patente"]
-          referral_code?: string | null
-          referral_count_pre_bronze?: number
-          cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
-          cardiorrespiratory_request_basis?: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
-          cardiorrespiratory_experience_description?: string | null
           updated_at?: string
           user_id?: string | null
           weekly_hour_limit?: number
@@ -3280,6 +4181,11 @@ export type Database = {
           address?: string | null
           asaas_wallet_id?: string | null
           birth_date?: string | null
+          cardiorrespiratory_experience_description?: string | null
+          cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          cardiorrespiratory_request_basis?:
+            | Database["public"]["Enums"]["cardiorrespiratory_request_basis"]
+            | null
           cpf_cnpj?: string | null
           created_at?: string
           credentialing_status?: Database["public"]["Enums"]["credentialing_status"]
@@ -3289,21 +4195,19 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean
+          patente?: Database["public"]["Enums"]["pp_patente"]
+          patient_preferences?: Database["public"]["Enums"]["pp_technical_category"][]
           person_type?: Database["public"]["Enums"]["person_type"]
           phone?: string | null
+          points_grandfathered?: boolean
+          points_total?: number
           pp_class?: Database["public"]["Enums"]["pp_class"]
           profession?: Database["public"]["Enums"]["profession_type"]
+          referral_code?: string | null
+          referral_count_pre_bronze?: number
           referral_source?: string | null
           specialty?: string | null
           technical_categories?: Database["public"]["Enums"]["pp_technical_category"][]
-          patient_preferences?: Database["public"]["Enums"]["pp_technical_category"][]
-          points_total?: number
-          patente?: Database["public"]["Enums"]["pp_patente"]
-          referral_code?: string | null
-          referral_count_pre_bronze?: number
-          cardiorrespiratory_habilitation_status?: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
-          cardiorrespiratory_request_basis?: Database["public"]["Enums"]["cardiorrespiratory_request_basis"] | null
-          cardiorrespiratory_experience_description?: string | null
           updated_at?: string
           user_id?: string | null
           weekly_hour_limit?: number
@@ -3378,6 +4282,61 @@ export type Database = {
         }
         Relationships: []
       }
+      refunds: {
+        Row: {
+          amount_cents: number
+          closure_id: string
+          created_at: string
+          cycle_id: string
+          executed_at: string | null
+          gateway_ref: string | null
+          id: string
+          status: Database["public"]["Enums"]["refund_status"]
+        }
+        Insert: {
+          amount_cents: number
+          closure_id: string
+          created_at?: string
+          cycle_id: string
+          executed_at?: string | null
+          gateway_ref?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["refund_status"]
+        }
+        Update: {
+          amount_cents?: number
+          closure_id?: string
+          created_at?: string
+          cycle_id?: string
+          executed_at?: string | null
+          gateway_ref?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["refund_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_closure_id_fkey"
+            columns: ["closure_id"]
+            isOneToOne: false
+            referencedRelation: "financial_closures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regions: {
         Row: {
           cities_description: string | null
@@ -3385,6 +4344,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          patient_service_available: boolean
         }
         Insert: {
           cities_description?: string | null
@@ -3392,6 +4352,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          patient_service_available?: boolean
         }
         Update: {
           cities_description?: string | null
@@ -3399,8 +4360,492 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          patient_service_available?: boolean
         }
         Relationships: []
+      }
+      reschedule_events: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          cycle_id: string
+          id: string
+          is_valid_justification: boolean | null
+          reason_category:
+            | Database["public"]["Enums"]["reschedule_reason_category"]
+            | null
+          reason_text: string | null
+          requested_by: string | null
+          sequence_number: number
+          session_id: string
+          warning_acknowledged: boolean
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          cycle_id: string
+          id?: string
+          is_valid_justification?: boolean | null
+          reason_category?:
+            | Database["public"]["Enums"]["reschedule_reason_category"]
+            | null
+          reason_text?: string | null
+          requested_by?: string | null
+          sequence_number: number
+          session_id: string
+          warning_acknowledged?: boolean
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          is_valid_justification?: boolean | null
+          reason_category?:
+            | Database["public"]["Enums"]["reschedule_reason_category"]
+            | null
+          reason_text?: string | null
+          requested_by?: string | null
+          sequence_number?: number
+          session_id?: string
+          warning_acknowledged?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reschedule_events_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reschedule_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reschedule_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reschedule_events_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reschedule_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "care_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduling_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          proposal_id: string
+          sender_role: string
+          template_code: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          proposal_id: string
+          sender_role: string
+          template_code: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          sender_role?: string
+          template_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduling_messages_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "scheduling_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduling_proposal_slots: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          proposal_id: string
+          sort_order: number
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          proposal_id: string
+          sort_order?: number
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          proposal_id?: string
+          sort_order?: number
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduling_proposal_slots_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "scheduling_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduling_proposals: {
+        Row: {
+          confirmed_slot_id: string | null
+          created_at: string
+          cycle_id: string | null
+          demand_id: string | null
+          expires_at: string | null
+          id: string
+          patient_id: string
+          professional_id: string
+          proposal_type: Database["public"]["Enums"]["scheduling_proposal_type"]
+          rejection_reason: string | null
+          session_id: string | null
+          status: Database["public"]["Enums"]["scheduling_proposal_status"]
+          updated_at: string
+        }
+        Insert: {
+          confirmed_slot_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          demand_id?: string | null
+          expires_at?: string | null
+          id?: string
+          patient_id: string
+          professional_id: string
+          proposal_type: Database["public"]["Enums"]["scheduling_proposal_type"]
+          rejection_reason?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["scheduling_proposal_status"]
+          updated_at?: string
+        }
+        Update: {
+          confirmed_slot_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          demand_id?: string | null
+          expires_at?: string | null
+          id?: string
+          patient_id?: string
+          professional_id?: string
+          proposal_type?: Database["public"]["Enums"]["scheduling_proposal_type"]
+          rejection_reason?: string | null
+          session_id?: string | null
+          status?: Database["public"]["Enums"]["scheduling_proposal_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduling_proposals_confirmed_slot_fkey"
+            columns: ["confirmed_slot_id"]
+            isOneToOne: false
+            referencedRelation: "scheduling_proposal_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_demand_id_fkey"
+            columns: ["demand_id"]
+            isOneToOne: false
+            referencedRelation: "demands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduling_proposals_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "care_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_adjustments: {
+        Row: {
+          cancelled_at: string
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          family_charge_cents: number
+          id: string
+          larsana_cents: number
+          partial_percent: number
+          pp_transfer_cents: number
+          reason: string
+          refund_family_cents: number
+          session_id: string
+          session_value_cents: number
+        }
+        Insert: {
+          cancelled_at?: string
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          family_charge_cents?: number
+          id?: string
+          larsana_cents: number
+          partial_percent?: number
+          pp_transfer_cents: number
+          reason?: string
+          refund_family_cents: number
+          session_id: string
+          session_value_cents: number
+        }
+        Update: {
+          cancelled_at?: string
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          family_charge_cents?: number
+          id?: string
+          larsana_cents?: number
+          partial_percent?: number
+          pp_transfer_cents?: number
+          reason?: string
+          refund_family_cents?: number
+          session_id?: string
+          session_value_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_adjustments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_adjustments_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_adjustments_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_adjustments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "care_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_reschedule_requests: {
+        Row: {
+          certificate_storage_path: string | null
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          id: string
+          initiated_by: Database["public"]["Enums"]["reschedule_initiated_by"]
+          original_professional_id: string | null
+          original_scheduled_at: string
+          patient_id: string
+          proposed_scheduled_at: string | null
+          reschedule_deadline: string
+          responsible_professional_id: string
+          scheduling_proposal_id: string | null
+          session_adjustment_id: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["reschedule_request_status"]
+          substitute_professional_id: string | null
+          updated_at: string
+          window_type: Database["public"]["Enums"]["reschedule_window_type"]
+        }
+        Insert: {
+          certificate_storage_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          id?: string
+          initiated_by: Database["public"]["Enums"]["reschedule_initiated_by"]
+          original_professional_id?: string | null
+          original_scheduled_at: string
+          patient_id: string
+          proposed_scheduled_at?: string | null
+          reschedule_deadline: string
+          responsible_professional_id: string
+          scheduling_proposal_id?: string | null
+          session_adjustment_id?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["reschedule_request_status"]
+          substitute_professional_id?: string | null
+          updated_at?: string
+          window_type: Database["public"]["Enums"]["reschedule_window_type"]
+        }
+        Update: {
+          certificate_storage_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          id?: string
+          initiated_by?: Database["public"]["Enums"]["reschedule_initiated_by"]
+          original_professional_id?: string | null
+          original_scheduled_at?: string
+          patient_id?: string
+          proposed_scheduled_at?: string | null
+          reschedule_deadline?: string
+          responsible_professional_id?: string
+          scheduling_proposal_id?: string | null
+          session_adjustment_id?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["reschedule_request_status"]
+          substitute_professional_id?: string | null
+          updated_at?: string
+          window_type?: Database["public"]["Enums"]["reschedule_window_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_reschedule_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_original_professional_id_fkey"
+            columns: ["original_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_responsible_professional_id_fkey"
+            columns: ["responsible_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_scheduling_proposal_id_fkey"
+            columns: ["scheduling_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "scheduling_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_session_adjustment_id_fkey"
+            columns: ["session_adjustment_id"]
+            isOneToOne: false
+            referencedRelation: "session_adjustments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "care_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_reschedule_requests_substitute_professional_id_fkey"
+            columns: ["substitute_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sp_municipalities: {
         Row: {
@@ -3498,6 +4943,120 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sub_pp_repasses: {
+        Row: {
+          amount_cents: number
+          asaas_transfer_id: string | null
+          assigned_professional_id: string
+          created_at: string
+          cycle_id: string
+          id: string
+          patient_id: string
+          pp_percentage: number
+          reschedule_request_id: string | null
+          session_id: string
+          session_number: number
+          session_unit_price_cents: number
+          status: Database["public"]["Enums"]["transfer_status"]
+          substitute_professional_id: string
+          transferred_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          asaas_transfer_id?: string | null
+          assigned_professional_id: string
+          created_at?: string
+          cycle_id: string
+          id?: string
+          patient_id: string
+          pp_percentage: number
+          reschedule_request_id?: string | null
+          session_id: string
+          session_number: number
+          session_unit_price_cents: number
+          status?: Database["public"]["Enums"]["transfer_status"]
+          substitute_professional_id: string
+          transferred_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          asaas_transfer_id?: string | null
+          assigned_professional_id?: string
+          created_at?: string
+          cycle_id?: string
+          id?: string
+          patient_id?: string
+          pp_percentage?: number
+          reschedule_request_id?: string | null
+          session_id?: string
+          session_number?: number
+          session_unit_price_cents?: number
+          status?: Database["public"]["Enums"]["transfer_status"]
+          substitute_professional_id?: string
+          transferred_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_pp_repasses_assigned_professional_id_fkey"
+            columns: ["assigned_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "care_cycles_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients_pp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_reschedule_request_id_fkey"
+            columns: ["reschedule_request_id"]
+            isOneToOne: false
+            referencedRelation: "session_reschedule_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "care_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sub_pp_repasses_substitute_professional_id_fkey"
+            columns: ["substitute_professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
             referencedColumns: ["id"]
           },
         ]
@@ -3874,6 +5433,7 @@ export type Database = {
       charges_patient: {
         Row: {
           amount_cents: number | null
+          asaas_payment_id: string | null
           assessment_id: string | null
           boleto_url: string | null
           created_at: string | null
@@ -3885,11 +5445,13 @@ export type Database = {
           patient_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"] | null
           payment_status: Database["public"]["Enums"]["payment_status"] | null
+          pix_copy_paste: string | null
           pix_qr_code: string | null
           receipt_storage_path: string | null
         }
         Insert: {
           amount_cents?: number | null
+          asaas_payment_id?: string | null
           assessment_id?: string | null
           boleto_url?: string | null
           created_at?: string | null
@@ -3901,11 +5463,13 @@ export type Database = {
           patient_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          pix_copy_paste?: string | null
           pix_qr_code?: string | null
           receipt_storage_path?: string | null
         }
         Update: {
           amount_cents?: number | null
+          asaas_payment_id?: string | null
           assessment_id?: string | null
           boleto_url?: string | null
           created_at?: string | null
@@ -3917,6 +5481,7 @@ export type Database = {
           patient_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
           payment_status?: Database["public"]["Enums"]["payment_status"] | null
+          pix_copy_paste?: string | null
           pix_qr_code?: string | null
           receipt_storage_path?: string | null
         }
@@ -4126,31 +5691,82 @@ export type Database = {
       }
     }
     Functions: {
-      cancel_session_without_justification: {
-        Args: { p_cancelled_at: string; p_session_id: string }
-        Returns: Json
-      }
-      register_pp_referral_on_signup: {
-        Args: { p_referred_professional_id: string; p_referral_code: string }
-        Returns: string
-      }
-      review_assessment_level_change: {
-        Args: {
-          p_assessment_id: string
-          p_approved: boolean
-          p_review_notes?: string
-        }
-        Returns: Json
-      }
-      accept_demand: {
-        Args: { p_demand_id: string }
-        Returns: Json
-      }
+      accept_assessment_proposal:
+        | {
+            Args: {
+              p_assessment_id: string
+              p_chosen_weekly_frequency?: number
+              p_response: Database["public"]["Enums"]["family_response"]
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_assessment_id: string
+              p_chosen_weekly_frequency?: number
+              p_payment_timing?: Database["public"]["Enums"]["cycle_payment_timing"]
+              p_response: Database["public"]["Enums"]["family_response"]
+            }
+            Returns: Json
+          }
+      accept_demand: { Args: { p_demand_id: string }; Returns: Json }
       add_business_days_from_date: {
         Args: { p_days: number; p_start: string }
         Returns: string
       }
+      apply_late_reschedule_fee: {
+        Args: { p_reason?: string; p_session_id: string }
+        Returns: string
+      }
+      assert_no_active_reschedule_request: {
+        Args: { p_session_id: string }
+        Returns: undefined
+      }
+      assert_pp_weekly_session_limit: {
+        Args: { p_professional_id: string; p_scheduled_at: string }
+        Returns: undefined
+      }
+      assert_reschedule_date_window: {
+        Args: {
+          p_max_days: number
+          p_new_scheduled_at: string
+          p_reference: string
+        }
+        Returns: undefined
+      }
       auth_user_id: { Args: never; Returns: string }
+      award_pp_points: {
+        Args: {
+          p_notes?: string
+          p_professional_id: string
+          p_reference_id?: string
+          p_rule_code: string
+        }
+        Returns: number
+      }
+      bootstrap_patient_account: { Args: never; Returns: string }
+      bulk_import_patients: { Args: { p_rows: Json }; Returns: Json }
+      bulk_import_professionals: { Args: { p_rows: Json }; Returns: Json }
+      calculate_financial_closure: {
+        Args: {
+          p_cycle_id: string
+          p_pause_type?: Database["public"]["Enums"]["pause_type"]
+        }
+        Returns: {
+          completed_amount_cents: number
+          family_refund_amount_cents: number
+          gross_cycle_amount_cents: number
+          larsana_commission_amount_cents: number
+          larsana_percentage: number
+          larsana_total_cents: number
+          operational_fee_cents: number
+          pp_percentage: number
+          pp_release_amount_cents: number
+          remaining_amount_cents: number
+          sessions_completed: number
+          sessions_contracted: number
+        }[]
+      }
       calculate_transfer_amount: {
         Args: { p_cycle_id: string }
         Returns: {
@@ -4161,13 +5777,66 @@ export type Database = {
         }[]
       }
       can_access_patient: { Args: { p_patient_id: string }; Returns: boolean }
+      cancel_session_without_justification: {
+        Args: { p_cancelled_at?: string; p_session_id: string }
+        Returns: string
+      }
       check_prontuario_24h: { Args: never; Returns: number }
+      classify_reschedule_reason: {
+        Args: {
+          p_category: Database["public"]["Enums"]["reschedule_reason_category"]
+        }
+        Returns: Database["public"]["Enums"]["pause_type"]
+      }
+      close_cycle_financially: {
+        Args: {
+          p_admin_decision?: string
+          p_cycle_id: string
+          p_pause_type?: Database["public"]["Enums"]["pause_type"]
+        }
+        Returns: string
+      }
+      complete_reschedule_request: {
+        Args: {
+          p_new_status: Database["public"]["Enums"]["reschedule_request_status"]
+          p_proposed_at?: string
+          p_request_id: string
+        }
+        Returns: undefined
+      }
+      compute_proposal_total_cents: {
+        Args: {
+          p_patient_level: Database["public"]["Enums"]["patient_level"]
+          p_region_id: string
+          p_session_count: number
+        }
+        Returns: number
+      }
+      confirm_charge_payment: { Args: { p_charge_id: string }; Returns: Json }
+      confirm_pp_referral_points: {
+        Args: { p_referred_professional_id: string }
+        Returns: undefined
+      }
+      count_assigned_pp_completed_sessions: {
+        Args: { p_cycle_id: string }
+        Returns: number
+      }
+      current_patient_id_for_user: { Args: never; Returns: string }
       current_patient_ids: { Args: never; Returns: string[] }
       current_professional_id: { Args: never; Returns: string }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      ensure_assessment_pp_repasse: {
+        Args: { p_demand_id: string; p_professional_id: string }
+        Returns: string
+      }
+      ensure_professional_referral_code: {
+        Args: { p_professional_id: string }
+        Returns: string
+      }
+      ensure_sub_pp_repasse: { Args: { p_session_id: string }; Returns: string }
       estimate_assessment_proposal_total_cents: {
         Args: {
           p_patient_id: string
@@ -4176,30 +5845,24 @@ export type Database = {
         }
         Returns: number
       }
-      get_patient_proposal_preview: {
-        Args: { p_assessment_id: string }
-        Returns: Json
-      }
-      accept_assessment_proposal: {
+      finalize_session_reschedule: {
         Args: {
-          p_assessment_id: string
-          p_response: Database["public"]["Enums"]["family_response"]
-          p_chosen_weekly_frequency?: number | null
+          p_keep_professional_id?: string
+          p_new_scheduled_at: string
+          p_request_id?: string
+          p_session_id: string
         }
         Returns: Json
       }
-      simulate_charge_payment: {
-        Args: { p_charge_id: string }
-        Returns: Json
-      }
-      send_assessment_proposal: {
-        Args: { p_assessment_id: string }
-        Returns: Json
+      freeze_cycle_split_percentages: {
+        Args: { p_cycle_id: string }
+        Returns: undefined
       }
       generate_contract_number: {
         Args: { p_profession: Database["public"]["Enums"]["profession_type"] }
         Returns: string
       }
+      generate_pp_referral_code: { Args: never; Returns: string }
       get_medical_record: {
         Args: { p_record_id: string }
         Returns: {
@@ -4225,6 +5888,48 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_operational_settings: {
+        Args: never
+        Returns: {
+          cancellation_min_hours_notice: number
+          cancellation_partial_percent: number
+          id: string
+          late_reschedule_partial_percent: number
+          late_reschedule_requires_certificate: boolean
+          reschedule_max_days_ahead: number
+          reschedule_requires_same_pp_for_patient: boolean
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "platform_operational_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_patient_proposal_preview: {
+        Args: { p_assessment_id: string }
+        Returns: Json
+      }
+      get_platform_settings: {
+        Args: never
+        Returns: {
+          assessment_fee_cents: number
+          assessment_pp_share_cents: number
+          early_cycle_discount_pct: number
+          id: string
+          late_fine_pct: number
+          late_interest_pct_month: number
+          max_weekly_sessions_pp: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "platform_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_valid_acceptance: {
         Args: {
           p_patient_id: string
@@ -4232,30 +5937,155 @@ export type Database = {
         }
         Returns: boolean
       }
+      initiate_pause: {
+        Args: {
+          p_admin_decision?: string
+          p_cycle_id: string
+          p_justification?: string
+          p_pause_type: Database["public"]["Enums"]["pause_type"]
+        }
+        Returns: string
+      }
       is_assigned_pp: { Args: { p_patient_id: string }; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       is_staff_role: {
         Args: { p_roles: Database["public"]["Enums"]["user_role"][] }
         Returns: boolean
       }
-      pp_can_see_demand: {
-        Args: { p_professional_id: string; p_demand_id: string }
-        Returns: boolean
-      }
-      pp_is_operational_regular: {
-        Args: { p_professional_id: string }
-        Returns: boolean
-      }
-      review_cardiorrespiratory_habilitation: {
+      is_valid_reschedule_justification: {
         Args: {
-          p_professional_id: string
-          p_new_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
-          p_admin_notes?: string | null
+          p_category: Database["public"]["Enums"]["reschedule_reason_category"]
+        }
+        Returns: boolean
+      }
+      match_substitute_professional: {
+        Args: { p_session_id: string }
+        Returns: string
+      }
+      notify_patient_responsibles: {
+        Args: {
+          p_body: string
+          p_patient_id: string
+          p_payload?: Json
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
         }
         Returns: undefined
       }
+      notify_professional_user: {
+        Args: {
+          p_body: string
+          p_payload?: Json
+          p_professional_id: string
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+        }
+        Returns: undefined
+      }
+      patient_complete_onboarding: {
+        Args: {
+          p_city_id: string
+          p_complement?: string
+          p_neighborhood: string
+          p_number: string
+          p_patient_full_name: string
+          p_postal_code: string
+          p_responsible_phone: string
+          p_street: string
+        }
+        Returns: Json
+      }
+      patient_confirm_session_presence: {
+        Args: { p_session_id: string }
+        Returns: Json
+      }
+      patient_confirm_slot: {
+        Args: { p_proposal_id: string; p_slot_id: string }
+        Returns: Json
+      }
+      patient_create_assessment_request_charge: {
+        Args: {
+          p_payment_method?: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: Json
+      }
+      patient_finalize_service_request_after_payment: {
+        Args: { p_charge_id: string }
+        Returns: Json
+      }
+      patient_get_onboarding_status: { Args: never; Returns: Json }
+      patient_get_service_status: { Args: never; Returns: Json }
+      patient_has_paid_assessment_fee: {
+        Args: { p_patient_id: string }
+        Returns: boolean
+      }
+      patient_join_waitlist: { Args: { p_notes?: string }; Returns: Json }
+      patient_prepare_service_request: {
+        Args: {
+          p_attendance_period: Database["public"]["Enums"]["patient_attendance_period"]
+          p_birth_date: string
+          p_birth_place?: string
+          p_diagnostic_hypothesis: string
+          p_gender?: Database["public"]["Enums"]["patient_gender"]
+          p_marital_status?: Database["public"]["Enums"]["patient_marital_status"]
+          p_patient_cpf: string
+          p_patient_full_name: string
+          p_referral_source: Database["public"]["Enums"]["patient_referral_source"]
+          p_responsible_cpf?: string
+          p_responsible_full_name?: string
+          p_terms_accepted?: boolean
+        }
+        Returns: Json
+      }
+      patient_reject_slot: {
+        Args: { p_proposal_id: string; p_reason?: string }
+        Returns: Json
+      }
+      patient_request_attendance: { Args: { p_notes?: string }; Returns: Json }
+      patient_request_reschedule: {
+        Args: {
+          p_certificate_storage_path?: string
+          p_new_scheduled_at: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      patient_respond_reschedule_proposal: {
+        Args: { p_accept: boolean; p_proposal_id: string; p_slot_id?: string }
+        Returns: Json
+      }
+      patient_respond_sub_offer: {
+        Args: { p_accept: boolean; p_request_id: string }
+        Returns: Json
+      }
+      patient_submit_service_request: {
+        Args: {
+          p_attendance_period: Database["public"]["Enums"]["patient_attendance_period"]
+          p_birth_date: string
+          p_diagnostic_hypothesis: string
+          p_patient_cpf: string
+          p_patient_full_name: string
+          p_referral_source: Database["public"]["Enums"]["patient_referral_source"]
+          p_responsible_cpf?: string
+          p_responsible_full_name?: string
+          p_terms_accepted?: boolean
+        }
+        Returns: Json
+      }
+      pp_can_see_demand: {
+        Args: { p_demand_id: string; p_professional_id: string }
+        Returns: boolean
+      }
       pp_can_view_open_demand_patient: {
         Args: { p_patient_id: string }
+        Returns: boolean
+      }
+      pp_demand_preference_score: {
+        Args: { p_demand_id: string; p_professional_id: string }
+        Returns: number
+      }
+      pp_is_operational_regular: {
+        Args: { p_professional_id: string }
         Returns: boolean
       }
       pp_passes_academy_gate: {
@@ -4264,9 +6094,189 @@ export type Database = {
         }
         Returns: boolean
       }
+      pp_passes_academy_gate_for_professional: {
+        Args: {
+          p_gate_target: Database["public"]["Enums"]["academy_gate_target"]
+          p_professional_id: string
+        }
+        Returns: boolean
+      }
+      pp_request_reschedule: {
+        Args: { p_new_scheduled_at: string; p_session_id: string }
+        Returns: Json
+      }
+      pp_reschedule_after_sub_rejection: {
+        Args: { p_new_scheduled_at: string; p_request_id: string }
+        Returns: Json
+      }
+      pp_reschedule_session: {
+        Args: { p_new_scheduled_at: string; p_session_id: string }
+        Returns: Json
+      }
+      pp_session_check_in: { Args: { p_session_id: string }; Returns: Json }
+      pp_session_check_out: { Args: { p_session_id: string }; Returns: Json }
+      pp_weekly_scheduled_session_count: {
+        Args: { p_professional_id: string; p_week_start: string }
+        Returns: number
+      }
+      process_session_presence_reminders: { Args: never; Returns: number }
+      proposal_frequency_options: {
+        Args: { p_proposed_frequency: number }
+        Returns: number[]
+      }
+      recalculate_pp_patente: {
+        Args: { p_professional_id: string }
+        Returns: Database["public"]["Enums"]["pp_patente"]
+      }
+      record_pp_term_acceptances: { Args: never; Returns: undefined }
+      region_has_patient_service: {
+        Args: { p_region_id: string }
+        Returns: boolean
+      }
+      register_pp_referral_on_signup: {
+        Args: { p_referral_code: string; p_referred_professional_id: string }
+        Returns: string
+      }
+      register_reschedule: {
+        Args: {
+          p_new_scheduled_at?: string
+          p_reason_category?: Database["public"]["Enums"]["reschedule_reason_category"]
+          p_reason_text?: string
+          p_session_id: string
+          p_warning_acknowledged?: boolean
+        }
+        Returns: Json
+      }
+      replicate_session_schedule: {
+        Args: { p_anchor_session_id: string; p_cycle_id: string }
+        Returns: Json
+      }
+      resolve_cycle_split_percentages: {
+        Args: { p_cycle_id: string }
+        Returns: {
+          larsana_percent: number
+          pp_percent: number
+        }[]
+      }
+      resolve_demand_technical_category: {
+        Args: { p_demand_id: string }
+        Returns: Database["public"]["Enums"]["pp_technical_category"]
+      }
       resolve_demand_type: {
         Args: { p_patient_id: string }
         Returns: Database["public"]["Enums"]["demand_type"]
+      }
+      resolve_patente_from_points: {
+        Args: { p_points: number }
+        Returns: Database["public"]["Enums"]["pp_patente"]
+      }
+      resolve_pp_percent_from_patente: {
+        Args: { p_patente: Database["public"]["Enums"]["pp_patente"] }
+        Returns: number
+      }
+      resolve_public_signup_role: {
+        Args: { p_requested: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      resolve_sub_session_split_percentages: {
+        Args: { p_cycle_id: string; p_substitute_professional_id: string }
+        Returns: {
+          larsana_percent: number
+          pp_percent: number
+        }[]
+      }
+      resume_treatment: {
+        Args: { p_pause_event_id: string }
+        Returns: undefined
+      }
+      review_assessment_level_change: {
+        Args: {
+          p_admin_notes?: string
+          p_assessment_id: string
+          p_decision: Database["public"]["Enums"]["assessment_level_review_status"]
+        }
+        Returns: undefined
+      }
+      review_cardiorrespiratory_habilitation: {
+        Args: {
+          p_admin_notes?: string
+          p_new_status: Database["public"]["Enums"]["cardiorrespiratory_habilitation_status"]
+          p_professional_id: string
+        }
+        Returns: undefined
+      }
+      scale_session_count_for_frequency: {
+        Args: {
+          p_chosen_frequency: number
+          p_proposed_frequency: number
+          p_proposed_sessions: number
+        }
+        Returns: number
+      }
+      send_assessment_proposal: {
+        Args: { p_assessment_id: string }
+        Returns: Json
+      }
+      session_hours_until: {
+        Args: { p_reference?: string; p_scheduled_at: string }
+        Returns: number
+      }
+      simulate_assessment_repasse_wallet: {
+        Args: { p_repasse_id: string }
+        Returns: Json
+      }
+      simulate_charge_payment: { Args: { p_charge_id: string }; Returns: Json }
+      simulate_sub_repasse_wallet: {
+        Args: { p_repasse_id: string }
+        Returns: Json
+      }
+      simulate_transfer_wallet: {
+        Args: { p_transfer_id: string }
+        Returns: Json
+      }
+      staff_reject_transfer_invoice: {
+        Args: { p_notes?: string; p_transfer_id: string }
+        Returns: Json
+      }
+      staff_validate_transfer_invoice: {
+        Args: { p_transfer_id: string }
+        Returns: Json
+      }
+      submit_pp_availability: {
+        Args: { p_demand_id: string; p_slots: Json }
+        Returns: Json
+      }
+      submit_pp_credentialing: { Args: never; Returns: Json }
+      submit_pp_transfer_invoice: {
+        Args: {
+          p_file_name: string
+          p_storage_path: string
+          p_transfer_id: string
+        }
+        Returns: undefined
+      }
+      sum_session_adjustments_for_cycle: {
+        Args: { p_cycle_id: string }
+        Returns: {
+          total_larsana_cents: number
+          total_pp_cents: number
+          total_refund_cents: number
+        }[]
+      }
+      sum_sub_pp_repasses_for_cycle: {
+        Args: { p_cycle_id: string }
+        Returns: number
+      }
+      update_platform_settings: {
+        Args: {
+          p_assessment_fee_cents: number
+          p_assessment_pp_share_cents: number
+          p_early_cycle_discount_pct: number
+          p_late_fine_pct: number
+          p_late_interest_pct_month: number
+          p_max_weekly_sessions_pp: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -4301,6 +6311,11 @@ export type Database = {
         | "avaliacao_sem_resposta_5d"
         | "nps_baixo_consecutivo"
         | "demanda_alocada"
+      assessment_level_review_status:
+        | "nao_aplicavel"
+        | "pendente"
+        | "aprovado"
+        | "rejeitado"
       assessment_status:
         | "avaliacao_feita"
         | "proposta_enviada"
@@ -4308,6 +6323,18 @@ export type Database = {
         | "respondida_sim"
         | "respondida_nao"
         | "vencida"
+      cardiorrespiratory_habilitation_status:
+        | "nao_solicitado"
+        | "em_analise"
+        | "habilitado"
+        | "nao_habilitado"
+        | "suspenso"
+      cardiorrespiratory_request_basis:
+        | "certificado"
+        | "experiencia"
+        | "certificado_e_experiencia"
+        | "analise_larsana"
+      charge_kind: "cycle" | "assessment_request" | "assessment_fee"
       contract_status:
         | "rascunho"
         | "gerado"
@@ -4325,16 +6352,34 @@ export type Database = {
         | "ativo"
         | "inativo"
         | "descredenciado"
+      cycle_payment_timing: "antecipado" | "pos_ciclo"
       cycle_status:
         | "rascunho"
         | "aguardando_pagamento"
         | "ativo"
         | "encerrado"
         | "cancelado"
+        | "em_pausa"
+        | "em_analise"
+        | "fechado_financeiramente"
+      demand_request_source: "gestao" | "paciente_app"
       demand_response_type: "accepted" | "declined"
       demand_status: "aberta" | "alocada" | "cancelada"
       demand_type: "avaliacao" | "continuidade"
       family_response: "SIM" | "NAO"
+      financial_ledger_entry_type:
+        | "pp_held"
+        | "pp_release"
+        | "larsana_commission"
+        | "operational_fee"
+        | "refund"
+        | "session_cancel_refund"
+        | "session_cancel_pp_release"
+        | "session_cancel_larsana"
+        | "session_late_reschedule_charge"
+        | "session_late_reschedule_pp"
+        | "session_late_reschedule_larsana"
+        | "sub_session_pp_release"
       legal_term_type:
         | "TERMO_ADESAO"
         | "DIRETRIZES"
@@ -4357,15 +6402,17 @@ export type Database = {
         | "geral"
         | "academy_reminder"
         | "academy_course_completed"
+        | "agendamento"
+        | "remarcacao"
+        | "agendamento_confirmado"
+        | "remarcacao_pendente_aceite"
+        | "sub_oferta"
+        | "sub_confirmado"
+        | "sub_recusado"
+        | "nps_sessao"
       nps_rated_entity_type: "professional" | "patient" | "platform"
       nps_rater_type: "paciente" | "pp"
-      patient_attendance_period: "MANHA" | "TARDE" | "NOITE"
-      patient_referral_source:
-        | "INDICACAO"
-        | "GOOGLE"
-        | "INSTAGRAM"
-        | "FACEBOOK"
-        | "OUTROS"
+      patient_attendance_period: "MANHA" | "TARDE" | "NOITE" | "INDIFERENTE"
       patient_care_status:
         | "ATIVO"
         | "PAUSA"
@@ -4374,31 +6421,45 @@ export type Database = {
         | "ALTA"
         | "OBITO"
         | "CANCELADO"
-      patient_document_type: "RG" | "LAUDO" | "EXAME" | "OUTRO"
+      patient_document_type:
+        | "RG"
+        | "LAUDO"
+        | "EXAME"
+        | "OUTRO"
+        | "ATESTADO_REMARCACAO"
+      patient_gender: "FEMININO" | "MASCULINO" | "OUTRO" | "NAO_INFORMADO"
       patient_level: "N1" | "N2" | "N3" | "VALOR_SOCIAL"
+      patient_marital_status:
+        | "SOLTEIRO"
+        | "CASADO"
+        | "DIVORCIADO"
+        | "VIUVO"
+        | "UNIAO_ESTAVEL"
+        | "NAO_INFORMADO"
+      patient_receipt_kind: "intermediacao" | "pp_prestacao"
+      patient_referral_source:
+        | "INDICACAO"
+        | "GOOGLE"
+        | "INSTAGRAM"
+        | "FACEBOOK"
+        | "OUTROS"
       patient_sex: "M" | "F" | "OUTRO"
+      patient_waitlist_status:
+        | "pendente"
+        | "contatado"
+        | "convertido"
+        | "cancelado"
+      pause_type:
+        | "none"
+        | "justified"
+        | "unjustified"
+        | "professional_or_operation_issue"
       payment_method: "PIX" | "BOLETO"
       payment_status: "pendente" | "pago" | "vencido" | "cancelado"
       person_type: "PF" | "PJ"
       pp_class: "BRONZE" | "PRATA" | "OURO"
-      profession_type: "FISIO" | "NUTI" | "MED" | "CUID" | "FONO"
-      cardiorrespiratory_habilitation_status:
-        | "nao_solicitado"
-        | "em_analise"
-        | "habilitado"
-        | "nao_habilitado"
-        | "suspenso"
-      cardiorrespiratory_request_basis:
-        | "certificado"
-        | "experiencia"
-        | "certificado_e_experiencia"
-        | "analise_larsana"
-      level_change_review_status:
-        | "nao_aplicavel"
-        | "pendente"
-        | "aprovado"
-        | "rejeitado"
       pp_patente: "ALUMINIO" | "BRONZE" | "PRATA" | "OURO"
+      pp_referral_status: "pendente" | "confirmada" | "expirada"
       pp_technical_category:
         | "ortopedico"
         | "pos_operatorio"
@@ -4408,6 +6469,7 @@ export type Database = {
         | "pediatrico_geral"
         | "cardiorrespiratoria"
         | "atendimento_unico"
+      profession_type: "FISIO" | "NUTI" | "MED" | "CUID" | "FONO"
       professional_document_type:
         | "RG_CNH"
         | "COUNCIL_CARD"
@@ -4420,7 +6482,39 @@ export type Database = {
         | "CARDIO_CV"
         | "CARDIO_PROFESSIONAL_DECLARATION"
         | "CARDIO_OTHER"
+      refund_status:
+        | "nao_aplicavel"
+        | "calculado"
+        | "pendente"
+        | "executado"
+        | "falhou"
       region_code: "A" | "B" | "C"
+      reschedule_initiated_by: "paciente" | "pp" | "staff"
+      reschedule_reason_category:
+        | "saude"
+        | "internacao"
+        | "problema_fisio"
+        | "horario"
+        | "familiar"
+        | "outro"
+      reschedule_request_status:
+        | "pending_patient"
+        | "patient_accepted"
+        | "patient_rejected"
+        | "sub_offered"
+        | "sub_accepted"
+        | "sub_rejected"
+        | "pp_reschedule_window"
+        | "completed"
+        | "expired"
+        | "cancelled"
+      reschedule_window_type: "on_time" | "late"
+      scheduling_proposal_status:
+        | "pendente"
+        | "confirmado"
+        | "recusado"
+        | "expirado"
+      scheduling_proposal_type: "avaliacao" | "continuidade" | "remarcacao"
       session_status:
         | "prevista"
         | "realizada"
@@ -4562,6 +6656,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       academy_audience: ["pp", "paciente"],
@@ -4599,6 +6696,12 @@ export const Constants = {
         "nps_baixo_consecutivo",
         "demanda_alocada",
       ],
+      assessment_level_review_status: [
+        "nao_aplicavel",
+        "pendente",
+        "aprovado",
+        "rejeitado",
+      ],
       assessment_status: [
         "avaliacao_feita",
         "proposta_enviada",
@@ -4607,6 +6710,20 @@ export const Constants = {
         "respondida_nao",
         "vencida",
       ],
+      cardiorrespiratory_habilitation_status: [
+        "nao_solicitado",
+        "em_analise",
+        "habilitado",
+        "nao_habilitado",
+        "suspenso",
+      ],
+      cardiorrespiratory_request_basis: [
+        "certificado",
+        "experiencia",
+        "certificado_e_experiencia",
+        "analise_larsana",
+      ],
+      charge_kind: ["cycle", "assessment_request", "assessment_fee"],
       contract_status: [
         "rascunho",
         "gerado",
@@ -4626,17 +6743,36 @@ export const Constants = {
         "inativo",
         "descredenciado",
       ],
+      cycle_payment_timing: ["antecipado", "pos_ciclo"],
       cycle_status: [
         "rascunho",
         "aguardando_pagamento",
         "ativo",
         "encerrado",
         "cancelado",
+        "em_pausa",
+        "em_analise",
+        "fechado_financeiramente",
       ],
+      demand_request_source: ["gestao", "paciente_app"],
       demand_response_type: ["accepted", "declined"],
       demand_status: ["aberta", "alocada", "cancelada"],
       demand_type: ["avaliacao", "continuidade"],
       family_response: ["SIM", "NAO"],
+      financial_ledger_entry_type: [
+        "pp_held",
+        "pp_release",
+        "larsana_commission",
+        "operational_fee",
+        "refund",
+        "session_cancel_refund",
+        "session_cancel_pp_release",
+        "session_cancel_larsana",
+        "session_late_reschedule_charge",
+        "session_late_reschedule_pp",
+        "session_late_reschedule_larsana",
+        "sub_session_pp_release",
+      ],
       legal_term_type: [
         "TERMO_ADESAO",
         "DIRETRIZES",
@@ -4660,17 +6796,18 @@ export const Constants = {
         "geral",
         "academy_reminder",
         "academy_course_completed",
+        "agendamento",
+        "remarcacao",
+        "agendamento_confirmado",
+        "remarcacao_pendente_aceite",
+        "sub_oferta",
+        "sub_confirmado",
+        "sub_recusado",
+        "nps_sessao",
       ],
       nps_rated_entity_type: ["professional", "patient", "platform"],
       nps_rater_type: ["paciente", "pp"],
-      patient_attendance_period: ["MANHA", "TARDE", "NOITE"],
-      patient_referral_source: [
-        "INDICACAO",
-        "GOOGLE",
-        "INSTAGRAM",
-        "FACEBOOK",
-        "OUTROS",
-      ],
+      patient_attendance_period: ["MANHA", "TARDE", "NOITE", "INDIFERENTE"],
       patient_care_status: [
         "ATIVO",
         "PAUSA",
@@ -4680,13 +6817,60 @@ export const Constants = {
         "OBITO",
         "CANCELADO",
       ],
-      patient_document_type: ["RG", "LAUDO", "EXAME", "OUTRO"],
+      patient_document_type: [
+        "RG",
+        "LAUDO",
+        "EXAME",
+        "OUTRO",
+        "ATESTADO_REMARCACAO",
+      ],
+      patient_gender: ["FEMININO", "MASCULINO", "OUTRO", "NAO_INFORMADO"],
       patient_level: ["N1", "N2", "N3", "VALOR_SOCIAL"],
+      patient_marital_status: [
+        "SOLTEIRO",
+        "CASADO",
+        "DIVORCIADO",
+        "VIUVO",
+        "UNIAO_ESTAVEL",
+        "NAO_INFORMADO",
+      ],
+      patient_receipt_kind: ["intermediacao", "pp_prestacao"],
+      patient_referral_source: [
+        "INDICACAO",
+        "GOOGLE",
+        "INSTAGRAM",
+        "FACEBOOK",
+        "OUTROS",
+      ],
       patient_sex: ["M", "F", "OUTRO"],
+      patient_waitlist_status: [
+        "pendente",
+        "contatado",
+        "convertido",
+        "cancelado",
+      ],
+      pause_type: [
+        "none",
+        "justified",
+        "unjustified",
+        "professional_or_operation_issue",
+      ],
       payment_method: ["PIX", "BOLETO"],
       payment_status: ["pendente", "pago", "vencido", "cancelado"],
       person_type: ["PF", "PJ"],
       pp_class: ["BRONZE", "PRATA", "OURO"],
+      pp_patente: ["ALUMINIO", "BRONZE", "PRATA", "OURO"],
+      pp_referral_status: ["pendente", "confirmada", "expirada"],
+      pp_technical_category: [
+        "ortopedico",
+        "pos_operatorio",
+        "neurologico",
+        "idoso_gerontologia",
+        "funcional_condicionamento",
+        "pediatrico_geral",
+        "cardiorrespiratoria",
+        "atendimento_unico",
+      ],
       profession_type: ["FISIO", "NUTI", "MED", "CUID", "FONO"],
       professional_document_type: [
         "RG_CNH",
@@ -4695,8 +6879,49 @@ export const Constants = {
         "CERTIFICATE",
         "SIGNED_CONTRACT_PDF",
         "VISIT_CARD_PHOTO",
+        "CARDIO_CERTIFICATE",
+        "CARDIO_EXPERIENCE_PROOF",
+        "CARDIO_CV",
+        "CARDIO_PROFESSIONAL_DECLARATION",
+        "CARDIO_OTHER",
+      ],
+      refund_status: [
+        "nao_aplicavel",
+        "calculado",
+        "pendente",
+        "executado",
+        "falhou",
       ],
       region_code: ["A", "B", "C"],
+      reschedule_initiated_by: ["paciente", "pp", "staff"],
+      reschedule_reason_category: [
+        "saude",
+        "internacao",
+        "problema_fisio",
+        "horario",
+        "familiar",
+        "outro",
+      ],
+      reschedule_request_status: [
+        "pending_patient",
+        "patient_accepted",
+        "patient_rejected",
+        "sub_offered",
+        "sub_accepted",
+        "sub_rejected",
+        "pp_reschedule_window",
+        "completed",
+        "expired",
+        "cancelled",
+      ],
+      reschedule_window_type: ["on_time", "late"],
+      scheduling_proposal_status: [
+        "pendente",
+        "confirmado",
+        "recusado",
+        "expirado",
+      ],
+      scheduling_proposal_type: ["avaliacao", "continuidade", "remarcacao"],
       session_status: [
         "prevista",
         "realizada",

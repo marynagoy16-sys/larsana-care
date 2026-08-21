@@ -65,7 +65,7 @@ export function PacienteNpsPage() {
 
       const professionalId = sessionContext?.professional_id
       const { error } = await supabase.from('nps_surveys').insert({
-        cycle_id: cicloId,
+        cycle_id: cicloId!,
         session_id: sessionId,
         score: values.score,
         comment: values.comment ?? null,

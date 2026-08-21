@@ -62,7 +62,7 @@ export async function validateTransferInvoice(transferId: string) {
 export async function rejectTransferInvoice(transferId: string, notes?: string) {
   const { data, error } = await supabase.rpc('staff_reject_transfer_invoice', {
     p_transfer_id: transferId,
-    p_notes: notes ?? null,
+    p_notes: notes,
   })
   if (error) throw error
   return data as { transfer_id: string; status: string }

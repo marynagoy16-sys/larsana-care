@@ -38,7 +38,7 @@ export async function closeCycleFinancially(
   const { data, error } = await supabase.rpc('close_cycle_financially', {
     p_cycle_id: cycleId,
     p_pause_type: pauseType,
-    p_admin_decision: adminDecision ?? null,
+    p_admin_decision: adminDecision,
   })
 
   if (error) throw error
@@ -54,8 +54,8 @@ export async function initiatePause(
   const { data, error } = await supabase.rpc('initiate_pause', {
     p_cycle_id: cycleId,
     p_pause_type: pauseType,
-    p_justification: justification ?? null,
-    p_admin_decision: adminDecision ?? null,
+    p_justification: justification,
+    p_admin_decision: adminDecision,
   })
 
   if (error) throw error

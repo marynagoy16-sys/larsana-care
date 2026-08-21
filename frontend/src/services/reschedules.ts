@@ -12,10 +12,10 @@ export interface RegisterRescheduleParams {
 export async function registerReschedule(params: RegisterRescheduleParams) {
   const { data, error } = await supabase.rpc('register_reschedule', {
     p_session_id: params.sessionId,
-    p_reason_category: params.reasonCategory ?? null,
-    p_reason_text: params.reasonText ?? null,
+    p_reason_category: params.reasonCategory ?? undefined,
+    p_reason_text: params.reasonText ?? undefined,
     p_warning_acknowledged: params.warningAcknowledged ?? false,
-    p_new_scheduled_at: params.newScheduledAt ?? null,
+    p_new_scheduled_at: params.newScheduledAt ?? undefined,
   })
 
   if (error) throw error

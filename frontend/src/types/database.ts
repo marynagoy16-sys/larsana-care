@@ -1,40 +1,32 @@
 import type { Database as GeneratedDatabase } from './database.types.generated'
-import type { AcademyDatabaseFunctions, AcademyDatabaseTables } from './database.academy.extension'
-import type { FinancialDatabaseFunctions, FinancialDatabaseTables } from './database.financial.extension'
-import type { GamificationDatabaseFunctions, GamificationDatabaseTables } from './database.gamification.extension'
-import type { SchedulingDatabaseFunctions, SchedulingDatabaseTables } from './database.scheduling.extension'
 
 export type { Json, Tables, TablesInsert, TablesUpdate, Enums } from './database.types.generated'
 
 type ProfessionalsTable = GeneratedDatabase['public']['Tables']['professionals']
-type PatchedProfessionalsTable = Omit<ProfessionalsTable, 'Insert' | 'Update'> & {
+
+/** Colunas de localização ao vivo (migration 20260818130000 — pode anteceder o schema remoto). */
+type PatchedProfessionalsTable = Omit<ProfessionalsTable, 'Row' | 'Insert' | 'Update'> & {
+  Row: ProfessionalsTable['Row'] & {
+    last_lat: number | null
+    last_lng: number | null
+    location_updated_at: string | null
+  }
   Insert: ProfessionalsTable['Insert'] & {
-    patient_preferences?: GeneratedDatabase['public']['Enums']['pp_technical_category'][]
-    points_total?: number
-    patente?: GeneratedDatabase['public']['Enums']['pp_patente']
-    referral_code?: string | null
-    referral_count_pre_bronze?: number
+    last_lat?: number | null
+    last_lng?: number | null
+    location_updated_at?: string | null
   }
   Update: ProfessionalsTable['Update'] & {
-    patient_preferences?: GeneratedDatabase['public']['Enums']['pp_technical_category'][]
-    points_total?: number
-    patente?: GeneratedDatabase['public']['Enums']['pp_patente']
-    referral_code?: string | null
-    referral_count_pre_bronze?: number
+    last_lat?: number | null
+    last_lng?: number | null
+    location_updated_at?: string | null
   }
 }
 
 export type Database = Omit<GeneratedDatabase, 'public'> & {
-  public: Omit<GeneratedDatabase['public'], 'Tables' | 'Functions'> & {
+  public: Omit<GeneratedDatabase['public'], 'Tables'> & {
     Tables: Omit<GeneratedDatabase['public']['Tables'], 'professionals'> & {
       professionals: PatchedProfessionalsTable
-    } & AcademyDatabaseTables & FinancialDatabaseTables & GamificationDatabaseTables & SchedulingDatabaseTables
-    Functions: Omit<
-      GeneratedDatabase['public']['Functions'],
-      'review_assessment_level_change'
-    > & AcademyDatabaseFunctions &
-      FinancialDatabaseFunctions &
-      GamificationDatabaseFunctions &
-      SchedulingDatabaseFunctions
+    }
   }
 }

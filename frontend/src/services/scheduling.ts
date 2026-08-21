@@ -78,7 +78,7 @@ export async function patientRejectSlot(
 ): Promise<{ proposal_id: string; status: string }> {
   const { data, error } = await supabase.rpc('patient_reject_slot', {
     p_proposal_id: proposalId,
-    p_reason: reason ?? null,
+    p_reason: reason,
   })
   if (error) throw error
   return data as { proposal_id: string; status: string }

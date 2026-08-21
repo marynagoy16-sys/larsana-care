@@ -12,6 +12,7 @@ describe('demandSimulation', () => {
       pp_class: 'BRONZE' as const,
       pp_percent: 70,
       larsana_percent: 30,
+      bonus_pp_percent: 0,
       version_id: 'v1',
       created_at: '2026-01-01T00:00:00Z',
     },

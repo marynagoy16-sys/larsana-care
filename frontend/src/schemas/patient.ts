@@ -31,7 +31,7 @@ export const patientStepSchema = z.object({
   city_id: z.string().uuid('Selecione a cidade'),
   allocated_professional_id: z.string().uuid().optional().nullable(),
   suggested_weekly_frequency: z.number().min(1).max(7).optional().nullable(),
-  attendance_period: z.enum(['MANHA', 'TARDE', 'NOITE']).optional().nullable(),
+  attendance_period: z.enum(['MANHA', 'TARDE', 'NOITE', 'INDIFERENTE']).optional().nullable(),
   technical_category: z
     .enum([
       'ortopedico',

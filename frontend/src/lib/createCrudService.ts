@@ -17,7 +17,16 @@ export function createCrudService(table: TableName) {
     },
 
     async getById(id: string, select = '*') {
-      const { data, error } = await supabase.from(table).select(select).eq('id', id).single()
+      const client = supabase as unknown as {
+        from: (name: string) => {
+          select: (s: string) => {
+            eq: (col: string, val: string) => {
+              single: () => Promise<{ data: unknown; error: { message: string } | null }>
+            }
+          }
+        }
+      }
+      const { data, error } = await client.from(table as string).select(select).eq('id', id).single()
       if (error) throw error
       return data as unknown as CrudRow
     },
@@ -50,7 +59,14 @@ export function createCrudService(table: TableName) {
     },
 
     async remove(id: string) {
-      const { error } = await supabase.from(table).delete().eq('id', id)
+      const client = supabase as unknown as {
+        from: (name: string) => {
+          delete: () => {
+            eq: (col: string, val: string) => Promise<{ error: { message: string } | null }>
+          }
+        }
+      }
+      const { error } = await client.from(table as string).delete().eq('id', id)
       if (error) throw error
     },
   }

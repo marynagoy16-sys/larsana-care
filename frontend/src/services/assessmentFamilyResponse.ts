@@ -57,7 +57,7 @@ export async function acceptAssessmentProposal(input: {
   const { data, error } = await supabase.rpc('accept_assessment_proposal', {
     p_assessment_id: input.assessmentId,
     p_response: input.response,
-    p_chosen_weekly_frequency: input.chosenWeeklyFrequency ?? null,
+    p_chosen_weekly_frequency: input.chosenWeeklyFrequency,
     p_payment_timing: input.paymentTiming ?? 'antecipado',
   })
 

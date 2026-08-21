@@ -45,7 +45,7 @@ export async function patientRespondRescheduleProposal(
   const { data, error } = await supabase.rpc('patient_respond_reschedule_proposal', {
     p_proposal_id: proposalId,
     p_accept: accept,
-    p_slot_id: slotId ?? null,
+    p_slot_id: slotId,
   })
   if (error) throw error
   return data as { status: string; session_id?: string; request_id?: string }
@@ -71,7 +71,7 @@ export async function patientRequestReschedule(
   const { data, error } = await supabase.rpc('patient_request_reschedule', {
     p_session_id: sessionId,
     p_new_scheduled_at: newScheduledAt,
-    p_certificate_storage_path: certificateStoragePath ?? null,
+    p_certificate_storage_path: certificateStoragePath ?? undefined,
   })
   if (error) throw error
   return data as unknown as Record<string, unknown>
