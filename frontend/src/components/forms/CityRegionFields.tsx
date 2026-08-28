@@ -11,6 +11,7 @@ interface CityRegionFieldsProps {
   disabled?: boolean
   cityLabel?: string
   regionLabel?: string
+  hideRegion?: boolean
 }
 
 export function CityRegionFields({
@@ -20,6 +21,7 @@ export function CityRegionFields({
   disabled,
   cityLabel = 'Cidade',
   regionLabel = 'Região',
+  hideRegion = false,
 }: CityRegionFieldsProps) {
   const { data: cities = [], isLoading: citiesLoading } = useAllCities()
   const { data: regions = [], isLoading: regionsLoading } = useRegions()
@@ -56,15 +58,17 @@ export function CityRegionFields({
           disabled={disabled || citiesLoading}
         />
       </div>
-      <div className="space-y-2">
-        <label className="text-sm font-medium leading-none">{regionLabel}</label>
-        <Input
-          value={regionsLoading ? 'Carregando…' : regionDisplay}
-          placeholder="Selecione a cidade"
-          disabled
-          readOnly
-        />
-      </div>
+      {!hideRegion ? (
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none">{regionLabel}</label>
+          <Input
+            value={regionsLoading ? 'Carregando…' : regionDisplay}
+            placeholder="Selecione a cidade"
+            disabled
+            readOnly
+          />
+        </div>
+      ) : null}
     </div>
   )
 }

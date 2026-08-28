@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Logo } from '@/components/shared/Logo'
 import { CoverageMapIllustration } from '@/components/paciente/CoverageMapIllustration'
 import { PatientHomeSchedulingBanner } from '@/components/paciente/PatientHomeSchedulingBanner'
+import { PatientSchedulingProposalList } from '@/components/paciente/PatientSchedulingProposalList'
 import { ServiceRequestForm } from '@/components/paciente/ServiceRequestForm'
 import { ServiceRequestTimeline } from '@/components/paciente/ServiceRequestTimeline'
 import { Button } from '@/components/ui/button'
@@ -35,9 +36,14 @@ export function PacienteSolicitarPage() {
     queryFn: getPatientServiceStatus,
   })
 
-  const { data: pendingProposals = [] } = useQuery({
-    queryKey: ['paciente', 'scheduling_proposals'],
-    queryFn: listPendingSchedulingProposalsForPatient,
+  const { data: pendingProposals = [], refetch: refetchProposals } = useQuery({
+    queryKey: ['paciente', 'scheduling_proposals', data?.patient_id, data?.active_demand?.id],
+    queryFn: () =>
+      listPendingSchedulingProposalsForPatient(
+        data?.active_demand?.id
+          ? { demandId: data.active_demand.id }
+          : { patientId: data?.patient_id },
+      ),
     enabled: Boolean(data?.linked),
   })
 
@@ -198,7 +204,18 @@ export function PacienteSolicitarPage() {
           ) : (
             <div className="space-y-3">
               <p className="text-sm font-medium text-primary">Sua solicitação já está em andamento.</p>
-              {pendingScheduling ? <PatientHomeSchedulingBanner /> : null}
+              {pendingScheduling ? (
+                <>
+                  <PatientSchedulingProposalList
+                    proposals={pendingProposals}
+                    onUpdated={() => {
+                      void refetchProposals()
+                      void queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
+                    }}
+                  />
+                  <PatientHomeSchedulingBanner />
+                </>
+              ) : null}
             </div>
           )}
 

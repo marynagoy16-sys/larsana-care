@@ -106,8 +106,11 @@ export async function ppRescheduleSession(
   }
 }
 
-export async function listPendingSchedulingProposalsForPatient(): Promise<SchedulingProposal[]> {
-  const { data, error } = await supabase
+export async function listPendingSchedulingProposalsForPatient(options?: {
+  patientId?: string
+  demandId?: string
+}): Promise<SchedulingProposal[]> {
+  let query = supabase
     .from('scheduling_proposals')
     .select(`
       id, demand_id, patient_id, professional_id, proposal_type, status,
@@ -117,6 +120,15 @@ export async function listPendingSchedulingProposalsForPatient(): Promise<Schedu
     `)
     .eq('status', 'pendente')
     .order('created_at', { ascending: false })
+
+  if (options?.patientId) {
+    query = query.eq('patient_id', options.patientId)
+  }
+  if (options?.demandId) {
+    query = query.eq('demand_id', options.demandId)
+  }
+
+  const { data, error } = await query
 
   if (error) throw error
   return (data ?? []) as unknown as SchedulingProposal[]

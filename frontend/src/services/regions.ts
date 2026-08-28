@@ -54,6 +54,17 @@ export async function getCitySearchOption(id: string): Promise<SearchOption | nu
   return { id: data.id, label: data.name, subtitle: data.state }
 }
 
+export async function findCityByNameAndState(name: string, state: string) {
+  const { data, error } = await supabase
+    .from('cities')
+    .select('id, name, state, region_id')
+    .eq('state', state.trim().toUpperCase())
+    .ilike('name', name.trim())
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
 export async function listNeighborhoods(cityId: string) {
   const { data, error } = await supabase
     .from('neighborhoods')

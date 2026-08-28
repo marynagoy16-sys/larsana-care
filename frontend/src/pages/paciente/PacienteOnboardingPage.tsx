@@ -11,9 +11,11 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/useAuth'
 import { softFieldButtonClass, softFieldInputClass, softFieldLabelClass } from '@/lib/formFieldStyles'
 import { formatCep, formatPhone } from '@/lib/formatters'
+import { fetchViaCep } from '@/lib/viacep'
 import { mapSupabaseError } from '@/lib/supabase-errors'
 import { patientOnboardingSchema } from '@/schemas/patientOnboarding'
 import { completePatientOnboarding } from '@/services/patientOnboarding'
+import { findCityByNameAndState } from '@/services/regions'
 import { sanitizeCep, sanitizePhone } from '@/lib/sanitize'
 
 export function PacienteOnboardingPage() {
@@ -29,12 +31,37 @@ export function PacienteOnboardingPage() {
   const [cityId, setCityId] = useState('')
   const [regionId, setRegionId] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cepLoading, setCepLoading] = useState(false)
 
   useEffect(() => {
     if (profile?.full_name && !patientFullName) {
       setPatientFullName(profile.full_name)
     }
   }, [profile?.full_name, patientFullName])
+
+  const handleCepBlur = async () => {
+    const digits = sanitizeCep(postalCode)
+    if (digits.length !== 8) return
+
+    setCepLoading(true)
+    try {
+      const address = await fetchViaCep(digits)
+      if (!address) return
+
+      if (address.logradouro) setStreet(address.logradouro)
+      if (address.bairro) setNeighborhood(address.bairro)
+
+      const city = await findCityByNameAndState(address.localidade, address.uf)
+      if (city) {
+        setCityId(city.id)
+        setRegionId(city.region_id)
+      }
+    } catch {
+      // preenchimento manual continua disponível
+    } finally {
+      setCepLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,9 +151,10 @@ export function PacienteOnboardingPage() {
                   id="postalCode"
                   value={postalCode}
                   onChange={(e) => setPostalCode(formatCep(sanitizeCep(e.target.value)))}
+                  onBlur={() => void handleCepBlur()}
                   placeholder="00000-000"
                   inputMode="numeric"
-                  disabled={loading}
+                  disabled={loading || cepLoading}
                   required
                   className={softFieldInputClass}
                 />
@@ -196,7 +224,8 @@ export function PacienteOnboardingPage() {
                 setCityId(nextCityId)
                 setRegionId(nextRegionId)
               }}
-              disabled={loading}
+              disabled={loading || cepLoading}
+              hideRegion
             />
           </div>
 

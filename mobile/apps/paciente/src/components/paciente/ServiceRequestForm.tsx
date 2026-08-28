@@ -14,10 +14,10 @@ import {
   patientReferralSourceLabels,
   patientReferralSourceValues,
   patientServiceRequestSchema,
+  patientServiceRequestStepOneSchema,
   requiresResponsibleByBirthDate,
   type PatientServiceRequestValues,
 } from '@/schemas/patientServiceRequest'
-import { cpfSchema } from '@/schemas/common'
 import {
   getPatientRequestPrefill,
   getPatientServiceLegalTerms,
@@ -140,8 +140,8 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
     patientCpf,
     birthDate,
     birthPlace,
-    maritalStatus: maritalStatus as PatientServiceRequestValues['maritalStatus'],
-    gender: gender as PatientServiceRequestValues['gender'],
+    maritalStatus: (maritalStatus || 'NAO_INFORMADO') as PatientServiceRequestValues['maritalStatus'],
+    gender: (gender || 'NAO_INFORMADO') as PatientServiceRequestValues['gender'],
     responsibleFullName,
     responsibleCpf: responsibleCpf || undefined,
     attendancePeriod: attendancePeriod as PatientServiceRequestValues['attendancePeriod'],
@@ -178,28 +178,29 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
 
   const validateStepOne = (): boolean => {
     setErrors({})
-    const next: Record<string, string> = {}
-    if (!patientFullName.trim()) next.patientFullName = 'Nome do paciente é obrigatório'
-    if (!patientCpf.trim()) next.patientCpf = 'CPF é obrigatório'
-    if (!birthDate.trim()) next.birthDate = 'Data é obrigatória'
-    if (birthDate && requiresResponsibleByBirthDate(birthDate)) {
-      if (!responsibleFullName.trim()) {
-        next.responsibleFullName = 'Nome do responsável é obrigatório para menores de 18 anos'
-      }
-      if (!responsibleCpf.trim()) {
-        next.responsibleCpf = 'CPF do responsável é obrigatório para menores de 18 anos'
-      }
-    }
     try {
-      if (patientCpf.trim()) cpfSchema.parse(patientCpf)
+      patientServiceRequestStepOneSchema.parse({
+        patientFullName,
+        patientCpf,
+        birthDate,
+        birthPlace,
+        maritalStatus: maritalStatus || undefined,
+        gender: gender || undefined,
+        responsibleFullName,
+        responsibleCpf: responsibleCpf || undefined,
+      })
+      return true
     } catch (err) {
-      if (err instanceof ZodError) next.patientCpf = err.issues[0]?.message ?? 'CPF inválido'
-    }
-    if (Object.keys(next).length > 0) {
-      setErrors(next)
+      if (err instanceof ZodError) {
+        const next: Record<string, string> = {}
+        for (const issue of err.issues) {
+          const key = issue.path[0]
+          if (typeof key === 'string' && !next[key]) next[key] = issue.message
+        }
+        setErrors(next)
+      }
       return false
     }
-    return true
   }
 
   const progressPercent = step === 1 ? 33 : step === 2 ? 66 : 100
@@ -264,7 +265,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
               {fieldError(errors, 'birthPlace')}
             </View>
             <EnumPicker
-              label="Estado civil"
+              label="Estado civil (opcional)"
               value={maritalStatus}
               options={patientMaritalStatusValues}
               labels={patientMaritalStatusLabels}
@@ -273,7 +274,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
             />
             {fieldError(errors, 'maritalStatus')}
             <EnumPicker
-              label="Gênero"
+              label="Gênero (opcional)"
               value={gender}
               options={patientGenderValues}
               labels={patientGenderLabels}

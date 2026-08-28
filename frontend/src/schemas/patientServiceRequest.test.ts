@@ -8,6 +8,7 @@ const basePayload = {
   patientFullName: 'Maria Silva',
   patientCpf: '52998224725',
   birthDate: '1990-06-15',
+  birthPlace: 'São Paulo/SP',
   responsibleFullName: '',
   attendancePeriod: 'MANHA' as const,
   diagnosticHypothesis: 'Dor lombar',
@@ -20,12 +21,12 @@ describe('requiresResponsibleByBirthDate', () => {
     expect(requiresResponsibleByBirthDate('2010-01-01')).toBe(true)
   })
 
-  it('exige responsável para idoso com 60 anos ou mais', () => {
-    expect(requiresResponsibleByBirthDate('1960-01-01')).toBe(true)
-  })
-
   it('não exige responsável para adulto entre 18 e 59', () => {
     expect(requiresResponsibleByBirthDate('1990-01-01')).toBe(false)
+  })
+
+  it('não exige responsável para idoso com 60 anos ou mais', () => {
+    expect(requiresResponsibleByBirthDate('1960-01-01')).toBe(false)
   })
 })
 

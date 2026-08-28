@@ -70,6 +70,46 @@ export const patientMaritalStatusLabels: Record<PatientMaritalStatus, string> = 
   NAO_INFORMADO: 'Prefiro não informar',
 }
 
+const optionalPatientEnum = <T extends readonly [string, ...string[]]>(
+  values: T,
+  fallback: T[number],
+) =>
+  z.preprocess(
+    (value) => (value === '' || value === undefined || value === null ? fallback : value),
+    z.enum(values),
+  )
+
+export const patientServiceRequestStepOneSchema = z
+  .object({
+    patientFullName: requiredString('Nome do paciente'),
+    patientCpf: cpfSchema,
+    birthDate: dateSchema,
+    birthPlace: requiredString('Naturalidade'),
+    maritalStatus: optionalPatientEnum(patientMaritalStatusValues, 'NAO_INFORMADO'),
+    gender: optionalPatientEnum(patientGenderValues, 'NAO_INFORMADO'),
+    responsibleFullName: z.string().optional().transform((v) => (v ? trimText(v) : '')),
+    responsibleCpf: optionalCpfSchema,
+  })
+  .superRefine((data, ctx) => {
+    if (!requiresResponsibleByBirthDate(data.birthDate)) return
+
+    if (!data.responsibleFullName?.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['responsibleFullName'],
+        message: 'Nome do responsável é obrigatório para menores de 18 anos',
+      })
+    }
+
+    if (!data.responsibleCpf) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['responsibleCpf'],
+        message: 'CPF do responsável é obrigatório para menores de 18 anos',
+      })
+    }
+  })
+
 export const patientServiceRequestSchema = z
   .object({
     patientFullName: requiredString('Nome do paciente'),
@@ -85,12 +125,8 @@ export const patientServiceRequestSchema = z
       message: 'Selecione como nos conheceu',
     }),
     birthPlace: requiredString('Naturalidade'),
-    maritalStatus: z.enum(patientMaritalStatusValues, {
-      message: 'Selecione o estado civil',
-    }),
-    gender: z.enum(patientGenderValues, {
-      message: 'Selecione o gênero',
-    }),
+    maritalStatus: optionalPatientEnum(patientMaritalStatusValues, 'NAO_INFORMADO'),
+    gender: optionalPatientEnum(patientGenderValues, 'NAO_INFORMADO'),
     termsAccepted: z.literal(true, {
       message: 'É necessário aceitar os termos para continuar',
     }),

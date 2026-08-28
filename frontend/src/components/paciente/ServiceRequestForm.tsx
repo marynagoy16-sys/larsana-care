@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ZodError } from 'zod'
+import { toast } from 'sonner'
 import { BirthDatePicker } from '@/components/forms/BirthDatePicker'
 import { MaskedInput } from '@/components/forms/MaskedInput'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,7 @@ import {
   patientMaritalStatusValues,
   patientReferralSourceLabels,
   patientServiceRequestSchema,
+  patientServiceRequestStepOneSchema,
   requiresResponsibleByBirthDate,
   type PatientServiceRequestValues,
 } from '@/schemas/patientServiceRequest'
@@ -39,6 +41,17 @@ import {
 
 const TERMS_DECLARATION =
   'Declaro que li integralmente e concordo com o Contrato de Intermediação, Termo de Consentimento e Políticas de Privacidade, compreendendo a natureza da atuação da plataforma, a autonomia dos profissionais e as limitações de responsabilidade envolvidas.'
+
+const STEP_ONE_FIELDS = new Set([
+  'patientFullName',
+  'patientCpf',
+  'birthDate',
+  'birthPlace',
+  'maritalStatus',
+  'gender',
+  'responsibleFullName',
+  'responsibleCpf',
+])
 
 function fieldError(errors: Record<string, string>, key: string) {
   const message = errors[key]
@@ -124,8 +137,8 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
     patientCpf,
     birthDate,
     birthPlace,
-    maritalStatus: maritalStatus as PatientServiceRequestValues['maritalStatus'],
-    gender: gender as PatientServiceRequestValues['gender'],
+    maritalStatus: (maritalStatus || 'NAO_INFORMADO') as PatientServiceRequestValues['maritalStatus'],
+    gender: (gender || 'NAO_INFORMADO') as PatientServiceRequestValues['gender'],
     responsibleFullName,
     responsibleCpf: responsibleCpf || undefined,
     attendancePeriod: attendancePeriod as PatientServiceRequestValues['attendancePeriod'],
@@ -154,6 +167,10 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
           if (typeof key === 'string' && !next[key]) next[key] = issue.message
         }
         setErrors(next)
+        if (Object.keys(next).some((key) => STEP_ONE_FIELDS.has(key))) {
+          setStep(1)
+          toast.error('Complete os dados do paciente antes de continuar.')
+        }
       } else {
         throw err
       }
@@ -177,38 +194,16 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
   const validateStepOne = (): boolean => {
     setErrors({})
     try {
-      patientServiceRequestSchema
-        .pick({
-          patientFullName: true,
-          patientCpf: true,
-          birthDate: true,
-          responsibleFullName: true,
-          responsibleCpf: true,
-        })
-        .superRefine((data, ctx) => {
-          if (!requiresResponsibleByBirthDate(data.birthDate)) return
-          if (!data.responsibleFullName?.trim()) {
-            ctx.addIssue({
-              code: 'custom',
-              path: ['responsibleFullName'],
-              message: 'Nome do responsável é obrigatório para menores de 18 anos',
-            })
-          }
-          if (!data.responsibleCpf) {
-            ctx.addIssue({
-              code: 'custom',
-              path: ['responsibleCpf'],
-              message: 'CPF do responsável é obrigatório para menores de 18 anos',
-            })
-          }
-        })
-        .parse({
-          patientFullName,
-          patientCpf,
-          birthDate,
-          responsibleFullName,
-          responsibleCpf: responsibleCpf || undefined,
-        })
+      patientServiceRequestStepOneSchema.parse({
+        patientFullName,
+        patientCpf,
+        birthDate,
+        birthPlace,
+        maritalStatus: maritalStatus || undefined,
+        gender: gender || undefined,
+        responsibleFullName,
+        responsibleCpf: responsibleCpf || undefined,
+      })
       return true
     } catch (err) {
       if (err instanceof ZodError) {
@@ -308,7 +303,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
         </div>
 
         <div className="space-y-2">
-          <Label className={softFieldLabelClass}>Estado civil</Label>
+          <Label className={softFieldLabelClass}>Estado civil (opcional)</Label>
           <Select
             value={maritalStatus}
             onValueChange={(v) => setMaritalStatus(v as PatientServiceRequestValues['maritalStatus'])}
@@ -327,7 +322,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
         </div>
 
         <div className="space-y-2">
-          <Label className={softFieldLabelClass}>Gênero</Label>
+          <Label className={softFieldLabelClass}>Gênero (opcional)</Label>
           <Select
             value={gender}
             onValueChange={(v) => setGender(v as PatientServiceRequestValues['gender'])}
