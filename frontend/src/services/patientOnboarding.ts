@@ -27,7 +27,7 @@ export async function bootstrapPatientAccount(): Promise<string> {
 }
 
 async function geocodeAndSavePatientAddress(
-  patientId: string,
+  _patientId: string,
   values: PatientOnboardingValues,
 ): Promise<void> {
   const { data: city } = await supabase

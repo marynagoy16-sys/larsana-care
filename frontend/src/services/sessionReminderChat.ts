@@ -50,7 +50,7 @@ export async function listSessionReminderStates(
     .from('session_reschedule_requests')
     .select('session_id, status')
     .in('session_id', sessionIds)
-    .in('status', ['awaiting_pp_slots', 'pending_patient'])
+    .in('status', ['awaiting_pp_slots', 'pending_patient'] as never)
 
   if (requestsError) throw requestsError
 
@@ -72,7 +72,7 @@ export async function getAwaitingRescheduleRequestForSession(sessionId: string) 
     .from('session_reschedule_requests')
     .select('id, session_id, status, original_scheduled_at, reschedule_deadline')
     .eq('session_id', sessionId)
-    .eq('status', 'awaiting_pp_slots')
+    .eq('status', 'awaiting_pp_slots' as never)
     .maybeSingle()
 
   if (error) throw error

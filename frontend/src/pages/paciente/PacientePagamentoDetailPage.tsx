@@ -68,7 +68,7 @@ export function PacientePagamentoDetailPage() {
         .eq('id', id!)
         .single()
       if (error) throw error
-      return row as ChargeRow
+      return row as unknown as ChargeRow
     },
     enabled: !!id,
   })

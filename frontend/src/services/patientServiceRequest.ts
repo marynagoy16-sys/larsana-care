@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import type { PatientServiceRequestValues } from '@/schemas/patientServiceRequest'
 import { ensurePatientPrimaryAddressGeocoded } from '@/services/patientAddressGeocode'
 import { simulateChargePayment, syncPatientChargeWithAsaas } from '@/services/patientPayments'
+import { isPaymentSimulationEnabled } from '@/lib/paymentSimulation'
 
 export type PatientServiceDemand = {
   id: string
@@ -180,13 +181,6 @@ export type CompleteAssessmentCheckoutResult = {
   syncError?: string
 }
 
-const ASAAS_SYNC_MAX_RETRIES = 3
-const ASAAS_SYNC_RETRY_MS = 800
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 export async function prepareServiceRequest(
   values: PatientServiceRequestValues,
 ): Promise<PrepareServiceRequestResult> {
@@ -243,7 +237,7 @@ export async function syncAssessmentChargeWithAsaas(
 
   return {
     synced: result.synced,
-    asaasEnabled: result.asaasEnabled,
+    asaasEnabled: result.asaasEnabled ?? false,
     chargeId: result.chargeId,
     pixQrCode: result.pixQrCode ?? null,
     pixCopyPaste: result.pixCopyPaste ?? null,

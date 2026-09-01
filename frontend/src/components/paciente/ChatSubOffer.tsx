@@ -13,15 +13,19 @@ type ChatSubOfferProps = {
 }
 
 export function ChatSubOffer({ offer, highlighted = false, onUpdated }: ChatSubOfferProps) {
-  const acceptMutation = useCrudMutation({
-    mutationFn: () => patientRespondSubOffer(offer.id, true),
+  const acceptMutation = useCrudMutation<void, void>({
+    mutationFn: async () => {
+      await patientRespondSubOffer(offer.id, true)
+    },
     queryKey: ['paciente', 'sub_offers'],
     successMessage: 'Substituto confirmado!',
     onSuccess: () => onUpdated?.(),
   })
 
-  const rejectMutation = useCrudMutation({
-    mutationFn: () => patientRespondSubOffer(offer.id, false),
+  const rejectMutation = useCrudMutation<void, void>({
+    mutationFn: async () => {
+      await patientRespondSubOffer(offer.id, false)
+    },
     queryKey: ['paciente', 'sub_offers'],
     successMessage: 'Solicitação enviada',
     onSuccess: () => onUpdated?.(),

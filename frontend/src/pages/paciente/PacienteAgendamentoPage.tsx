@@ -1,6 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { Link } from 'react-router-dom'
 import { CalendarClock } from 'lucide-react'
 import { Button } from '@/components/ui/button'

@@ -4,7 +4,7 @@ import type { StatCardItem } from '@/components/crud/list-page/StatsCardRow'
 import { formatCurrency } from '@/lib/formatters'
 import type { ChargeListItem, PaymentStatus } from '@/services/charges'
 
-const REVENUE_STATUSES: PaymentStatus[] = ['pago', 'pendente', 'vencido']
+const REVENUE_STATUSES = ['pago', 'pendente', 'vencido'] as const satisfies readonly PaymentStatus[]
 
 const FATURAMENTO_STATUS_LABELS: Record<(typeof REVENUE_STATUSES)[number], string> = {
   pago: 'Recebido',

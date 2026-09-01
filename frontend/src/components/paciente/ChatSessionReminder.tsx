@@ -18,15 +18,19 @@ type ChatSessionReminderProps = {
 }
 
 export function ChatSessionReminder({ sessionId, state, onUpdated }: ChatSessionReminderProps) {
-  const confirmMutation = useCrudMutation({
-    mutationFn: () => patientChatConfirmPresence(sessionId),
+  const confirmMutation = useCrudMutation<void, void>({
+    mutationFn: async () => {
+      await patientChatConfirmPresence(sessionId)
+    },
     queryKey: ['paciente', 'chat'],
     successMessage: 'Presença confirmada!',
     onSuccess: () => onUpdated?.(),
   })
 
-  const rescheduleMutation = useCrudMutation({
-    mutationFn: () => patientChatRequestReschedule(sessionId),
+  const rescheduleMutation = useCrudMutation<void, void>({
+    mutationFn: async () => {
+      await patientChatRequestReschedule(sessionId)
+    },
     queryKey: ['paciente', 'chat'],
     successMessage: 'Solicitação enviada ao profissional',
     onSuccess: () => onUpdated?.(),

@@ -3,7 +3,7 @@ import { ptBR } from 'date-fns/locale'
 import { CHARGE_KIND_LABELS, PAYMENT_METHOD_LABELS } from '@/services/charges'
 import type { ChargeKind, ChargeListItem, PaymentMethod, PaymentStatus } from '@/services/charges'
 
-export const FATURAMENTO_CHART_STATUSES: PaymentStatus[] = ['pago', 'pendente', 'vencido']
+export const FATURAMENTO_CHART_STATUSES = ['pago', 'pendente', 'vencido'] as const satisfies readonly PaymentStatus[]
 
 export const FATURAMENTO_STATUS_COLORS: Record<(typeof FATURAMENTO_CHART_STATUSES)[number], string> = {
   pago: 'hsl(163.8 81.3% 28%)',

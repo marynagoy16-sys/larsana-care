@@ -25,10 +25,10 @@ export async function updateChargePaymentMethod(
   chargeId: string,
   paymentMethod: 'PIX' | 'BOLETO',
 ): Promise<{ charge_id: string; payment_method: string }> {
-  const { data, error } = await supabase.rpc('patient_update_charge_payment_method', {
+  const { data, error } = await supabase.rpc('patient_update_charge_payment_method' as never, {
     p_charge_id: chargeId,
     p_payment_method: paymentMethod,
-  })
+  } as never)
   if (error) throw error
   return data as { charge_id: string; payment_method: string }
 }

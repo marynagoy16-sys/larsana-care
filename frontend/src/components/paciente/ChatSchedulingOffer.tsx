@@ -26,8 +26,10 @@ export function ChatSchedulingOffer({
     onSuccess: () => onUpdated?.(),
   })
 
-  const rejectMutation = useCrudMutation({
-    mutationFn: () => patientRejectSlot(proposal.id),
+  const rejectMutation = useCrudMutation<void, void>({
+    mutationFn: async () => {
+      await patientRejectSlot(proposal.id)
+    },
     queryKey: ['paciente', 'scheduling_proposals'],
     successMessage: 'Solicitação enviada ao profissional',
     onSuccess: () => onUpdated?.(),

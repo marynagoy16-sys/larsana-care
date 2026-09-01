@@ -186,13 +186,14 @@ export async function demandNeedsScheduleSlots(demand: DemandScheduleContext): P
 }
 
 export async function getDemandSchedulingFollowUp(demandId: string): Promise<DemandSchedulingFollowUp> {
-  const { data: demand, error: demandError } = await supabase
+  const { data: demandRaw, error: demandError } = await supabase
     .from('demands')
-    .select('id, cycle_id, demand_type')
+    .select('id, cycle_id, demand_type' as never)
     .eq('id', demandId)
     .maybeSingle()
 
   if (demandError) throw demandError
+  const demand = demandRaw as DemandScheduleContext | null
 
   if (demand && (await demandNeedsScheduleSlots(demand))) {
     return { kind: 'needs_slots' }
@@ -236,16 +237,17 @@ export async function getPendingScheduleDemandForPatient(
   if (proError) throw proError
   if (!professional) return null
 
-  const { data: demands, error: demandError } = await supabase
+  const { data: demandsRaw, error: demandError } = await supabase
     .from('demands')
-    .select('id, demand_type, cycle_id, created_at')
+    .select('id, demand_type, cycle_id, created_at' as never)
     .eq('patient_id', patientId)
     .eq('status', 'alocada')
     .eq('assigned_professional_id', professional.id)
     .order('created_at', { ascending: false })
 
   if (demandError) throw demandError
-  if (!demands?.length) return null
+  const demands = (demandsRaw ?? []) as unknown as DemandScheduleContext[]
+  if (!demands.length) return null
 
   const prioritized = [
     ...demands.filter((d) => d.cycle_id != null),

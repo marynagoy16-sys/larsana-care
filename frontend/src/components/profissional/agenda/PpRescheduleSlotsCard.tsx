@@ -19,11 +19,11 @@ export function PpRescheduleSlotsCard({
   const getSelectedSlotsRef = useRef<(() => { starts_at: string; ends_at?: string }[]) | null>(null)
   const [selectionCount, setSelectionCount] = useState(0)
 
-  const submitMutation = useCrudMutation({
-    mutationFn: () => {
+  const submitMutation = useCrudMutation<void, void>({
+    mutationFn: async () => {
       const slots = getSelectedSlotsRef.current?.() ?? []
       if (slots.length === 0) throw new Error('Selecione ao menos um horário')
-      return ppSubmitRescheduleAvailability(requestId, slots)
+      await ppSubmitRescheduleAvailability(requestId, slots)
     },
     queryKey: ['pp', 'reschedule-requests'],
     successMessage: 'Horários enviados ao paciente',

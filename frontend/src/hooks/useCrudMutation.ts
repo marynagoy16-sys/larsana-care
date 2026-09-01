@@ -9,7 +9,7 @@ interface UseCrudMutationOptions<TData, TVariables> {
   onSuccess?: (data: TData) => void
 }
 
-export function useCrudMutation<TData, TVariables>({
+export function useCrudMutation<TData, TVariables = void>({
   mutationFn,
   queryKey,
   successMessage = 'Salvo com sucesso',

@@ -399,7 +399,7 @@ export async function getPPPatientProntuario(patientId: string): Promise<PPPatie
   )
 
   const cycles = ((cyclesRes.data ?? []) as CareCycleRow[])
-    .filter((cycle) => isStartedTreatmentCycle(cycle.status))
+    .filter((cycle) => isStartedTreatmentCycle(cycle.status ?? ''))
     .map((cycle) => ({
     cycleId: cycle.id,
     cycleNumber: cycle.cycle_number,

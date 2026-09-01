@@ -27,6 +27,7 @@ import {
 } from '@/services/ppPatients'
 import { PpRescheduleSlotsCard } from '@/components/profissional/agenda/PpRescheduleSlotsCard'
 import { getAwaitingRescheduleRequestForSession } from '@/services/sessionReminderChat'
+import { ppSessionCheckIn, ppSessionCheckOut } from '@/services/ppSessions'
 import { toast } from 'sonner'
 
 function buildGoogleMapsUrl(
