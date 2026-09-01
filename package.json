@@ -20,5 +20,8 @@
     "cap:sync": "npm run cap:sync --workspace=frontend",
     "cap:android": "npm run cap:android --workspace=frontend",
     "cap:ios": "npm run cap:ios --workspace=frontend"
+  },
+  "devDependencies": {
+    "xlsx": "^0.18.5"
   }
 }

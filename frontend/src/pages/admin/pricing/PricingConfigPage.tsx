@@ -92,7 +92,7 @@ export function PricingConfigPage() {
     <>
       <EntityListPage
         title="Tabela de preços"
-        description="Versões de precificação regional, repasses e taxa do primeiro mês"
+        description="Versões de precificação regional, repasses, taxa do primeiro mês e avaliação domiciliar"
         queryKey={pricingQueryKeys.versions}
         queryFn={async () => {
           const data = await listPricingVersions()

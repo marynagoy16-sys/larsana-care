@@ -50,11 +50,10 @@ async function geocodeAndSavePatientAddress(
 
   if (!point) return
 
-  const { error } = await supabase
-    .from('patient_addresses')
-    .update({ latitude: point.lat, longitude: point.lng })
-    .eq('patient_id', patientId)
-    .eq('is_primary', true)
+  const { error } = await supabase.rpc('patient_set_primary_address_coordinates' as never, {
+    p_latitude: point.lat,
+    p_longitude: point.lng,
+  } as never)
 
   if (error) throw error
 }

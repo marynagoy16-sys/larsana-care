@@ -13,6 +13,7 @@ import { listPendingEvolutionsForPp, ppEvolutionsQueryKeys } from '@/services/pp
 import {
   buildAgendaDaySummary,
   listAgendaSessionsForDay,
+  listUpcomingAgendaSessions,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
 import {
@@ -62,6 +63,14 @@ export default function InicioScreen() {
     queryFn: () => listAgendaSessionsForDay(today),
   })
 
+  const todaySessions = sessionsQuery.data ?? []
+
+  const upcomingQuery = useQuery({
+    queryKey: ppAgendaQueryKeys.upcoming(MAX_TODAY_SESSIONS),
+    queryFn: () => listUpcomingAgendaSessions({ limit: MAX_TODAY_SESSIONS }),
+    enabled: !sessionsQuery.isLoading && todaySessions.length === 0,
+  })
+
   const demandsQuery = useQuery({
     queryKey: ['pp', 'demands'],
     queryFn: listOpenDemandsForPp,
@@ -83,14 +92,25 @@ export default function InicioScreen() {
     enabled: !!professionalId,
   })
 
-  const sessions = sessionsQuery.data ?? []
-  const daySummary = buildAgendaDaySummary(sessions)
+  const upcomingSessions = upcomingQuery.data ?? []
+  const showingUpcoming = todaySessions.length === 0 && upcomingSessions.length > 0
+  const sessions = showingUpcoming ? upcomingSessions : todaySessions
+  const daySummary = buildAgendaDaySummary(todaySessions)
   const demandsCount = demandsQuery.data?.count ?? 0
   const pendingCount = pendingQuery.data?.count ?? 0
   const previewSessions = sessions.slice(0, MAX_TODAY_SESSIONS)
   const remaining = Math.max(0, sessions.length - MAX_TODAY_SESSIONS)
+  const sessionsSectionTitle = showingUpcoming ? 'Próximas sessões' : 'Seu dia'
+  const sessionsEmpty =
+    todaySessions.length === 0 &&
+    upcomingSessions.length === 0 &&
+    !upcomingQuery.isLoading &&
+    !upcomingQuery.isFetching
 
-  const loading = sessionsQuery.isLoading || demandsQuery.isLoading
+  const loading =
+    sessionsQuery.isLoading ||
+    (todaySessions.length === 0 && upcomingQuery.isLoading) ||
+    demandsQuery.isLoading
 
   if (loading) {
     return (
@@ -129,11 +149,11 @@ export default function InicioScreen() {
 
         <View className="gap-3">
           <SectionTitle
-            title="Seu dia"
+            title={sessionsSectionTitle}
             actionLabel="Ver agenda"
             onAction={() => router.push('/(app)/(tabs)/agenda')}
           />
-          {sessions.length === 0 ? (
+          {sessionsEmpty ? (
             <View className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6">
               <Text className="text-center text-sm text-muted-foreground">
                 Você não tem terapias agendadas para hoje.
@@ -146,7 +166,8 @@ export default function InicioScreen() {
               ))}
               {remaining > 0 ? (
                 <Text className="px-1 text-xs text-muted-foreground">
-                  +{remaining} terapia{remaining === 1 ? '' : 's'} hoje
+                  +{remaining} terapia{remaining === 1 ? '' : 's'}{' '}
+                  {showingUpcoming ? 'nos próximos dias' : 'hoje'}
                 </Text>
               ) : null}
             </View>

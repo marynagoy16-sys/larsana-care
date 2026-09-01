@@ -41,7 +41,6 @@ import { cycleStatusLabels, paymentStatusLabels, ppClassLabels } from '@/constan
 import { careSessionsService } from '@/services/index'
 import { sanitizeRichText } from '@/lib/sanitize'
 import { cn } from '@/lib/utils'
-import { RescheduleSessionModal } from '@/components/cycles/RescheduleSessionModal'
 import { CancelSessionModal } from '@/components/cycles/CancelSessionModal'
 import { FinancialClosurePanel } from '@/components/cycles/FinancialClosurePanel'
 import { InitiatePauseModal } from '@/components/cycles/InitiatePauseModal'
@@ -315,17 +314,13 @@ function SessionScheduleItem({
   slot,
   expanded,
   onToggle,
-  onReschedule,
   onCancel,
-  canReschedule,
   canCancel,
 }: {
   slot: SessionSlot
   expanded: boolean
   onToggle: () => void
-  onReschedule?: (session: Session) => void
   onCancel?: (session: Session) => void
-  canReschedule?: boolean
   canCancel?: boolean
 }) {
   const { session, number } = slot
@@ -336,7 +331,6 @@ function SessionScheduleItem({
   const records = normalizeMedicalRecords(session?.medical_records)
   const primaryRecord = records[0] ?? null
   const canExpand = isDone
-  const showReschedule = canReschedule && session && (status === 'prevista' || status === 'remarcada')
   const showCancel = canCancel && session && (status === 'prevista' || status === 'remarcada')
 
   return (
@@ -378,26 +372,16 @@ function SessionScheduleItem({
         )}
         </button>
 
-        {showReschedule && onReschedule && session && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="shrink-0"
-            onClick={() => onReschedule(session)}
-          >
-            <RefreshCw size={14} className="mr-1" />
-            Remarcar
-          </Button>
-        )}
         {showCancel && onCancel && session && (
           <Button
             size="sm"
             variant="outline"
             className="shrink-0 text-orange-700 border-orange-200 hover:bg-orange-50"
             onClick={() => onCancel(session)}
+            title="Cancelamento sem justificativa com menos de 2h de antecedência: 50% reembolso à família e 50% repasse ao PP"
           >
             <Ban size={14} className="mr-1" />
-            Cancelar 50%
+            Cancelar sem justificativa
           </Button>
         )}
       </div>
@@ -423,20 +407,18 @@ function SessionScheduleSection({
   cycle,
   slots,
   onAddSession,
-  onReschedule,
   onCancel,
 }: {
   cycle: CycleDetail
   slots: SessionSlot[]
   onAddSession: () => void
-  onReschedule: (session: Session) => void
   onCancel: (session: Session) => void
 }) {
   const [expandedSession, setExpandedSession] = useState<number | null>(null)
   const sessions = cycle.care_sessions ?? []
   const canAddSession = sessions.length < cycle.session_count
-  const canReschedule = ['ativo', 'em_pausa'].includes(cycle.status)
-  const canCancel = canReschedule && cycle.payment_status === 'pago'
+  const canCancel =
+    ['ativo', 'em_pausa'].includes(cycle.status) && cycle.payment_status === 'pago'
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -463,24 +445,29 @@ function SessionScheduleSection({
             onToggle={() =>
               setExpandedSession((current) => (current === slot.number ? null : slot.number))
             }
-            onReschedule={onReschedule}
             onCancel={onCancel}
-            canReschedule={canReschedule}
             canCancel={canCancel}
           />
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-4 px-5 pb-4 text-xs text-muted-foreground border-t border-border pt-3">
-        {Object.entries(SESSION_STATUS_CONFIG).map(([key, cfg]) => {
-          const Icon = cfg.icon
-          return (
-            <span key={key} className="flex items-center gap-1">
-              <Icon size={12} className={cfg.color} />
-              {cfg.label}
-            </span>
-          )
-        })}
+      <div className="space-y-2 px-5 pb-4 text-xs text-muted-foreground border-t border-border pt-3">
+        <div className="flex flex-wrap gap-4">
+          {Object.entries(SESSION_STATUS_CONFIG).map(([key, cfg]) => {
+            const Icon = cfg.icon
+            return (
+              <span key={key} className="flex items-center gap-1">
+                <Icon size={12} className={cfg.color} />
+                {cfg.label}
+              </span>
+            )
+          })}
+        </div>
+        <p>
+          Remarcações são feitas pelo profissional parceiro ou paciente (app/chat). Use{' '}
+          <span className="font-medium text-foreground">Cancelar sem justificativa</span> apenas quando a família
+          desmarcar com menos de 2h de antecedência — aplica regra de 50% (reembolso parcial + repasse parcial ao PP).
+        </p>
       </div>
     </div>
   )
@@ -625,7 +612,6 @@ export function CycleDetailPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [addSessionOpen, setAddSessionOpen] = useState(false)
-  const [rescheduleSession, setRescheduleSession] = useState<Session | null>(null)
   const [cancelSession, setCancelSession] = useState<Session | null>(null)
   const [pauseModalOpen, setPauseModalOpen] = useState(false)
 
@@ -710,7 +696,6 @@ export function CycleDetailPage() {
             cycle={cycle}
             slots={sessionSlots}
             onAddSession={() => setAddSessionOpen(true)}
-            onReschedule={setRescheduleSession}
             onCancel={setCancelSession}
           />
         </CascadeItem>
@@ -753,17 +738,6 @@ export function CycleDetailPage() {
         cycleId={cycle.id}
         nextSessionNumber={nextSessionNumber}
       />
-
-      {rescheduleSession && (
-        <RescheduleSessionModal
-          open={!!rescheduleSession}
-          onOpenChange={(open) => !open && setRescheduleSession(null)}
-          sessionId={rescheduleSession.id}
-          sessionNumber={rescheduleSession.session_number}
-          nextSequenceNumber={(cycle.reschedule_count_consecutive ?? 0) + 1}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['care_cycle_detail', id] })}
-        />
-      )}
 
       {cancelSession && (
         <CancelSessionModal

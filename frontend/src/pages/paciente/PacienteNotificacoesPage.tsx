@@ -19,9 +19,18 @@ type NotificationRow = {
 }
 
 function resolveNotificationHref(notification: NotificationRow): string | null {
+  const payload = notification.payload
+  if (typeof payload?.href === 'string') {
+    return payload.href
+  }
+
   const type = notification.type ?? ''
   if (type.includes('agendamento') || type.includes('horario') || type === 'scheduling') {
-    return '/paciente/agendamento'
+    const proposalId = payload?.proposal_id ?? payload?.scheduling_proposal_id
+    if (typeof proposalId === 'string') {
+      return `/paciente/chat?proposal=${proposalId}`
+    }
+    return '/paciente/chat'
   }
   if (type === 'proposta' || type.includes('proposta')) {
     return '/paciente/proposta'
@@ -30,18 +39,17 @@ function resolveNotificationHref(notification: NotificationRow): string | null {
     return '/paciente/pagamentos'
   }
   if (type === 'nps_sessao') {
-    const href = notification.payload?.href
+    const href = payload?.href
     return typeof href === 'string' ? href : null
   }
-  const payload = notification.payload
   if (payload?.proposal_id || payload?.scheduling_proposal_id) {
-    return '/paciente/agendamento'
+    const proposalId = payload.proposal_id ?? payload.scheduling_proposal_id
+    return typeof proposalId === 'string'
+      ? `/paciente/chat?proposal=${proposalId}`
+      : '/paciente/chat'
   }
   if (payload?.assessment_id) {
     return '/paciente/proposta'
-  }
-  if (typeof payload?.href === 'string') {
-    return payload.href
   }
   return null
 }

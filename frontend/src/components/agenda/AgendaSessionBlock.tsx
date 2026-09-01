@@ -68,7 +68,7 @@ export function AgendaSessionBlock({
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
           )}
           onClick={openDetail}
-          title={`${session.patientName} · ${timeLabel} · Ciclo ${session.cycleNumber} · Sessão #${session.sessionNumber}`}
+          title={`${session.patientName} · ${timeLabel} · Ciclo ${session.cycleNumber} · Terapia #${session.sessionNumber}`}
         >
           <div
             className={cn('agenda-session-fill absolute inset-0 transition-opacity', cfg.agendaFill)}
@@ -90,7 +90,7 @@ export function AgendaSessionBlock({
             </p>
             {!compact && (
               <p className="text-[10px] leading-none text-muted-foreground truncate sm:text-xs">
-                Ciclo {session.cycleNumber} · Sessão #{session.sessionNumber}
+                Ciclo {session.cycleNumber} · Terapia #{session.sessionNumber}
               </p>
             )}
           </div>
@@ -104,13 +104,13 @@ export function AgendaSessionBlock({
               size="icon"
               className="absolute right-1 top-1 z-[2] h-7 w-7 shrink-0 opacity-70 group-hover:opacity-100 sm:right-1.5 sm:top-1.5 sm:h-8 sm:w-8"
               onClick={(e) => e.stopPropagation()}
-              aria-label="Ações da sessão"
+              aria-label="Ações da terapia"
             >
               <MoreHorizontal size={16} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenuItem onClick={openDetail}>Ver sessão</DropdownMenuItem>
+            <DropdownMenuItem onClick={openDetail}>Ver terapia</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/profissional/pacientes/${session.patientId}`)}>
               Ver paciente
             </DropdownMenuItem>
@@ -118,9 +118,13 @@ export function AgendaSessionBlock({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => navigate(`/profissional/evolucao/nova?session=${session.id}`)}
+                  onClick={() =>
+                    session.isAssessment
+                      ? navigate(`/profissional/pacientes/${session.patientId}/avaliacao`)
+                      : navigate(`/profissional/evolucao/nova?session=${session.id}`)
+                  }
                 >
-                  Evoluir terapia
+                  {session.isAssessment ? 'Registrar avaliação' : 'Evoluir terapia'}
                 </DropdownMenuItem>
               </>
             )}

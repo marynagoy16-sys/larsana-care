@@ -1,8 +1,17 @@
+import * as XLSX from 'xlsx'
 import { supabase } from '@/lib/supabase'
+import {
+  normalizeImportRows,
+  previewImportRows,
+  type ImportKind,
+} from '@/services/bulkImportNormalizer'
+
+export type { ImportKind }
 
 export type BulkImportResult = {
   created: number
   errors: Array<{ row: number; message: string; data?: unknown }>
+  run_id?: string
 }
 
 function parseCsv(text: string): Record<string, string>[] {
@@ -23,18 +32,57 @@ function parseCsv(text: string): Record<string, string>[] {
   })
 }
 
+function parseXlsx(buffer: ArrayBuffer): Record<string, unknown>[] {
+  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true })
+  const sheetName = workbook.SheetNames[0]
+  if (!sheetName) return []
+  const sheet = workbook.Sheets[sheetName]
+  return XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' })
+}
+
+export async function parseImportFile(file: File): Promise<Record<string, unknown>[]> {
+  const name = file.name.toLowerCase()
+  if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+    const buffer = await file.arrayBuffer()
+    return parseXlsx(buffer)
+  }
+  const text = await file.text()
+  return parseCsv(text)
+}
+
+export function prepareImportRows(
+  kind: ImportKind,
+  rawRows: Record<string, unknown>[],
+): Record<string, string>[] {
+  return normalizeImportRows(kind, rawRows.filter((row) => Object.values(row).some((v) => String(v ?? '').trim())))
+}
+
+export { previewImportRows }
+
 export function parseImportCsvFile(text: string): Record<string, string>[] {
   return parseCsv(text)
 }
 
-export async function bulkImportPatients(rows: Record<string, string>[]): Promise<BulkImportResult> {
-  const { data, error } = await supabase.rpc('bulk_import_patients', { p_rows: rows })
+export async function bulkImportPatients(
+  rows: Record<string, string>[],
+  options?: { skipDuplicates?: boolean },
+): Promise<BulkImportResult> {
+  const { data, error } = await supabase.rpc('bulk_import_patients' as never, {
+    p_rows: rows,
+    p_skip_duplicates: options?.skipDuplicates ?? true,
+  } as never)
   if (error) throw error
   return data as BulkImportResult
 }
 
-export async function bulkImportProfessionals(rows: Record<string, string>[]): Promise<BulkImportResult> {
-  const { data, error } = await supabase.rpc('bulk_import_professionals', { p_rows: rows })
+export async function bulkImportProfessionals(
+  rows: Record<string, string>[],
+  options?: { skipDuplicates?: boolean },
+): Promise<BulkImportResult> {
+  const { data, error } = await supabase.rpc('bulk_import_professionals' as never, {
+    p_rows: rows,
+    p_skip_duplicates: options?.skipDuplicates ?? true,
+  } as never)
   if (error) throw error
   return data as BulkImportResult
 }

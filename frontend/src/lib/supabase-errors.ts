@@ -11,6 +11,10 @@ const CODE_MESSAGES: Record<string, string> = {
 
 export function mapSupabaseError(error: PostgrestError | Error | null): string {
   if (!error) return 'Erro desconhecido.'
+  const message = error.message?.trim()
+  if (message && message !== 'duplicate key value violates unique constraint') {
+    return message
+  }
   if ('code' in error && error.code && CODE_MESSAGES[error.code]) {
     return CODE_MESSAGES[error.code]
   }

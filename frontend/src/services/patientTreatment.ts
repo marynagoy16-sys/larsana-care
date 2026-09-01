@@ -68,9 +68,15 @@ type CycleDetailRow = {
 function summarizeCycle(row: CycleListRow, pendingChargeId: string | null): PatientCycleSummary {
   const sessions = row.care_sessions ?? []
   const completedSessions = sessions.filter((s) => s.status === 'realizada').length
+  const nowIso = new Date().toISOString()
   const nextSessionAt =
     sessions
-      .filter((s) => s.status === 'prevista' && s.scheduled_at)
+      .filter(
+        (s) =>
+          (s.status === 'prevista' || s.status === 'remarcada') &&
+          s.scheduled_at &&
+          s.scheduled_at >= nowIso,
+      )
       .map((s) => s.scheduled_at!)
       .sort()[0] ?? null
 
@@ -85,6 +91,10 @@ function summarizeCycle(row: CycleListRow, pendingChargeId: string | null): Pati
     nextSessionAt,
     pendingChargeId,
   }
+}
+
+function isVisibleTreatmentCycle(status: string): boolean {
+  return status !== 'rascunho'
 }
 
 async function loadPendingChargesByCycleId(): Promise<Map<string, string>> {
@@ -115,15 +125,16 @@ export async function loadPatientTreatmentPage(): Promise<PatientTreatmentPageDa
       professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name ),
       care_sessions ( status, scheduled_at )`,
       )
+      .neq('status', 'rascunho')
       .order('created_at', { ascending: false }),
     loadPendingChargesByCycleId(),
   ])
 
   if (error) throw error
 
-  const cycles = ((data ?? []) as CycleListRow[]).map((row) =>
-    summarizeCycle(row, pendingChargesByCycleId.get(row.id) ?? null),
-  )
+  const cycles = ((data ?? []) as CycleListRow[])
+    .filter((row) => isVisibleTreatmentCycle(row.status))
+    .map((row) => summarizeCycle(row, pendingChargesByCycleId.get(row.id) ?? null))
   const activeCycle =
     cycles.find((cycle) => cycle.status === 'ativo' && cycle.payment_status === 'pago') ?? null
 
@@ -152,6 +163,8 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
   if (!data) return null
 
   const row = data as CycleDetailRow
+  if (!isVisibleTreatmentCycle(row.status)) return null
+
   const sessions = row.care_sessions ?? []
 
   return {

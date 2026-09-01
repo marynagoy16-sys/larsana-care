@@ -123,7 +123,7 @@ function AppShellContent({
           className={
             lockScroll
               ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
-              : 'flex flex-1 flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-sidebar'
+              : 'shell-scroll-region flex-1 min-h-0 min-w-0 scrollbar-sidebar'
           }
         >
           <main
@@ -131,7 +131,7 @@ function AppShellContent({
               lockScroll
                 ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden w-full'
                 : cn(
-                    'w-full min-w-0',
+                    'block w-full min-w-0 shrink-0',
                     hideShellHeader ? 'max-lg:px-0' : 'shell-content-x',
                     showNav && !hideShellHeader && 'shell-content-scroll-top',
                     showNav && hideShellHeader && 'shell-content-scroll-top-compact',
@@ -149,7 +149,9 @@ function AppShellContent({
       </DataLayer>
 
       {variant === 'profissional' && showNav && <ShellBottomNav items={profBottom} fabIndex={2} />}
-      {variant === 'paciente' && showNav && <ShellBottomNav items={pacBottom} fabIndex={2} />}
+      {variant === 'paciente' && showNav && (
+        <ShellBottomNav items={pacBottom} fabIndex={2} showChatUnreadBadge />
+      )}
     </>
   )
 }

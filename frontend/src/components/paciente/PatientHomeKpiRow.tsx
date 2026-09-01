@@ -38,7 +38,7 @@ export function PatientHomeKpiRow({ context, isLoading }: PatientHomeKpiRowProps
           href: '/paciente/tratamento',
         },
         {
-          label: 'Próxima sessão',
+          label: 'Próxima terapia',
           value: nextSessionValue,
           icon: Calendar,
           href: '/paciente/tratamento',

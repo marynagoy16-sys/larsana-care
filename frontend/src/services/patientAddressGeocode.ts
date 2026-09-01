@@ -43,10 +43,10 @@ export async function ensurePatientPrimaryAddressGeocoded(patientId: string): Pr
 
   if (!point) return
 
-  const { error: updateError } = await supabase
-    .from('patient_addresses')
-    .update({ latitude: point.lat, longitude: point.lng })
-    .eq('id', address.id)
+  const { error: updateError } = await supabase.rpc('patient_set_primary_address_coordinates' as never, {
+    p_latitude: point.lat,
+    p_longitude: point.lng,
+  } as never)
 
   if (updateError) throw updateError
 }

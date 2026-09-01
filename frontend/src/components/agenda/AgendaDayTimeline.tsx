@@ -122,7 +122,7 @@ export function AgendaDayTimeline({
 
           {sessions.length === 0 && (
             <div className="absolute inset-x-0 top-1/3 flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center sm:px-6 sm:py-10">
-              <p className="text-sm font-medium text-foreground">Nenhuma sessão neste dia</p>
+              <p className="text-sm font-medium text-foreground">Nenhuma terapia neste dia</p>
               <p className="mt-1 max-w-xs text-xs text-muted-foreground">
                 Selecione outro dia na faixa acima ou confira demandas abertas.
               </p>

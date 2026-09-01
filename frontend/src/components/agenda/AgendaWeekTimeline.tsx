@@ -295,7 +295,7 @@ export function AgendaWeekTimeline({
 
         {sessions.length === 0 && (
           <div className="mx-auto mt-6 flex max-w-md flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
-            <p className="text-sm font-medium text-foreground">Nenhuma sessão nesta semana</p>
+            <p className="text-sm font-medium text-foreground">Nenhuma terapia nesta semana</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Navegue entre semanas ou mude para a visualização diária.
             </p>

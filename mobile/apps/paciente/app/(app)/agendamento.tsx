@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { supabase } from '@/lib/supabaseClient'
 import { listPendingSchedulingProposalsForPatient } from '@/services/scheduling'
+import { patientPortalQueryKeys } from '@/services/patientPortal'
 
 export default function AgendamentoScreen() {
   const queryClient = useQueryClient()
@@ -29,6 +30,7 @@ export default function AgendamentoScreen() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['paciente', 'scheduling_proposals'] })
+      queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
       Alert.alert('Horário confirmado', 'Seu profissional parceiro foi avisado.')
     },
     onError: (err: Error) => Alert.alert('Erro', err.message),

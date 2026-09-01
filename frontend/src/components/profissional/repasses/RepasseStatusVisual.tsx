@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { getRepasseStatusVisual } from '@/lib/repasseStatus'
 
@@ -34,14 +35,8 @@ export function RepasseStatusBadge({ status, label, className }: RepasseStatusBa
   const visual = getRepasseStatusVisual(status)
 
   return (
-    <span
-      className={cn(
-        'inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        visual.badgeClass,
-        className,
-      )}
-    >
+    <Badge variant="outline" className={cn('font-normal', visual.badgeClass, className)}>
       {label}
-    </span>
+    </Badge>
   )
 }

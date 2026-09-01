@@ -172,6 +172,10 @@ function stripHtmlPreview(html: string | null, maxLength = 120): string {
 
 export { stripHtmlPreview as prontuarioContentPreview }
 
+export function isStartedTreatmentCycle(status: string): boolean {
+  return status !== 'rascunho' && status !== 'aguardando_pagamento'
+}
+
 export async function getPPPatientProntuario(patientId: string): Promise<PPPatientProntuario | null> {
   const professional = await getCurrentProfessional()
   if (!professional) return null
@@ -221,7 +225,9 @@ export async function getPPPatientProntuario(patientId: string): Promise<PPPatie
   })) as PPPatientProntuarioRecord[]
 
   const assessmentRecords = records.filter((r) => r.record_type === 'avaliacao')
-  const cycles = (cyclesRes.data ?? []).map((cycle) => ({
+  const cycles = (cyclesRes.data ?? [])
+    .filter((cycle) => isStartedTreatmentCycle(cycle.status))
+    .map((cycle) => ({
     cycleId: cycle.id,
     cycleNumber: cycle.cycle_number,
     status: cycle.status,

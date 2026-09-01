@@ -41,11 +41,13 @@ export async function patientRespondRescheduleProposal(
   proposalId: string,
   accept: boolean,
   slotId?: string,
+  options?: { choiceLabel?: string },
 ): Promise<{ status: string; session_id?: string; request_id?: string }> {
   const { data, error } = await supabase.rpc('patient_respond_reschedule_proposal', {
     p_proposal_id: proposalId,
     p_accept: accept,
     p_slot_id: slotId,
+    p_choice_label: options?.choiceLabel ?? null,
   })
   if (error) throw error
   return data as { status: string; session_id?: string; request_id?: string }

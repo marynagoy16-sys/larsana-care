@@ -1,5 +1,7 @@
 import {
+  addDays,
   endOfDay,
+  isSameDay,
   startOfDay,
 } from 'date-fns'
 import { getWeekRange } from '@/lib/agendaWeek'
@@ -85,6 +87,7 @@ export type AgendaDaySummary = {
 
 export const ppAgendaQueryKeys = {
   day: (isoDate: string) => ['pp', 'agenda', 'day', isoDate] as const,
+  upcoming: (limit: number) => ['pp', 'agenda', 'upcoming', limit] as const,
   week: (isoDate: string) => ['pp', 'agenda', 'week', isoDate] as const,
   session: (sessionId: string) => ['pp', 'agenda', 'session', sessionId] as const,
 }
@@ -177,6 +180,26 @@ async function listAgendaSessionsInRange(rangeStart: Date, rangeEnd: Date): Prom
 
 export async function listAgendaSessionsForDay(day: Date): Promise<AgendaSessionItem[]> {
   return listAgendaSessionsInRange(startOfDay(day), endOfDay(day))
+}
+
+export async function listUpcomingAgendaSessions(options?: {
+  limit?: number
+  horizonDays?: number
+}): Promise<AgendaSessionItem[]> {
+  const limit = options?.limit ?? 5
+  const horizonDays = options?.horizonDays ?? 14
+  const today = startOfDay(new Date())
+  const rangeEnd = endOfDay(addDays(today, horizonDays))
+  const now = new Date()
+
+  const sessions = await listAgendaSessionsInRange(today, rangeEnd)
+
+  return sessions
+    .filter((session) => {
+      if (session.status !== 'prevista' && session.status !== 'remarcada') return false
+      return session.start >= now || isSameDay(session.start, today)
+    })
+    .slice(0, limit)
 }
 
 export async function listAgendaSessionsForWeek(anchor: Date): Promise<AgendaSessionItem[]> {

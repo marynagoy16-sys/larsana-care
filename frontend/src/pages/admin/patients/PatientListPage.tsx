@@ -25,6 +25,11 @@ import { useDeletePatient } from '@/hooks/mutations/usePatientMutations'
 import { formatCpf, formatDate } from '@/lib/formatters'
 import { exportToCsv } from '@/lib/exportCsv'
 import { careStatusLabels } from '@/constants/labels'
+import { AdminImportDialog } from '@/components/admin/import/AdminImportDialog'
+import {
+  bulkImportPatients,
+  PATIENT_IMPORT_TEMPLATE,
+} from '@/services/bulkImport'
 import type { PatientListItem } from '@/services/patients'
 import { cn } from '@/lib/utils'
 
@@ -69,6 +74,7 @@ export function PatientListPage() {
   const [filterOpen, setFilterOpen] = useState(false)
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
   const [previewId, setPreviewId] = useState<string | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -212,7 +218,8 @@ export function PatientListPage() {
                 activeFilterCount={activeFilterCount}
                 onOpenFilters={() => setFilterOpen(true)}
                 onClearFilters={() => { setFilters(emptyPatientFilters); setPage(0) }}
-                onImport={() => toast.info('Importação em breve')}
+                onImport={() => setImportOpen(true)}
+                importDisabled={false}
                 onExport={handleExport}
                 onRefresh={() => refetch()}
                 onSettings={() => toast.info('Configurações em breve')}
@@ -347,6 +354,18 @@ export function PatientListPage() {
         }
         isDeleting={deletePatient.isPending}
         onConfirm={handleBulkDelete}
+      />
+
+      <AdminImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Importar pacientes"
+        description="Importação de pacientes legados via CSV ou XLSX. Campos obrigatórios: full_name."
+        templateCsv={PATIENT_IMPORT_TEMPLATE}
+        templateFilename="modelo_importacao_pacientes.csv"
+        importKind="patients"
+        importFn={bulkImportPatients}
+        onSuccess={() => void refetch()}
       />
     </>
   )

@@ -7,6 +7,7 @@ interface BottomNavProps {
   items: NavItem[]
   fabIndex?: number
   collapsed?: boolean
+  badgeCounts?: Partial<Record<string, number>>
 }
 
 function glassNavItemClass(isActive: boolean) {
@@ -18,7 +19,7 @@ function glassNavItemClass(isActive: boolean) {
   )
 }
 
-export function BottomNav({ items, fabIndex, collapsed = false }: BottomNavProps) {
+export function BottomNav({ items, fabIndex, collapsed = false, badgeCounts }: BottomNavProps) {
   const hasFab = fabIndex !== undefined
 
   return (
@@ -94,6 +95,8 @@ export function BottomNav({ items, fabIndex, collapsed = false }: BottomNavProps
               )
             }
 
+            const badgeCount = badgeCounts?.[item.href] ?? 0
+
             return (
               <NavLink
                 key={item.href}
@@ -109,7 +112,17 @@ export function BottomNav({ items, fabIndex, collapsed = false }: BottomNavProps
                 {({ isActive }) => (
                   <>
                     <div className={glassNavItemClass(isActive)}>
-                      <Icon size={20} className={isActive ? 'text-nav-icon' : 'text-muted-foreground'} />
+                      <span className="relative inline-flex">
+                        <Icon size={20} className={isActive ? 'text-nav-icon' : 'text-muted-foreground'} />
+                        {badgeCount > 0 && !isActive ? (
+                          <span
+                            className="absolute right-0 top-0 flex h-[14px] min-w-[14px] -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-bold leading-none text-primary-foreground ring-2 ring-background/80"
+                            aria-hidden
+                          >
+                            {badgeCount > 9 ? '9+' : badgeCount}
+                          </span>
+                        ) : null}
+                      </span>
                     </div>
                     <span className="max-w-[4.25rem] truncate text-[10px] leading-tight">{item.label}</span>
                     {item.comingSoon && (

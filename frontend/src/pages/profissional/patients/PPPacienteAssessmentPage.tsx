@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
@@ -16,7 +16,7 @@ import { useSuppressBottomNav } from '@/contexts/PageFooterContext'
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { cn } from '@/lib/utils'
-import { getPPPatientDetail, getPPProfessionalCrefito } from '@/services/ppPatients'
+import { getPPPatientDetail, getPPProfessionalCrefito, ppPatientQueryKeys } from '@/services/ppPatients'
 import { getCurrentProfessional } from '@/services/professionals'
 import { supabase } from '@/lib/supabase'
 import { initialAssessmentsService } from '@/services/index'
@@ -37,6 +37,7 @@ const ASSESSMENT_FORM_ID = 'pp-assessment-form'
 export function PPPacienteAssessmentPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const sidebarCollapsed = useSidebarCollapsed()
   const goBack = () => navigate(`/profissional/pacientes/${id}`)
 
@@ -125,6 +126,8 @@ export function PPPacienteAssessmentPage() {
     queryKey: ['pp'],
     successMessage: 'Avaliação registrada',
     onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ppPatientQueryKeys.latestAssessment(id!) })
+      queryClient.invalidateQueries({ queryKey: ['pp', 'patient_detail', id] })
       if (result.requires_admin_review) {
         toast.message('Avaliação enviada para revisão da Larsana', {
           description: 'A proposta será encaminhada à família após análise do nível sugerido.',

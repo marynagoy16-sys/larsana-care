@@ -5,6 +5,7 @@ import { PatientHomeBanner } from '@/components/paciente/PatientHomeBanner'
 import { PatientHomeHelpLink, PatientHomeLarsanaPillTeaser } from '@/components/paciente/PatientHomeExtras'
 import { PatientHomeJourney } from '@/components/paciente/PatientHomeJourney'
 import { PatientActiveTreatmentCard } from '@/components/paciente/PatientActiveTreatmentCard'
+import { PatientHomeUpcomingAssessmentCard } from '@/components/paciente/PatientHomeUpcomingAssessmentCard'
 import { loadPatientHome, patientPortalQueryKeys } from '@/services/patientPortal'
 
 export default function InicioScreen() {
@@ -48,7 +49,13 @@ export default function InicioScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
       <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 py-4 pb-28">
         <PatientHomeBanner context={data} />
-        {!data.pendingProposal && !data.pendingCharge && !data.latestAssessment && !data.activeCycle ? (
+        {data.upcomingAssessment ? (
+          <PatientHomeUpcomingAssessmentCard appointment={data.upcomingAssessment} />
+        ) : null}
+        <View className="flex-row items-center justify-between">
+          <Text className="text-sm font-semibold text-foreground">Seu tratamento</Text>
+        </View>
+        {!data.pendingProposal && !data.pendingCharge && !data.latestAssessment && !data.activeCycle && !data.upcomingAssessment ? (
           <View className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6">
             <Text className="text-center text-sm text-muted-foreground">
               Em breve você verá aqui o andamento do tratamento e avisos importantes.

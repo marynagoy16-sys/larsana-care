@@ -53,12 +53,12 @@ export function PatientActiveTreatmentCard({
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar size={16} className="shrink-0" />
             <span>
-              Próxima sessão:{' '}
+              Próxima terapia:{' '}
               <span className="font-medium text-foreground">{formatDateTime(cycle.nextSessionAt)}</span>
             </span>
           </div>
         ) : (
-          <p className="text-muted-foreground">Nenhuma sessão prevista no momento.</p>
+          <p className="text-muted-foreground">Nenhuma terapia prevista no momento.</p>
         )}
         {!featured ? (
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

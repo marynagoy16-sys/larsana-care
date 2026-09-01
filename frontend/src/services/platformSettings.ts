@@ -1,5 +1,8 @@
 import { supabase } from '@/lib/supabase'
 
+/** Valor mínimo por cobrança no Asaas (PIX/boleto). */
+export const ASAAS_MIN_CHARGE_CENTS = 500
+
 export type PlatformSettings = {
   id: string
   assessment_fee_cents: number

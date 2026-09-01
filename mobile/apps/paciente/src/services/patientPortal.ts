@@ -39,12 +39,19 @@ export type PendingChargeSummary = {
   cycle_id: string | null
 }
 
+export type UpcomingAssessmentAppointment = {
+  proposalId: string
+  scheduledAt: string
+  professionalName: string | null
+}
+
 export type PatientHomeContext = {
   linkedPatient: LinkedPatient | null
   latestAssessment: PatientAssessmentSummary | null
   pendingProposal: PatientAssessmentSummary | null
   activeCycle: ActiveCycleSummary | null
   pendingCharge: PendingChargeSummary | null
+  upcomingAssessment: UpcomingAssessmentAppointment | null
 }
 
 type ResponsibleRow = {
@@ -83,6 +90,59 @@ export async function getLinkedPatient(): Promise<LinkedPatient | null> {
     careStatus: patient.care_status,
     responsibleName: row.full_name,
     professionalName: patient.professionals?.full_name ?? null,
+  }
+}
+
+async function getUpcomingAssessmentAppointment(
+  patientId: string,
+  latestAssessment: PatientAssessmentSummary | null,
+): Promise<UpcomingAssessmentAppointment | null> {
+  if (latestAssessment) return null
+
+  const { data: proposal, error: proposalError } = await supabase
+    .from('scheduling_proposals')
+    .select('id, confirmed_slot_id, professional_id')
+    .eq('patient_id', patientId)
+    .eq('proposal_type', 'avaliacao')
+    .eq('status', 'confirmado')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (proposalError) throw proposalError
+  if (!proposal?.confirmed_slot_id) return null
+
+  const { data: slot, error: slotError } = await supabase
+    .from('scheduling_proposal_slots')
+    .select('starts_at')
+    .eq('id', proposal.confirmed_slot_id)
+    .maybeSingle()
+
+  if (slotError) throw slotError
+  if (!slot?.starts_at) return null
+
+  let professionalName: string | null = null
+  if (proposal.professional_id) {
+    const { data: cycle, error: cycleError } = await supabase
+      .from('care_cycles')
+      .select('professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name )')
+      .eq('patient_id', patientId)
+      .eq('assigned_professional_id', proposal.professional_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (!cycleError) {
+      professionalName =
+        (cycle as { professionals: { full_name: string } | null } | null)?.professionals?.full_name ??
+        null
+    }
+  }
+
+  return {
+    proposalId: proposal.id,
+    scheduledAt: slot.starts_at,
+    professionalName,
   }
 }
 
@@ -157,7 +217,8 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
           professionals:professionals!care_sessions_professional_id_fkey ( full_name )`,
         )
         .eq('cycle_id', cycleRow.id)
-        .eq('status', 'prevista')
+        .in('status', ['prevista', 'remarcada'])
+        .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true })
         .limit(1)
         .maybeSingle(),
@@ -187,11 +248,19 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
   const chargeRow = chargeResult.data as PendingChargeSummary | null
   const pendingCharge = chargeRow?.id ? chargeRow : null
 
+  let upcomingAssessment: UpcomingAssessmentAppointment | null = null
+  try {
+    upcomingAssessment = await getUpcomingAssessmentAppointment(patientId, latestAssessment)
+  } catch {
+    upcomingAssessment = null
+  }
+
   return {
     latestAssessment,
     pendingProposal,
     activeCycle,
     pendingCharge,
+    upcomingAssessment,
   }
 }
 
@@ -204,6 +273,7 @@ export async function loadPatientHome(): Promise<PatientHomeContext> {
       pendingProposal: null,
       activeCycle: null,
       pendingCharge: null,
+      upcomingAssessment: null,
     }
   }
 

@@ -11,8 +11,8 @@ const cycleStatusLabels: Record<string, string> = {
   ativo: 'Ativo',
   em_pausa: 'Em pausa',
   em_analise: 'Em análise',
-  encerrado: 'Encerrado',
-  fechado_financeiramente: 'Fechado financeiramente',
+  encerrado: 'Concluído',
+  fechado_financeiramente: 'Concluído',
   cancelado: 'Cancelado',
 }
 
@@ -48,7 +48,7 @@ export default function TratamentoScreen() {
           {cycles.length === 0 ? (
             <View className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-8">
               <Text className="text-center text-sm text-muted-foreground">
-                Nenhum ciclo de tratamento encontrado no momento.
+                Seu tratamento aparecerá aqui após a avaliação inicial e aceite da proposta.
               </Text>
             </View>
           ) : (
@@ -78,14 +78,14 @@ export default function TratamentoScreen() {
                       <View className="flex-row items-center gap-2">
                         <Calendar size={16} color="#49796B" />
                         <Text className="text-sm text-muted-foreground">
-                          Próxima sessão:{' '}
+                          Próxima terapia:{' '}
                           <Text className="font-medium text-foreground">
                             {formatDateTime(activeCycle.nextSessionAt)}
                           </Text>
                         </Text>
                       </View>
                     ) : (
-                      <Text className="text-sm text-muted-foreground">Nenhuma sessão prevista no momento.</Text>
+                      <Text className="text-sm text-muted-foreground">Nenhuma terapia prevista no momento.</Text>
                     )}
                     <Pressable
                       onPress={() => router.push(`/(app)/tratamento/ciclo/${activeCycle.id}`)}

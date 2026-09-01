@@ -9,6 +9,7 @@ import {
   HelpCircle,
   LogOut,
   Moon,
+  Pill,
   ScrollText,
   User,
 } from 'lucide-react'
@@ -96,6 +97,13 @@ export function PacienteContaPage() {
             label="Documentos"
             description="Termos aceitos e comprovantes"
             icon={FileText}
+            className="border-b border-border"
+          />
+          <AccountLinkRow
+            to="/paciente/larsanapill"
+            label="LarsanaPill"
+            description="Exercícios e orientações em casa"
+            icon={Pill}
             className="border-b border-border"
           />
           <AccountLinkRow

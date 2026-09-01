@@ -1,4 +1,11 @@
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { supabase } from '@/lib/supabase'
+
+/** Mesmo texto exibido nos botões de escolha de horário. */
+export function formatAvailabilitySlotLabel(startsAt: string): string {
+  return format(new Date(startsAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
+}
 
 export type SchedulingProposalStatus = 'pendente' | 'confirmado' | 'recusado' | 'expirado'
 
@@ -63,10 +70,12 @@ export async function submitPpAvailability(
 export async function patientConfirmSlot(
   proposalId: string,
   slotId: string,
+  options?: { choiceLabel?: string },
 ): Promise<{ proposal_id: string; status: string; session_id: string | null }> {
   const { data, error } = await supabase.rpc('patient_confirm_slot', {
     p_proposal_id: proposalId,
     p_slot_id: slotId,
+    p_choice_label: options?.choiceLabel ?? null,
   })
   if (error) throw error
   return data as { proposal_id: string; status: string; session_id: string | null }
@@ -110,25 +119,9 @@ export async function listPendingSchedulingProposalsForPatient(options?: {
   patientId?: string
   demandId?: string
 }): Promise<SchedulingProposal[]> {
-  let query = supabase
-    .from('scheduling_proposals')
-    .select(`
-      id, demand_id, patient_id, professional_id, proposal_type, status,
-      expires_at, confirmed_slot_id, rejection_reason, created_at,
-      scheduling_proposal_slots ( id, proposal_id, starts_at, ends_at, sort_order ),
-      scheduling_messages ( id, proposal_id, sender_role, template_code, body, created_at )
-    `)
-    .eq('status', 'pendente')
-    .order('created_at', { ascending: false })
-
-  if (options?.patientId) {
-    query = query.eq('patient_id', options.patientId)
-  }
-  if (options?.demandId) {
-    query = query.eq('demand_id', options.demandId)
-  }
-
-  const { data, error } = await query
+  const { data, error } = await supabase.rpc('patient_list_pending_scheduling_proposals' as never, {
+    p_demand_id: options?.demandId ?? null,
+  } as never)
 
   if (error) throw error
   return (data ?? []) as unknown as SchedulingProposal[]
@@ -155,7 +148,56 @@ export type DemandSchedulingFollowUp =
   | { kind: 'awaiting_patient' }
   | { kind: 'confirmed' }
 
+type DemandScheduleContext = {
+  id: string
+  cycle_id: string | null
+  demand_type: string
+}
+
+/** Demanda ainda precisa que o PP envie horários (inclui continuidade pós-pagamento com sessões sem data). */
+export async function demandNeedsScheduleSlots(demand: DemandScheduleContext): Promise<boolean> {
+  const { data: latestProposal, error: proposalError } = await supabase
+    .from('scheduling_proposals')
+    .select('status')
+    .eq('demand_id', demand.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (proposalError) throw proposalError
+  if (latestProposal?.status === 'pendente') return false
+
+  if (demand.cycle_id && demand.demand_type === 'continuidade') {
+    const { count, error: sessionError } = await supabase
+      .from('care_sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('cycle_id', demand.cycle_id)
+      .eq('is_assessment_session', false)
+      .is('scheduled_at', null)
+      .eq('status', 'prevista')
+
+    if (sessionError) throw sessionError
+    if ((count ?? 0) > 0) return true
+  }
+
+  if (!latestProposal) return true
+  if (latestProposal.status === 'recusado' || latestProposal.status === 'expirado') return true
+  return false
+}
+
 export async function getDemandSchedulingFollowUp(demandId: string): Promise<DemandSchedulingFollowUp> {
+  const { data: demand, error: demandError } = await supabase
+    .from('demands')
+    .select('id, cycle_id, demand_type')
+    .eq('id', demandId)
+    .maybeSingle()
+
+  if (demandError) throw demandError
+
+  if (demand && (await demandNeedsScheduleSlots(demand))) {
+    return { kind: 'needs_slots' }
+  }
+
   const { data, error } = await supabase
     .from('scheduling_proposals')
     .select('status')
@@ -171,8 +213,15 @@ export async function getDemandSchedulingFollowUp(demandId: string): Promise<Dem
   return { kind: 'needs_slots' }
 }
 
+export type PendingScheduleDemand = {
+  id: string
+  demand_type: 'avaliacao' | 'continuidade'
+}
+
 /** Demanda alocada ao PP atual que ainda precisa de envio de horários. */
-export async function getPendingScheduleDemandIdForPatient(patientId: string): Promise<string | null> {
+export async function getPendingScheduleDemandForPatient(
+  patientId: string,
+): Promise<PendingScheduleDemand | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -187,17 +236,36 @@ export async function getPendingScheduleDemandIdForPatient(patientId: string): P
   if (proError) throw proError
   if (!professional) return null
 
-  const { data: demand, error: demandError } = await supabase
+  const { data: demands, error: demandError } = await supabase
     .from('demands')
-    .select('id')
+    .select('id, demand_type, cycle_id, created_at')
     .eq('patient_id', patientId)
     .eq('status', 'alocada')
     .eq('assigned_professional_id', professional.id)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
 
   if (demandError) throw demandError
-  if (!demand) return null
+  if (!demands?.length) return null
 
-  const followUp = await getDemandSchedulingFollowUp(demand.id)
-  return followUp.kind === 'needs_slots' ? demand.id : null
+  const prioritized = [
+    ...demands.filter((d) => d.cycle_id != null),
+    ...demands.filter((d) => d.cycle_id == null),
+  ]
+
+  for (const demand of prioritized) {
+    if (await demandNeedsScheduleSlots(demand)) {
+      return {
+        id: demand.id,
+        demand_type: demand.demand_type as PendingScheduleDemand['demand_type'],
+      }
+    }
+  }
+
+  return null
+}
+
+/** @deprecated Use getPendingScheduleDemandForPatient */
+export async function getPendingScheduleDemandIdForPatient(patientId: string): Promise<string | null> {
+  const pending = await getPendingScheduleDemandForPatient(patientId)
+  return pending?.id ?? null
 }

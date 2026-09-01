@@ -12,8 +12,8 @@ const cycleStatusLabels: Record<string, string> = {
   ativo: 'Ativo',
   em_pausa: 'Em pausa',
   em_analise: 'Em análise',
-  encerrado: 'Encerrado',
-  fechado_financeiramente: 'Fechado financeiramente',
+  encerrado: 'Concluído',
+  fechado_financeiramente: 'Concluído',
   cancelado: 'Cancelado',
 }
 

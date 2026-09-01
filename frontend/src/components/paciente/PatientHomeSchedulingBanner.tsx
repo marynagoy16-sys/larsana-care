@@ -7,7 +7,7 @@ import { listPendingSubOffersForPatient } from '@/services/sessionReschedule'
 export function PatientHomeSchedulingBanner() {
   const { data: proposals = [] } = useQuery({
     queryKey: ['paciente', 'scheduling_proposals'],
-    queryFn: listPendingSchedulingProposalsForPatient,
+    queryFn: () => listPendingSchedulingProposalsForPatient(),
   })
 
   const { data: subOffers = [] } = useQuery({
@@ -20,12 +20,16 @@ export function PatientHomeSchedulingBanner() {
 
   const hasSub = subOffers.length > 0
   const hasReschedule = proposals.some((p) => p.proposal_type === 'remarcacao')
+  const hasContinuidade = proposals.some((p) => p.proposal_type === 'continuidade')
+  const hasAvaliacao = proposals.some((p) => p.proposal_type === 'avaliacao')
 
   const title = hasSub
     ? 'Substituto ou remarcação pendente'
     : hasReschedule
       ? 'Confirmar remarcação'
-      : 'Confirmar horário de atendimento'
+      : hasContinuidade && !hasAvaliacao
+        ? 'Escolha o horário da primeira terapia'
+        : 'Confirmar horário de atendimento'
 
   const subtitle = hasSub
     ? `${subOffers.length} oferta(s) de substituto aguardando resposta`
@@ -33,7 +37,7 @@ export function PatientHomeSchedulingBanner() {
 
   return (
     <Link
-      to="/paciente/agendamento"
+      to="/paciente/chat"
       className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3.5 transition-colors hover:bg-primary/10"
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">

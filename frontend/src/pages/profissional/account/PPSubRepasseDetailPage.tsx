@@ -92,7 +92,7 @@ export function PPSubRepasseDetailPage() {
             <div className="space-y-3 rounded-xl border border-border bg-card p-5 text-sm">
               <DetailRow label="Paciente" value={patientName} />
               <DetailRow
-                label="Sessão"
+                label="Terapia"
                 value={`Terapia ${data.session_number}${data.care_cycles ? ` · Ciclo ${data.care_cycles.cycle_number}` : ''}`}
               />
               <DetailRow label="Comissão" value={`${data.pp_percentage}%`} />

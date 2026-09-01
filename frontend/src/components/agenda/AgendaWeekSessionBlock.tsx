@@ -62,7 +62,7 @@ export function AgendaWeekSessionBlock({
       )}
       style={{ top, height, ...sessionColumnPositionStyle(columnIndex, columnCount) }}
       onClick={() => navigate(`/profissional/agenda/${session.id}`)}
-      title={`${session.patientName} · ${timeLabel} · Ciclo ${session.cycleNumber} · Sessão #${session.sessionNumber}`}
+      title={`${session.patientName} · ${timeLabel} · Ciclo ${session.cycleNumber} · Terapia #${session.sessionNumber}`}
       aria-label={label}
     >
       {showLabel ? (

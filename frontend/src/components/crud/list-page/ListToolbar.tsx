@@ -20,6 +20,7 @@ interface ListToolbarProps {
   importDisabled?: boolean
   isRefreshing?: boolean
   trailing?: ReactNode
+  searchAccessory?: ReactNode
 }
 
 function IconAction({
@@ -65,9 +66,10 @@ export function ListToolbar({
   onSettings,
   onAdd,
   addLabel = 'Adicionar',
-  importDisabled = true,
+  importDisabled = false,
   isRefreshing,
   trailing,
+  searchAccessory,
 }: ListToolbarProps) {
   const showSearch = onSearchChange !== undefined
 
@@ -75,14 +77,17 @@ export function ListToolbar({
     <div className="flex flex-nowrap items-center gap-2 min-w-0 w-full">
       <div className={cn('flex min-w-0 items-center gap-1.5 sm:gap-2', showSearch ? 'flex-1' : 'flex-1 sm:flex-none')}>
         {showSearch && (
-        <div className="relative flex-1 min-w-0">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <Input
-            placeholder={searchPlaceholder}
-            className="pl-9 h-9 w-full"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
+        <div className="flex flex-1 min-w-0 items-center gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder={searchPlaceholder}
+              className="pl-9 h-9 w-full"
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+          {searchAccessory}
         </div>
         )}
 
@@ -117,7 +122,7 @@ export function ListToolbar({
             <IconAction label="Importar" onClick={onImport} disabled={importDisabled} className="lg:hidden">
               <Upload size={16} />
             </IconAction>
-            <Button variant="outline" size="sm" className="hidden lg:inline-flex h-9 shrink-0 whitespace-nowrap" disabled={importDisabled} onClick={onImport} title="Em breve">
+            <Button variant="outline" size="sm" className="hidden lg:inline-flex h-9 shrink-0 whitespace-nowrap" disabled={importDisabled} onClick={onImport}>
               <Upload size={14} />
               Importar
             </Button>

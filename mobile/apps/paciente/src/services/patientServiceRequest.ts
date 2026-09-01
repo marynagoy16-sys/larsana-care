@@ -91,6 +91,23 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+export async function getPendingAssessmentRequestCharge(
+  patientId: string,
+): Promise<{ id: string; amount_cents: number; due_date: string | null; created_at: string } | null> {
+  const { data, error } = await supabase
+    .from('charges')
+    .select('id, amount_cents, due_date, created_at')
+    .eq('patient_id', patientId)
+    .eq('charge_kind', 'assessment_request')
+    .in('payment_status', ['pendente', 'vencido'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
+
 export async function getPatientServiceStatus(): Promise<PatientServiceStatus> {
   const { data, error } = await supabase.rpc('patient_get_service_status' as never)
   if (error) throw error
@@ -272,6 +289,8 @@ export async function joinWaitlist(notes?: string): Promise<JoinWaitlistResult> 
 
 export const patientServiceQueryKeys = {
   status: ['paciente', 'service-status'] as const,
+  pendingAssessmentCharge: (patientId: string) =>
+    ['paciente', 'pending-assessment-charge', patientId] as const,
   prefill: ['paciente', 'service-request-prefill'] as const,
   legalTerms: ['paciente', 'service-request-legal-terms'] as const,
 }

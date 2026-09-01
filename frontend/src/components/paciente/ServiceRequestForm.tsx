@@ -72,10 +72,11 @@ interface ServiceRequestFormProps {
     patientId: string
     assessmentFeeCents: number
   }) => Promise<void>
+  onSimulate?: () => Promise<void>
   submitting?: boolean
 }
 
-export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: ServiceRequestFormProps) {
+export function ServiceRequestForm({ onPrepare, onCheckout, onSimulate, submitting }: ServiceRequestFormProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [patientFullName, setPatientFullName] = useState('')
   const [patientCpf, setPatientCpf] = useState('')
@@ -225,6 +226,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
   }
 
   const progressPercent = step === 1 ? 33 : step === 2 ? 66 : 100
+  const showSimulatePayment = !import.meta.env.PROD && typeof onSimulate === 'function'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -511,18 +513,37 @@ export function ServiceRequestForm({ onPrepare, onCheckout, submitting }: Servic
             </div>
           </section>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button type="button" variant="outline" className="sm:flex-1" onClick={() => setStep(2)} disabled={submitting}>
-              Voltar
-            </Button>
-            <Button
-              type="button"
-              className={cn(softFieldButtonClass, 'sm:flex-1')}
-              disabled={submitting}
-              onClick={() => void handleCheckout()}
-            >
-              {submitting ? 'Gerando pagamento…' : 'Pagar avaliação (PIX)'}
-            </Button>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button type="button" variant="outline" className="sm:flex-1" onClick={() => setStep(2)} disabled={submitting}>
+                Voltar
+              </Button>
+              <Button
+                type="button"
+                className={cn(softFieldButtonClass, 'sm:flex-1')}
+                disabled={submitting}
+                onClick={() => void handleCheckout()}
+              >
+                {submitting ? 'Gerando pagamento…' : 'Pagar avaliação (PIX)'}
+              </Button>
+            </div>
+
+            {showSimulatePayment ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  disabled={submitting}
+                  onClick={() => void onSimulate?.()}
+                >
+                  {submitting ? 'Confirmando…' : 'Simular pagamento confirmado'}
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  Ambiente de demonstração — confirma o pagamento e envia a solicitação.
+                </p>
+              </>
+            ) : null}
           </div>
         </>
       )}

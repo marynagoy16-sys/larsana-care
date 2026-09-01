@@ -1,8 +1,24 @@
+import { FunctionsHttpError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
 async function invoke<T>(name: string, body?: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body })
-  if (error) throw error
+  if (error) {
+    if (error instanceof FunctionsHttpError) {
+      try {
+        const payload = await error.context.json() as { error?: string }
+        if (payload?.error) throw new Error(payload.error)
+      } catch (parseErr) {
+        if (parseErr instanceof Error && parseErr.message !== error.message) {
+          throw parseErr
+        }
+      }
+    }
+    throw error
+  }
+  if (data && typeof data === 'object' && 'error' in data && typeof (data as { error?: string }).error === 'string') {
+    throw new Error((data as { error: string }).error)
+  }
   return data as T
 }
 
@@ -13,6 +29,7 @@ export interface CreateChargePayload {
   payment_method: 'PIX' | 'BOLETO'
   description?: string
   charge_id?: string
+  force_new_asaas_payment?: boolean
 }
 
 export interface CreateChargeResult {
@@ -22,6 +39,8 @@ export interface CreateChargeResult {
   pix_copy_paste: string | null
   boleto_url: string | null
   asaas_enabled: boolean
+  pix_receiver_ready?: boolean
+  pix_receiver_message?: string | null
 }
 
 export interface DelumaExportPayload {

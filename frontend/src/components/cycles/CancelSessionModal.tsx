@@ -33,8 +33,8 @@ export function CancelSessionModal({
     <CrudModal
       open={open}
       onOpenChange={onOpenChange}
-      title={`Cancelar sessão #${sessionNumber}`}
-      description="Desmarque sem justificativa com menos de 12h de antecedência. Aplica regra de 50%: metade reembolsada à família e metade repassada ao profissional (split proporcional)."
+      title={`Cancelar terapia #${sessionNumber} sem justificativa`}
+      description="Use quando a família desmarcar com menos de 2 horas de antecedência. Aplica regra de 50% do valor da terapia: metade reembolsada à família e metade repassada ao profissional parceiro (proporcional à comissão do ciclo)."
     >
       <div className="space-y-4">
         {scheduledAt && (
@@ -56,7 +56,7 @@ export function CancelSessionModal({
             onClick={() => mutation.mutate()}
           >
             <Ban className="size-4 mr-1" />
-            {mutation.isPending ? 'Registrando…' : 'Confirmar cancelamento 50%'}
+            {mutation.isPending ? 'Registrando…' : 'Confirmar cancelamento'}
           </Button>
         </div>
         {mutation.isError && (

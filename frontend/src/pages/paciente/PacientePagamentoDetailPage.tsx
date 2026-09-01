@@ -1,20 +1,32 @@
-﻿import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 import { CheckCircle2, Copy } from 'lucide-react'
 import { PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { Button } from '@/components/ui/button'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { paymentStatusLabels } from '@/constants/labels'
-import { simulateChargePayment } from '@/services/patientPayments'
+import { simulateChargePayment, syncPatientChargeWithAsaas, updateChargePaymentMethod } from '@/services/patientPayments'
+import { ensurePatientPrimaryAddressGeocoded } from '@/services/patientAddressGeocode'
 import { patientPortalQueryKeys } from '@/services/patientPortal'
-import { syncAssessmentChargeWithAsaas } from '@/services/patientServiceRequest'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { getPatientReceiptSignedUrl } from '@/services/patientReceipts'
+import { PaymentTrustBanner } from '@/components/paciente/PaymentTrustBanner'
+import { BoletoIcon, PaymentMethodIconSlot, PixIcon } from '@/components/paciente/PaymentMethodIcons'
+import { isPaymentSimulationEnabled } from '@/lib/paymentSimulation'
+import { patientServiceQueryKeys } from '@/services/patientServiceRequest'
+
+import { cn } from '@/lib/utils'
+
+type PaymentMethodChoice = 'PIX' | 'BOLETO'
 
 type ChargeRow = {
   id: string
   patient_id: string
   amount_cents: number
+  assessment_credit_cents?: number
+  charge_kind?: string | null
   payment_status: string
   due_date: string | null
   description: string | null
@@ -42,6 +54,8 @@ function pixImageSrc(code: string | null): string | null {
 export function PacientePagamentoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const queryClient = useQueryClient()
+  const [pixReceiverMessage, setPixReceiverMessage] = useState<string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodChoice>('PIX')
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['paciente', 'charges', id],
@@ -49,7 +63,7 @@ export function PacientePagamentoDetailPage() {
       const { data: row, error } = await supabase
         .from('charges_patient')
         .select(
-          'id, patient_id, amount_cents, payment_status, due_date, description, payment_method, cycle_id, asaas_payment_id, pix_qr_code, pix_copy_paste, boleto_url',
+          'id, patient_id, amount_cents, assessment_credit_cents, charge_kind, payment_status, due_date, description, payment_method, cycle_id, asaas_payment_id, pix_qr_code, pix_copy_paste, boleto_url',
         )
         .eq('id', id!)
         .single()
@@ -73,48 +87,87 @@ export function PacientePagamentoDetailPage() {
     enabled: !!id && data?.payment_status === 'pago',
   })
 
-  const syncPixMutation = useMutation({
+  useEffect(() => {
+    if (data?.payment_method === 'PIX' || data?.payment_method === 'BOLETO') {
+      setPaymentMethod(data.payment_method)
+    }
+  }, [data?.payment_method])
+
+  const methodMutation = useMutation({
+    mutationFn: async (method: PaymentMethodChoice) => {
+      if (!id) throw new Error('Cobrança não encontrada')
+      await updateChargePaymentMethod(id, method)
+      return method
+    },
+    onSuccess: (method) => {
+      setPaymentMethod(method)
+      setPixReceiverMessage(null)
+      queryClient.invalidateQueries({ queryKey: ['paciente', 'charges', id] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Não foi possível alterar a forma de pagamento'),
+  })
+
+  const syncChargeMutation = useMutation({
     mutationFn: async () => {
-      if (!data) throw new Error('Cobran├ºa n├úo carregada')
-      const result = await syncAssessmentChargeWithAsaas(
-        data.patient_id,
-        data.id,
-        data.amount_cents,
-        (data.payment_method as 'PIX' | 'BOLETO') ?? 'PIX',
-      )
-      if (!result.synced) throw new Error(result.error ?? 'N├úo foi poss├¡vel gerar o PIX')
+      if (!data) throw new Error('Cobrança não carregada')
+      const result = await syncPatientChargeWithAsaas({
+        patientId: data.patient_id,
+        chargeId: data.id,
+        amountCents: data.amount_cents,
+        paymentMethod,
+        description: data.description ?? 'Pagamento Larsana Care',
+        dueDate: data.due_date ?? undefined,
+        forceNewAsaasPayment: Boolean(data.asaas_payment_id),
+      })
+      if (!result.synced) {
+        throw new Error(
+          result.error
+            ?? (paymentMethod === 'BOLETO' ? 'Não foi possível gerar o boleto' : 'Não foi possível gerar o PIX'),
+        )
+      }
+      setPixReceiverMessage(result.pixReceiverMessage ?? null)
       return result
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      if (paymentMethod === 'PIX' && result.pixReceiverReady === false && result.pixReceiverMessage) {
+        toast.warning('PIX gerado, mas a conta recebedora ainda não está pronta', {
+          description: result.pixReceiverMessage,
+        })
+      }
       queryClient.invalidateQueries({ queryKey: ['paciente', 'charges', id] })
-      toast.success('PIX gerado com sucesso')
+      toast.success(paymentMethod === 'BOLETO' ? 'Boleto gerado com sucesso' : 'PIX gerado com sucesso')
     },
     onError: (err: Error) => {
-      toast.error(err.message || 'N├úo foi poss├¡vel gerar o PIX. Tente novamente.')
+      toast.error(err.message || 'Não foi possível gerar a cobrança. Tente novamente.')
     },
   })
 
   const simulateMutation = useMutation({
-    mutationFn: () => simulateChargePayment(id!),
+    mutationFn: async () => {
+      if (data?.patient_id) {
+        await ensurePatientPrimaryAddressGeocoded(data.patient_id)
+      }
+      return simulateChargePayment(id!)
+    },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['paciente', 'charges', id] })
       queryClient.invalidateQueries({ queryKey: ['paciente', 'charges-list'] })
       queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
-      queryClient.invalidateQueries({ queryKey: ['paciente', 'cycles'] })
+      queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
 
       if (result.already_paid) {
-        toast.info('Este pagamento j├í estava confirmado.')
+        toast.info('Este pagamento já estava confirmado.')
         return
       }
 
       toast.success(
         result.sessions_count > 0
-          ? `Pagamento confirmado! ${result.sessions_count} sess├Áes liberadas.`
-          : 'Pagamento confirmado!',
+          ? `Pagamento confirmado! ${result.sessions_count} sessões liberadas.`
+          : 'Pagamento confirmado! Sua solicitação foi enviada.',
       )
     },
     onError: (err: Error) => {
-      toast.error(err.message || 'N├úo foi poss├¡vel simular o pagamento.')
+      toast.error(err.message || 'Não foi possível simular o pagamento.')
     },
   })
 
@@ -122,9 +175,9 @@ export function PacientePagamentoDetailPage() {
     if (!data?.pix_copy_paste) return
     try {
       await navigator.clipboard.writeText(data.pix_copy_paste)
-      toast.success('C├│digo PIX copiado')
+      toast.success('Código PIX copiado')
     } catch {
-      toast.error('N├úo foi poss├¡vel copiar o c├│digo PIX')
+      toast.error('Não foi possível copiar o código PIX')
     }
   }
 
@@ -139,21 +192,41 @@ export function PacientePagamentoDetailPage() {
   if (isError || !data) {
     return (
       <PacienteSubpageShell title="Pagamento" backTo="/paciente/pagamentos">
-        <p className="text-muted-foreground">Cobran├ºa n├úo encontrada.</p>
+        <p className="text-muted-foreground">Cobrança não encontrada.</p>
       </PacienteSubpageShell>
     )
   }
 
   const isPaid = data.payment_status === 'pago'
+  const assessmentCredit = data.assessment_credit_cents ?? 0
+  const grossAmount = data.amount_cents + assessmentCredit
   const statusLabel = paymentStatusLabels[data.payment_status] ?? data.payment_status
   const hasAsaasCharge = Boolean(data.asaas_payment_id)
+  const isPix = paymentMethod === 'PIX'
+  const isBoleto = paymentMethod === 'BOLETO'
   const pixSrc = pixImageSrc(data.pix_qr_code)
-  const showDevSimulate = !hasAsaasCharge && import.meta.env.DEV
+  const showSimulatePayment = isPaymentSimulationEnabled() && !isPaid
+  const asaasInvoiceUrl = data.asaas_payment_id
+    ? `https://www.asaas.com/i/${data.asaas_payment_id.replace(/^pay_/, '')}`
+    : null
+  const paymentBusy = methodMutation.isPending || syncChargeMutation.isPending
+
+  const handlePaymentMethodChange = (method: PaymentMethodChoice) => {
+    if (method === paymentMethod || paymentBusy) return
+    if (!hasAsaasCharge) {
+      setPaymentMethod(method)
+      if (method !== data.payment_method) {
+        methodMutation.mutate(method)
+      }
+      return
+    }
+    methodMutation.mutate(method)
+  }
 
   return (
     <PacienteSubpageShell title="Pagamento" backTo="/paciente/pagamentos">
       <div className="space-y-4 pb-8">
-        <p className="text-sm text-muted-foreground">{data.description ?? 'Detalhe da cobran├ºa'}</p>
+        <p className="text-sm text-muted-foreground">{data.description ?? 'Detalhe da cobrança'}</p>
 
         {isPaid && (
           <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 dark:border-emerald-900/50 dark:bg-emerald-950/30 p-5">
@@ -162,7 +235,7 @@ export function PacientePagamentoDetailPage() {
               <div>
                 <p className="font-semibold text-emerald-950 dark:text-emerald-100">Pagamento confirmado</p>
                 <p className="text-sm text-emerald-900/85 dark:text-emerald-200/90 mt-1">
-                  Seu tratamento foi liberado. As sess├Áes domiciliares j├í est├úo agendadas.
+                  Seu tratamento foi liberado. As sessões domiciliares já estão agendadas.
                 </p>
               </div>
             </div>
@@ -174,6 +247,12 @@ export function PacientePagamentoDetailPage() {
             <div>
               <p className="text-xs text-muted-foreground">Valor</p>
               <p className="font-display text-2xl font-bold">{formatCurrency(data.amount_cents)}</p>
+              {assessmentCredit > 0 && data.charge_kind === 'cycle' ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Subtotal {formatCurrency(grossAmount)} − desconto da avaliação paga{' '}
+                  {formatCurrency(assessmentCredit)}
+                </p>
+              ) : null}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -188,21 +267,62 @@ export function PacientePagamentoDetailPage() {
                   <p className="font-medium">{formatDate(data.due_date)}</p>
                 </div>
               )}
-              {data.payment_method && (
-                <div>
-                  <p className="text-xs text-muted-foreground">Forma</p>
-                  <p className="font-medium">{data.payment_method}</p>
-                </div>
-              )}
             </div>
+
+            {!isPaid && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Forma de pagamento</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['PIX', 'BOLETO'] as const).map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      disabled={paymentBusy}
+                      onClick={() => handlePaymentMethodChange(method)}
+                      className={cn(
+                        'flex min-h-[4.5rem] flex-col items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-medium transition-colors',
+                        paymentMethod === method
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border bg-background text-foreground hover:bg-muted/40',
+                      )}
+                    >
+                      <PaymentMethodIconSlot>
+                        {method === 'PIX' ? (
+                          <PixIcon />
+                        ) : (
+                          <BoletoIcon
+                            className={paymentMethod === method ? 'text-primary' : undefined}
+                          />
+                        )}
+                      </PaymentMethodIconSlot>
+                      <span className="w-full text-center leading-none">{method === 'PIX' ? 'PIX' : 'Boleto'}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {!isPaid && (
               <>
                 {hasAsaasCharge ? (
                   <div className="space-y-4">
-                    {data.payment_method === 'PIX' && (pixSrc || data.pix_copy_paste) && (
+                    {pixReceiverMessage ? (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs leading-relaxed text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-100">
+                        {pixReceiverMessage}
+                      </div>
+                    ) : null}
+                    {isPix && (pixSrc || data.pix_copy_paste) && (
                       <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3 text-center">
                         <p className="font-medium text-foreground">Pague com PIX</p>
+                        <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                          Se a leitura do QR Code falhar, o código copiado costuma funcionar.
+                        </p>
+                        {data.pix_copy_paste && (
+                          <Button type="button" className="w-full" onClick={() => void copyPix()}>
+                            <Copy className="size-4 mr-2" />
+                            Copiar código PIX
+                          </Button>
+                        )}
                         {pixSrc && (
                           <img
                             src={pixSrc}
@@ -210,56 +330,80 @@ export function PacientePagamentoDetailPage() {
                             className="mx-auto w-48 h-48 object-contain rounded-lg bg-white p-2"
                           />
                         )}
-                        {data.pix_copy_paste && (
-                          <Button type="button" variant="outline" className="w-full" onClick={() => void copyPix()}>
-                            <Copy className="size-4 mr-2" />
-                            Copiar c├│digo PIX
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => syncChargeMutation.mutate()}
+                          disabled={syncChargeMutation.isPending}
+                        >
+                          {syncChargeMutation.isPending
+                            ? isBoleto
+                              ? 'Gerando boleto…'
+                              : 'Gerando novo PIX…'
+                            : isBoleto
+                              ? 'Gerar novo boleto'
+                              : 'Gerar novo PIX'}
+                        </Button>
+                        {asaasInvoiceUrl ? (
+                          <Button asChild variant="ghost" className="w-full text-primary">
+                            <a href={asaasInvoiceUrl} target="_blank" rel="noopener noreferrer">
+                              Abrir pagamento no Asaas
+                            </a>
                           </Button>
-                        )}
+                        ) : null}
                       </div>
                     )}
-                    {data.boleto_url && (
+                    {isBoleto && data.boleto_url && (
                       <Button asChild className="w-full h-12 lg:h-10">
                         <a href={data.boleto_url} target="_blank" rel="noopener noreferrer">
                           Abrir boleto
                         </a>
                       </Button>
                     )}
-                    {!pixSrc && !data.pix_copy_paste && !data.boleto_url && (
+                    {isPix && !pixSrc && !data.pix_copy_paste && (
                       <p className="text-sm text-muted-foreground text-center">
-                        Cobran├ºa gerada. Aguarde a atualiza├º├úo do QR Code ou boleto.
+                        Cobrança gerada. Aguarde a atualização do QR Code PIX.
+                      </p>
+                    )}
+                    {isBoleto && !data.boleto_url && (
+                      <p className="text-sm text-muted-foreground text-center">
+                        Cobrança gerada. Aguarde a geração do boleto.
                       </p>
                     )}
                   </div>
                 ) : (
                   <>
-                    <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-center text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground mb-1">Pagamento via PIX ou boleto</p>
-                      <p>A cobran├ºa foi registrada. Gere o PIX para concluir o pagamento.</p>
-                    </div>
-
                     <Button
                       className="w-full h-12 lg:h-10"
-                      onClick={() => syncPixMutation.mutate()}
-                      disabled={syncPixMutation.isPending}
+                      onClick={() => syncChargeMutation.mutate()}
+                      disabled={syncChargeMutation.isPending || methodMutation.isPending}
                     >
-                      {syncPixMutation.isPending ? 'Gerando PIXÔÇª' : 'Gerar PIX'}
+                      {syncChargeMutation.isPending
+                        ? isBoleto
+                          ? 'Gerando boleto…'
+                          : 'Gerando PIX…'
+                        : isBoleto
+                          ? 'Gerar boleto'
+                          : 'Gerar PIX'}
                     </Button>
 
-                    {showDevSimulate && (
+                    {showSimulatePayment ? (
                       <>
                         <Button
+                          type="button"
+                          variant="outline"
                           className="w-full h-12 lg:h-10"
                           onClick={() => simulateMutation.mutate()}
-                          disabled={simulateMutation.isPending}
+                          disabled={simulateMutation.isPending || paymentBusy}
                         >
-                          {simulateMutation.isPending ? 'ConfirmandoÔÇª' : 'Simular pagamento confirmado'}
+                          {simulateMutation.isPending ? 'Confirmando…' : 'Simular pagamento confirmado'}
                         </Button>
                         <p className="text-xs text-center text-muted-foreground">
-                          Ambiente de demonstra├º├úo ÔÇö confirma o PIX e libera as sess├Áes do ciclo.
+                          Ambiente de demonstração — confirma o pagamento e envia a solicitação.
                         </p>
                       </>
-                    )}
+                    ) : null}
                   </>
                 )}
               </>
@@ -269,26 +413,34 @@ export function PacientePagamentoDetailPage() {
               <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
                 <p className="text-sm font-semibold text-foreground">Notas fiscais</p>
                 <p className="text-xs text-muted-foreground">
-                  Para reembolso em conv├¬nio, voc├¬ pode precisar da NF de intermedia├º├úo (Larsana) e da presta├º├úo de
-                  servi├ºo do profissional parceiro.
+                  Para reembolso em convênio, você pode precisar da NF de intermediação (Larsana) e da prestação de
+                  serviço do profissional parceiro.
                 </p>
                 {receipts.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">As notas ser├úo disponibilizadas aqui ap├│s emiss├úo.</p>
+                  <p className="text-xs text-muted-foreground">As notas serão disponibilizadas aqui após emissão.</p>
                 ) : (
                   <ul className="space-y-2 text-sm">
                     {receipts.map((receipt) => (
                       <li key={receipt.id} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2">
                         <span>
                           {receipt.receipt_kind === 'pp_prestacao'
-                            ? 'Presta├º├úo de servi├ºo (PP)'
+                            ? 'Prestação de serviço (PP)'
                             : receipt.receipt_kind === 'intermediacao'
-                              ? 'Intermedia├º├úo Larsana'
+                              ? 'Intermediação Larsana'
                               : 'Nota fiscal'}
                         </span>
                         {receipt.storage_path ? (
-                          <a href={receipt.storage_path} className="text-primary text-xs font-medium hover:underline">
+                          <button
+                            type="button"
+                            className="text-primary text-xs font-medium hover:underline"
+                            onClick={() => {
+                              void getPatientReceiptSignedUrl(receipt.storage_path!).then((url) => {
+                                window.open(url, '_blank', 'noopener,noreferrer')
+                              }).catch((err: Error) => toast.error(err.message))
+                            }}
+                          >
                             Baixar
-                          </a>
+                          </button>
                         ) : (
                           <span className="text-xs text-muted-foreground">Em processamento</span>
                         )}
@@ -304,6 +456,8 @@ export function PacientePagamentoDetailPage() {
                 <Link to={`/paciente/tratamento/ciclo/${data.cycle_id}`}>Ver meu tratamento</Link>
               </Button>
             )}
+
+            {!isPaid && <PaymentTrustBanner />}
           </div>
         </div>
       </div>

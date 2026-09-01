@@ -6,10 +6,28 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertTriangle, ArrowLeft, ClipboardList, Clock, PenLine, Search } from 'lucide-react'
 import { EntityListPage } from '@/components/crud/EntityListPage'
+import { CrudEmptyState } from '@/components/crud/CrudEmptyState'
+import { ListToolbar } from '@/components/crud/list-page/ListToolbar'
+import { CrudListPageLayout } from '@/components/crud/list-page/CrudListPageLayout'
+import { StatsCardRow } from '@/components/crud/list-page/StatsCardRow'
+import { buildEntityListStats } from '@/lib/buildEntityListStats'
+import { buildChargesStatCards } from '@/lib/chargesListStats'
+import {
+  listStaffCharges,
+  CHARGE_KIND_LABELS,
+  formatChargeDueHint,
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_STATUS_ORDER,
+  type ChargeListItem,
+  type PaymentMethod,
+  type PaymentStatus,
+} from '@/services/charges'
+import { FaturamentoCharts } from '@/components/admin/finance/FaturamentoCharts'
+import { PaymentStatusBadge } from '@/components/admin/finance/PaymentStatusVisual'
 import { CrudModal } from '@/components/crud/CrudModal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Toggle } from '@/components/ui/toggle'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { PatientSearchField } from '@/components/forms/PatientSearchField'
@@ -31,17 +49,26 @@ import {
   careCyclesService,
   careSessionsService,
   medicalRecordsService,
-  chargesService,
   transfersService,
-  internalExpensesService,
   supportTicketsService,
-  legalTermsService,
   profilesService,
-  delumaExportsService,
   contractTemplatesService,
   npsSurveysService,
 } from '@/services/index'
-import { listSubRepassesStaff, type SubRepasseDetail } from '@/services/transfers'
+import {
+  listSubRepassesStaff,
+  listStaffCycleTransfers,
+  formatRepasseWaitingLabel,
+  transferHasInvoice,
+  type SubRepasseDetail,
+  type TransferListItem,
+} from '@/services/transfers'
+import { RepasseStatusBadge } from '@/components/profissional/repasses/RepasseStatusVisual'
+import {
+  TRANSFER_STATUS_LABELS,
+  TRANSFER_STATUS_ORDER,
+  type TransferStatus,
+} from '@/services/ppTransfers'
 import { edgeFunctions } from '@/services/edgeFunctions'
 import { supabase } from '@/lib/supabase'
 import { GenericDetailPage } from '@/pages/admin/GenericDetailPage'
@@ -70,22 +97,12 @@ const qk = {
   regions: ['regions'] as const,
   users: ['profiles'] as const,
   contracts: ['contracts'] as const,
-  deluma: ['deluma_exports'] as const,
   nps: ['nps_surveys'] as const,
   reportsFaturamento: ['reports', 'faturamento'] as const,
   reportsConversao: ['reports', 'conversao'] as const,
   reportsHorasCrefito: ['reports', 'horas-crefito'] as const,
   reportsRepassesAging: ['reports', 'repasses-aging'] as const,
-  reportsCatalog: ['reports', 'catalog'] as const,
 }
-
-const REPORT_CATALOG = [
-  { id: 'faturamento', name: 'Faturamento', description: 'Receitas e cobranças por período', path: '/admin/relatorios/faturamento' },
-  { id: 'conversao', name: 'Conversão', description: 'Funil de avaliações e adesão ao tratamento', path: '/admin/relatorios/conversao' },
-  { id: 'horas-crefito', name: 'Horas CREFITO', description: 'Sessões realizadas e registro clínico', path: '/admin/relatorios/horas-crefito' },
-  { id: 'nps', name: 'NPS', description: 'Net Promoter Score por ciclo', path: '/admin/relatorios/nps' },
-  { id: 'repasses-aging', name: 'Aging repasses', description: 'Repasses pendentes por tempo de espera', path: '/admin/relatorios/repasses-aging' },
-] as const
 
 type AdminAssessmentRow = {
   id: string
@@ -613,6 +630,33 @@ export function MedicalRecordPatientPage() {
 export function ChargesPage() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<'all' | PaymentStatus>('all')
+
+  const statusSelect = (
+    <Select
+      value={statusFilter}
+      onValueChange={(value) => setStatusFilter(value as 'all' | PaymentStatus)}
+    >
+      <SelectTrigger className="h-9 w-[168px] shrink-0">
+        <SelectValue placeholder="Status" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">Todos os status</SelectItem>
+        {PAYMENT_STATUS_ORDER.map((status) => (
+          <SelectItem key={status} value={status}>
+            {paymentStatusLabels[status]}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+
+  const chargeStats = useMemo(
+    () => (_rows: ChargeListItem[], filteredRows: ChargeListItem[]) =>
+      buildChargesStatCards(filteredRows),
+    [],
+  )
+
   const schema = z.object({
     patient_id: z.string().uuid('Selecione um paciente'),
     amount_cents: z.coerce.number().positive(),
@@ -627,14 +671,84 @@ export function ChargesPage() {
   })
   return (
     <>
-      <EntityListPage title="Cobranças" queryKey={qk.charges} queryFn={() => chargesService.list('id, amount_cents, payment_status, due_date')}
+      <EntityListPage<ChargeListItem>
+        title="Cobranças"
+        queryKey={qk.charges}
+        queryFn={listStaffCharges}
+        buildStats={chargeStats}
+        statsColumns={4}
         onCreate={() => setOpen(true)}
         createLabel="Nova cobrança"
+        searchPlaceholder="Pesquisar cobranças..."
+        searchAccessory={statusSelect}
+        filterResetKey={statusFilter}
+        rowFilter={statusFilter === 'all' ? undefined : (row) => row.payment_status === statusFilter}
+        getSearchText={(row) =>
+          [
+            row.patients?.full_name,
+            row.description,
+            CHARGE_KIND_LABELS[row.charge_kind],
+            row.payment_method
+              ? PAYMENT_METHOD_LABELS[row.payment_method as PaymentMethod] ?? row.payment_method
+              : '',
+            paymentStatusLabels[row.payment_status],
+            formatCurrency(row.amount_cents),
+            row.due_date ? formatDate(row.due_date) : '',
+            formatDateTime(row.created_at),
+          ]
+            .filter(Boolean)
+            .join(' ')
+        }
         onRowClick={(r) => navigate(`/admin/cobrancas/${r.id}`)}
         columns={[
-          { key: 'amount', header: 'Valor', cell: (r) => formatCurrency(Number(r.amount_cents)) },
-          { key: 'status', header: 'Status', cell: (r) => paymentStatusLabels[String(r.payment_status)] ?? String(r.payment_status) },
-          { key: 'due', header: 'Vencimento', cell: (r) => formatDate(String(r.due_date)) },
+          {
+            key: 'patient',
+            header: 'Paciente',
+            mobilePrimary: true,
+            cell: (r) => r.patients?.full_name ?? '—',
+          },
+          {
+            key: 'kind',
+            header: 'Tipo',
+            cell: (r) => CHARGE_KIND_LABELS[r.charge_kind] ?? r.charge_kind,
+          },
+          {
+            key: 'amount',
+            header: 'Valor',
+            cell: (r) => formatCurrency(r.amount_cents),
+          },
+          {
+            key: 'method',
+            header: 'Método',
+            mobileHidden: true,
+            cell: (r) =>
+              r.payment_method
+                ? PAYMENT_METHOD_LABELS[r.payment_method as PaymentMethod] ?? r.payment_method
+                : '—',
+          },
+          {
+            key: 'due',
+            header: 'Vencimento',
+            cell: (r) => {
+              const hint = formatChargeDueHint(r.due_date, r.payment_status)
+              return (
+                <div className="min-w-0">
+                  <p className="tabular-nums">{r.due_date ? formatDate(r.due_date) : '—'}</p>
+                  {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+                </div>
+              )
+            },
+          },
+          {
+            key: 'status',
+            header: 'Status',
+            cell: (r) => (
+              <PaymentStatusBadge
+                status={r.payment_status}
+                label={paymentStatusLabels[r.payment_status] ?? r.payment_status}
+              />
+            ),
+          },
         ]}
       />
       <CrudModal open={open} onOpenChange={setOpen} title="Nova cobrança (Asaas)">
@@ -661,139 +775,249 @@ export function ChargesPage() {
   )
 }
 
-export function ChargeDetailPage() {
-  return <GenericDetailPage title="Cobrança" backPath="/admin/cobrancas" queryKey={qk.charges} queryFn={(id) => chargesService.getById(id)}
-    fields={[{ key: 'amount_cents', label: 'Valor', format: 'currency' }, { key: 'payment_status', label: 'Status' }, { key: 'due_date', label: 'Vencimento', format: 'date' }]} />
-}
-
 export function TransfersPage() {
   const navigate = useNavigate()
-  const [tab, setTab] = useState<'ciclo' | 'sub'>('ciclo')
+  const [kind, setKind] = useState<'ciclo' | 'sub'>('ciclo')
+  const [statusFilter, setStatusFilter] = useState<'all' | TransferStatus>('all')
+  const [subSearch, setSubSearch] = useState('')
 
-  const { data: subRows, isLoading: subLoading } = useQuery({
+  const kindSelect = (
+    <Select value={kind} onValueChange={(value) => setKind(value as 'ciclo' | 'sub')}>
+      <SelectTrigger className="h-9 w-[132px] shrink-0">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="ciclo">Ciclo</SelectItem>
+        <SelectItem value="sub">SUB avulso</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+
+  const statusSelect = (
+    <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | TransferStatus)}>
+      <SelectTrigger className="h-9 w-[168px] shrink-0">
+        <SelectValue placeholder="Status" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">Todos os status</SelectItem>
+        {TRANSFER_STATUS_ORDER.map((status) => (
+          <SelectItem key={status} value={status}>
+            {TRANSFER_STATUS_LABELS[status]}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+
+  const toolbarFilters = (
+    <div className="flex items-center gap-2 shrink-0">
+      {statusSelect}
+      {kindSelect}
+    </div>
+  )
+
+  const { data: subRows, isLoading: subLoading, isFetching: subFetching, refetch: refetchSub } = useQuery({
     queryKey: ['sub-repasses'],
     queryFn: listSubRepassesStaff,
-    enabled: tab === 'sub',
+    enabled: kind === 'sub',
   })
 
-  if (tab === 'sub') {
+  const filteredSubRows = useMemo(() => {
+    if (!subRows?.length) return []
+    let rows = subRows
+    if (statusFilter !== 'all') {
+      rows = rows.filter((row) => row.status === statusFilter)
+    }
+    const query = subSearch.trim().toLowerCase()
+    if (!query) return rows
+    return rows.filter((row) => {
+      const haystack = [
+        row.substitute?.full_name,
+        row.patients?.full_name,
+        row.care_cycles?.cycle_number != null ? `ciclo ${row.care_cycles.cycle_number}` : '',
+        row.status,
+        TRANSFER_STATUS_LABELS[row.status],
+        formatCurrency(row.amount_cents),
+        String(row.session_number),
+        formatDateTime(row.created_at),
+        row.transferred_at ? formatDateTime(row.transferred_at) : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return haystack.includes(query)
+    })
+  }, [subRows, subSearch, statusFilter])
+
+  const subStatCards = useMemo(() => {
+    const allRows = subRows ?? []
+    const cards = buildEntityListStats(allRows, filteredSubRows, {
+      title: 'Repasses',
+      search: subSearch || (statusFilter !== 'all' ? statusFilter : ''),
+      page: 0,
+      pageSize: Math.max(filteredSubRows.length, 1),
+      pageCount: filteredSubRows.length,
+    })
+    if (cards.length > 0) {
+      return [{ ...cards[0], footer: 'Repasse avulso SUB por sessão' }, ...cards.slice(1)]
+    }
+    return cards
+  }, [subRows, filteredSubRows, subSearch, statusFilter])
+
+  if (kind === 'sub') {
     return (
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-          <div>
-            <h1 className="font-display text-xl font-semibold">Repasses</h1>
-            <p className="text-sm text-muted-foreground">Repasse avulso SUB por sessão</p>
-          </div>
-          <div className="flex gap-2">
-            <Toggle
-              variant="outline"
-              pressed={false}
-              onPressedChange={() => setTab('ciclo')}
-              className="rounded-full px-4"
-            >
-              Ciclo
-            </Toggle>
-            <Toggle
-              variant="outline"
-              pressed={true}
-              onPressedChange={() => setTab('sub')}
-              className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              SUB avulso
-            </Toggle>
-          </div>
-        </div>
-        {subLoading ? (
-          <p className="p-6 text-sm text-muted-foreground">Carregando repasses SUB…</p>
-        ) : !subRows?.length ? (
-          <p className="p-6 text-sm text-muted-foreground">Nenhum repasse SUB registrado.</p>
-        ) : (
-          <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
-            {subRows.map((row: SubRepasseDetail) => (
-              <button
-                key={row.id}
-                type="button"
-                onClick={() => navigate(`/admin/repasses/sub/${row.id}`)}
-                className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/30"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium tabular-nums">{formatCurrency(row.amount_cents)}</p>
-                    <Badge variant="secondary" className="text-[10px]">
-                      SUB
-                    </Badge>
+      <CrudListPageLayout>
+        <div className="space-y-4">
+          <StatsCardRow cards={subStatCards} columns={4} isLoading={subLoading} />
+          <ListToolbar
+            search={subSearch}
+            onSearchChange={setSubSearch}
+            searchPlaceholder="Pesquisar repasses..."
+            searchAccessory={toolbarFilters}
+            onRefresh={() => void refetchSub()}
+            isRefreshing={subFetching}
+          />
+          {subLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando repasses SUB…</p>
+          ) : filteredSubRows.length === 0 ? (
+            <CrudEmptyState
+              message={
+                subSearch.trim() || statusFilter !== 'all'
+                  ? 'Nenhum repasse SUB encontrado com os filtros atuais.'
+                  : 'Nenhum repasse SUB registrado.'
+              }
+              muted
+            />
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
+              {filteredSubRows.map((row: SubRepasseDetail) => (
+                <button
+                  key={row.id}
+                  type="button"
+                  onClick={() => navigate(`/admin/repasses/sub/${row.id}`)}
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/30"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-medium tabular-nums">{formatCurrency(row.amount_cents)}</p>
+                      <Badge variant="secondary" className="text-[10px]">
+                        SUB
+                      </Badge>
+                      <RepasseStatusBadge
+                        status={row.status}
+                        label={TRANSFER_STATUS_LABELS[row.status] ?? row.status}
+                      />
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {row.patients?.full_name ?? 'Paciente'} ·{' '}
+                      {row.care_cycles?.cycle_number != null ? `Ciclo #${row.care_cycles.cycle_number}` : 'Ciclo'} ·{' '}
+                      {row.substitute?.full_name ?? 'Substituto'} · Sessão {row.session_number}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                      Gerado {formatDateTime(row.created_at)}
+                      {row.transferred_at ? ` · Transferido ${formatDateTime(row.transferred_at)}` : ''}
+                    </p>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {row.substitute?.full_name ?? 'Substituto'} · Sessão {row.session_number} ·{' '}
-                    {formatDateTime(row.created_at)}
-                  </p>
-                </div>
-                <span className="text-xs text-muted-foreground">{String(row.status)}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </CrudListPageLayout>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-        <div>
-          <h1 className="font-display text-xl font-semibold">Repasses</h1>
-          <p className="text-sm text-muted-foreground">Repasse pós-ciclo com NF</p>
-        </div>
-        <div className="flex gap-2">
-          <Toggle
-            variant="outline"
-            pressed={true}
-            onPressedChange={() => setTab('ciclo')}
-            className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-          >
-            Ciclo
-          </Toggle>
-          <Toggle
-            variant="outline"
-            pressed={false}
-            onPressedChange={() => setTab('sub')}
-            className="rounded-full px-4"
-          >
-            SUB avulso
-          </Toggle>
-        </div>
-      </div>
-      <EntityListPage
-        title=""
-        queryKey={qk.transfers}
-        queryFn={() => transfersService.list('id, pp_transfer_amount_cents, status, created_at')}
-        onRowClick={(r) => navigate(`/admin/repasses/${r.id}`)}
-        columns={[
-          { key: 'amount', header: 'Repasse PP', cell: (r) => formatCurrency(Number(r.pp_transfer_amount_cents)) },
-          { key: 'status', header: 'Status', cell: (r) => String(r.status) },
-        ]}
-      />
-    </div>
-  )
-}
-
-export function CaixaPage() {
-  const [open, setOpen] = useState(false)
-  const schema = z.object({ expense_type: requiredString('Tipo'), amount_cents: z.coerce.number().positive(), reference_month: requiredString('Mês') })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) as never, defaultValues: { expense_type: '', amount_cents: 0, reference_month: '' } })
-  const create = useCrudMutation({ mutationFn: (v: z.infer<typeof schema>) => internalExpensesService.create(v), queryKey: qk.expenses, onSuccess: () => { form.reset(); setOpen(false) } })
-  return (
-    <>
-      <EntityListPage title="Caixa" description="Despesas internas" queryKey={qk.expenses} queryFn={() => internalExpensesService.list()} onCreate={() => setOpen(true)}
-        columns={[{ key: 'type', header: 'Tipo', cell: (r) => String(r.expense_type) }, { key: 'amount', header: 'Valor', cell: (r) => formatCurrency(Number(r.amount_cents)) }]} />
-      <CrudModal open={open} onOpenChange={setOpen} title="Nova despesa">
-        <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-          <FormField control={form.control} name="expense_type" render={({ field }) => (<FormItem><FormLabel>Tipo</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-          <FormField control={form.control} name="amount_cents" render={({ field }) => (<FormItem><FormLabel>Valor (centavos)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} />
-        </form></Form>
-      </CrudModal>
-    </>
+    <EntityListPage<TransferListItem>
+      title="Repasses"
+      description="Repasse pós-ciclo com NF"
+      queryKey={qk.transfers}
+      queryFn={listStaffCycleTransfers}
+      searchPlaceholder="Pesquisar repasses..."
+      searchAccessory={toolbarFilters}
+      filterResetKey={`${kind}-${statusFilter}`}
+      rowFilter={statusFilter === 'all' ? undefined : (row) => row.status === statusFilter}
+      getSearchText={(row) => {
+        const waiting = formatRepasseWaitingLabel(row.created_at, row.status)
+        return [
+          row.professionals?.full_name,
+          row.care_cycles?.patients?.full_name,
+          row.care_cycles?.cycle_number != null ? `ciclo ${row.care_cycles.cycle_number}` : '',
+          formatCurrency(row.pp_transfer_amount_cents),
+          row.status,
+          TRANSFER_STATUS_LABELS[row.status] ?? '',
+          formatDateTime(row.created_at),
+          row.transferred_at ? formatDateTime(row.transferred_at) : '',
+          waiting,
+        ]
+          .filter(Boolean)
+          .join(' ')
+      }}
+      onRowClick={(r) => navigate(`/admin/repasses/${r.id}`)}
+      columns={[
+        {
+          key: 'professional',
+          header: 'Profissional',
+          mobilePrimary: true,
+          cell: (r) => r.professionals?.full_name ?? '—',
+        },
+        {
+          key: 'patient',
+          header: 'Paciente',
+          cell: (r) => r.care_cycles?.patients?.full_name ?? '—',
+        },
+        {
+          key: 'cycle',
+          header: 'Ciclo',
+          cell: (r) =>
+            r.care_cycles?.cycle_number != null ? `#${r.care_cycles.cycle_number}` : '—',
+        },
+        {
+          key: 'created_at',
+          header: 'Gerado em',
+          cell: (r) => {
+            const waiting = formatRepasseWaitingLabel(r.created_at, r.status)
+            return (
+              <div className="min-w-0">
+                <p className="tabular-nums">{formatDateTime(r.created_at)}</p>
+                {waiting ? (
+                  <p className="text-xs text-muted-foreground">{waiting} aguardando</p>
+                ) : r.transferred_at ? (
+                  <p className="text-xs text-muted-foreground">
+                    Transferido {formatDateTime(r.transferred_at)}
+                  </p>
+                ) : null}
+              </div>
+            )
+          },
+        },
+        {
+          key: 'amount',
+          header: 'Repasse PP',
+          cell: (r) => formatCurrency(r.pp_transfer_amount_cents),
+        },
+        {
+          key: 'nf',
+          header: 'NF',
+          mobileHidden: true,
+          cell: (r) => {
+            if (r.status === 'aguardando_nf') return 'Pendente'
+            if (transferHasInvoice(r)) return 'Enviada'
+            return '—'
+          },
+        },
+        {
+          key: 'status',
+          header: 'Status',
+          cell: (r) => (
+            <RepasseStatusBadge
+              status={r.status}
+              label={TRANSFER_STATUS_LABELS[r.status] ?? r.status}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }
 
@@ -860,38 +1084,6 @@ export function SessionsPage() {
 export { TreatmentPausesListPage as TreatmentPausesPage } from './treatment-pauses/TreatmentPausesListPage'
 export { TreatmentPauseDetailPage } from './treatment-pauses/TreatmentPauseDetailPage'
 
-export function DelumaExportPage() {
-  const [generating, setGenerating] = useState(false)
-  const month = new Date().toISOString().slice(0, 7)
-
-  const handleGenerate = async () => {
-    setGenerating(true)
-    try {
-      await edgeFunctions.generateDelumaExport({ reference_month: month })
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  return (
-    <EntityListPage
-      title="Exportação DELUMA"
-      description="Gere o arquivo XLSX do mês de referência."
-      queryKey={qk.deluma}
-      queryFn={() => delumaExportsService.list()}
-      headerExtra={
-        <Button type="button" size="sm" disabled={generating} onClick={handleGenerate}>
-          {generating ? 'Gerando…' : `Gerar export ${month}`}
-        </Button>
-      }
-      columns={[
-        { key: 'month', header: 'Mês', cell: (r) => String(r.reference_month) },
-        { key: 'date', header: 'Gerado em', cell: (r) => formatDateTime(String(r.generated_at ?? '')) },
-      ]}
-    />
-  )
-}
-
 export function NpsReportPage() {
   return (
     <EntityListPage
@@ -907,24 +1099,7 @@ export function NpsReportPage() {
   )
 }
 
-export function TermsConfigPage() {
-  const [open, setOpen] = useState(false)
-  const schema = z.object({ term_type: z.enum(['TERMO_ADESAO', 'DIRETRIZES', 'LGPD', 'DIRETRIZES_PP', 'LGPD_PP']), version: requiredString('Versão'), content: requiredString('Conteúdo') })
-  const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) as never, defaultValues: { term_type: 'TERMO_ADESAO', version: '1.0', content: '' } })
-  const create = useCrudMutation({ mutationFn: (v: z.infer<typeof schema>) => legalTermsService.create({ ...v, is_current: false }), queryKey: qk.terms, onSuccess: () => { form.reset(); setOpen(false) } })
-  return (
-    <>
-      <EntityListPage title="Termos legais" queryKey={qk.terms} queryFn={() => legalTermsService.list()} onCreate={() => setOpen(true)}
-        columns={[{ key: 'type', header: 'Tipo', cell: (r) => String(r.term_type) }, { key: 'ver', header: 'Versão', cell: (r) => String(r.version) }]} />
-      <CrudModal open={open} onOpenChange={setOpen} title="Novo termo" size="lg">
-        <Form {...form}><form onSubmit={form.handleSubmit((v) => create.mutate(v))} className="space-y-4">
-          <FormField control={form.control} name="content" render={({ field }) => (<FormItem><FormLabel>Conteúdo</FormLabel><FormControl><Textarea rows={6} {...field} /></FormControl><FormMessage /></FormItem>)} />
-          <FormActions onCancel={() => setOpen(false)} isSubmitting={create.isPending} />
-        </form></Form>
-      </CrudModal>
-    </>
-  )
-}
+export { TermsConfigPage } from '@/pages/admin/config/TermsConfigPage'
 
 export function ContractsConfigPage() {
   return <EntityListPage title="Templates de contrato" queryKey={['contract_templates']} queryFn={() => contractTemplatesService.list()}
@@ -968,38 +1143,61 @@ export function SupportPage() {
   )
 }
 
-export function ReportsHubPage() {
-  const navigate = useNavigate()
-  return (
-    <EntityListPage
-      title="Relatórios"
-      description="Selecione um relatório para visualizar"
-      queryKey={qk.reportsCatalog}
-      queryFn={async () => ({
-        data: REPORT_CATALOG.map((item) => ({ ...item })),
-        count: REPORT_CATALOG.length,
-      })}
-      onRowClick={(r) => navigate(String(r.path))}
-      columns={[
-        { key: 'name', header: 'Relatório', cell: (r) => String(r.name), mobilePrimary: true },
-        { key: 'description', header: 'Descrição', cell: (r) => String(r.description) },
-      ]}
-    />
-  )
-}
-
 export function FaturamentoReportPage() {
   return (
-    <EntityListPage
-      title="Relatório de faturamento"
-      description="Cobranças emitidas e status de pagamento"
+    <EntityListPage<ChargeListItem>
+      title="Faturamento"
+      description="Receitas e cobranças emitidas"
       queryKey={qk.reportsFaturamento}
-      queryFn={() => chargesService.list('id, amount_cents, payment_status, due_date, created_at')}
+      queryFn={listStaffCharges}
+      showStats={false}
+      renderAfterStats={(filteredRows) => <FaturamentoCharts rows={filteredRows} />}
+      searchPlaceholder="Pesquisar faturamento..."
+      getSearchText={(row) =>
+        [
+          row.patients?.full_name,
+          row.description,
+          CHARGE_KIND_LABELS[row.charge_kind],
+          paymentStatusLabels[row.payment_status],
+          formatCurrency(row.amount_cents),
+          row.due_date ? formatDate(row.due_date) : '',
+          formatDateTime(row.created_at),
+        ]
+          .filter(Boolean)
+          .join(' ')
+      }
       columns={[
-        { key: 'amount', header: 'Valor', cell: (r) => formatCurrency(Number(r.amount_cents)) },
-        { key: 'status', header: 'Status', cell: (r) => paymentStatusLabels[String(r.payment_status)] ?? String(r.payment_status) },
-        { key: 'due', header: 'Vencimento', cell: (r) => formatDate(String(r.due_date)) },
-        { key: 'date', header: 'Emitido em', cell: (r) => formatDateTime(String(r.created_at)) },
+        {
+          key: 'patient',
+          header: 'Paciente',
+          cell: (r) => String(r.patients?.full_name ?? '—'),
+          mobilePrimary: true,
+        },
+        {
+          key: 'amount',
+          header: 'Valor',
+          cell: (r) => formatCurrency(r.amount_cents),
+        },
+        {
+          key: 'status',
+          header: 'Status',
+          cell: (r) => <PaymentStatusBadge status={r.payment_status} />,
+        },
+        {
+          key: 'kind',
+          header: 'Tipo',
+          cell: (r) => CHARGE_KIND_LABELS[r.charge_kind],
+        },
+        {
+          key: 'due',
+          header: 'Vencimento',
+          cell: (r) => (r.due_date ? formatDate(r.due_date) : '—'),
+        },
+        {
+          key: 'date',
+          header: 'Emitido em',
+          cell: (r) => formatDateTime(r.created_at),
+        },
       ]}
     />
   )

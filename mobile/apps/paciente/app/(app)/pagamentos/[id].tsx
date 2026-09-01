@@ -103,7 +103,7 @@ export default function PagamentoDetailScreen() {
                   Copiar código PIX
                 </Button>
               ) : null}
-              {data.boleto_url ? (
+              {data.payment_method === 'BOLETO' && data.boleto_url ? (
                 <Button onPress={() => Linking.openURL(String(data.boleto_url))}>Abrir boleto</Button>
               ) : null}
             </View>

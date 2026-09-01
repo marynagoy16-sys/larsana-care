@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { SubpageHeaderBar } from '@/components/paciente/PacienteSubpageShell'
 import { RepasseInvoiceSection } from '@/components/profissional/repasses/RepasseInvoiceSection'
+import { PatientBillingCopyCard } from '@/components/profissional/repasses/PatientBillingCopyCard'
 import { RepasseStatusBadge, RepasseStatusIcon } from '@/components/profissional/repasses/RepasseStatusVisual'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
@@ -150,6 +151,12 @@ export function PPRepasseDetailPage() {
               />
             </CascadeItem>
           )}
+
+          {data.status === 'aguardando_nf' ? (
+            <CascadeItem>
+              <PatientBillingCopyCard patient={data.patient_billing} />
+            </CascadeItem>
+          ) : null}
 
           <CascadeItem>
             <div

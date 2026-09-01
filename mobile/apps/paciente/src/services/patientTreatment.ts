@@ -62,9 +62,15 @@ type CycleDetailRow = {
 function summarizeCycle(row: CycleListRow): PatientCycleSummary {
   const sessions = row.care_sessions ?? []
   const completedSessions = sessions.filter((s) => s.status === 'realizada').length
+  const nowIso = new Date().toISOString()
   const nextSessionAt =
     sessions
-      .filter((s) => s.status === 'prevista' && s.scheduled_at)
+      .filter(
+        (s) =>
+          (s.status === 'prevista' || s.status === 'remarcada') &&
+          s.scheduled_at &&
+          s.scheduled_at >= nowIso,
+      )
       .map((s) => s.scheduled_at!)
       .sort()[0] ?? null
 
@@ -80,6 +86,10 @@ function summarizeCycle(row: CycleListRow): PatientCycleSummary {
   }
 }
 
+function isVisibleTreatmentCycle(status: string): boolean {
+  return status !== 'rascunho'
+}
+
 export async function loadPatientTreatmentPage(): Promise<PatientTreatmentPageData> {
   const { data, error } = await supabase
     .from('care_cycles')
@@ -88,11 +98,14 @@ export async function loadPatientTreatmentPage(): Promise<PatientTreatmentPageDa
       professionals:assigned_professional_id ( full_name ),
       care_sessions ( status, scheduled_at )`,
     )
+    .neq('status', 'rascunho')
     .order('created_at', { ascending: false })
 
   if (error) throw error
 
-  const cycles = ((data ?? []) as CycleListRow[]).map(summarizeCycle)
+  const cycles = ((data ?? []) as CycleListRow[])
+    .filter((row) => isVisibleTreatmentCycle(row.status))
+    .map(summarizeCycle)
   const activeCycle =
     cycles.find((cycle) => cycle.status === 'ativo' && cycle.payment_status === 'pago') ?? null
 
@@ -118,6 +131,8 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
   if (!data) return null
 
   const row = data as CycleDetailRow
+  if (!isVisibleTreatmentCycle(row.status)) return null
+
   const sessions = row.care_sessions ?? []
 
   return {

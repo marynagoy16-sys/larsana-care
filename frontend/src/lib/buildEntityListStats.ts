@@ -1,5 +1,9 @@
-import { Database, Filter, Layers, List } from 'lucide-react'
+import { Database, Filter, Layers, List, type LucideIcon } from 'lucide-react'
 import type { StatCardItem } from '@/components/crud/list-page/StatsCardRow'
+import { getRepasseStatusVisual } from '@/lib/repasseStatus'
+import { getPaymentStatusVisual } from '@/components/admin/finance/PaymentStatusVisual'
+import { paymentStatusLabels } from '@/constants/labels'
+import { TRANSFER_STATUS_LABELS, type TransferStatus } from '@/services/ppTransfers'
 
 const STATUS_KEYS = [
   'status',
@@ -13,6 +17,31 @@ const STATUS_KEYS = [
 function findStatusKey<T extends Record<string, unknown>>(rows: T[]): string | undefined {
   if (rows.length === 0) return undefined
   return STATUS_KEYS.find((key) => key in rows[0])
+}
+
+function capitalizeFirst(text: string): string {
+  if (!text) return text
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+function getStatStatusIcon(statusKey: string, status: string): LucideIcon {
+  if (statusKey === 'status') {
+    return getRepasseStatusVisual(status).icon
+  }
+  if (statusKey === 'payment_status') {
+    return getPaymentStatusVisual(status).icon
+  }
+  return Layers
+}
+
+function formatStatStatusLabel(statusKey: string, status: string): string {
+  if (statusKey === 'status' && status in TRANSFER_STATUS_LABELS) {
+    return TRANSFER_STATUS_LABELS[status as TransferStatus]
+  }
+  if (statusKey === 'payment_status') {
+    return paymentStatusLabels[status] ?? capitalizeFirst(status.replace(/_/g, ' '))
+  }
+  return capitalizeFirst(status.replace(/_/g, ' '))
 }
 
 export function buildEntityListStats<T extends Record<string, unknown>>(
@@ -48,19 +77,29 @@ export function buildEntityListStats<T extends Record<string, unknown>>(
         footer: title,
       },
       ...topStatuses.map(([status, count]) => ({
-        label: status.replace(/_/g, ' '),
+        label: formatStatStatusLabel(statusKey, status),
         value: count,
-        icon: Layers,
+        icon: getStatStatusIcon(statusKey, status),
         footer: total > 0 ? `${Math.round((count / total) * 100)}% do total` : '—',
       })),
     ]
-    while (cards.length < 4) {
-      cards.push({
+    const fillerCards: StatCardItem[] = [
+      {
         label: search ? 'Filtrados' : 'Visíveis',
         value: search ? filtered : total,
         icon: Filter,
         footer: search ? 'Com busca ativa' : 'Sem filtro',
-      })
+      },
+      {
+        label: 'Nesta página',
+        value: pageCount,
+        icon: List,
+        footer: filtered > 0 ? `${from}–${to} de ${filtered}` : 'Nenhum registro',
+      },
+    ]
+    for (const filler of fillerCards) {
+      if (cards.length >= 4) break
+      cards.push(filler)
     }
     return cards.slice(0, 4)
   }

@@ -19,10 +19,10 @@ interface CrudModalProps {
 }
 
 const sizeClass = {
-  sm: 'max-w-lg',
-  md: 'max-w-2xl',
-  lg: 'max-w-4xl',
-  full: 'max-w-[min(96vw,72rem)]',
+  sm: 'lg:max-w-lg',
+  md: 'lg:max-w-2xl',
+  lg: 'lg:max-w-4xl',
+  full: 'lg:max-w-[min(96vw,72rem)]',
 }
 
 export function CrudModal({

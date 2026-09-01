@@ -1,20 +1,23 @@
 import { useMemo, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
 import { EntityListPage } from '@/components/crud/EntityListPage'
 import { Toggle } from '@/components/ui/toggle'
 import { formatDateTime } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
-import { notificationsService } from '@/services/index'
+import {
+  markNotificationRead,
+  notificationsQueryKeys,
+  resolvePpNotificationHref,
+  type AppNotificationRow,
+} from '@/services/notifications'
+import { supabase } from '@/lib/supabase'
 
 type NotificationFilter = 'all' | 'unread' | 'read'
 
-type NotificationRow = {
-  id: string
-  title: string | null
-  read_at: string | null
-  created_at: string | null
-}
+type NotificationRow = AppNotificationRow
 
 const NOTIFICATION_FILTERS: { id: NotificationFilter; label: string }[] = [
   { id: 'all', label: 'Todas' },
@@ -35,12 +38,30 @@ function matchesNotificationFilter(row: NotificationRow, filter: NotificationFil
 }
 
 export function PPNotificacoesPage() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [notificationFilter, setNotificationFilter] = useState<NotificationFilter>('all')
 
   const rowFilter = useMemo(
     () => (row: NotificationRow) => matchesNotificationFilter(row, notificationFilter),
     [notificationFilter],
   )
+
+  const markRead = useMutation({
+    mutationFn: markNotificationRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pp', 'notifications'] })
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKeys.unreadCount })
+    },
+  })
+
+  const handleOpen = (notification: NotificationRow) => {
+    const href = resolvePpNotificationHref(notification)
+    if (!notification.read_at) {
+      markRead.mutate(notification.id)
+    }
+    if (href) navigate(href)
+  }
 
   return (
     <>
@@ -53,14 +74,19 @@ export function PPNotificacoesPage() {
         mobileVariant="compact"
         queryKey={['pp', 'notifications']}
         queryFn={async () => {
-          const result = await notificationsService.list('id, title, read_at, created_at')
-          return { data: result.data as NotificationRow[], count: result.count }
+          const { data, error, count } = await supabase
+            .from('notifications')
+            .select('id, title, body, type, payload, read_at, created_at', { count: 'exact' })
+            .order('created_at', { ascending: false })
+          if (error) throw error
+          return { data: (data ?? []) as NotificationRow[], count: count ?? data?.length ?? 0 }
         }}
         emptyMessage={EMPTY_MESSAGES[notificationFilter]}
         emptyIcon={Bell}
         filterResetKey={notificationFilter}
         rowFilter={rowFilter}
-        getMobileAvatarLabel={(row) => String(row.title ?? 'Notificação').slice(0, 2)}
+        onRowClick={handleOpen}
+        getMobileAvatarLabel={(row) => String(row.title ?? 'Notificação').slice(0, 1)}
         toolbar={
           <div
             className={cn(

@@ -65,9 +65,7 @@ function buildSelectedSlots(selected: Set<CellKey>): AvailabilitySlotInput[] {
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
 }
 
-export function formatAvailabilitySlotLabel(startsAt: string): string {
-  return format(new Date(startsAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
-}
+export { formatAvailabilitySlotLabel } from '@/services/scheduling'
 
 function getLatestOfferDay(demandType: 'avaliacao' | 'continuidade'): Date {
   const horizonDays =

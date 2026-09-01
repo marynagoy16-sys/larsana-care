@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { PatientServiceRequestValues } from '@/schemas/patientServiceRequest'
 import { ensurePatientPrimaryAddressGeocoded } from '@/services/patientAddressGeocode'
-import { edgeFunctions } from '@/services/edgeFunctions'
+import { simulateChargePayment, syncPatientChargeWithAsaas } from '@/services/patientPayments'
 
 export type PatientServiceDemand = {
   id: string
@@ -57,6 +57,23 @@ export type JoinWaitlistResult = {
   message?: string
   waitlist_id?: string
   already_exists?: boolean
+}
+
+export async function getPendingAssessmentRequestCharge(
+  patientId: string,
+): Promise<{ id: string; amount_cents: number; due_date: string | null; created_at: string } | null> {
+  const { data, error } = await supabase
+    .from('charges')
+    .select('id, amount_cents, due_date, created_at')
+    .eq('patient_id', patientId)
+    .eq('charge_kind', 'assessment_request')
+    .in('payment_status', ['pendente', 'vencido'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
 }
 
 export async function getPatientServiceStatus(): Promise<PatientServiceStatus> {
@@ -151,6 +168,8 @@ export type SyncAssessmentChargeResult = {
   chargeId: string
   pixQrCode: string | null
   pixCopyPaste: string | null
+  pixReceiverReady?: boolean
+  pixReceiverMessage?: string | null
   error?: string
 }
 
@@ -210,43 +229,53 @@ export async function syncAssessmentChargeWithAsaas(
   chargeId: string,
   amountCents: number,
   paymentMethod: 'PIX' | 'BOLETO' = 'PIX',
+  options?: { forceNewAsaasPayment?: boolean; description?: string; dueDate?: string },
 ): Promise<SyncAssessmentChargeResult> {
-  const today = new Date().toISOString().slice(0, 10)
-  let lastError: Error | null = null
-
-  for (let attempt = 1; attempt <= ASAAS_SYNC_MAX_RETRIES; attempt += 1) {
-    try {
-      const result = await edgeFunctions.createCharge({
-        patient_id: patientId,
-        charge_id: chargeId,
-        amount_cents: amountCents,
-        due_date: today,
-        payment_method: paymentMethod,
-        description: 'Taxa de avaliação domiciliar Larsana Care',
-      })
-      return {
-        synced: true,
-        asaasEnabled: result.asaas_enabled,
-        chargeId,
-        pixQrCode: result.pix_qr_code,
-        pixCopyPaste: result.pix_copy_paste,
-      }
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err))
-      if (attempt < ASAAS_SYNC_MAX_RETRIES) {
-        await sleep(ASAAS_SYNC_RETRY_MS * attempt)
-      }
-    }
-  }
+  const result = await syncPatientChargeWithAsaas({
+    patientId,
+    chargeId,
+    amountCents,
+    paymentMethod,
+    description: options?.description ?? 'Taxa de avaliação domiciliar Larsana Care',
+    dueDate: options?.dueDate,
+    forceNewAsaasPayment: options?.forceNewAsaasPayment,
+  })
 
   return {
-    synced: false,
-    asaasEnabled: true,
-    chargeId,
-    pixQrCode: null,
-    pixCopyPaste: null,
-    error: lastError?.message ?? 'Falha ao sincronizar cobrança',
+    synced: result.synced,
+    asaasEnabled: result.asaasEnabled,
+    chargeId: result.chargeId,
+    pixQrCode: result.pixQrCode ?? null,
+    pixCopyPaste: result.pixCopyPaste ?? null,
+    pixReceiverReady: result.pixReceiverReady,
+    pixReceiverMessage: result.pixReceiverMessage,
+    error: result.error,
   }
+}
+
+export async function simulateAssessmentCheckout(): Promise<{
+  chargeId: string
+  alreadyPaid: boolean
+}> {
+  if (!isPaymentSimulationEnabled()) {
+    throw new Error('Simulação de pagamento indisponível neste ambiente.')
+  }
+
+  const status = await getPatientServiceStatus()
+  if (status.patient_id) {
+    await ensurePatientPrimaryAddressGeocoded(status.patient_id)
+  }
+
+  const charge = await createAssessmentRequestCharge('PIX')
+  if (charge.already_paid) {
+    return { chargeId: charge.charge_id ?? '', alreadyPaid: true }
+  }
+
+  const chargeId = charge.charge_id
+  if (!chargeId) throw new Error('Não foi possível gerar a cobrança')
+
+  await simulateChargePayment(chargeId)
+  return { chargeId, alreadyPaid: false }
 }
 
 export async function completeAssessmentCheckout(
@@ -331,6 +360,8 @@ export async function joinWaitlist(notes?: string): Promise<JoinWaitlistResult> 
 
 export const patientServiceQueryKeys = {
   status: ['paciente', 'service-status'] as const,
+  pendingAssessmentCharge: (patientId: string) =>
+    ['paciente', 'pending-assessment-charge', patientId] as const,
   prefill: ['paciente', 'service-request-prefill'] as const,
   legalTerms: ['paciente', 'service-request-legal-terms'] as const,
 }

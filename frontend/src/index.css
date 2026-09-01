@@ -236,6 +236,15 @@ body {
   padding-top: 0;
 }
 
+/* Região de scroll principal do AppShell — fluxo em bloco evita clip de formulários longos no mobile. */
+.shell-scroll-region {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
 .shell-bottom-nav-clearance {
   padding-bottom: calc(var(--shell-gap) + var(--bottom-nav-clearance));
 }

@@ -398,7 +398,9 @@ export async function getPPPatientProntuario(patientId: string): Promise<PPPatie
       .map((record) => [record.session_id!, record]),
   )
 
-  const cycles = ((cyclesRes.data ?? []) as CareCycleRow[]).map((cycle) => ({
+  const cycles = ((cyclesRes.data ?? []) as CareCycleRow[])
+    .filter((cycle) => isStartedTreatmentCycle(cycle.status))
+    .map((cycle) => ({
     cycleId: cycle.id,
     cycleNumber: cycle.cycle_number,
     status: cycle.status,
@@ -407,4 +409,45 @@ export async function getPPPatientProntuario(patientId: string): Promise<PPPatie
   }))
 
   return { assessmentRecords, cycles }
+}
+
+export function isStartedTreatmentCycle(status: string): boolean {
+  return status !== 'rascunho' && status !== 'aguardando_pagamento'
+}
+
+export type PatientLatestAssessment = {
+  id: string
+  status: string
+}
+
+export const ppPatientQueryKeys = {
+  latestAssessment: (patientId: string) => ['pp', 'patient_latest_assessment', patientId] as const,
+}
+
+export async function getPatientLatestAssessment(
+  patientId: string,
+): Promise<PatientLatestAssessment | null> {
+  const { data, error } = await supabase
+    .from('initial_assessments')
+    .select('id, status')
+    .eq('patient_id', patientId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
+
+export function describeRegisteredAssessment(status: string): string {
+  if (status === 'em_analise') {
+    return 'Avaliação enviada para revisão da Larsana'
+  }
+  if (status === 'proposta_enviada') {
+    return 'Avaliação enviada — proposta com a família'
+  }
+  if (status === 'avaliacao_feita') {
+    return 'Avaliação registrada'
+  }
+  return 'Avaliação já registrada'
 }

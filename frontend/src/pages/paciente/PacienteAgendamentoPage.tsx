@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Link } from 'react-router-dom'
@@ -9,18 +9,20 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { SchedulingStructuredMessages } from '@/components/scheduling/SchedulingAvailabilityWizard'
 import { formatDateTime } from '@/lib/formatters'
-import { listPendingSchedulingProposalsForPatient } from '@/services/scheduling'
+import { formatAvailabilitySlotLabel, listPendingSchedulingProposalsForPatient } from '@/services/scheduling'
 import {
   listPendingSubOffersForPatient,
   patientRespondRescheduleProposal,
   patientRespondSubOffer,
 } from '@/services/sessionReschedule'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
+import { patientPortalQueryKeys } from '@/services/patientPortal'
 
 export function PacienteAgendamentoPage() {
+  const queryClient = useQueryClient()
   const { data: proposals = [], isLoading, refetch } = useQuery({
     queryKey: ['paciente', 'scheduling_proposals'],
-    queryFn: listPendingSchedulingProposalsForPatient,
+    queryFn: () => listPendingSchedulingProposalsForPatient(),
   })
 
   const { data: subOffers = [], refetch: refetchSub } = useQuery({
@@ -32,8 +34,15 @@ export function PacienteAgendamentoPage() {
   const rescheduleProposals = proposals.filter((p) => p.proposal_type === 'remarcacao')
 
   const confirmMutation = useCrudMutation({
-    mutationFn: ({ proposalId, slotId }: { proposalId: string; slotId: string }) =>
-      patientRespondRescheduleProposal(proposalId, true, slotId),
+    mutationFn: ({
+      proposalId,
+      slotId,
+      choiceLabel,
+    }: {
+      proposalId: string
+      slotId: string
+      choiceLabel: string
+    }) => patientRespondRescheduleProposal(proposalId, true, slotId, { choiceLabel }),
     queryKey: ['paciente', 'scheduling_proposals'],
     successMessage: 'Remarcação confirmada!',
     onSuccess: () => refetch(),
@@ -64,13 +73,24 @@ export function PacienteAgendamentoPage() {
   })
 
   const confirmInitialMutation = useCrudMutation({
-    mutationFn: async ({ proposalId, slotId }: { proposalId: string; slotId: string }) => {
+    mutationFn: async ({
+      proposalId,
+      slotId,
+      choiceLabel,
+    }: {
+      proposalId: string
+      slotId: string
+      choiceLabel: string
+    }) => {
       const { patientConfirmSlot } = await import('@/services/scheduling')
-      return patientConfirmSlot(proposalId, slotId)
+      return patientConfirmSlot(proposalId, slotId, { choiceLabel })
     },
     queryKey: ['paciente', 'scheduling_proposals'],
     successMessage: 'Horário confirmado!',
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      void refetch()
+      void queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
+    },
   })
 
   const rejectInitialMutation = useCrudMutation({
@@ -157,10 +177,14 @@ export function PacienteAgendamentoPage() {
                             className="w-full justify-start h-auto py-3"
                             disabled={confirmMutation.isPending || rejectRescheduleMutation.isPending}
                             onClick={() =>
-                              confirmMutation.mutate({ proposalId: proposal.id, slotId: slot.id })
+                              confirmMutation.mutate({
+                                proposalId: proposal.id,
+                                slotId: slot.id,
+                                choiceLabel: formatAvailabilitySlotLabel(slot.starts_at),
+                              })
                             }
                           >
-                            {format(new Date(slot.starts_at), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })}
+                            {formatAvailabilitySlotLabel(slot.starts_at)}
                           </Button>
                         ))}
                       <Button
@@ -198,10 +222,14 @@ export function PacienteAgendamentoPage() {
                             className="w-full justify-start h-auto py-3"
                             disabled={confirmInitialMutation.isPending || rejectInitialMutation.isPending}
                             onClick={() =>
-                              confirmInitialMutation.mutate({ proposalId: proposal.id, slotId: slot.id })
+                              confirmInitialMutation.mutate({
+                                proposalId: proposal.id,
+                                slotId: slot.id,
+                                choiceLabel: formatAvailabilitySlotLabel(slot.starts_at),
+                              })
                             }
                           >
-                            {format(new Date(slot.starts_at), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })}
+                            {formatAvailabilitySlotLabel(slot.starts_at)}
                           </Button>
                         ))}
 

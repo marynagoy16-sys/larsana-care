@@ -1,17 +1,24 @@
 import { supabase } from '@/lib/supabase'
 
 export async function getProfessionalNpsAverage(professionalId: string): Promise<number | null> {
-  const { data, error } = await supabase
-    .from('nps_surveys')
-    .select('score')
-    .eq('rated_entity_type', 'professional')
-    .eq('rated_entity_id', professionalId)
-
-  if (error) throw error
-  if (!data?.length) return null
-
-  const sum = data.reduce((acc, row) => acc + Number(row.score), 0)
-  return Math.round((sum / data.length) * 10) / 10
+  const { data, error } = await supabase.rpc('pp_nps_score' as never, {
+    p_professional_id: professionalId,
+  } as never)
+  if (error) {
+    const { data: fallback, error: fallbackError } = await supabase
+      .from('nps_surveys')
+      .select('score')
+      .eq('rated_entity_type', 'professional')
+      .eq('rated_entity_id', professionalId)
+      .order('submitted_at', { ascending: false })
+      .limit(100)
+    if (fallbackError) throw fallbackError
+    if (!fallback?.length) return null
+    const sum = fallback.reduce((acc, row) => acc + Number(row.score), 0)
+    return Math.round((sum / fallback.length) * 10) / 10
+  }
+  if (data == null) return null
+  return Number(data)
 }
 
 export async function getAssignedProfessionalSummary(

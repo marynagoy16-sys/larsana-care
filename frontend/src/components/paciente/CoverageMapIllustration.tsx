@@ -1,14 +1,27 @@
+import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const SEARCH_PATH =
   'M40 110 C 60 90, 80 120, 100 95 S 140 85, 160 100 S 200 115, 240 90'
 
 type Props = {
-  variant?: 'searching' | 'coming_soon'
+  variant?: 'searching' | 'coming_soon' | 'assigned'
   className?: string
 }
 
 export function CoverageMapIllustration({ variant = 'searching', className }: Props) {
+  if (variant === 'assigned') {
+    return (
+      <div className={cn('w-full', className)}>
+        <div className="flex h-40 w-full items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50/80">
+          <div className="flex size-16 items-center justify-center rounded-full bg-primary shadow-sm">
+            <Check className="size-8 text-primary-foreground" strokeWidth={2.5} aria-hidden />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const searching = variant === 'searching'
 
   return (

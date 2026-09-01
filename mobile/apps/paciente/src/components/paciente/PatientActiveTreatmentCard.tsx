@@ -60,12 +60,12 @@ export function PatientActiveTreatmentCard({
           <View className="flex-row items-center gap-2">
             <Calendar size={16} color="#49796B" />
             <Text className="text-sm text-muted-foreground">
-              Próxima sessão:{' '}
+              Próxima terapia:{' '}
               <Text className="font-medium text-foreground">{formatDateTime(cycle.nextSessionAt)}</Text>
             </Text>
           </View>
         ) : (
-          <Text className="text-sm text-muted-foreground">Nenhuma sessão prevista no momento.</Text>
+          <Text className="text-sm text-muted-foreground">Nenhuma terapia prevista no momento.</Text>
         )}
         <View className="gap-2">
           <Button onPress={() => router.push(`/(app)/tratamento/ciclo/${cycle.id}`)}>

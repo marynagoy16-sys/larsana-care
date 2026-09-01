@@ -15,6 +15,9 @@ const ForgotPasswordPageLazy = lazy(() =>
 const ResetPasswordPageLazy = lazy(() =>
   import('@/pages/auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
 )
+const PublicLegalTermPageLazy = lazy(() =>
+  import('@/pages/auth/PublicLegalTermPage').then((m) => ({ default: m.PublicLegalTermPage })),
+)
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -45,6 +48,8 @@ export const publicRoutes: RouteObject[] = [
     path: '/redefinir-senha',
     element: <ResetPasswordPageLazy />,
   },
+  { path: '/termos-de-uso', element: <PublicLegalTermPageLazy /> },
+  { path: '/politica-de-privacidade', element: <PublicLegalTermPageLazy /> },
   {
     path: '/acesso-plataforma-web',
     element: (

@@ -10,6 +10,7 @@ import {
   FileText,
   HelpCircle,
   LogOut,
+  Pill,
   User,
 } from 'lucide-react-native'
 import { Button } from '@/components/ui/Button'
@@ -26,6 +27,12 @@ type MenuItem = {
 const MENU_ITEMS: MenuItem[] = [
   { label: 'Pagamentos', href: '/(app)/(tabs)/pagamentos', Icon: CreditCard, description: 'PIX e boletos' },
   { label: 'Documentos', href: '/(app)/(tabs)/documentos', Icon: FileText, description: 'Termos e comprovantes' },
+  {
+    label: 'LarsanaPill',
+    href: '/(app)/larsanapill',
+    Icon: Pill,
+    description: 'Exercícios e orientações em casa',
+  },
   { label: 'Notificações', href: '/(app)/(tabs)/notificacoes', Icon: Bell, description: 'Alertas e avisos importantes' },
   { label: 'Ajuda', href: '/(app)/(tabs)/ajuda', Icon: HelpCircle, description: 'Suporte e FAQ' },
 ]
@@ -116,7 +123,7 @@ export default function ContaScreen() {
               return (
                 <Pressable
                   key={item.href}
-                  onPress={() => router.push(item.href as '/(app)/(tabs)/tratamento')}
+                  onPress={() => router.push(item.href as never)}
                   className={`flex-row items-center gap-3 px-4 py-3.5 active:bg-muted/40 ${
                     index < MENU_ITEMS.length - 1 ? 'border-b border-border' : ''
                   }`}

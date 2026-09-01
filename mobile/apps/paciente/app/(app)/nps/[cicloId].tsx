@@ -6,19 +6,22 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
+import { cn } from '@/lib/cn'
 import { createNpsSurvey } from '@/services/nps'
+
+const SCORES = Array.from({ length: 11 }, (_, index) => index)
 
 export default function NpsScreen() {
   const { cicloId } = useLocalSearchParams<{ cicloId: string }>()
   const router = useRouter()
-  const [score, setScore] = useState('10')
+  const [score, setScore] = useState(10)
   const [comment, setComment] = useState('')
 
   const submit = useMutation({
     mutationFn: () =>
       createNpsSurvey({
         cycle_id: cicloId!,
-        score: Number(score),
+        score,
         comment,
       }),
     onSuccess: () => {
@@ -39,13 +42,31 @@ export default function NpsScreen() {
         </View>
       </PageHeader>
       <View className="flex-1 px-4 py-6 gap-4">
-        <Text className="text-sm text-muted-foreground">Nota de 0 a 10</Text>
-        <TextInput
-          value={score}
-          onChangeText={setScore}
-          keyboardType="number-pad"
-          className="h-12 rounded-xl bg-muted px-4 text-base"
-        />
+        <View className="gap-2">
+          <Text className="text-sm font-medium text-foreground">Nota (0–10)</Text>
+          <View className="flex-row flex-wrap gap-2">
+            {SCORES.map((value) => {
+              const selected = score === value
+              return (
+                <Pressable
+                  key={value}
+                  onPress={() => setScore(value)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Nota ${value}`}
+                  accessibilityState={{ selected }}
+                  className={cn(
+                    'h-11 w-[15%] min-w-[2.75rem] items-center justify-center rounded-xl border',
+                    selected ? 'border-primary bg-primary' : 'border-border bg-card',
+                  )}
+                >
+                  <Text className={cn('text-sm font-semibold', selected ? 'text-white' : 'text-foreground')}>
+                    {value}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </View>
+        </View>
         <Text className="text-sm text-muted-foreground">Comentário (opcional)</Text>
         <TextInput
           value={comment}

@@ -18,7 +18,14 @@ const BASE_STEPS = [
 
 type StepKey = (typeof BASE_STEPS)[number]['key']
 
-function resolveVisibleSteps(hasWaitlist?: boolean, pendingScheduling?: boolean): StepKey[] {
+function resolveVisibleSteps(
+  hasWaitlist?: boolean,
+  pendingScheduling?: boolean,
+  awaitingAssessmentPayment?: boolean,
+): StepKey[] {
+  if (awaitingAssessmentPayment) {
+    return ['pagamento', 'enviada', 'buscando', 'atribuido']
+  }
   if (hasWaitlist && pendingScheduling) {
     return ['enviada', 'waitlist', 'atribuido', 'horario']
   }
@@ -35,7 +42,9 @@ function resolveStepIndex(
   demand: PatientServiceDemand | null | undefined,
   hasWaitlist?: boolean,
   pendingScheduling?: boolean,
+  awaitingAssessmentPayment?: boolean,
 ): number {
+  if (awaitingAssessmentPayment) return 0
   if (hasWaitlist && !demand) return 1
   if (!demand) return -1
   if (pendingScheduling) return 3
@@ -48,6 +57,7 @@ type Props = {
   demand?: PatientServiceDemand | null
   hasWaitlist?: boolean
   pendingScheduling?: boolean
+  awaitingAssessmentPayment?: boolean
   createdAt?: string
   assignedProfessional?: { name: string; rating?: number | null } | null
 }
@@ -70,12 +80,18 @@ export function ServiceRequestTimeline({
   demand,
   hasWaitlist,
   pendingScheduling,
+  awaitingAssessmentPayment,
   createdAt,
   assignedProfessional,
 }: Props) {
-  const visibleKeys = resolveVisibleSteps(hasWaitlist, pendingScheduling)
+  const visibleKeys = resolveVisibleSteps(hasWaitlist, pendingScheduling, awaitingAssessmentPayment)
   const steps = BASE_STEPS.filter((step) => visibleKeys.includes(step.key))
-  const activeIndex = resolveStepIndex(demand, hasWaitlist, pendingScheduling)
+  const activeIndex = resolveStepIndex(
+    demand,
+    hasWaitlist,
+    pendingScheduling,
+    awaitingAssessmentPayment,
+  )
 
   if (activeIndex < 0 && !hasWaitlist) return null
 
@@ -107,10 +123,17 @@ export function ServiceRequestTimeline({
                     done && 'text-foreground',
                   )}
                 >
-                  {step.label}
+                  {step.key === 'pagamento' && current && awaitingAssessmentPayment
+                    ? 'Aguardando pagamento'
+                    : step.label}
                 </p>
                 {index === 0 && createdAt ? (
                   <p className="text-xs text-muted-foreground">{formatWhen(createdAt)}</p>
+                ) : null}
+                {current && step.key === 'pagamento' ? (
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Aguardando pagamento da taxa de avaliação para enviarmos sua solicitação.
+                  </p>
                 ) : null}
                 {current && step.key === 'buscando' ? (
                   <p className="text-xs text-muted-foreground">
@@ -136,7 +159,7 @@ export function ServiceRequestTimeline({
                       O profissional enviou horários disponíveis. Escolha o melhor para você.
                     </p>
                     <Button asChild size="sm" className="h-8">
-                      <Link to="/paciente/agendamento">Escolher horário</Link>
+                      <Link to="/paciente/chat">Escolher horário</Link>
                     </Button>
                   </div>
                 ) : null}

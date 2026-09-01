@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
@@ -14,13 +14,19 @@ import { Button } from '@/components/ui/button'
 import {
   completeAssessmentCheckout,
   getPatientServiceStatus,
+  getPendingAssessmentRequestCharge,
   joinWaitlist,
   patientServiceQueryKeys,
   prepareServiceRequest,
+  simulateAssessmentCheckout,
 } from '@/services/patientServiceRequest'
 import { listPendingSchedulingProposalsForPatient } from '@/services/scheduling'
 import { getAssignedProfessionalSummary } from '@/services/professionalRating'
 import { patientPortalQueryKeys } from '@/services/patientPortal'
+import {
+  getActiveDemandStatusMessage,
+  isProfessionalAssignedToDemand,
+} from '@/lib/serviceRequestStatusCopy'
 import { mapSupabaseError } from '@/lib/supabase-errors'
 
 function PacienteSolicitarHeaderLogo() {
@@ -36,14 +42,15 @@ export function PacienteSolicitarPage() {
     queryFn: getPatientServiceStatus,
   })
 
+  const { data: pendingAssessmentCharge } = useQuery({
+    queryKey: patientServiceQueryKeys.pendingAssessmentCharge(data?.patient_id ?? ''),
+    queryFn: () => getPendingAssessmentRequestCharge(data!.patient_id!),
+    enabled: Boolean(data?.linked && data?.patient_id && !data?.active_demand),
+  })
+
   const { data: pendingProposals = [], refetch: refetchProposals } = useQuery({
-    queryKey: ['paciente', 'scheduling_proposals', data?.patient_id, data?.active_demand?.id],
-    queryFn: () =>
-      listPendingSchedulingProposalsForPatient(
-        data?.active_demand?.id
-          ? { demandId: data.active_demand.id }
-          : { patientId: data?.patient_id },
-      ),
+    queryKey: ['paciente', 'scheduling_proposals', data?.patient_id],
+    queryFn: () => listPendingSchedulingProposalsForPatient(),
     enabled: Boolean(data?.linked),
   })
 
@@ -75,6 +82,11 @@ export function PacienteSolicitarPage() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
       queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
+      if (data?.patient_id) {
+        queryClient.invalidateQueries({
+          queryKey: patientServiceQueryKeys.pendingAssessmentCharge(data.patient_id),
+        })
+      }
       if (result.alreadyPaid) {
         toast.success('Solicitação enviada', {
           description: 'Estamos procurando um profissional parceiro para você.',
@@ -87,6 +99,27 @@ export function PacienteSolicitarPage() {
         })
       }
       navigate(`/paciente/pagamentos/${result.chargeId}`)
+    },
+    onError: (err: Error) => toast.error(mapSupabaseError(err)),
+  })
+
+  const simulateMutation = useMutation({
+    mutationFn: simulateAssessmentCheckout,
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
+      queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
+      if (data?.patient_id) {
+        queryClient.invalidateQueries({
+          queryKey: patientServiceQueryKeys.pendingAssessmentCharge(data.patient_id),
+        })
+      }
+      if (result.alreadyPaid) {
+        toast.info('Solicitação já estava paga.')
+        return
+      }
+      toast.success('Solicitação enviada', {
+        description: 'Estamos procurando um profissional parceiro para você.',
+      })
     },
     onError: (err: Error) => toast.error(mapSupabaseError(err)),
   })
@@ -107,7 +140,11 @@ export function PacienteSolicitarPage() {
     onError: (err: Error) => toast.error(mapSupabaseError(err)),
   })
 
-  const busy = prepareMutation.isPending || checkoutMutation.isPending || waitlistMutation.isPending
+  const busy =
+    prepareMutation.isPending
+    || checkoutMutation.isPending
+    || simulateMutation.isPending
+    || waitlistMutation.isPending
 
   if (isLoading) {
     return (
@@ -148,8 +185,17 @@ export function PacienteSolicitarPage() {
 
   const hasActiveDemand = Boolean(data.active_demand)
   const hasWaitlist = Boolean(data.waitlist)
+  const awaitingAssessmentPayment = Boolean(pendingAssessmentCharge) && !hasActiveDemand
   const serviceAvailable = data.service_available === true
   const showComingSoon = !serviceAvailable
+  const showingRequestForm =
+    serviceAvailable && !awaitingAssessmentPayment && !hasActiveDemand && !hasWaitlist
+  const isProfessionalAssigned = isProfessionalAssignedToDemand(data.active_demand)
+  const mapVariant = showComingSoon
+    ? 'coming_soon'
+    : hasActiveDemand && isProfessionalAssigned
+      ? 'assigned'
+      : 'searching'
 
   return (
     <>
@@ -157,8 +203,11 @@ export function PacienteSolicitarPage() {
         <PacienteSolicitarHeaderLogo />
       </PageHeader>
       <CrudScrollPageLayout>
-        <div className="mx-auto flex w-full max-w-lg flex-col gap-5 pb-8">
-          <CoverageMapIllustration variant={showComingSoon ? 'coming_soon' : 'searching'} />
+        <div className="mx-auto w-full max-w-lg space-y-5 shell-scroll-with-bottom-nav pb-6">
+          <CoverageMapIllustration
+            variant={mapVariant}
+            className={showingRequestForm ? 'max-lg:hidden' : undefined}
+          />
 
           {showComingSoon ? (
             <div className="space-y-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-5">
@@ -177,6 +226,17 @@ export function PacienteSolicitarPage() {
               ) : (
                 <p className="text-sm font-medium text-primary">Você já está na nossa lista de espera.</p>
               )}
+            </div>
+          ) : awaitingAssessmentPayment && pendingAssessmentCharge ? (
+            <div className="space-y-3 rounded-xl border border-amber-200/80 bg-amber-50/60 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
+              <p className="font-semibold text-foreground">Aguardando pagamento</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Sua solicitação está quase pronta. Conclua o pagamento da avaliação para enviarmos o pedido aos
+                profissionais parceiros.
+              </p>
+              <Button asChild className="w-full">
+                <Link to={`/paciente/pagamentos/${pendingAssessmentCharge.id}`}>Continuar pagamento</Link>
+              </Button>
             </div>
           ) : !hasActiveDemand ? (
             <div className="space-y-4">
@@ -199,11 +259,20 @@ export function PacienteSolicitarPage() {
                 onCheckout={async ({ patientId, assessmentFeeCents }) => {
                   await checkoutMutation.mutateAsync({ patientId, assessmentFeeCents })
                 }}
+                onSimulate={async () => {
+                  await simulateMutation.mutateAsync()
+                }}
               />
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm font-medium text-primary">Sua solicitação já está em andamento.</p>
+              <p className="text-sm font-medium text-primary">
+                {getActiveDemandStatusMessage({
+                  isProfessionalAssigned,
+                  pendingScheduling,
+                  professionalName: assignedProfessional?.name,
+                })}
+              </p>
               {pendingScheduling ? (
                 <>
                   <PatientSchedulingProposalList
@@ -211,6 +280,7 @@ export function PacienteSolicitarPage() {
                     onUpdated={() => {
                       void refetchProposals()
                       void queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
+                      void queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
                     }}
                   />
                   <PatientHomeSchedulingBanner />
@@ -219,12 +289,17 @@ export function PacienteSolicitarPage() {
             </div>
           )}
 
-          {(hasActiveDemand || hasWaitlist) && (
+          {(hasActiveDemand || hasWaitlist || awaitingAssessmentPayment) && (
             <ServiceRequestTimeline
               demand={data.active_demand}
               hasWaitlist={hasWaitlist}
               pendingScheduling={pendingScheduling}
-              createdAt={data.active_demand?.created_at ?? data.waitlist?.created_at}
+              awaitingAssessmentPayment={awaitingAssessmentPayment}
+              createdAt={
+                pendingAssessmentCharge?.created_at
+                ?? data.active_demand?.created_at
+                ?? data.waitlist?.created_at
+              }
               assignedProfessional={assignedProfessional ?? null}
             />
           )}

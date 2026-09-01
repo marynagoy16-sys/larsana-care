@@ -20,16 +20,15 @@ import {
   FileCheck,
   Building2,
   ScrollText,
-  Download,
   Receipt,
   TrendingUp,
   Clock,
   Star,
   Timer,
   GraduationCap,
+  MessageCircle,
   Pill,
   Trophy,
-  Upload,
   UserPlus,
 } from 'lucide-react'
 import type { UserRole } from '@/types/auth'
@@ -74,8 +73,6 @@ export const adminNavSections: NavSection[] = [
       { label: 'Profissionais', href: '/admin/profissionais', icon: UserCheck, roles: ['admin', 'gestao'] },
       { label: 'Demandas', href: '/admin/demandas', icon: MapPin, roles: ['admin', 'gestao'] },
       { label: 'Lista de espera', href: '/admin/lista-espera', icon: Users, roles: ['admin', 'gestao'] },
-      { label: 'Importar pacientes', href: '/admin/importacao/pacientes', icon: Upload, roles: ['admin'] },
-      { label: 'Importar profissionais', href: '/admin/importacao/profissionais', icon: Upload, roles: ['admin'] },
       { label: 'Academy', href: '/admin/academy', icon: GraduationCap, roles: ['admin', 'gestao'] },
       { label: 'LarsanaPill', href: '/admin/larsanapill', icon: Pill, roles: ['admin', 'gestao'] },
     ],
@@ -87,14 +84,12 @@ export const adminNavSections: NavSection[] = [
       { label: 'Cobranças', href: '/admin/cobrancas', icon: Receipt, roles: ['admin', 'financeiro'] },
       { label: 'Repasses', href: '/admin/repasses', icon: Wallet, roles: ['admin', 'financeiro'] },
       { label: 'Caixa', href: '/admin/caixa', icon: TrendingUp, roles: ['admin', 'financeiro'] },
-      { label: 'Exportação DELUMA', href: '/admin/exportacao-deluma', icon: Download, roles: ['admin', 'financeiro'] },
     ],
   },
   {
     title: 'Relatórios',
     icon: BarChart3,
     items: [
-      { label: 'Hub relatórios', href: '/admin/relatorios', icon: BarChart3, roles: ['admin', 'financeiro', 'gestao'] },
       { label: 'Faturamento', href: '/admin/relatorios/faturamento', icon: TrendingUp, roles: ['admin', 'financeiro'] },
       { label: 'Conversão', href: '/admin/relatorios/conversao', icon: BarChart3, roles: ['admin', 'gestao'] },
       { label: 'Horas CREFITO', href: '/admin/relatorios/horas-crefito', icon: Clock, roles: ['admin', 'gestao'] },
@@ -170,7 +165,7 @@ export const profissionalBottomNav: NavItem[] = [
 
 export const pacienteHeaderNav: NavItem[] = [
   { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
-  { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
+  { label: 'Chat', href: '/paciente/chat', icon: MessageCircle, roles: ['paciente'] },
   { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
@@ -178,7 +173,7 @@ export const pacienteHeaderNav: NavItem[] = [
 
 export const pacienteBottomNav: NavItem[] = [
   { label: 'Início', href: '/paciente', icon: Home, roles: ['paciente'], end: true },
-  { label: 'LarsanaPill', href: '/paciente/larsanapill', icon: Pill, roles: ['paciente'] },
+  { label: 'Chat', href: '/paciente/chat', icon: MessageCircle, roles: ['paciente'] },
   { label: 'Solicitar', href: '/paciente/solicitar', icon: UserPlus, roles: ['paciente'] },
   { label: 'Tratamento', href: '/paciente/tratamento', icon: Heart, roles: ['paciente'] },
   { label: 'Conta', href: '/paciente/conta', icon: User, roles: ['paciente'] },
@@ -249,8 +244,6 @@ export const routeTitles: Record<string, string> = {
   '/admin/cobrancas': 'Cobranças',
   '/admin/repasses': 'Repasses',
   '/admin/caixa': 'Caixa',
-  '/admin/exportacao-deluma': 'Exportação DELUMA',
-  '/admin/relatorios': 'Relatórios',
   '/admin/relatorios/faturamento': 'Faturamento',
   '/admin/relatorios/conversao': 'Conversão',
   '/admin/relatorios/horas-crefito': 'Horas CREFITO',
@@ -297,6 +290,7 @@ export const routeTitles: Record<string, string> = {
   '/paciente/conta/perfil': 'Perfil',
   '/paciente/termos': 'Termos',
   '/paciente/ajuda': 'Ajuda',
+  '/paciente/chat': 'Chat',
   '/paciente/larsanapill': 'LarsanaPill',
   '/paciente/notificacoes': 'Notificações',
 }

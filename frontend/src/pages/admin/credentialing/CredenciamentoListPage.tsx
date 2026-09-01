@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { EntityListPage } from '@/components/crud/EntityListPage'
+import { AdminImportDialog } from '@/components/admin/import/AdminImportDialog'
 import { CredentialingFilterPanel } from '@/components/crud/list-page/CredentialingFilterPanel'
 import type { DataTableColumn } from '@/components/crud/DataTable'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +25,10 @@ import {
   listCredentialingProfessionals,
   type CredentialingListItem,
 } from '@/services/adminCredentialing'
+import {
+  bulkImportProfessionals,
+  PROFESSIONAL_IMPORT_TEMPLATE,
+} from '@/services/bulkImport'
 import { cn } from '@/lib/utils'
 
 function statusBadgeClass(status: string): string {
@@ -97,8 +103,10 @@ const columns: DataTableColumn<CredentialingListItem>[] = [
 
 export function CredenciamentoListPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [filters, setFilters] = useState<CredentialingListFilters>(emptyCredentialingFilters)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
 
   const activeFilterCount = countActiveCredentialingFilters(filters)
   const filtersKey = useMemo(() => JSON.stringify(filters), [filters])
@@ -130,12 +138,25 @@ export function CredenciamentoListPage() {
         onOpenFilters={() => setFilterOpen(true)}
         activeFilterCount={activeFilterCount}
         onClearFilters={() => setFilters(emptyCredentialingFilters)}
+        onImport={() => setImportOpen(true)}
+        importDisabled={false}
       />
       <CredentialingFilterPanel
         open={filterOpen}
         onOpenChange={setFilterOpen}
         filters={filters}
         onApply={setFilters}
+      />
+      <AdminImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Importar profissionais"
+        description="Importação de PPs legados via CSV ou XLSX. Preencha asaas_wallet_id quando houver carteira Asaas."
+        templateCsv={PROFESSIONAL_IMPORT_TEMPLATE}
+        templateFilename="modelo_importacao_profissionais.csv"
+        importKind="professionals"
+        importFn={bulkImportProfessionals}
+        onSuccess={() => void queryClient.invalidateQueries({ queryKey: adminCredentialingQueryKeys.list })}
       />
     </>
   )

@@ -18,7 +18,7 @@ import {
   resolveDiagnosticHypothesis,
 } from '@/lib/patientDisplay'
 import { getPPPatientDetail, getPPPatientProntuario } from '@/services/ppPatients'
-import { getPendingScheduleDemandIdForPatient } from '@/services/scheduling'
+import { getPendingScheduleDemandForPatient } from '@/services/scheduling'
 import { PPPatientProntuarioSection } from '@/components/profissional/patients/PPPatientProntuarioSection'
 import { PPPatientSituationBadge } from '@/components/profissional/patients/PPPatientSituationBadge'
 
@@ -46,9 +46,9 @@ export function PPPacienteDetailPage() {
     enabled: !!id,
   })
 
-  const { data: pendingScheduleDemandId } = useQuery({
+  const { data: pendingScheduleDemand } = useQuery({
     queryKey: ['pp', 'patient_pending_schedule', id],
-    queryFn: () => getPendingScheduleDemandIdForPatient(id!),
+    queryFn: () => getPendingScheduleDemandForPatient(id!),
     enabled: !!id,
   })
 
@@ -245,17 +245,25 @@ export function PPPacienteDetailPage() {
 
       <CrudScrollPageLayout>
         <CascadeReveal className="space-y-5 pb-8">
-          {pendingScheduleDemandId && (
+          {pendingScheduleDemand && (
             <CascadeItem>
               <div className="rounded-xl border border-primary/25 bg-primary/5 px-5 py-4">
-                <p className="font-medium text-foreground">Horários pendentes de envio</p>
+                <p className="font-medium text-foreground">
+                  {pendingScheduleDemand.demand_type === 'continuidade'
+                    ? 'Horários da primeira terapia pendentes'
+                    : 'Horários pendentes de envio'}
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Você assumiu este paciente, mas ainda não enviou opções de horário para a família confirmar.
+                  {pendingScheduleDemand.demand_type === 'continuidade'
+                    ? 'O paciente confirmou o pagamento. Envie opções de horário para a primeira terapia do ciclo.'
+                    : 'Você assumiu este paciente, mas ainda não enviou opções de horário para a família confirmar.'}
                 </p>
                 <Button
                   size="sm"
                   className="mt-3"
-                  onClick={() => navigate(`/profissional/demandas/${pendingScheduleDemandId}/agendar`)}
+                  onClick={() =>
+                    navigate(`/profissional/demandas/${pendingScheduleDemand.id}/agendar`)
+                  }
                 >
                   Enviar horários ao paciente
                 </Button>

@@ -35,6 +35,7 @@ import {
 import {
   buildAgendaDaySummary,
   listAgendaSessionsForDay,
+  listUpcomingAgendaSessions,
   ppAgendaQueryKeys,
 } from '@/services/ppAgenda'
 import { getCurrentProfessional } from '@/services/professionals'
@@ -198,6 +199,14 @@ export function PPHomePage() {
     queryFn: () => listAgendaSessionsForDay(today),
   })
 
+  const todaySessions = sessionsQuery.data ?? []
+
+  const upcomingQuery = useQuery({
+    queryKey: ppAgendaQueryKeys.upcoming(MAX_TODAY_SESSIONS_DESKTOP),
+    queryFn: () => listUpcomingAgendaSessions({ limit: MAX_TODAY_SESSIONS_DESKTOP }),
+    enabled: !sessionsQuery.isLoading && todaySessions.length === 0,
+  })
+
   const demandsQuery = useQuery({
     queryKey: PP_DEMANDS_QUERY_KEY,
     queryFn: () => demandsService.listOpenForPp(),
@@ -255,11 +264,19 @@ export function PPHomePage() {
   )
 
   const opportunitiesCopy = describeNearbyDemands(nearbyCount, demands.length)
-  const sessions = sessionsQuery.data ?? []
-  const daySummary = buildAgendaDaySummary(sessions)
+  const upcomingSessions = upcomingQuery.data ?? []
+  const showingUpcoming = todaySessions.length === 0 && upcomingSessions.length > 0
+  const sessions = showingUpcoming ? upcomingSessions : todaySessions
+  const daySummary = buildAgendaDaySummary(todaySessions)
   const previewSessions = sessions.slice(0, MAX_TODAY_SESSIONS_DESKTOP)
   const remainingSessionsMobile = Math.max(0, sessions.length - MAX_TODAY_SESSIONS_MOBILE)
   const remainingSessionsDesktop = Math.max(0, sessions.length - MAX_TODAY_SESSIONS_DESKTOP)
+  const sessionsSectionTitle = showingUpcoming ? 'Próximas sessões' : 'Seu dia'
+  const sessionsEmpty =
+    todaySessions.length === 0 &&
+    upcomingSessions.length === 0 &&
+    !upcomingQuery.isLoading &&
+    !upcomingQuery.isFetching
 
   const continueLessonId = useMemo(() => {
     if (!playerContext) return null
@@ -276,6 +293,7 @@ export function PPHomePage() {
 
   const isLoading =
     sessionsQuery.isLoading ||
+    (todaySessions.length === 0 && upcomingQuery.isLoading) ||
     demandsQuery.isLoading ||
     pendingEvolutionsQuery.isLoading
 
@@ -313,7 +331,7 @@ export function PPHomePage() {
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
               <div className="min-w-0 space-y-3">
                 <HomeSectionTitle
-                  title="Seu dia"
+                  title={sessionsSectionTitle}
                   action={
                     <Button variant="ghost" size="sm" className="h-auto px-0 text-primary" asChild>
                       <Link to="/profissional/agenda">
@@ -324,7 +342,7 @@ export function PPHomePage() {
                   }
                 />
 
-                {sessions.length === 0 ? (
+                {sessionsEmpty ? (
                   <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6 text-center text-sm text-muted-foreground">
                     Você não tem sessões agendadas para hoje.
                   </div>
@@ -341,12 +359,14 @@ export function PPHomePage() {
                     </div>
                     {remainingSessionsMobile > 0 && (
                       <p className="px-1 text-xs text-muted-foreground lg:hidden">
-                        +{remainingSessionsMobile} sessão{remainingSessionsMobile === 1 ? '' : 'ões'} hoje
+                        +{remainingSessionsMobile} terapia{remainingSessionsMobile === 1 ? '' : 's'}{' '}
+                        {showingUpcoming ? 'nos próximos dias' : 'hoje'}
                       </p>
                     )}
                     {remainingSessionsDesktop > 0 && (
                       <p className="hidden px-1 text-xs text-muted-foreground lg:block">
-                        +{remainingSessionsDesktop} sessão{remainingSessionsDesktop === 1 ? '' : 'ões'} hoje
+                        +{remainingSessionsDesktop} terapia{remainingSessionsDesktop === 1 ? '' : 's'}{' '}
+                        {showingUpcoming ? 'nos próximos dias' : 'hoje'}
                       </p>
                     )}
                   </>

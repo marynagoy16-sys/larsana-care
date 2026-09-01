@@ -386,7 +386,7 @@ export function PPAgendaPage() {
       </div>
 
       <AlertDialog open={!!pendingReschedule} onOpenChange={(open) => !open && setPendingReschedule(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-md px-4 py-5 sm:w-full sm:px-6">
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar remarcação?</AlertDialogTitle>
             <AlertDialogDescription>

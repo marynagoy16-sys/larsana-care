@@ -94,6 +94,7 @@ export async function listPendingEvolutionsForPp() {
     `)
     .eq('professional_id', professional.id)
     .eq('status', 'realizada')
+    .eq('is_assessment_session', false)
     .order('check_out_at', { ascending: false, nullsFirst: false })
 
   if (sessionsError) throw sessionsError

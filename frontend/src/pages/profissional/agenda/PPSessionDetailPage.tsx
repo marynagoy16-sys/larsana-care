@@ -20,7 +20,13 @@ import {
   ppAgendaQueryKeys,
   type AgendaSessionItem,
 } from '@/services/ppAgenda'
-import { ppSessionCheckIn, ppSessionCheckOut } from '@/services/ppSessions'
+import {
+  describeRegisteredAssessment,
+  getPatientLatestAssessment,
+  ppPatientQueryKeys,
+} from '@/services/ppPatients'
+import { PpRescheduleSlotsCard } from '@/components/profissional/agenda/PpRescheduleSlotsCard'
+import { getAwaitingRescheduleRequestForSession } from '@/services/sessionReminderChat'
 import { toast } from 'sonner'
 
 function buildGoogleMapsUrl(
@@ -187,6 +193,7 @@ function SessionDetailBody({
   isFetching,
   isLoading,
   mobile,
+  assessmentRegisteredMessage,
   onOpenEvolution,
   onOpenPatient,
   onCheckIn,
@@ -197,6 +204,7 @@ function SessionDetailBody({
   isFetching: boolean
   isLoading: boolean
   mobile: boolean
+  assessmentRegisteredMessage?: string | null
   onOpenEvolution: () => void
   onOpenPatient: () => void
   onCheckIn: () => void
@@ -206,8 +214,11 @@ function SessionDetailBody({
   const scheduledLabel = session.scheduledAt
     ? format(new Date(session.scheduledAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
     : format(session.start, "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
-  const showEvolutionFooter = canEvolveTherapy(session)
+  const showClinicalAction = session.isAssessment
+    ? !assessmentRegisteredMessage
+    : canEvolveTherapy(session)
   const statusCfg = getAgendaStatusConfig(session.displayStatus)
+  const clinicalActionLabel = session.isAssessment ? 'Registrar avaliação' : 'Evoluir terapia'
 
   const sessionInfoFields = (
     <>
@@ -296,11 +307,15 @@ function SessionDetailBody({
               Check-out
             </Button>
           ) : null}
-          {showEvolutionFooter && (
+          {assessmentRegisteredMessage ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm font-medium text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200">
+              {assessmentRegisteredMessage}
+            </div>
+          ) : showClinicalAction ? (
             <Button onClick={onOpenEvolution} className="h-12 w-full">
-              Evoluir terapia
+              {clinicalActionLabel}
             </Button>
-          )}
+          ) : null}
           <Button variant="outline" onClick={onOpenPatient} className="h-12 w-full">
             Ver paciente
           </Button>
@@ -325,6 +340,23 @@ export function PPSessionDetailPage() {
     placeholderData: (prev) => prev,
   })
 
+  const { data: latestAssessment } = useQuery({
+    queryKey: ppPatientQueryKeys.latestAssessment(session?.patientId ?? ''),
+    queryFn: () => getPatientLatestAssessment(session!.patientId),
+    enabled: !!session?.isAssessment && !!session?.patientId,
+  })
+
+  const assessmentRegisteredMessage =
+    session?.isAssessment && latestAssessment
+      ? describeRegisteredAssessment(latestAssessment.status)
+      : null
+
+  const { data: rescheduleRequest, refetch: refetchRescheduleRequest } = useQuery({
+    queryKey: ['pp', 'reschedule-request', id],
+    queryFn: () => getAwaitingRescheduleRequestForSession(id!),
+    enabled: !!id && !!session,
+  })
+
   const checkMutation = useMutation({
     mutationFn: async (action: 'in' | 'out') => {
       if (!id) throw new Error('Sessão inválida')
@@ -340,6 +372,10 @@ export function PPSessionDetailPage() {
 
   const openEvolution = () => {
     if (!session) return
+    if (session.isAssessment) {
+      navigate(`/profissional/pacientes/${session.patientId}/avaliacao`)
+      return
+    }
     navigate(`/profissional/evolucao/nova?session=${session.id}`)
   }
 
@@ -380,7 +416,7 @@ export function PPSessionDetailPage() {
     if (!isLgUp) {
       return (
         <MobileSessionLayout title="Terapia" onBack={goBack} scrollClassName="pb-8">
-          <p className="text-muted-foreground">Sessão não encontrada ou não alocada a você.</p>
+          <p className="text-muted-foreground">Terapia não encontrada ou não alocada a você.</p>
         </MobileSessionLayout>
       )
     }
@@ -396,13 +432,23 @@ export function PPSessionDetailPage() {
           </div>
         </PageHeader>
         <CrudScrollPageLayout>
-          <p className="text-muted-foreground p-6">Sessão não encontrada ou não alocada a você.</p>
+          <p className="text-muted-foreground p-6">Terapia não encontrada ou não alocada a você.</p>
         </CrudScrollPageLayout>
       </>
     )
   }
 
   const statusCfg = getAgendaStatusConfig(session.displayStatus)
+
+  const rescheduleCard = rescheduleRequest ? (
+    <PpRescheduleSlotsCard
+      requestId={rescheduleRequest.id}
+      originalScheduledAt={rescheduleRequest.original_scheduled_at}
+      onSubmitted={() => {
+        void refetchRescheduleRequest()
+      }}
+    />
+  ) : null
 
   if (!isLgUp) {
     return (
@@ -411,11 +457,13 @@ export function PPSessionDetailPage() {
         onBack={goBack}
         scrollClassName="pb-8"
       >
+        {rescheduleCard ? <div className="mb-5">{rescheduleCard}</div> : null}
         <SessionDetailBody
           session={session}
           isFetching={isFetching}
           isLoading={isLoading}
           mobile
+          assessmentRegisteredMessage={assessmentRegisteredMessage}
           onOpenEvolution={openEvolution}
           onOpenPatient={openPatient}
           onCheckIn={() => checkMutation.mutate('in')}
@@ -446,11 +494,13 @@ export function PPSessionDetailPage() {
       </PageHeader>
 
       <CrudScrollPageLayout>
+        {rescheduleCard ? <div className="mb-5">{rescheduleCard}</div> : null}
         <SessionDetailBody
           session={session}
           isFetching={isFetching}
           isLoading={isLoading}
           mobile={false}
+          assessmentRegisteredMessage={assessmentRegisteredMessage}
           onOpenEvolution={openEvolution}
           onOpenPatient={openPatient}
           onCheckIn={() => checkMutation.mutate('in')}

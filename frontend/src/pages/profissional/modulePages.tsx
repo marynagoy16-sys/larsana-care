@@ -38,7 +38,7 @@ export function PPEvolucaoNovaPage() {
   const schema = z.object({
     patient_id: z.string().uuid('Selecione um paciente'),
     content_richtext: requiredString('Evolução'),
-    crefto_number: requiredString('CREFITO'),
+    crefto_number: z.string().trim().min(3, 'CREFITO não cadastrado no perfil'),
   })
   const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { patient_id: '', content_richtext: '', crefto_number: '' } })
 
@@ -100,6 +100,7 @@ export function PPEvolucaoNovaPage() {
           form={PP_EVOLUTION_FORM_ID}
           onCancel={() => navigate('/profissional/evolucoes')}
           isSubmitting={create.isPending}
+          submitLabel="Salvar evolução"
         />
       }
     >
@@ -118,7 +119,7 @@ export function PPEvolucaoNovaPage() {
                   <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
                     <p className="font-medium">{sessionContext.patientName}</p>
                     <p className="text-muted-foreground mt-0.5">
-                      Ciclo {sessionContext.cycleNumber} · Sessão #{sessionContext.sessionNumber}
+                      Ciclo {sessionContext.cycleNumber} · Terapia #{sessionContext.sessionNumber}
                     </p>
                   </div>
                 </>
@@ -137,8 +138,24 @@ export function PPEvolucaoNovaPage() {
           <FormField control={form.control} name="content_richtext" render={({ field }) => (
             <FormItem><FormLabel>Evolução clínica</FormLabel><FormControl><Textarea rows={8} {...field} /></FormControl><FormMessage /></FormItem>
           )} />
+          {(professional?.full_name || defaultCrefito) ? (
+            <div className="space-y-2">
+              <FormLabel>Profissional</FormLabel>
+              <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+                <p className="font-medium">{professional?.full_name ?? '—'}</p>
+                {defaultCrefito ? (
+                  <p className="text-muted-foreground mt-0.5">CREFITO {defaultCrefito}</p>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
           <FormField control={form.control} name="crefto_number" render={({ field }) => (
-            <FormItem><FormLabel>CREFITO</FormLabel><FormControl><Textarea rows={1} {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem className="hidden">
+              <FormControl>
+                <input type="hidden" {...field} value={defaultCrefito ?? field.value} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )} />
         </form>
       </Form>

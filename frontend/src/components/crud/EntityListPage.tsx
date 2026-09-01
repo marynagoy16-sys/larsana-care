@@ -38,6 +38,7 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   beforeTable?: ReactNode
   searchable?: boolean
   searchPlaceholder?: string
+  searchAccessory?: ReactNode
   headerExtra?: ReactNode
   stats?: StatCardItem[]
   showStats?: boolean
@@ -59,7 +60,10 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   onOpenFilters?: () => void
   activeFilterCount?: number
   onClearFilters?: () => void
+  onImport?: () => void
+  importDisabled?: boolean
   buildStats?: (rows: T[], filteredRows: T[]) => StatCardItem[]
+  renderAfterStats?: (filteredRows: T[], allRows: T[]) => ReactNode
   layoutClassName?: string
   tableSectionClassName?: string
   splitScrollOnMobile?: boolean
@@ -102,6 +106,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   beforeTable,
   searchable = true,
   searchPlaceholder,
+  searchAccessory,
   headerExtra,
   stats,
   showStats = true,
@@ -123,7 +128,10 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   onOpenFilters,
   activeFilterCount = 0,
   onClearFilters,
+  onImport,
+  importDisabled,
   buildStats,
+  renderAfterStats,
   layoutClassName,
   tableSectionClassName,
   splitScrollOnMobile = false,
@@ -295,6 +303,10 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
             </CascadeItem>
           )}
 
+          {renderAfterStats && (
+            <CascadeItem>{renderAfterStats(filteredRows, allRows)}</CascadeItem>
+          )}
+
           {(toolbar != null || showToolbar) && (
             <CascadeItem className="overflow-visible">
               {toolbar ?? (
@@ -302,9 +314,12 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
                   search={searchable ? search : undefined}
                   onSearchChange={searchable ? (v) => { setSearch(v); setPage(0) } : undefined}
                   searchPlaceholder={searchPlaceholder ?? `Pesquisar em ${title.toLowerCase()}...`}
+                  searchAccessory={searchAccessory}
                   onOpenFilters={onOpenFilters}
                   activeFilterCount={activeFilterCount}
                   onClearFilters={onClearFilters}
+                  onImport={onImport}
+                  importDisabled={importDisabled}
                   onExport={handleExport}
                   onRefresh={() => refetch()}
                   onAdd={onCreate}

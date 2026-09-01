@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, Lock, Receipt, Sparkles, X } from 'lucide-react'
+import { CalendarDays, Receipt, Sparkles, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,6 @@ import { FormActions } from '@/components/crud/FormActions'
 import { patientLevelLabels, ppClassLabels } from '@/constants/labels'
 import { formatCurrency, formatDate } from '@/lib/formatters'
 import { mapSupabaseError } from '@/lib/supabase-errors'
-import { cn } from '@/lib/utils'
 import { useRegions } from '@/hooks/queries/useRegions'
 import {
   PP_CLASSES,
@@ -29,6 +28,7 @@ import {
   type CommissionRule,
   type PricingEntry,
 } from '@/services/pricing'
+import { getPlatformSettings, updatePlatformSettings, ASAAS_MIN_CHARGE_CENTS } from '@/services/platformSettings'
 import { PRICING_DRAWER_SHEET_CLASS, PRICING_DRAWER_TABS } from '@/components/pricing/pricingDrawerShared'
 import type { Database } from '@/types/database'
 
@@ -87,7 +87,9 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
   const [priceGrid, setPriceGrid] = useState<PriceGrid>({})
   const [commissionInputs, setCommissionInputs] = useState<Array<{ id?: string; pp_class: typeof PP_CLASSES[number]; pp_percent: string }>>([])
   const [retentionPercent, setRetentionPercent] = useState('40')
-  const [savingTab, setSavingTab] = useState<'prices' | 'commissions' | 'retention' | null>(null)
+  const [assessmentFeeInput, setAssessmentFeeInput] = useState('')
+  const [assessmentPpShareInput, setAssessmentPpShareInput] = useState('')
+  const [savingTab, setSavingTab] = useState<'prices' | 'commissions' | 'retention' | 'assessment' | null>(null)
 
   const { data: regions = [] } = useRegions({ enabled: open })
 
@@ -95,6 +97,12 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
     queryKey: pricingQueryKeys.bundle(versionId ?? ''),
     queryFn: () => getPricingBundle(versionId!),
     enabled: open && !!versionId,
+  })
+
+  const { data: platformSettings } = useQuery({
+    queryKey: ['admin', 'platform-settings'],
+    queryFn: getPlatformSettings,
+    enabled: open,
   })
 
   useEffect(() => {
@@ -108,7 +116,11 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
     setRetentionPercent(bundle.retention ? String(bundle.retention.larsana_percent) : '40')
   }, [bundle, regions, open])
 
-  const isReadOnly = bundle?.version.is_active ?? false
+  useEffect(() => {
+    if (!open || !platformSettings) return
+    setAssessmentFeeInput(centsToReaisInput(platformSettings.assessment_fee_cents))
+    setAssessmentPpShareInput(centsToReaisInput(platformSettings.assessment_pp_share_cents))
+  }, [platformSettings, open])
 
   const invalidate = async () => {
     if (!versionId) return
@@ -117,7 +129,7 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
   }
 
   const handleSavePrices = async () => {
-    if (!versionId || isReadOnly) return
+    if (!versionId) return
     setSavingTab('prices')
     try {
       const payload = regions.flatMap((region) =>
@@ -153,7 +165,7 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
   }
 
   const handleSaveCommissions = async () => {
-    if (!versionId || isReadOnly) return
+    if (!versionId) return
     setSavingTab('commissions')
     try {
       const rules = commissionInputs.map((rule) => {
@@ -175,7 +187,7 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
   }
 
   const handleSaveRetention = async () => {
-    if (!versionId || isReadOnly) return
+    if (!versionId) return
     setSavingTab('retention')
     try {
       const larsanaPercent = Number(retentionPercent.replace(',', '.'))
@@ -186,6 +198,39 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
       await saveRetentionRule(versionId, larsanaPercent, bundle?.retention?.id)
       toast.success('Taxa do 1º mês salva')
       await invalidate()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : mapSupabaseError(error as Error))
+    } finally {
+      setSavingTab(null)
+    }
+  }
+
+  const handleSaveAssessment = async () => {
+    if (!platformSettings) return
+    setSavingTab('assessment')
+    try {
+      const assessmentFeeCents = reaisInputToCents(assessmentFeeInput)
+      const assessmentPpShareCents = reaisInputToCents(assessmentPpShareInput)
+      if (assessmentFeeCents == null || assessmentFeeCents <= 0) {
+        throw new Error('Informe uma taxa de avaliação válida')
+      }
+      if (assessmentFeeCents < ASAAS_MIN_CHARGE_CENTS) {
+        throw new Error(`Taxa mínima para PIX no Asaas: ${formatCurrency(ASAAS_MIN_CHARGE_CENTS)}`)
+      }
+      if (assessmentPpShareCents == null || assessmentPpShareCents < 0) {
+        throw new Error('Informe um repasse PP válido')
+      }
+
+      await updatePlatformSettings({
+        assessment_fee_cents: assessmentFeeCents,
+        assessment_pp_share_cents: assessmentPpShareCents,
+        early_cycle_discount_pct: platformSettings.early_cycle_discount_pct,
+        late_interest_pct_month: platformSettings.late_interest_pct_month,
+        late_fine_pct: platformSettings.late_fine_pct,
+        max_weekly_sessions_pp: platformSettings.max_weekly_sessions_pp,
+      })
+      toast.success('Taxa de avaliação salva')
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'platform-settings'] })
     } catch (error) {
       toast.error(error instanceof Error ? error.message : mapSupabaseError(error as Error))
     } finally {
@@ -212,7 +257,7 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
     return n2 != null ? formatCurrency(n2 * 4) : null
   }, [priceGrid, regions])
 
-  const footer = !isReadOnly && bundle ? (
+  const footer = bundle ? (
     <div className="shrink-0 border-t border-border bg-card/95 px-5 py-4 backdrop-blur-sm">
       {activeTab === 'prices' ? (
         <form
@@ -256,6 +301,24 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
             isSubmitting={savingTab === 'retention'}
             cancelLabel="Desfazer"
             submitLabel="Salvar taxa"
+          />
+        </form>
+      ) : null}
+      {activeTab === 'assessment' && platformSettings ? (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+            void handleSaveAssessment()
+          }}
+        >
+          <FormActions
+            onCancel={() => {
+              setAssessmentFeeInput(centsToReaisInput(platformSettings.assessment_fee_cents))
+              setAssessmentPpShareInput(centsToReaisInput(platformSettings.assessment_pp_share_cents))
+            }}
+            isSubmitting={savingTab === 'assessment'}
+            cancelLabel="Desfazer"
+            submitLabel="Salvar avaliação"
           />
         </form>
       ) : null}
@@ -318,16 +381,6 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
                   </Button>
                 ) : null}
               </div>
-
-              {isReadOnly ? (
-                <div className="mx-5 mb-4 flex items-start gap-2.5 rounded-xl border border-amber-200/80 bg-amber-50/90 px-3.5 py-2.5 text-xs text-amber-950">
-                  <Lock className="mt-0.5 size-3.5 shrink-0" />
-                  <p>
-                    <span className="font-semibold">Versão em vigor — somente leitura.</span>{' '}
-                    Crie uma nova versão clonando esta tabela para alterar valores.
-                  </p>
-                </div>
-              ) : null}
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
@@ -386,13 +439,9 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
                                     R$
                                   </span>
                                   <Input
-                                    className={cn(
-                                      'h-9 rounded-xl border-muted bg-muted/30 pl-8 text-sm',
-                                      isReadOnly && 'opacity-80',
-                                    )}
+                                    className="h-9 rounded-xl border-muted bg-muted/30 pl-8 text-sm"
                                     inputMode="decimal"
                                     placeholder="0,00"
-                                    disabled={isReadOnly}
                                     value={priceGrid[region.id]?.[level] ?? ''}
                                     onChange={(event) => {
                                       const value = event.target.value
@@ -438,7 +487,6 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
                             <Input
                               className="h-9 w-24 rounded-xl border-muted bg-muted/30"
                               inputMode="decimal"
-                              disabled={isReadOnly}
                               value={rule.pp_percent}
                               onChange={(event) => {
                                 const value = event.target.value
@@ -476,11 +524,60 @@ export function PricingVersionDrawer({ versionId, open, onOpenChange }: PricingV
                         <Input
                           className="h-9 w-24 rounded-xl border-muted bg-muted/30"
                           inputMode="decimal"
-                          disabled={isReadOnly}
                           value={retentionPercent}
                           onChange={(event) => setRetentionPercent(event.target.value)}
                         />
                         <span className="text-sm text-muted-foreground">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="assessment" className="mt-0 space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Valores globais da plataforma para a avaliação domiciliar — não variam por versão da tabela de
+                    preços.
+                  </p>
+                  <div className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="font-semibold">Taxa de avaliação</p>
+                        <p className="text-xs text-muted-foreground">
+                          Cobrada na solicitação. Se o paciente fechar tratamento, é descontada no primeiro ciclo.
+                          Mínimo {formatCurrency(ASAAS_MIN_CHARGE_CENTS)} para PIX no Asaas.
+                        </p>
+                      </div>
+                      <div className="relative w-full max-w-[140px]">
+                        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">
+                          R$
+                        </span>
+                        <Input
+                          className="h-9 rounded-xl border-muted bg-muted/30 pl-8 text-sm"
+                          inputMode="decimal"
+                          placeholder="0,00"
+                          value={assessmentFeeInput}
+                          onChange={(event) => setAssessmentFeeInput(event.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="font-semibold">Repasse PP (sem continuidade)</p>
+                        <p className="text-xs text-muted-foreground">
+                          Valor pago ao profissional quando o paciente não segue para tratamento.
+                        </p>
+                      </div>
+                      <div className="relative w-full max-w-[140px]">
+                        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">
+                          R$
+                        </span>
+                        <Input
+                          className="h-9 rounded-xl border-muted bg-muted/30 pl-8 text-sm"
+                          inputMode="decimal"
+                          placeholder="0,00"
+                          value={assessmentPpShareInput}
+                          onChange={(event) => setAssessmentPpShareInput(event.target.value)}
+                        />
                       </div>
                     </div>
                   </div>

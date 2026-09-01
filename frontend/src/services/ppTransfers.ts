@@ -72,6 +72,12 @@ export type PPRepasseDetail = {
     started_at: string | null
     closed_at: string | null
     patient_name: string | null
+    patient_id: string | null
+  } | null
+  patient_billing: {
+    full_name: string
+    cpf: string | null
+    full_address: string | null
   } | null
 }
 
@@ -106,7 +112,8 @@ export async function getPPRepasseDetail(id: string): Promise<PPRepasseDetail | 
         is_first_month_capture,
         started_at,
         closed_at,
-        patients ( full_name )
+        patient_id,
+        patients ( full_name, cpf )
       )
     `,
     )
@@ -126,13 +133,35 @@ export async function getPPRepasseDetail(id: string): Promise<PPRepasseDetail | 
         is_first_month_capture: boolean
         started_at: string | null
         closed_at: string | null
-        patients: { full_name: string } | { full_name: string }[] | null
+        patient_id: string
+        patients: { full_name: string; cpf: string | null } | { full_name: string; cpf: string | null }[] | null
       }
     | null
     | undefined
 
   const patient = cycleRaw?.patients
-  const patientName = Array.isArray(patient) ? patient[0]?.full_name : patient?.full_name
+  const patientRow = Array.isArray(patient) ? patient[0] : patient
+  const patientName = patientRow?.full_name
+  const patientId = cycleRaw?.patient_id ?? null
+
+  let fullAddress: string | null = null
+  if (patientId) {
+    const { data: addressRow } = await supabase
+      .from('patient_addresses')
+      .select('full_address, street, number, neighborhood, postal_code')
+      .eq('patient_id', patientId)
+      .order('is_primary', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (addressRow) {
+      fullAddress =
+        addressRow.full_address ||
+        [addressRow.street, addressRow.number, addressRow.neighborhood, addressRow.postal_code]
+          .filter(Boolean)
+          .join(', ') ||
+        null
+    }
+  }
 
   return {
     id: data.id,
@@ -153,6 +182,14 @@ export async function getPPRepasseDetail(id: string): Promise<PPRepasseDetail | 
           started_at: cycleRaw.started_at,
           closed_at: cycleRaw.closed_at,
           patient_name: patientName ?? null,
+          patient_id: patientId,
+        }
+      : null,
+    patient_billing: patientRow
+      ? {
+          full_name: patientRow.full_name,
+          cpf: patientRow.cpf,
+          full_address: fullAddress,
         }
       : null,
   }
@@ -297,7 +334,7 @@ export async function listPPRepassesCombined(): Promise<PPRepasseListItem[]> {
       amount_cents: row.amount_cents,
       status: row.status as TransferStatus,
       created_at: row.created_at,
-      label: `SUB · Sessão ${row.session_number}${cycle ? ` · Ciclo ${cycle.cycle_number}` : ''}`,
+      label: `SUB · Terapia ${row.session_number}${cycle ? ` · Ciclo ${cycle.cycle_number}` : ''}`,
     }
   })
 

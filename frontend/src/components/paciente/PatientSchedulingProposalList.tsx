@@ -1,9 +1,8 @@
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { SchedulingStructuredMessages } from '@/components/scheduling/SchedulingAvailabilityWizard'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import {
+  formatAvailabilitySlotLabel,
   patientConfirmSlot,
   patientRejectSlot,
   type SchedulingProposal,
@@ -21,8 +20,15 @@ export function PatientSchedulingProposalList({
   const initialProposals = proposals.filter((p) => p.proposal_type !== 'remarcacao')
 
   const confirmMutation = useCrudMutation({
-    mutationFn: ({ proposalId, slotId }: { proposalId: string; slotId: string }) =>
-      patientConfirmSlot(proposalId, slotId),
+    mutationFn: ({
+      proposalId,
+      slotId,
+      choiceLabel,
+    }: {
+      proposalId: string
+      slotId: string
+      choiceLabel: string
+    }) => patientConfirmSlot(proposalId, slotId, { choiceLabel }),
     queryKey: ['paciente', 'scheduling_proposals'],
     successMessage: 'Horário confirmado!',
     onSuccess: () => onUpdated?.(),
@@ -45,10 +51,14 @@ export function PatientSchedulingProposalList({
         <div key={proposal.id} className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="font-semibold text-sm">
-              {proposal.proposal_type === 'avaliacao' ? 'Avaliação inicial' : 'Continuidade de tratamento'}
+              {proposal.proposal_type === 'avaliacao'
+                ? 'Avaliação inicial'
+                : 'Primeira terapia do ciclo'}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Escolha um horário proposto pelo profissional parceiro.
+              {proposal.proposal_type === 'continuidade'
+                ? 'Escolha o dia e horário da primeira sessão. As demais serão no mesmo dia e horário.'
+                : 'Escolha um horário proposto pelo profissional parceiro.'}
             </p>
           </div>
 
@@ -62,10 +72,14 @@ export function PatientSchedulingProposalList({
                   className="w-full justify-start h-auto py-3"
                   disabled={busy}
                   onClick={() =>
-                    confirmMutation.mutate({ proposalId: proposal.id, slotId: slot.id })
+                    confirmMutation.mutate({
+                      proposalId: proposal.id,
+                      slotId: slot.id,
+                      choiceLabel: formatAvailabilitySlotLabel(slot.starts_at),
+                    })
                   }
                 >
-                  {format(new Date(slot.starts_at), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })}
+                  {formatAvailabilitySlotLabel(slot.starts_at)}
                 </Button>
               ))}
 

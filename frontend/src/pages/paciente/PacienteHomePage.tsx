@@ -13,6 +13,7 @@ import { PatientHomeServiceRequestCard } from '@/components/paciente/PatientHome
 import { PatientHomeSchedulingBanner } from '@/components/paciente/PatientHomeSchedulingBanner'
 import { PatientHomeHelpLink, PatientHomeLarsanaPillTeaser } from '@/components/paciente/PatientHomeExtras'
 import { PatientHomeJourney } from '@/components/paciente/PatientHomeJourney'
+import { PatientHomeUpcomingAssessmentCard } from '@/components/paciente/PatientHomeUpcomingAssessmentCard'
 import { PatientHomeKpiRow } from '@/components/paciente/PatientHomeKpiRow'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -90,7 +91,7 @@ export function PacienteHomePage() {
     )
   }
 
-  const { activeCycle, latestAssessment, linkedPatient, serviceRequest } = data
+  const { activeCycle, latestAssessment, linkedPatient, serviceRequest, upcomingAssessment } = data
   const hasOpenServiceRequest = Boolean(serviceRequest)
 
   const sidebarContent = (
@@ -128,6 +129,12 @@ export function PacienteHomePage() {
             <PatientHomeKpiRow context={data} />
           </CascadeItem>
 
+          {upcomingAssessment && (
+            <CascadeItem>
+              <PatientHomeUpcomingAssessmentCard appointment={upcomingAssessment} />
+            </CascadeItem>
+          )}
+
           <CascadeItem className="space-y-3">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_min(20rem,32%)] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
               <div className="min-w-0 space-y-3">
@@ -143,7 +150,7 @@ export function PacienteHomePage() {
                   }
                 />
 
-                {!data.pendingProposal && !data.pendingCharge && !latestAssessment && !activeCycle && !hasOpenServiceRequest && (
+                {!data.pendingProposal && !data.pendingCharge && !latestAssessment && !activeCycle && !hasOpenServiceRequest && !upcomingAssessment && (
                   <div className="rounded-xl border border-dashed border-border bg-muted/20 px-5 py-6 text-sm text-muted-foreground text-center">
                     Em breve você verá aqui o andamento do tratamento e avisos importantes.
                   </div>

@@ -5,6 +5,7 @@ import { RequireAuth } from '@/routes/guards/RequireAuth'
 import { RequireRole } from '@/routes/guards/RequireRole'
 import { NativeAdminGuard } from '@/routes/guards/NativeAdminGuard'
 import { AppShell } from '@/components/layout/AppShell'
+import { useAuth } from '@/hooks/useAuth'
 import type { UserRole } from '@/types/auth'
 
 const staffRoles: UserRole[] = ['admin', 'financeiro', 'gestao']
@@ -51,7 +52,9 @@ const DemandsPage = lazy(() =>
   import('@/pages/admin/demands/DemandsListPage').then((m) => ({ default: m.DemandsListPage })),
 )
 const ChargesPage = lazyAdmin('ChargesPage')
-const ChargeDetailPage = lazyAdmin('ChargeDetailPage')
+const ChargeDetailPage = lazy(() =>
+  import('@/pages/admin/finance/ChargeDetailPage').then((m) => ({ default: m.ChargeDetailPage })),
+)
 const TransfersPage = lazyAdmin('TransfersPage')
 const TransferDetailPage = lazy(() =>
   import('@/pages/admin/finance/TransferDetailPage').then((m) => ({ default: m.TransferDetailPage })),
@@ -59,9 +62,9 @@ const TransferDetailPage = lazy(() =>
 const SubRepasseDetailPage = lazy(() =>
   import('@/pages/admin/finance/SubRepasseDetailPage').then((m) => ({ default: m.SubRepasseDetailPage })),
 )
-const CaixaPage = lazyAdmin('CaixaPage')
-const DelumaExportPage = lazyAdmin('DelumaExportPage')
-const ReportsHubPage = lazyAdmin('ReportsHubPage')
+const CaixaPage = lazy(() =>
+  import('@/pages/admin/finance/CaixaPage').then((m) => ({ default: m.CaixaPage })),
+)
 const FaturamentoReportPage = lazyAdmin('FaturamentoReportPage')
 const ConversaoReportPage = lazyAdmin('ConversaoReportPage')
 const HorasCrefitoReportPage = lazyAdmin('HorasCrefitoReportPage')
@@ -74,12 +77,6 @@ const PpPointsConfigPage = lazy(() =>
 )
 const PlatformSettingsPage = lazy(() =>
   import('@/pages/admin/config/PlatformSettingsPage').then((m) => ({ default: m.PlatformSettingsPage })),
-)
-const AdminImportPatientsPage = lazy(() =>
-  import('@/pages/admin/import/AdminImportPatientsPage').then((m) => ({ default: m.AdminImportPatientsPage })),
-)
-const AdminImportProfessionalsPage = lazy(() =>
-  import('@/pages/admin/import/AdminImportProfessionalsPage').then((m) => ({ default: m.AdminImportProfessionalsPage })),
 )
 const PricingConfigPage = lazy(() =>
   import('@/pages/admin/pricing/PricingConfigPage').then((m) => ({ default: m.PricingConfigPage })),
@@ -126,6 +123,16 @@ function LegacyCredenciamentoRedirect() {
   return <Navigate to={id ? `/admin/profissionais/${id}` : '/admin/profissionais'} replace />
 }
 
+function ReportsRedirect() {
+  const { role, loading } = useAuth()
+  if (loading) return null
+  const target =
+    role === 'gestao'
+      ? '/admin/relatorios/conversao'
+      : '/admin/relatorios/faturamento'
+  return <Navigate to={target} replace />
+}
+
 export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
@@ -153,16 +160,14 @@ export const adminRoutes: RouteObject[] = [
       { path: 'demandas', element: staffRoute(<DemandsPage />, operacaoRoles) },
       { path: 'demandas/:id', element: staffRoute(<DemandDetailPage />, operacaoRoles) },
       { path: 'lista-espera', element: staffRoute(<AdminWaitlistPage />, operacaoRoles) },
-      { path: 'importacao/pacientes', element: staffRoute(<AdminImportPatientsPage />, adminOnly) },
-      { path: 'importacao/profissionais', element: staffRoute(<AdminImportProfessionalsPage />, adminOnly) },
       { path: 'cobrancas', element: staffRoute(<ChargesPage />, financeiroRoles) },
       { path: 'cobrancas/:id', element: staffRoute(<ChargeDetailPage />, financeiroRoles) },
       { path: 'repasses', element: staffRoute(<TransfersPage />, financeiroRoles) },
       { path: 'repasses/sub/:id', element: staffRoute(<SubRepasseDetailPage />, financeiroRoles) },
       { path: 'repasses/:id', element: staffRoute(<TransferDetailPage />, financeiroRoles) },
       { path: 'caixa', element: staffRoute(<CaixaPage />, financeiroRoles) },
-      { path: 'exportacao-deluma', element: staffRoute(<DelumaExportPage />, financeiroRoles) },
-      { path: 'relatorios', element: staffRoute(<ReportsHubPage />) },
+      { path: 'exportacao-deluma', element: <Navigate to="/admin/caixa" replace /> },
+      { path: 'relatorios', element: staffRoute(<ReportsRedirect />) },
       { path: 'relatorios/faturamento', element: staffRoute(<FaturamentoReportPage />, financeiroRoles) },
       { path: 'relatorios/conversao', element: staffRoute(<ConversaoReportPage />, operacaoRoles) },
       { path: 'relatorios/horas-crefito', element: staffRoute(<HorasCrefitoReportPage />, operacaoRoles) },

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { View } from 'react-native'
+import { Check } from 'lucide-react-native'
 import Svg, { Circle, Path, Rect } from 'react-native-svg'
 import Animated, {
   Easing,
@@ -47,7 +48,7 @@ function interpolatePath(t: number): { x: number; y: number } {
 }
 
 type Props = {
-  variant?: 'searching' | 'coming_soon'
+  variant?: 'searching' | 'coming_soon' | 'assigned'
   className?: string
 }
 
@@ -93,6 +94,18 @@ function SearchingMarker() {
 }
 
 export function CoverageMapIllustration({ variant = 'searching', className }: Props) {
+  if (variant === 'assigned') {
+    return (
+      <View className={cn('items-center justify-center', className)}>
+        <View className="h-40 w-full items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50/80">
+          <View className="h-16 w-16 items-center justify-center rounded-full bg-primary">
+            <Check size={32} color="#fff" strokeWidth={2.5} />
+          </View>
+        </View>
+      </View>
+    )
+  }
+
   const searching = variant === 'searching'
 
   return (

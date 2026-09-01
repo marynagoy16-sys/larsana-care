@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { CrudModal } from '@/components/crud/CrudModal'
+import { NpsScorePicker } from '@/components/paciente/NpsScorePicker'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
@@ -98,7 +98,7 @@ export function PacienteNpsPage() {
               <FormItem>
                 <FormLabel>Nota (0–10)</FormLabel>
                 <FormControl>
-                  <Input type="number" min={0} max={10} {...field} />
+                  <NpsScorePicker value={field.value} onChange={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

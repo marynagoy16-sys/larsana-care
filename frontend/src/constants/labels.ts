@@ -23,12 +23,12 @@ export const weeklyFrequencyLabels: Record<number, string> = {
 }
 
 export const proposedSessionCountLabels: Record<number, string> = {
-  4: 'Serão 4 terapias',
-  8: 'Serão 8 terapias',
-  12: 'Serão 12 terapias',
-  16: 'Serão 16 terapias',
-  20: 'Serão 20 terapias',
-  25: 'Serão 25 terapias',
+  4: '4 terapias',
+  8: '8 terapias',
+  12: '12 terapias',
+  16: '16 terapias',
+  20: '20 terapias',
+  25: '25 terapias',
 }
 
 export const patientSexLabels: Record<string, string> = {
@@ -63,6 +63,13 @@ export const cycleStatusLabels: Record<string, string> = {
   encerrado: 'Encerrado',
   fechado_financeiramente: 'Fechado financeiramente',
   cancelado: 'Cancelado',
+}
+
+/** Rótulos amigáveis no portal do paciente (sem jargão financeiro). */
+export const patientCycleStatusLabels: Record<string, string> = {
+  ...cycleStatusLabels,
+  encerrado: 'Concluído',
+  fechado_financeiramente: 'Concluído',
 }
 
 export const pauseTypeLabels: Record<string, string> = {

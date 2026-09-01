@@ -24,6 +24,8 @@ const PAUSE_TYPE_OPTIONS: { value: PauseType; label: string }[] = [
   { value: 'professional_or_operation_issue', label: 'Problema PP / operação' },
 ]
 
+const MANUAL_PAUSE_TYPE_OPTIONS = PAUSE_TYPE_OPTIONS.filter((opt) => opt.value !== 'none')
+
 interface FinancialClosurePanelProps {
   cycleId: string
   sessionsCompleted: number
@@ -40,7 +42,10 @@ export function FinancialClosurePanel({
   onClosed,
 }: FinancialClosurePanelProps) {
   const queryClient = useQueryClient()
-  const [pauseType, setPauseType] = useState<PauseType>('none')
+  const allSessionsComplete = sessionCount > 0 && sessionsCompleted >= sessionCount
+  const autoClosurePending = allSessionsComplete && cycleStatus === 'ativo'
+  const needsManualClosure = !autoClosurePending
+  const [pauseType, setPauseType] = useState<PauseType>('justified')
   const [adminDecision, setAdminDecision] = useState('')
 
   const isClosed = cycleStatus === 'fechado_financeiramente'
@@ -48,7 +53,7 @@ export function FinancialClosurePanel({
   const { data: preview, isLoading, isFetching } = useQuery({
     queryKey: ['financial_closure_preview', cycleId, pauseType],
     queryFn: () => previewFinancialClosure(cycleId, pauseType),
-    enabled: !!cycleId && !isClosed,
+    enabled: !!cycleId && !isClosed && needsManualClosure,
   })
 
   const closeMutation = useMutation({
@@ -68,6 +73,30 @@ export function FinancialClosurePanel({
         </div>
         <div className="px-5 py-4">
           <Badge variant="secondary">Ciclo fechado financeiramente</Badge>
+        </div>
+      </div>
+    )
+  }
+
+  if (autoClosurePending) {
+    return (
+      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
+          <h3 className="text-sm font-semibold">Fechamento financeiro</h3>
+        </div>
+        <div className="px-5 py-4 space-y-2 text-sm text-muted-foreground">
+          <p>
+            Quando o profissional parceiro registra a última terapia, o fechamento é{' '}
+            <span className="font-medium text-foreground">automático</span> — repasse entra na fila
+            aguardando NF.
+          </p>
+          <p>
+            Progresso:{' '}
+            <span className="font-medium text-foreground">
+              {sessionsCompleted} de {sessionCount} terapias realizadas
+            </span>
+            . Se o status não atualizar, recarregue a página.
+          </p>
         </div>
       </div>
     )
@@ -119,13 +148,13 @@ export function FinancialClosurePanel({
       <div className="px-5 py-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label>Tipo de pausa / encerramento</Label>
+            <Label>Tipo de pausa / encerramento antecipado</Label>
             <Select value={pauseType} onValueChange={(v) => setPauseType(v as PauseType)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {PAUSE_TYPE_OPTIONS.map((opt) => (
+                {MANUAL_PAUSE_TYPE_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>
@@ -172,6 +201,11 @@ export function FinancialClosurePanel({
             </div>
           </div>
         )}
+
+        <p className="text-xs text-muted-foreground">
+          Use apenas para encerramento antecipado ou pausa antes de concluir todas as terapias. Ciclos
+          completos fecham sozinhos.
+        </p>
 
         <Button
           onClick={() => closeMutation.mutate()}

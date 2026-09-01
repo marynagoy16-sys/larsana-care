@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -30,7 +30,6 @@ export default function EvolucaoNovaScreen() {
   const sessionId = session ?? undefined
 
   const [contentRichtext, setContentRichtext] = useState('')
-  const [crefitoNumber, setCrefitoNumber] = useState('')
   const [error, setError] = useState('')
 
   const { data: sessionContext } = useQuery({
@@ -44,12 +43,6 @@ export default function EvolucaoNovaScreen() {
     queryFn: getPPProfessionalCrefito,
   })
 
-  useEffect(() => {
-    if (defaultCrefito && !crefitoNumber) {
-      setCrefitoNumber(defaultCrefito)
-    }
-  }, [defaultCrefito])
-
   const { data: professional } = useQuery({
     queryKey: ['pp', 'current_professional'],
     queryFn: async () => {
@@ -57,7 +50,7 @@ export default function EvolucaoNovaScreen() {
       if (!user) return null
       const { data, error } = await supabase
         .from('professionals')
-        .select('id')
+        .select('id, full_name')
         .eq('user_id', user.id)
         .maybeSingle()
       if (error) throw error
@@ -68,7 +61,8 @@ export default function EvolucaoNovaScreen() {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!contentRichtext.trim()) throw new Error('Evolução clínica é obrigatória')
-      if (!crefitoNumber.trim()) throw new Error('CREFITO é obrigatório')
+      const crefito = defaultCrefito?.trim()
+      if (!crefito) throw new Error('CREFITO não cadastrado no perfil')
       if (!professional?.id) throw new Error('Profissional não encontrado')
 
       const patientId = sessionContext?.patientId ?? ''
@@ -78,7 +72,7 @@ export default function EvolucaoNovaScreen() {
         patient_id: patientId,
         professional_id: professional.id,
         content_richtext: contentRichtext.trim(),
-        crefito_number: crefitoNumber.trim(),
+        crefito_number: crefito,
         record_type: 'evolucao',
         session_id: sessionContext?.sessionId ?? null,
         cycle_id: sessionContext?.cycleId ?? null,
@@ -143,17 +137,21 @@ export default function EvolucaoNovaScreen() {
             />
           </View>
 
-          <View className="rounded-xl border border-border bg-card p-4">
-            <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              CREFITO
-            </Text>
-            <TextInput
-              value={crefitoNumber}
-              onChangeText={setCrefitoNumber}
-              placeholder="Número do CREFITO"
-              className="mt-2 rounded-lg border border-border bg-background p-3 text-sm text-foreground"
-            />
-          </View>
+          {(professional?.full_name || defaultCrefito) ? (
+            <View>
+              <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Profissional
+              </Text>
+              <View className="mt-2 rounded-xl border border-border bg-card p-4">
+                <Text className="text-sm font-medium text-foreground">
+                  {professional?.full_name ?? '—'}
+                </Text>
+                {defaultCrefito ? (
+                  <Text className="mt-0.5 text-sm text-muted-foreground">CREFITO {defaultCrefito}</Text>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
 
           {error ? (
             <Text className="text-center text-sm text-red-600">{error}</Text>

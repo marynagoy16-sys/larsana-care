@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn'
 import type { PatientServiceDemand } from '@/services/patientServiceRequest'
 
 const BASE_STEPS = [
+  { key: 'pagamento', label: 'Pagamento da avaliação' },
   { key: 'enviada', label: 'Solicitação enviada' },
   { key: 'buscando', label: 'Procurando profissional parceiro' },
   { key: 'waitlist', label: 'Lista de espera / sem cobertura imediata' },
@@ -14,7 +15,12 @@ const BASE_STEPS = [
 
 type StepKey = (typeof BASE_STEPS)[number]['key']
 
-function resolveVisibleSteps(hasWaitlist?: boolean, pendingScheduling?: boolean): StepKey[] {
+function resolveVisibleSteps(
+  hasWaitlist?: boolean,
+  pendingScheduling?: boolean,
+  awaitingAssessmentPayment?: boolean,
+): StepKey[] {
+  if (awaitingAssessmentPayment) return ['pagamento', 'enviada', 'buscando', 'atribuido']
   if (hasWaitlist && pendingScheduling) return ['enviada', 'waitlist', 'atribuido', 'horario']
   if (hasWaitlist) return ['enviada', 'waitlist']
   if (pendingScheduling) return ['enviada', 'buscando', 'atribuido', 'horario']
@@ -25,7 +31,9 @@ function resolveStepIndex(
   demand: PatientServiceDemand | null | undefined,
   hasWaitlist?: boolean,
   pendingScheduling?: boolean,
+  awaitingAssessmentPayment?: boolean,
 ): number {
+  if (awaitingAssessmentPayment) return 0
   if (hasWaitlist && !demand) return 1
   if (!demand) return -1
   if (pendingScheduling) return 3
@@ -38,6 +46,7 @@ type Props = {
   demand?: PatientServiceDemand | null
   hasWaitlist?: boolean
   pendingScheduling?: boolean
+  awaitingAssessmentPayment?: boolean
   createdAt?: string
   assignedProfessionalName?: string | null
 }
@@ -60,12 +69,13 @@ export function ServiceRequestTimeline({
   demand,
   hasWaitlist,
   pendingScheduling,
+  awaitingAssessmentPayment,
   createdAt,
   assignedProfessionalName,
 }: Props) {
   const router = useRouter()
 
-  if (hasWaitlist && !demand) {
+  if (hasWaitlist && !demand && !awaitingAssessmentPayment) {
     return (
       <View className="rounded-xl border border-border bg-card p-4 gap-2">
         <Text className="text-sm font-semibold text-foreground">Lista de espera</Text>
@@ -76,9 +86,14 @@ export function ServiceRequestTimeline({
     )
   }
 
-  const visibleKeys = resolveVisibleSteps(hasWaitlist, pendingScheduling)
+  const visibleKeys = resolveVisibleSteps(hasWaitlist, pendingScheduling, awaitingAssessmentPayment)
   const steps = BASE_STEPS.filter((step) => visibleKeys.includes(step.key))
-  const activeIndex = resolveStepIndex(demand, hasWaitlist, pendingScheduling)
+  const activeIndex = resolveStepIndex(
+    demand,
+    hasWaitlist,
+    pendingScheduling,
+    awaitingAssessmentPayment,
+  )
 
   if (activeIndex < 0 && !hasWaitlist) return null
 
@@ -102,10 +117,17 @@ export function ServiceRequestTimeline({
                   done && 'text-foreground',
                 )}
               >
-                {step.label}
+                {step.key === 'pagamento' && current && awaitingAssessmentPayment
+                  ? 'Aguardando pagamento'
+                  : step.label}
               </Text>
               {index === 0 && createdAt ? (
                 <Text className="text-xs text-muted-foreground">{formatWhen(createdAt)}</Text>
+              ) : null}
+              {current && step.key === 'pagamento' ? (
+                <Text className="text-xs text-muted-foreground pt-1">
+                  Aguardando pagamento da taxa de avaliação para enviarmos sua solicitação.
+                </Text>
               ) : null}
               {current && step.key === 'buscando' ? (
                 <Text className="text-xs text-muted-foreground">

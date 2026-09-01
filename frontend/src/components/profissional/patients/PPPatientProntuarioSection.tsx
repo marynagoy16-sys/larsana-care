@@ -19,11 +19,21 @@ const extraSessionStatusLabels: Record<string, string> = {
   a_agendar: 'A agendar',
 }
 
-function sessionStatusLabel(status: string) {
+function sessionStatusLabel(status: string, scheduledAt: string | null) {
+  if (status === 'prevista' && !scheduledAt) {
+    return extraSessionStatusLabels.a_agendar
+  }
   return extraSessionStatusLabels[status] ?? sessionStatusLabels[status] ?? status
 }
 
-function sessionStatusBadgeClass(status: string) {
+function sessionStatusBadgeClass(status: string, scheduledAt: string | null) {
+  if (status === 'prevista' && !scheduledAt) {
+    return sessionStatusBadgeClassForCode('a_agendar')
+  }
+  return sessionStatusBadgeClassForCode(status)
+}
+
+function sessionStatusBadgeClassForCode(status: string) {
   if (status === 'realizada') {
     return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
   }
@@ -57,10 +67,10 @@ function ProntuarioSessionRow({ session }: { session: PPPatientProntuarioSession
         <span
           className={cn(
             'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
-            sessionStatusBadgeClass(session.status),
+            sessionStatusBadgeClass(session.status, session.scheduled_at),
           )}
         >
-          {sessionStatusLabel(session.status)}
+          {sessionStatusLabel(session.status, session.scheduled_at)}
         </span>
       </div>
       {evolution ? (

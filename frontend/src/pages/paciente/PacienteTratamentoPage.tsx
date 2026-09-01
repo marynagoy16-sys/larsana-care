@@ -4,7 +4,7 @@ import { ChevronRight } from 'lucide-react'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PacienteEmptyState } from '@/components/paciente/PacienteSubpageShell'
 import { PatientActiveTreatmentCard } from '@/components/paciente/PatientActiveTreatmentCard'
-import { cycleStatusLabels } from '@/constants/labels'
+import { patientCycleStatusLabels } from '@/constants/labels'
 import { loadPatientTreatmentPage, patientTreatmentQueryKeys } from '@/services/patientTreatment'
 import { cn } from '@/lib/utils'
 
@@ -37,7 +37,7 @@ export function PacienteTratamentoPage() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando tratamento…</p>
         ) : cycles.length === 0 ? (
-          <PacienteEmptyState message="Nenhum ciclo de tratamento encontrado no momento." />
+          <PacienteEmptyState message="Seu tratamento aparecerá aqui após a avaliação inicial e aceite da proposta." />
         ) : (
           <>
             {activeCycle && <PatientActiveTreatmentCard cycle={activeCycle} />}
@@ -52,7 +52,7 @@ export function PacienteTratamentoPage() {
               ) : (
                 <div className="rounded-xl border border-border bg-card overflow-hidden divide-y divide-border">
                   {otherCycles.map((cycle) => {
-                    const statusLabel = cycleStatusLabels[cycle.status] ?? cycle.status
+                    const statusLabel = patientCycleStatusLabels[cycle.status] ?? cycle.status
 
                     return (
                       <Link

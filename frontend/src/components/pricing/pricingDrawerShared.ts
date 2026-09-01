@@ -5,6 +5,7 @@ export const PRICING_DRAWER_TABS = [
   { id: 'prices', label: 'Preços por sessão' },
   { id: 'commissions', label: 'Repasses' },
   { id: 'retention', label: 'Taxa 1º mês' },
+  { id: 'assessment', label: 'Avaliação' },
 ] as const
 
 export type PricingDrawerTabId = (typeof PRICING_DRAWER_TABS)[number]['id']
