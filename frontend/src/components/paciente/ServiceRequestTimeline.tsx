@@ -13,7 +13,7 @@ const BASE_STEPS = [
   { key: 'plano', label: 'Escolha do plano de tratamento' },
   { key: 'ciclo', label: 'Pagamento do ciclo' },
   { key: 'atribuido', label: 'Profissional parceiro atribuído' },
-  { key: 'horario', label: 'Escolha um horário' },
+  { key: 'horario', label: 'Confirmar horário no chat' },
 ] as const
 
 type StepKey = (typeof BASE_STEPS)[number]['key']
@@ -156,10 +156,10 @@ export function ServiceRequestTimeline({
                 {current && step.key === 'horario' ? (
                   <div className="space-y-2 pt-1">
                     <p className="text-xs text-muted-foreground">
-                      O profissional enviou horários disponíveis. Escolha o melhor para você.
+                      O profissional enviou opções de horário no chat com a Sara.
                     </p>
                     <Button asChild size="sm" className="h-8">
-                      <Link to="/paciente/chat">Escolher horário</Link>
+                      <Link to="/paciente/chat">Abrir chat</Link>
                     </Button>
                   </div>
                 ) : null}

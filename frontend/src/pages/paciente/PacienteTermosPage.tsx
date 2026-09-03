@@ -1,24 +1,10 @@
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronRight } from 'lucide-react'
 import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
+import { LegalDocumentsHub } from '@/components/legal/LegalDocumentsHub'
+import { legalTermLabel } from '@/constants/legalTerms'
 import { supabase } from '@/lib/supabase'
-
-const PATIENT_TERM_TYPES = [
-  'CONTRATO_INTERMEDIACAO',
-  'TERMO_CONSENTIMENTO',
-  'LGPD',
-  'TERMO_ADESAO',
-  'DIRETRIZES',
-] as const
-
-const TERM_LABELS: Record<(typeof PATIENT_TERM_TYPES)[number], string> = {
-  CONTRATO_INTERMEDIACAO: 'Contrato de Intermediação',
-  TERMO_CONSENTIMENTO: 'Termo de Consentimento',
-  LGPD: 'Políticas de Privacidade',
-  TERMO_ADESAO: 'Termo de adesão',
-  DIRETRIZES: 'Diretrizes de uso',
-}
+import { formatDateTime } from '@/lib/formatters'
 
 type LegalTerm = {
   id: string
@@ -29,48 +15,14 @@ type LegalTerm = {
 }
 
 export function PacienteTermosPage() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['paciente', 'legal-terms'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('legal_terms')
-        .select('id, term_type, title, version, content')
-        .in('term_type', [...PATIENT_TERM_TYPES])
-        .eq('is_current', true)
-        .order('term_type')
-      if (error) throw error
-      return (data ?? []) as LegalTerm[]
-    },
-  })
-
   return (
-    <PacienteSubpageShell title="Termos" loading={isLoading}>
-      <div className="space-y-4 pb-8">
-        <p className="text-sm text-muted-foreground">Termos de uso e política de privacidade</p>
-
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando termos…</p>
-        ) : (data ?? []).length === 0 ? (
-          <PacienteEmptyState message="Nenhum termo disponível no momento." />
-        ) : (
-          <div className="space-y-2">
-            {(data ?? []).map((term) => (
-              <Link
-                key={term.id}
-                to={`/paciente/termos/${term.id}`}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 transition-colors hover:bg-muted/40"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-foreground">
-                    {TERM_LABELS[term.term_type as (typeof PATIENT_TERM_TYPES)[number]] ?? term.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Versão {term.version}</p>
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-              </Link>
-            ))}
-          </div>
-        )}
+    <PacienteSubpageShell title="Documentos e Termos">
+      <div className="pb-8">
+        <LegalDocumentsHub
+          profile="paciente"
+          detailBasePath="/paciente/termos"
+          description="Termos de uso, privacidade, anexos comerciais e histórico de aceites."
+        />
       </div>
     </PacienteSubpageShell>
   )
@@ -79,7 +31,7 @@ export function PacienteTermosPage() {
 export function PacienteTermoDetailPage() {
   const { id } = useParams<{ id: string }>()
 
-  const { data, isLoading } = useQuery({
+  const { data: term, isLoading } = useQuery({
     queryKey: ['paciente', 'legal-term', id],
     enabled: Boolean(id),
     queryFn: async () => {
@@ -93,24 +45,46 @@ export function PacienteTermoDetailPage() {
     },
   })
 
+  const { data: acceptance } = useQuery({
+    queryKey: ['paciente', 'legal-term-acceptance', id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('digital_acceptances')
+        .select('accepted_at, legal_terms(version)')
+        .eq('term_id', id!)
+        .order('accepted_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      return data as { accepted_at: string; legal_terms: { version: string } | null } | null
+    },
+  })
+
   return (
     <PacienteSubpageShell
-      title={data?.title ?? 'Termo'}
+      title={term ? legalTermLabel(term.term_type, term.title) : 'Documento'}
       loading={isLoading}
       backTo="/paciente/termos"
     >
       <div className="space-y-4 pb-8">
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
-        ) : data ? (
+        ) : term ? (
           <>
-            <p className="text-sm text-muted-foreground">Versão {data.version}</p>
+            <p className="text-sm text-muted-foreground">Versão vigente {term.version}</p>
+            {acceptance?.accepted_at ? (
+              <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                Aceito em {formatDateTime(acceptance.accepted_at)}
+                {acceptance.legal_terms?.version ? ` — Versão ${acceptance.legal_terms.version}` : ''}
+              </p>
+            ) : null}
             <div className="rounded-xl border border-border bg-muted/30 px-4 py-5">
-              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{data.content}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{term.content}</p>
             </div>
           </>
         ) : (
-          <PacienteEmptyState message="Termo não encontrado." />
+          <PacienteEmptyState message="Documento não encontrado." />
         )}
       </div>
     </PacienteSubpageShell>

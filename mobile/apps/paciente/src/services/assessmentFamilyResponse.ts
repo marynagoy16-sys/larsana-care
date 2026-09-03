@@ -48,12 +48,16 @@ export async function acceptAssessmentProposal(input: {
   assessmentId: string
   response: 'SIM' | 'NAO'
   chosenWeeklyFrequency?: number
+  acceptAnexoI?: boolean
+  acceptAnexoII?: boolean
 }): Promise<AcceptProposalResult> {
   const { data, error } = await supabase.rpc('accept_assessment_proposal', {
     p_assessment_id: input.assessmentId,
     p_response: input.response,
     p_chosen_weekly_frequency: input.chosenWeeklyFrequency ?? null,
     p_payment_timing: 'antecipado',
+    p_accept_anexo_i: input.acceptAnexoI ?? false,
+    p_accept_anexo_ii: input.acceptAnexoII ?? false,
   })
 
   if (error) throw error

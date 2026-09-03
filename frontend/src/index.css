@@ -13,6 +13,10 @@
  */
 :root {
   --shell-gap: 1rem;
+  --shell-safe-top: max(var(--shell-gap), env(safe-area-inset-top, 0px));
+  /* Altura útil do header mobile (conteúdo + pb-4), sem contar a safe area. */
+  --shell-mobile-header-block: 3.25rem;
+  --shell-mobile-header-total: calc(var(--shell-mobile-header-block) + var(--shell-safe-top));
   /* Altura da bottom nav flutuante + respiro para o último item não ficar atrás do menu */
   --bottom-nav-clearance: calc(6.25rem + env(safe-area-inset-bottom, 0px));
   --sidebar-width: 17.5rem;
@@ -146,14 +150,18 @@
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font-sans);
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
+  isolation: isolate;
 }
 
 .scrollbar-custom::-webkit-scrollbar {
@@ -221,7 +229,26 @@ body {
 }
 
 .shell-content-y-top {
-  padding-top: calc(var(--shell-gap) + env(safe-area-inset-top, 0px));
+  padding-top: var(--shell-safe-top);
+}
+
+@media (max-width: 1023px) {
+  .shell-mobile-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    padding-top: var(--shell-safe-top);
+    padding-bottom: 1rem;
+    background-color: hsl(var(--background));
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .shell-scroll-region.shell-has-mobile-header {
+    padding-top: var(--shell-mobile-header-total);
+  }
 }
 
 .shell-content-y-bottom {

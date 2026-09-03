@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { ZodError } from 'zod'
 import { toast } from 'sonner'
+import { LegalTermAcceptanceStepForm } from '@/components/legal/LegalTermAcceptanceStepForm'
+import { PATIENT_ONBOARDING_TERM_TYPES } from '@/constants/legalTerms'
+import type { LegalTermType } from '@/constants/legalTerms'
 import { CityRegionFields } from '@/components/forms/CityRegionFields'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -15,6 +19,7 @@ import { fetchViaCep } from '@/lib/viacep'
 import { mapSupabaseError } from '@/lib/supabase-errors'
 import { patientOnboardingSchema } from '@/schemas/patientOnboarding'
 import { completePatientOnboarding } from '@/services/patientOnboarding'
+import { loadCurrentLegalTerms, recordLegalAcceptances } from '@/services/legalDocuments'
 import { findCityByNameAndState } from '@/services/regions'
 import { sanitizeCep, sanitizePhone } from '@/lib/sanitize'
 
@@ -32,6 +37,12 @@ export function PacienteOnboardingPage() {
   const [regionId, setRegionId] = useState('')
   const [loading, setLoading] = useState(false)
   const [cepLoading, setCepLoading] = useState(false)
+  const [allTermsChecked, setAllTermsChecked] = useState(false)
+
+  const legalTermsQuery = useQuery({
+    queryKey: ['paciente', 'onboarding-legal-terms'],
+    queryFn: () => loadCurrentLegalTerms(PATIENT_ONBOARDING_TERM_TYPES),
+  })
 
   useEffect(() => {
     if (profile?.full_name && !patientFullName) {
@@ -65,6 +76,11 @@ export function PacienteOnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!allTermsChecked) {
+      toast.error('Aceite todos os termos obrigatórios para continuar.')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -80,6 +96,7 @@ export function PacienteOnboardingPage() {
         regionId,
       })
 
+      await recordLegalAcceptances(PATIENT_ONBOARDING_TERM_TYPES, 'onboarding')
       await completePatientOnboarding(parsed)
       toast.success('Cadastro concluído! Agora você pode solicitar atendimento.')
       navigate('/paciente/solicitar', { replace: true })
@@ -229,7 +246,21 @@ export function PacienteOnboardingPage() {
             />
           </div>
 
-          <Button type="submit" className={softFieldButtonClass} disabled={loading}>
+          <LegalTermAcceptanceStepForm
+            title="Termos obrigatórios"
+            description="Antes de solicitar atendimento, aceite os documentos abaixo."
+            termTypes={PATIENT_ONBOARDING_TERM_TYPES}
+            legalTerms={legalTermsQuery.data ?? []}
+            acceptedTermTypes={[]}
+            onAccept={async (types: LegalTermType[]) => {
+              await recordLegalAcceptances(types, 'onboarding')
+            }}
+            disabled={loading}
+            showSubmitButton={false}
+            onAllCheckedChange={setAllTermsChecked}
+          />
+
+          <Button type="submit" className={softFieldButtonClass} disabled={loading || !allTermsChecked}>
             {loading ? 'Salvando...' : 'Continuar para solicitar atendimento'}
           </Button>
         </form>

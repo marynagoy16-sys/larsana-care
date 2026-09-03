@@ -1,6 +1,6 @@
 -- 200 demandas abertas para teste de carga (idempotente por prefixo lt2)
 -- Aplicar: node data/supabase/scripts/apply-sql-remote.mjs data/supabase/seed-load-test-200-demands.sql
--- Remover: node data/supabase/scripts/apply-sql-remote.mjs data/supabase/seed-load-test-200-demands-cleanup.sql
+-- Remover: npx supabase db query --linked -f data/supabase/scripts/cleanup-load-test-patients.sql
 
 DO $$
 DECLARE

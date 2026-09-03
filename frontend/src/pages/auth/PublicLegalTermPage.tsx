@@ -1,21 +1,27 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
 import {
   PUBLIC_LEGAL_TERM_LABELS,
   getPublicLegalTerm,
+  isPublicLegalTermSlug,
   type PublicLegalTermSlug,
 } from '@/services/publicLegalTerms'
 
 const PATH_TO_SLUG: Record<string, PublicLegalTermSlug> = {
   '/termos-de-uso': 'termos-de-uso',
   '/politica-de-privacidade': 'politica-de-privacidade',
+  '/termos-profissionais': 'termos-profissionais',
+  '/privacidade-profissionais': 'privacidade-profissionais',
+  '/politica-de-cookies': 'politica-de-cookies',
+  '/regras-cancelamento': 'regras-cancelamento',
 }
 
 export function PublicLegalTermPage() {
   const { pathname } = useLocation()
-  const validSlug = PATH_TO_SLUG[pathname] ?? null
+  const { slug: paramSlug } = useParams<{ slug?: string }>()
+  const validSlug = PATH_TO_SLUG[pathname] ?? (paramSlug && isPublicLegalTermSlug(paramSlug) ? paramSlug : null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['public', 'legal-term', validSlug],

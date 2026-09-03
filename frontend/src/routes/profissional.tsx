@@ -74,6 +74,16 @@ const PPCartaoPage = lazy(() =>
 const PPPerfilPage = lazy(() =>
   import('@/pages/profissional/account/PPPerfilPage').then((m) => ({ default: m.PPPerfilPage })),
 )
+const PPLegalDocumentsPage = lazy(() =>
+  import('@/pages/profissional/account/PPLegalDocumentsPage').then((m) => ({
+    default: m.PPLegalDocumentsPage,
+  })),
+)
+const PPLegalDocumentDetailPage = lazy(() =>
+  import('@/pages/profissional/account/PPLegalDocumentsPage').then((m) => ({
+    default: m.PPLegalDocumentDetailPage,
+  })),
+)
 import { AcademyLessonPage } from '@/pages/profissional/academy/AcademyLessonPage'
 const AcademyHubPage = lazy(() => import('@/pages/profissional/academy/AcademyHubPage').then((m) => ({ default: m.AcademyHubPage })))
 const AcademyModulePage = lazy(() => import('@/pages/profissional/academy/AcademyModulePage').then((m) => ({ default: m.AcademyModulePage })))
@@ -112,6 +122,8 @@ export const profissionalRoutes: RouteObject[] = [
       { path: 'credenciamento/contrato', element: ppRoute(<PPCredenciamentoPage />) },
       { path: 'cartao', element: ppRoute(<PPCartaoPage />) },
       { path: 'perfil', element: ppRoute(<PPPerfilPage />) },
+      { path: 'documentos', element: ppRoute(<PPLegalDocumentsPage />) },
+      { path: 'documentos/:id', element: ppRoute(<PPLegalDocumentDetailPage />) },
       { path: 'notificacoes', element: ppRoute(<PPNotificacoesPage />) },
       { path: 'academy', element: ppRoute(<AcademyHubPage />) },
       { path: 'academy/modulos/:moduleId', element: ppRoute(<AcademyModulePage />) },

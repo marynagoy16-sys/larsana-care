@@ -2,10 +2,14 @@ import { supabase } from '@/lib/supabase'
 import { sanitizeStorageFileName } from '@/lib/sanitize'
 import { mapSupabaseError } from '@/lib/supabase-errors'
 import {
-  PP_LEGAL_TERM_TYPES,
+  PP_CATEGORIAS_TERM,
+  PP_REGRAS_TYPES,
+  PP_SIGILO_TERM,
+  PP_TERMOS_TYPES,
   type CredentialingSnapshot,
   type CredentialingStepId,
 } from '@/lib/credentialingModel'
+import { PP_CREDENTIALING_TERM_TYPES } from '@/constants/legalTerms'
 import type {
   BancoStepValues,
   CategoriasStepValues,
@@ -13,6 +17,8 @@ import type {
   DadosStepValues,
 } from '@/schemas/credentialing'
 import { normalizeTechnicalCategoriesForSave } from '@/lib/ppTechnicalCategories'
+import { recordLegalAcceptances } from '@/services/legalDocuments'
+import type { LegalTermType } from '@/constants/legalTerms'
 import type { Tables, TablesInsert } from '@/types/database'
 
 export const PROFESSIONAL_DOCS_BUCKET = 'professional-documents'
@@ -264,19 +270,32 @@ export async function removeProfessionalDocument(documentId: string) {
   if (error) throw error
 }
 
-async function loadCurrentLegalTerms() {
+async function loadCurrentLegalTerms(termTypes: readonly string[]) {
   const { data, error } = await supabase
     .from('legal_terms')
-    .select('id, term_type, title, version')
-    .in('term_type', [...PP_LEGAL_TERM_TYPES])
+    .select('id, term_type, title, version, content, acceptance_mode')
+    .in('term_type', [...termTypes] as never)
     .eq('is_current', true)
 
   if (error) throw error
   return data ?? []
 }
 
+export async function loadPpLegalTermsForStep(step: CredentialingStepId) {
+  if (step === 'termos') return loadCurrentLegalTerms(PP_TERMOS_TYPES)
+  if (step === 'categorias') return loadCurrentLegalTerms([PP_CATEGORIAS_TERM])
+  if (step === 'sigilo') return loadCurrentLegalTerms([PP_SIGILO_TERM])
+  if (step === 'regras') return loadCurrentLegalTerms(PP_REGRAS_TYPES)
+  return loadCurrentLegalTerms(PP_CREDENTIALING_TERM_TYPES)
+}
+
+/** @deprecated use loadPpLegalTermsForStep */
 export async function loadPpLegalTermsForContrato() {
-  return loadCurrentLegalTerms()
+  return loadPpLegalTermsForStep('contrato')
+}
+
+export async function recordCredentialingLegalAcceptances(termTypes: readonly LegalTermType[]) {
+  await recordLegalAcceptances(termTypes, 'credentialing')
 }
 
 export async function acceptContratoAndSubmit() {
@@ -303,4 +322,8 @@ export const CREDENTIALING_STEP_SAVE: SaveStepFn = {
 
 export function stepHasPersistedSave(step: CredentialingStepId): step is keyof SaveStepFn {
   return step === 'dados' || step === 'categorias' || step === 'conselho' || step === 'banco'
+}
+
+export function stepRequiresLegalAcceptance(step: CredentialingStepId): boolean {
+  return step === 'termos' || step === 'categorias' || step === 'sigilo' || step === 'regras'
 }

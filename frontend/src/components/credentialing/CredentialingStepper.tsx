@@ -115,8 +115,8 @@ export function getCredentialingStepDescription(step: CredentialingStepId, readO
       ? 'Dados pessoais e profissionais cadastrados.'
       : 'Informe seus dados pessoais e profissionais.',
     categorias: readOnly
-      ? 'Categorias técnicas de atendimento selecionadas.'
-      : 'Selecione as categorias técnicas de atendimento e, se aplicável, solicite habilitação Cardiorrespiratória.',
+      ? 'Categorias técnicas e Anexo III aceitos.'
+      : 'Selecione categorias técnicas, aceite o Anexo III e solicite habilitação Cardiorrespiratória se aplicável.',
     conselho: readOnly
       ? 'Registro no conselho profissional.'
       : 'Registre seu conselho profissional (CREFITO ou COREN).',
@@ -126,9 +126,18 @@ export function getCredentialingStepDescription(step: CredentialingStepId, readO
     banco: readOnly
       ? 'Dados bancários para repasses.'
       : 'Informe conta bancária e chave PIX para repasses.',
+    termos: readOnly
+      ? 'Termos de uso e privacidade aceitos.'
+      : 'Aceite os Termos de Uso e a Política de Privacidade para profissionais parceiros.',
+    sigilo: readOnly
+      ? 'Anexo IV — Sigilo e dados assistenciais aceito.'
+      : 'Aceite o Anexo IV para acesso a prontuários e evoluções clínicas.',
+    regras: readOnly
+      ? 'Regras comerciais e operacionais registradas.'
+      : 'Tome ciência das regras comerciais (Anexo I) e operacionais (Anexo II).',
     contrato: readOnly
-      ? 'Termos aceitos e contrato LRS-PROF.'
-      : 'Leia e aceite os termos e o contrato LRS-PROF para enviar à Larsana.',
+      ? 'Contrato LRS-PROF assinado.'
+      : 'Leia e aceite o contrato LRS-PROF para enviar à Larsana.',
   }
   return hints[step]
 }

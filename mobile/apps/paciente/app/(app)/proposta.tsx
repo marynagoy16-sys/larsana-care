@@ -22,6 +22,8 @@ export default function PropostaScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [chosenFrequency, setChosenFrequency] = useState<number | null>(null)
+  const [acceptAnexoI, setAcceptAnexoI] = useState(false)
+  const [acceptAnexoII, setAcceptAnexoII] = useState(false)
 
   const homeQuery = useQuery({ queryKey: patientPortalQueryKeys.home, queryFn: loadPatientHome })
   const pendingAssessment = homeQuery.data?.pendingProposal
@@ -43,6 +45,8 @@ export default function PropostaScreen() {
         assessmentId: pendingAssessment!.id,
         response,
         chosenWeeklyFrequency: response === 'SIM' ? selectedFrequency : undefined,
+        acceptAnexoI: response === 'SIM' ? acceptAnexoI : undefined,
+        acceptAnexoII: response === 'SIM' ? acceptAnexoII : undefined,
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
@@ -57,6 +61,8 @@ export default function PropostaScreen() {
   })
 
   const loading = homeQuery.isLoading || (pendingAssessment && previewQuery.isLoading)
+
+  const canAccept = acceptAnexoI && acceptAnexoII && Boolean(selectedOption)
 
   const handleAccept = () => {
     if (selectedFrequency < recommended) {
@@ -131,9 +137,35 @@ export default function PropostaScreen() {
                 />
               </View>
             ) : null}
+            {selectedOption ? (
+              <View className="rounded-xl border border-border bg-card p-5 gap-3">
+                <Text className="font-semibold text-sm">Aceite comercial do ciclo</Text>
+                <Text className="text-sm text-muted-foreground">
+                  {selectedOption.session_count} terapias — total {formatCurrency(selectedOption.total_amount_cents)}
+                </Text>
+                <Pressable
+                  className="flex-row items-start gap-3 rounded-lg border border-border p-3"
+                  onPress={() => setAcceptAnexoI((v) => !v)}
+                >
+                  <View className={`mt-0.5 h-5 w-5 rounded border ${acceptAnexoI ? 'bg-primary border-primary' : 'border-muted-foreground'}`} />
+                  <Text className="flex-1 text-sm">
+                    Li e aceito o Anexo I — Condições Comerciais com os valores acima.
+                  </Text>
+                </Pressable>
+                <Pressable
+                  className="flex-row items-start gap-3 rounded-lg border border-border p-3"
+                  onPress={() => setAcceptAnexoII((v) => !v)}
+                >
+                  <View className={`mt-0.5 h-5 w-5 rounded border ${acceptAnexoII ? 'bg-primary border-primary' : 'border-muted-foreground'}`} />
+                  <Text className="flex-1 text-sm">
+                    Declaro ciência do Anexo II — Cancelamento e Reagendamento.
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
           </ScrollView>
           <View className="border-t border-border bg-card px-4 py-4 gap-2">
-            <Button onPress={handleAccept} loading={acceptMutation.isPending}>
+            <Button onPress={handleAccept} loading={acceptMutation.isPending} disabled={!canAccept}>
               Aceitar e pagar
             </Button>
             <Button

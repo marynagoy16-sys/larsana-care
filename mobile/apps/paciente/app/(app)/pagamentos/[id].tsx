@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react-native'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { formatCurrency, formatDate } from '@/lib/formatters'
+import { isPaymentSimulationEnabled } from '@/config/paymentSimulation'
 import { simulateChargePayment } from '@/services/patientPayments'
 import { patientPortalQueryKeys } from '@/services/patientPortal'
 import { supabase } from '@/lib/supabase'
@@ -109,9 +110,9 @@ export default function PagamentoDetailScreen() {
             </View>
           ) : null}
 
-          {data.payment_status !== 'pago' && !hasAsaasCharge && __DEV__ ? (
+          {data.payment_status !== 'pago' && !hasAsaasCharge && isPaymentSimulationEnabled() ? (
             <Button onPress={() => simulateMutation.mutate()} loading={simulateMutation.isPending}>
-              Simular pagamento (dev)
+              Simular pagamento confirmado
             </Button>
           ) : null}
         </ScrollView>

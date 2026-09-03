@@ -3,6 +3,17 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { loadCredentialingSnapshot } from '@/services/credentialing'
+import { supabase } from '@/lib/supabase'
+
+const PP_TERM_TYPES = [
+  'TERMO_USO_PP',
+  'DIRETRIZES_PP',
+  'LGPD_PP',
+  'ANEXO_III_CATEGORIAS_PP',
+  'ANEXO_IV_SIGILO_PP',
+  'ANEXO_I_COMERCIAL_PP',
+  'ANEXO_II_OPERACIONAL_PP',
+]
 
 export default function CredenciamentoScreen() {
   const { data, isLoading } = useQuery({
@@ -10,9 +21,24 @@ export default function CredenciamentoScreen() {
     queryFn: loadCredentialingSnapshot,
   })
 
+  const { data: legalTerms = [] } = useQuery({
+    queryKey: ['pp', 'credentialing-legal'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('legal_terms')
+        .select('term_type, version, title')
+        .in('term_type', PP_TERM_TYPES)
+        .eq('is_current', true)
+      if (error) throw error
+      return data ?? []
+    },
+  })
+
+  const accepted = new Set(data?.acceptedTermTypes ?? [])
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <PageHeader title="Credenciamento" subtitle="Status e documentos" />
+      <PageHeader title="Credenciamento" subtitle="Status, documentos e termos" />
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
@@ -24,67 +50,30 @@ export default function CredenciamentoScreen() {
         </View>
       ) : (
         <ScrollView className="flex-1 px-4" contentContainerClassName="gap-4 pb-8">
-          <View className="rounded-xl border border-border bg-card p-5 gap-3">
-            <Text className="font-medium text-foreground">Dados pessoais</Text>
-            <View>
-              <Text className="text-xs text-muted-foreground">Nome</Text>
-              <Text className="font-medium text-foreground">{data.professional.full_name}</Text>
-            </View>
-            <View>
-              <Text className="text-xs text-muted-foreground">Profissão</Text>
-              <Text className="font-medium text-foreground">{data.professional.profession ?? '—'}</Text>
-            </View>
-            <View>
-              <Text className="text-xs text-muted-foreground">Status</Text>
-              <Text className="font-medium text-foreground">{data.professional.credentialing_status ?? '—'}</Text>
-            </View>
-          </View>
-
-          <View className="rounded-xl border border-border bg-card p-5 gap-3">
-            <Text className="font-medium text-foreground">Conselho</Text>
-            <Text className="text-sm text-foreground">
-              {data.council ? `${data.council.council_type}: ${data.council.registration_number}` : 'Não cadastrado'}
+          <View className="rounded-xl border border-border bg-card p-5 gap-2">
+            <Text className="font-medium text-foreground">Status</Text>
+            <Text className="text-sm text-foreground">{data.professional.credentialing_status ?? '—'}</Text>
+            <Text className="text-xs text-muted-foreground">
+              Credenciamento completo no portal web: /profissional/credenciamento
             </Text>
           </View>
 
           <View className="rounded-xl border border-border bg-card p-5 gap-3">
-            <Text className="font-medium text-foreground">Dados bancários</Text>
-            <Text className="text-sm text-foreground">
-              {data.bank ? `${data.bank.bank_name} · ${data.bank.account_type}` : 'Não cadastrado'}
-            </Text>
-            {data.bank ? (
-              <Text className="text-xs text-muted-foreground">
-                Agência {data.bank.agency} · Conta {data.bank.account_number}
-              </Text>
-            ) : null}
+            <Text className="font-medium text-foreground">Termos e anexos</Text>
+            {legalTerms.map((term) => {
+              const ok = accepted.has(term.term_type)
+                || (term.term_type === 'TERMO_USO_PP' && accepted.has('DIRETRIZES_PP'))
+                || (term.term_type === 'DIRETRIZES_PP' && accepted.has('TERMO_USO_PP'))
+              return (
+                <View key={term.term_type} className="flex-row items-center justify-between">
+                  <Text className="text-sm text-foreground flex-1 pr-2">{term.title}</Text>
+                  <Text className={`text-xs font-medium ${ok ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    {ok ? 'Aceito' : 'Pendente'}
+                  </Text>
+                </View>
+              )
+            })}
           </View>
-
-          <View className="rounded-xl border border-border bg-card p-5 gap-3">
-            <Text className="font-medium text-foreground">Documentos</Text>
-            {data.documents.length === 0 ? (
-              <Text className="text-sm text-muted-foreground">Nenhum documento enviado.</Text>
-            ) : (
-              data.documents.map((doc) => (
-                <Text key={doc.id} className="text-sm text-foreground">
-                  {doc.document_type} · {doc.file_name}
-                </Text>
-              ))
-            )}
-          </View>
-
-          {data.contract && (
-            <View className="rounded-xl border border-border bg-card p-5 gap-3">
-              <Text className="font-medium text-foreground">Contrato</Text>
-              <Text className="text-sm text-foreground">
-                Nº {data.contract.contract_number ?? '—'} · Status: {data.contract.status}
-              </Text>
-              {data.contract.signed_at ? (
-                <Text className="text-xs text-muted-foreground">
-                  Assinado em {data.contract.signed_at}
-                </Text>
-              ) : null}
-            </View>
-          )}
         </ScrollView>
       )}
     </SafeAreaView>

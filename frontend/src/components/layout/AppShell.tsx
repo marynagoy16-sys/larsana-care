@@ -71,6 +71,8 @@ function AppShellContent({
   const showNav = showBottomNav && !suppressBottomNav
   const lockScroll = immersive || fixedMain
 
+  const showMobileHeader = !immersive && !hideShellHeader && isMobile
+
   useBottomNavAutoHide(scrollRef, showNav && isMobile && !lockScroll)
 
   useEffect(() => {
@@ -92,7 +94,8 @@ function AppShellContent({
         {!immersive && !hideShellHeader && (
           <div
             className={cn(
-              'shell-content-x shell-content-y-top shrink-0 z-20 bg-background transition-[box-shadow,border-color] duration-200',
+              'shell-content-x shrink-0 z-20 bg-background transition-[box-shadow,border-color] duration-200',
+              showMobileHeader ? 'shell-mobile-header' : 'shell-content-y-top',
               isScrolled && 'border-b border-border/50',
             )}
           >
@@ -123,7 +126,10 @@ function AppShellContent({
           className={
             lockScroll
               ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
-              : 'shell-scroll-region flex-1 min-h-0 min-w-0 scrollbar-sidebar'
+              : cn(
+                  'shell-scroll-region flex-1 min-h-0 min-w-0 scrollbar-sidebar',
+                  showMobileHeader && 'shell-has-mobile-header',
+                )
           }
         >
           <main

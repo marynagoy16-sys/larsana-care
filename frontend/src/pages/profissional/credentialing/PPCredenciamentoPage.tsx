@@ -16,8 +16,13 @@ import {
 } from '@/components/credentialing/steps/DocumentosStepForm'
 import { BancoStepForm } from '@/components/credentialing/steps/BancoStepForm'
 import { ContratoStepForm } from '@/components/credentialing/steps/ContratoStepForm'
+import { LegalTermAcceptanceStepForm } from '@/components/legal/LegalTermAcceptanceStepForm'
 import {
   CREDENTIALING_STEPS,
+  PP_CATEGORIAS_TERM,
+  PP_REGRAS_TYPES,
+  PP_SIGILO_TERM,
+  PP_TERMOS_TYPES,
   computeStepCompletion,
   isCredentialingEditable,
   resolveCurrentStep,
@@ -27,7 +32,8 @@ import {
   acceptContratoAndSubmit,
   credentialingQueryKeys,
   loadCredentialingSnapshot,
-  loadPpLegalTermsForContrato,
+  loadPpLegalTermsForStep,
+  recordCredentialingLegalAcceptances,
   removeProfessionalDocument,
   saveBancoStep,
   saveCategoriasStep,
@@ -36,6 +42,7 @@ import {
   stepHasPersistedSave,
   uploadProfessionalDocument,
 } from '@/services/credentialing'
+import type { LegalTermType } from '@/constants/legalTerms'
 import { useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import { toast } from 'sonner'
 
@@ -61,10 +68,11 @@ export function PPCredenciamentoPage() {
     queryFn: loadCredentialingSnapshot,
   })
 
+  const legalSteps: CredentialingStepId[] = ['termos', 'categorias', 'sigilo', 'regras', 'contrato']
   const legalTermsQuery = useQuery({
-    queryKey: [...credentialingQueryKeys.snapshot, 'legal-terms'],
-    queryFn: loadPpLegalTermsForContrato,
-    enabled: step === 'contrato',
+    queryKey: [...credentialingQueryKeys.snapshot, 'legal-terms', step],
+    queryFn: () => loadPpLegalTermsForStep(step),
+    enabled: legalSteps.includes(step),
   })
 
   const snapshot = snapshotQuery.data
@@ -115,7 +123,8 @@ export function PPCredenciamentoPage() {
   })
 
   const stepIndex = CREDENTIALING_STEPS.findIndex((s) => s.id === step)
-  const isLastStep = stepIndex === CREDENTIALING_STEPS.length - 1
+  const isLastStep = step === 'contrato'
+  const isLegalOnlyStep = step === 'termos' || step === 'sigilo' || step === 'regras'
 
   const goNext = async () => {
     if (readOnly) {
@@ -158,6 +167,19 @@ export function PPCredenciamentoPage() {
     }
   }
 
+  const advanceAfterLegalAccept = () => {
+    invalidate()
+    toast.success('Aceite registrado')
+    if (stepIndex < CREDENTIALING_STEPS.length - 1) {
+      setStep(CREDENTIALING_STEPS[stepIndex + 1].id)
+    }
+  }
+
+  const handleLegalAccept = async (termTypes: LegalTermType[]) => {
+    await recordCredentialingLegalAcceptances(termTypes)
+    advanceAfterLegalAccept()
+  }
+
   const handleContratoSubmit = async () => {
     try {
       await submitMutation.mutateAsync()
@@ -181,34 +203,47 @@ export function PPCredenciamentoPage() {
         )
       case 'categorias':
         return (
-          <CategoriasTecnicasStepForm
-            key={`categorias-${snapshot.professional.id}-${(snapshot.professional.technical_categories ?? []).join(',')}`}
-            snapshot={snapshot}
-            disabled={readOnly}
-            uploadingType={uploadingType}
-            onSubmit={(values) => handleStepSave(values)}
-            onUpload={async (file, type) => {
-              setUploadingType(type)
-              try {
-                await uploadProfessionalDocument(file, type)
-                invalidate()
-                toast.success('Documento enviado')
-              } catch (err) {
-                toast.error(err instanceof Error ? err.message : 'Erro ao enviar')
-              } finally {
-                setUploadingType(null)
-              }
-            }}
-            onRemove={async (id) => {
-              try {
-                await removeProfessionalDocument(id)
-                invalidate()
-                toast.success('Documento removido')
-              } catch (err) {
-                toast.error(err instanceof Error ? err.message : 'Erro ao remover')
-              }
-            }}
-          />
+          <div className="space-y-6">
+            <CategoriasTecnicasStepForm
+              key={`categorias-${snapshot.professional.id}-${(snapshot.professional.technical_categories ?? []).join(',')}`}
+              snapshot={snapshot}
+              disabled={readOnly}
+              uploadingType={uploadingType}
+              onSubmit={async (values) => {
+                await saveMutation.mutateAsync({ stepId: 'categorias', values })
+              }}
+              onUpload={async (file, type) => {
+                setUploadingType(type)
+                try {
+                  await uploadProfessionalDocument(file, type)
+                  invalidate()
+                  toast.success('Documento enviado')
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'Erro ao enviar')
+                } finally {
+                  setUploadingType(null)
+                }
+              }}
+              onRemove={async (id) => {
+                try {
+                  await removeProfessionalDocument(id)
+                  invalidate()
+                  toast.success('Documento removido')
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : 'Erro ao remover')
+                }
+              }}
+            />
+            <LegalTermAcceptanceStepForm
+              title="Anexo III — Categorias Técnicas"
+              description="Aceite vinculado às categorias selecionadas acima."
+              termTypes={[PP_CATEGORIAS_TERM]}
+              legalTerms={legalTermsQuery.data ?? []}
+              acceptedTermTypes={snapshot.acceptedTermTypes}
+              onAccept={handleLegalAccept}
+              disabled={readOnly}
+            />
+          </div>
         )
       case 'conselho':
         return (
@@ -257,12 +292,48 @@ export function PPCredenciamentoPage() {
             onSubmit={(values) => handleStepSave(values)}
           />
         )
+      case 'termos':
+        return (
+          <LegalTermAcceptanceStepForm
+            title="Termos de Uso e Privacidade"
+            description="Leia e aceite os documentos base antes de continuar o credenciamento."
+            termTypes={PP_TERMOS_TYPES}
+            legalTerms={legalTermsQuery.data ?? []}
+            acceptedTermTypes={snapshot.acceptedTermTypes}
+            onAccept={handleLegalAccept}
+            disabled={readOnly}
+          />
+        )
+      case 'sigilo':
+        return (
+          <LegalTermAcceptanceStepForm
+            title="Sigilo e Dados Assistenciais"
+            description="Obrigatório para acesso a prontuários e evoluções clínicas."
+            termTypes={[PP_SIGILO_TERM]}
+            legalTerms={legalTermsQuery.data ?? []}
+            acceptedTermTypes={snapshot.acceptedTermTypes}
+            onAccept={handleLegalAccept}
+            disabled={readOnly}
+          />
+        )
+      case 'regras':
+        return (
+          <LegalTermAcceptanceStepForm
+            title="Regras Comerciais e Operacionais"
+            description="Ciência das regras de repasse, demandas e operação na plataforma."
+            termTypes={PP_REGRAS_TYPES}
+            legalTerms={legalTermsQuery.data ?? []}
+            acceptedTermTypes={snapshot.acceptedTermTypes}
+            onAccept={handleLegalAccept}
+            disabled={readOnly}
+            awarenessOnly
+          />
+        )
       case 'contrato':
         return (
           <ContratoStepForm
             key={`contrato-${snapshot.contract?.contract_number ?? 'none'}-${snapshot.acceptedTermTypes.join(',')}`}
             snapshot={snapshot}
-            legalTerms={legalTermsQuery.data ?? []}
             disabled={readOnly || submitMutation.isPending}
             onSubmit={handleContratoSubmit}
           />
@@ -375,6 +446,8 @@ export function PPCredenciamentoPage() {
               >
                 {submitMutation.isPending ? 'Enviando…' : 'Enviar para aprovação'}
               </Button>
+            ) : isLegalOnlyStep ? (
+              <span className="text-xs text-muted-foreground">Use o botão de confirmação acima</span>
             ) : (
               <Button
                 type="button"

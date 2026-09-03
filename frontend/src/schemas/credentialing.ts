@@ -48,8 +48,6 @@ export const bancoStepSchema = z.object({
 })
 
 export const contratoAcceptSchema = z.object({
-  acceptDiretrizes: z.boolean().refine((v) => v === true, { message: 'Aceite as diretrizes' }),
-  acceptLgpd: z.boolean().refine((v) => v === true, { message: 'Aceite a política de privacidade' }),
   acceptContract: z.boolean().refine((v) => v === true, { message: 'Aceite o contrato LRS-PROF' }),
 })
 

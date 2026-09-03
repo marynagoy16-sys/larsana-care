@@ -9,6 +9,7 @@ import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/
 import { sessionStatusLabels } from '@/constants/labels'
 import { formatDateTime } from '@/lib/formatters'
 import { loadPatientCycleDetail, patientTreatmentQueryKeys } from '@/services/patientTreatment'
+import { CycleLegalAcceptancePanel } from '@/components/legal/CycleLegalAcceptancePanel'
 import { cn } from '@/lib/utils'
 
 function sessionStatusBadgeClass(status: string) {
@@ -59,6 +60,16 @@ export function PacienteCicloDetailPage() {
           <PacienteEmptyState message="Ciclo não encontrado." />
         ) : (
           <>
+            {needsPayment && (
+              <CycleLegalAcceptancePanel
+                cycleId={cycle.id}
+                sessionCount={cycle.session_count}
+                unitPriceCents={cycle.session_unit_price_cents}
+                totalCents={cycle.total_amount_cents}
+                onAccepted={() => void refetch()}
+              />
+            )}
+
             {needsPayment && (
               <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/25 p-4">
                 <div className="flex items-start gap-3">

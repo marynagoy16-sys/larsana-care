@@ -112,12 +112,13 @@ export function AdminImportDialog({
         if (!next) resetState()
       }}
     >
-      <DialogContent className="overflow-x-hidden sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[min(90dvh,calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-2rem))] w-[calc(100vw-2rem)] max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="shrink-0 space-y-1.5 border-b border-border px-6 py-4 text-left">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4">
         <div className="space-y-5">
           <section className="rounded-xl border border-border bg-card p-4 space-y-3">
             <h2 className="font-semibold text-sm">Modelo CSV</h2>
@@ -223,6 +224,7 @@ export function AdminImportDialog({
               </ul>
             </section>
           ) : null}
+        </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -10,7 +10,7 @@ const BASE_STEPS = [
   { key: 'buscando', label: 'Procurando profissional parceiro' },
   { key: 'waitlist', label: 'Lista de espera / sem cobertura imediata' },
   { key: 'atribuido', label: 'Profissional parceiro atribuído' },
-  { key: 'horario', label: 'Escolha um horário' },
+  { key: 'horario', label: 'Confirmar horário no chat' },
 ] as const
 
 type StepKey = (typeof BASE_STEPS)[number]['key']
@@ -140,10 +140,10 @@ export function ServiceRequestTimeline({
               {current && step.key === 'horario' ? (
                 <View className="gap-2 pt-1">
                   <Text className="text-xs text-muted-foreground">
-                    O profissional enviou horários. Confirme o melhor para você.
+                    O profissional enviou opções de horário no chat com a Sara.
                   </Text>
                   <Pressable onPress={() => router.push('/(app)/agendamento')}>
-                    <Text className="text-sm font-semibold text-primary">Escolher horário →</Text>
+                    <Text className="text-sm font-semibold text-primary">Ver horários →</Text>
                   </Pressable>
                 </View>
               ) : null}

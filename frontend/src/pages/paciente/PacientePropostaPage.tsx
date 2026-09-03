@@ -8,6 +8,7 @@ import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useSuppressBottomNav } from '@/contexts/PageFooterContext'
 import { PatientProposalSummary } from '@/components/paciente/PatientProposalSummary'
+import { CycleLegalAcceptanceFields } from '@/components/legal/CycleLegalAcceptanceFields'
 import {
   buildFrequencyDisclaimer,
   PatientWeeklyFrequencyPicker,
@@ -35,6 +36,8 @@ export function PacientePropostaPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [chosenFrequency, setChosenFrequency] = useState<number | null>(null)
+  const [acceptAnexoI, setAcceptAnexoI] = useState(false)
+  const [acceptAnexoII, setAcceptAnexoII] = useState(false)
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   const [declineOpen, setDeclineOpen] = useState(false)
 
@@ -72,6 +75,8 @@ export function PacientePropostaPage() {
         assessmentId: pendingAssessment!.id,
         response,
         chosenWeeklyFrequency: response === 'SIM' ? selectedFrequency : undefined,
+        acceptAnexoI: response === 'SIM' ? acceptAnexoI : undefined,
+        acceptAnexoII: response === 'SIM' ? acceptAnexoII : undefined,
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
@@ -157,6 +162,12 @@ export function PacientePropostaPage() {
   }
 
   const preview = previewQuery.data
+  const cycleSessionCount = selectedOption?.session_count ?? preview.proposed_session_count
+  const cycleTotalCents = selectedOption?.total_amount_cents ?? 0
+  const cycleUnitPriceCents = cycleSessionCount > 0
+    ? Math.round(cycleTotalCents / cycleSessionCount)
+    : 0
+  const canAccept = acceptAnexoI && acceptAnexoII && Boolean(selectedOption)
 
   return (
     <>
@@ -176,6 +187,20 @@ export function PacientePropostaPage() {
               onChange={setChosenFrequency}
             />
           </CascadeItem>
+
+          {selectedOption ? (
+            <CascadeItem>
+              <CycleLegalAcceptanceFields
+                sessionCount={cycleSessionCount}
+                unitPriceCents={cycleUnitPriceCents}
+                totalCents={cycleTotalCents}
+                acceptI={acceptAnexoI}
+                acceptII={acceptAnexoII}
+                onAcceptIChange={setAcceptAnexoI}
+                onAcceptIIChange={setAcceptAnexoII}
+              />
+            </CascadeItem>
+          ) : null}
         </CascadeReveal>
       </CrudScrollPageLayout>
 
@@ -185,7 +210,7 @@ export function PacientePropostaPage() {
             size="lg"
             className="w-full"
             onClick={handleAcceptClick}
-            disabled={acceptMutation.isPending}
+            disabled={acceptMutation.isPending || !canAccept}
           >
             Aceitar e pagar
           </Button>

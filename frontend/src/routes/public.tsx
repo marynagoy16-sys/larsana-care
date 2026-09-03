@@ -50,6 +50,10 @@ export const publicRoutes: RouteObject[] = [
   },
   { path: '/termos-de-uso', element: <PublicLegalTermPageLazy /> },
   { path: '/politica-de-privacidade', element: <PublicLegalTermPageLazy /> },
+  { path: '/termos-profissionais', element: <PublicLegalTermPageLazy /> },
+  { path: '/privacidade-profissionais', element: <PublicLegalTermPageLazy /> },
+  { path: '/politica-de-cookies', element: <PublicLegalTermPageLazy /> },
+  { path: '/regras-cancelamento', element: <PublicLegalTermPageLazy /> },
   {
     path: '/acesso-plataforma-web',
     element: (

@@ -4,7 +4,7 @@ export function getActiveDemandStatusMessage(options: {
   professionalName?: string | null
 }): string {
   if (options.pendingScheduling) {
-    return 'Escolha um horário para sua avaliação domiciliar.'
+    return 'Horários disponíveis no chat com a Sara. Abra o chat para confirmar sua avaliação.'
   }
 
   if (options.isProfessionalAssigned) {

@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -2378,36 +2378,48 @@ export type Database = {
       }
       legal_terms: {
         Row: {
+          acceptance_mode: Database["public"]["Enums"]["legal_acceptance_mode"] | null
           content: string | null
           created_at: string
+          effective_at: string | null
           id: string
           is_current: boolean
+          profile: Database["public"]["Enums"]["legal_term_profile"] | null
           published_at: string
           requires_reaccept: boolean
+          status: Database["public"]["Enums"]["legal_term_status"] | null
           storage_path: string | null
           term_type: Database["public"]["Enums"]["legal_term_type"]
           title: string
           version: string
         }
         Insert: {
+          acceptance_mode?: Database["public"]["Enums"]["legal_acceptance_mode"] | null
           content?: string | null
           created_at?: string
+          effective_at?: string | null
           id?: string
           is_current?: boolean
+          profile?: Database["public"]["Enums"]["legal_term_profile"] | null
           published_at?: string
           requires_reaccept?: boolean
+          status?: Database["public"]["Enums"]["legal_term_status"] | null
           storage_path?: string | null
           term_type: Database["public"]["Enums"]["legal_term_type"]
           title: string
           version: string
         }
         Update: {
+          acceptance_mode?: Database["public"]["Enums"]["legal_acceptance_mode"] | null
           content?: string | null
           created_at?: string
+          effective_at?: string | null
           id?: string
           is_current?: boolean
+          profile?: Database["public"]["Enums"]["legal_term_profile"] | null
           published_at?: string
           requires_reaccept?: boolean
+          status?: Database["public"]["Enums"]["legal_term_status"] | null
           storage_path?: string | null
           term_type?: Database["public"]["Enums"]["legal_term_type"]
           title?: string
@@ -6380,6 +6392,9 @@ export type Database = {
         | "session_late_reschedule_pp"
         | "session_late_reschedule_larsana"
         | "sub_session_pp_release"
+      legal_acceptance_mode: "express" | "awareness" | "contextual"
+      legal_term_profile: "pp" | "paciente" | "publico"
+      legal_term_status: "vigente" | "inativo" | "rascunho"
       legal_term_type:
         | "TERMO_ADESAO"
         | "DIRETRIZES"
@@ -6388,6 +6403,20 @@ export type Database = {
         | "LGPD_PP"
         | "CONTRATO_INTERMEDIACAO"
         | "TERMO_CONSENTIMENTO"
+        | "TERMO_USO_PP"
+        | "ANEXO_I_COMERCIAL_PP"
+        | "ANEXO_II_OPERACIONAL_PP"
+        | "ANEXO_III_CATEGORIAS_PP"
+        | "ANEXO_IV_SIGILO_PP"
+        | "CONTRATO_PARCERIA_PP"
+        | "ANEXO_I_COMERCIAL_PACIENTE"
+        | "ANEXO_II_CANCELAMENTO_PACIENTE"
+        | "ANEXO_III_ESCOPO_PACIENTE"
+        | "TCLE_FISIO"
+        | "AUTORIZACAO_FAMILIAR"
+        | "REPRESENTACAO_LEGAL"
+        | "AVISO_DADOS_SAUDE"
+        | "POLITICA_COOKIES"
       lgpd_request_status: "pendente" | "em_analise" | "concluido" | "rejeitado"
       lgpd_request_type: "portabilidade" | "revogacao" | "exclusao" | "acesso"
       medical_record_type: "avaliacao" | "evolucao" | "alta"
@@ -6773,6 +6802,9 @@ export const Constants = {
         "session_late_reschedule_larsana",
         "sub_session_pp_release",
       ],
+      legal_acceptance_mode: ["express", "awareness", "contextual"],
+      legal_term_profile: ["pp", "paciente", "publico"],
+      legal_term_status: ["vigente", "inativo", "rascunho"],
       legal_term_type: [
         "TERMO_ADESAO",
         "DIRETRIZES",
@@ -6781,6 +6813,20 @@ export const Constants = {
         "LGPD_PP",
         "CONTRATO_INTERMEDIACAO",
         "TERMO_CONSENTIMENTO",
+        "TERMO_USO_PP",
+        "ANEXO_I_COMERCIAL_PP",
+        "ANEXO_II_OPERACIONAL_PP",
+        "ANEXO_III_CATEGORIAS_PP",
+        "ANEXO_IV_SIGILO_PP",
+        "CONTRATO_PARCERIA_PP",
+        "ANEXO_I_COMERCIAL_PACIENTE",
+        "ANEXO_II_CANCELAMENTO_PACIENTE",
+        "ANEXO_III_ESCOPO_PACIENTE",
+        "TCLE_FISIO",
+        "AUTORIZACAO_FAMILIAR",
+        "REPRESENTACAO_LEGAL",
+        "AVISO_DADOS_SAUDE",
+        "POLITICA_COOKIES",
       ],
       lgpd_request_status: ["pendente", "em_analise", "concluido", "rejeitado"],
       lgpd_request_type: ["portabilidade", "revogacao", "exclusao", "acesso"],

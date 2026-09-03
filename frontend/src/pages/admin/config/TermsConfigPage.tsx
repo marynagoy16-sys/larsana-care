@@ -26,6 +26,9 @@ type LegalTermRow = {
   title: string
   content: string | null
   is_current: boolean
+  profile?: string | null
+  acceptance_mode?: string | null
+  requires_reaccept?: boolean
 }
 
 const termSchema = z.object({
@@ -34,6 +37,9 @@ const termSchema = z.object({
   title: requiredString('Título'),
   content: requiredString('Conteúdo'),
   is_current: z.boolean(),
+  profile: z.enum(['pp', 'paciente', 'publico']).optional(),
+  acceptance_mode: z.enum(['express', 'awareness', 'contextual']).optional(),
+  requires_reaccept: z.boolean().optional(),
 })
 
 type TermFormValues = z.infer<typeof termSchema>
@@ -43,7 +49,7 @@ async function saveLegalTerm(id: string | null, values: TermFormValues) {
     let deactivateQuery = supabase
       .from('legal_terms')
       .update({ is_current: false })
-      .eq('term_type', values.term_type)
+      .eq('term_type', values.term_type as never)
     if (id) {
       deactivateQuery = deactivateQuery.neq('id', id)
     }
@@ -57,6 +63,9 @@ async function saveLegalTerm(id: string | null, values: TermFormValues) {
     title: values.title,
     content: values.content,
     is_current: values.is_current,
+    profile: values.profile ?? null,
+    acceptance_mode: values.acceptance_mode ?? 'express',
+    requires_reaccept: values.requires_reaccept ?? true,
   }
 
   if (id) {

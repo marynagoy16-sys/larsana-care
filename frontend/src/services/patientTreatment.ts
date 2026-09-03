@@ -32,6 +32,8 @@ export type PatientCycleDetail = {
   status: string
   payment_status: string
   session_count: number
+  session_unit_price_cents: number
+  total_amount_cents: number
   completedSessions: number
   professionalName: string | null
   pendingChargeId: string | null
@@ -55,6 +57,8 @@ type CycleDetailRow = {
   status: string
   payment_status: string
   session_count: number
+  session_unit_price_cents: number
+  total_amount_cents: number
   professionals: { full_name: string } | null
   care_sessions: Array<{
     id: string
@@ -147,6 +151,7 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
       .from('care_cycles')
       .select(
         `id, patient_id, cycle_number, status, payment_status, session_count,
+        session_unit_price_cents, total_amount_cents,
       professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name ),
       care_sessions (
         id, session_number, scheduled_at, status,
@@ -174,6 +179,8 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
     status: row.status,
     payment_status: row.payment_status,
     session_count: row.session_count,
+    session_unit_price_cents: row.session_unit_price_cents,
+    total_amount_cents: row.total_amount_cents,
     completedSessions: sessions.filter((s) => s.status === 'realizada').length,
     professionalName: row.professionals?.full_name ?? null,
     pendingChargeId: pendingChargesByCycleId.get(row.id) ?? null,

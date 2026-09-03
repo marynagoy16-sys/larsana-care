@@ -20,6 +20,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { attendancePeriodLabels } from '@/constants/labels'
 import { softFieldButtonClass, softFieldInputClass, softFieldLabelClass } from '@/lib/formFieldStyles'
 import { formatCpf } from '@/lib/formatters'
+import { PatientRepresentationFlow } from '@/components/legal/PatientRepresentationFlow'
+import { isPaymentSimulationEnabled } from '@/lib/paymentSimulation'
 import { cn } from '@/lib/utils'
 import {
   patientGenderLabels,
@@ -226,7 +228,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, onSimulate, submitti
   }
 
   const progressPercent = step === 1 ? 33 : step === 2 ? 66 : 100
-  const showSimulatePayment = !import.meta.env.PROD && typeof onSimulate === 'function'
+  const showSimulatePayment = isPaymentSimulationEnabled() && typeof onSimulate === 'function'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -379,6 +381,11 @@ export function ServiceRequestForm({ onPrepare, onCheckout, onSimulate, submitti
           />
           {fieldError(errors, 'responsibleCpf')}
         </div>
+
+        <PatientRepresentationFlow
+          showFamilyAuthorization={responsibleRequired}
+          showLegalRepresentation={responsibleRequired}
+        />
       </section>
 
       <Button type="button" className={softFieldButtonClass} onClick={goToStepTwo} disabled={submitting}>

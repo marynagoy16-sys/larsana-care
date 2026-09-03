@@ -6,8 +6,6 @@ import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPage
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Logo } from '@/components/shared/Logo'
 import { CoverageMapIllustration } from '@/components/paciente/CoverageMapIllustration'
-import { PatientHomeSchedulingBanner } from '@/components/paciente/PatientHomeSchedulingBanner'
-import { PatientSchedulingProposalList } from '@/components/paciente/PatientSchedulingProposalList'
 import { ServiceRequestForm } from '@/components/paciente/ServiceRequestForm'
 import { ServiceRequestTimeline } from '@/components/paciente/ServiceRequestTimeline'
 import { Button } from '@/components/ui/button'
@@ -48,7 +46,7 @@ export function PacienteSolicitarPage() {
     enabled: Boolean(data?.linked && data?.patient_id && !data?.active_demand),
   })
 
-  const { data: pendingProposals = [], refetch: refetchProposals } = useQuery({
+  const { data: pendingProposals = [] } = useQuery({
     queryKey: ['paciente', 'scheduling_proposals', data?.patient_id],
     queryFn: () => listPendingSchedulingProposalsForPatient(),
     enabled: Boolean(data?.linked),
@@ -265,28 +263,13 @@ export function PacienteSolicitarPage() {
               />
             </div>
           ) : (
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-primary">
-                {getActiveDemandStatusMessage({
-                  isProfessionalAssigned,
-                  pendingScheduling,
-                  professionalName: assignedProfessional?.name,
-                })}
-              </p>
-              {pendingScheduling ? (
-                <>
-                  <PatientSchedulingProposalList
-                    proposals={pendingProposals}
-                    onUpdated={() => {
-                      void refetchProposals()
-                      void queryClient.invalidateQueries({ queryKey: patientServiceQueryKeys.status })
-                      void queryClient.invalidateQueries({ queryKey: patientPortalQueryKeys.home })
-                    }}
-                  />
-                  <PatientHomeSchedulingBanner />
-                </>
-              ) : null}
-            </div>
+            <p className="text-sm font-medium text-primary">
+              {getActiveDemandStatusMessage({
+                isProfessionalAssigned,
+                pendingScheduling,
+                professionalName: assignedProfessional?.name,
+              })}
+            </p>
           )}
 
           {(hasActiveDemand || hasWaitlist || awaitingAssessmentPayment) && (

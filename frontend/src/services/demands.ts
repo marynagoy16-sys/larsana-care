@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { recordDemandCommercialSnapshot } from '@/services/legalDocuments'
 import type { CrudRow } from '@/lib/createCrudService'
 import {
   formatAttendancePeriod,
@@ -244,7 +245,8 @@ export const demandsService = {
     return { data: mapped, count: mapped.length }
   },
 
-  async acceptDemand(demandId: string): Promise<AcceptDemandResult> {
+  async acceptDemand(demandId: string, commercial?: { patente?: string; repassePct?: number; baseAmountCents?: number }): Promise<AcceptDemandResult> {
+    await recordDemandCommercialSnapshot(demandId, commercial)
     const { data, error } = await supabase.rpc('accept_demand', { p_demand_id: demandId })
     if (error) throw error
     return data as unknown as AcceptDemandResult

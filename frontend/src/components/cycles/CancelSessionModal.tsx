@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { Ban } from 'lucide-react'
 import { CrudModal } from '@/components/crud/CrudModal'
 import { Button } from '@/components/ui/button'
+import { ANEXO_II_CANCELAMENTO_SUMMARY } from '@/constants/legalTerms'
 import { cancelSessionWithoutJustification } from '@/services/sessionCancellation'
 
 interface CancelSessionModalProps {
@@ -34,9 +35,10 @@ export function CancelSessionModal({
       open={open}
       onOpenChange={onOpenChange}
       title={`Cancelar terapia #${sessionNumber} sem justificativa`}
-      description="Use quando a família desmarcar com menos de 2 horas de antecedência. Aplica regra de 50% do valor da terapia: metade reembolsada à família e metade repassada ao profissional parceiro (proporcional à comissão do ciclo)."
+      description="Use quando a família desmarcar com menos de 2 horas de antecedência. Aplica regra de 50% do valor da terapia conforme Anexo II."
     >
       <div className="space-y-4">
+        <p className="text-xs text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">{ANEXO_II_CANCELAMENTO_SUMMARY}</p>
         {scheduledAt && (
           <p className="text-sm text-muted-foreground">
             Agendada para: {new Date(scheduledAt).toLocaleString('pt-BR')}
