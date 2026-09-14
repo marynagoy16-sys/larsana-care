@@ -44,8 +44,8 @@ Legenda de status:
 | Ciclos de atendimento e sessões | ✅ | Abertura, grade, status |
 | Demandas e matching geográfico | ✅ | Admin + mapa |
 | Pausas e encerramentos | ⚠️ | Regras PDF v6 em validação |
-| Cobranças e caixa (recebido vs a repassar) | ⚠️ | Schema ok; Asaas produção pendente |
-| Repasses pós-ciclo (liberação + NF) | ⚠️ | Fluxo admin; validação financeira pendente |
+| Cobranças e caixa (recebido vs a repassar) | ✅ | PIX/boleto Asaas em produção; webhook confirma pagamentos |
+| Repasses pós-ciclo (liberação + NF) | ⚠️ | Transferência wallet Asaas ativa; validação operacional de NF/retenção |
 | Lista de espera regional (admin) | ✅ | `/admin/lista-espera` |
 | Regiões A/B/C e tabela de preços V1-2026 | ✅ | |
 | Exportação contábil DELUMA | ❌ | Planejado pós-go-live |
@@ -84,8 +84,9 @@ Legenda de status:
 | Confirmação de horário (pós-agendamento PP) | ✅ | ⚠️ | ✅ |
 | Resposta à proposta de avaliação (SIM/NÃO) | ✅ | ⚠️ | ✅ |
 | Tratamento / detalhe do ciclo | ✅ | ✅ | ✅ |
-| Pagamentos antecipados (PIX/boleto Asaas) | ⚠️ | ⚠️ | ⚠️ |
-| Aceite legal (Contrato intermediação + Termo consentimento) | ✅ | ⚠️ | ⚠️ |
+| Pagamentos antecipados (PIX/boleto Asaas) | ✅ | ⚠️ | ✅ |
+| Documentos legais (onboarding, credenciamento, aceite por ciclo, TCLE) | ✅ | ⚠️ | ✅ |
+| Aceite legal (Contrato intermediação + Termo consentimento) | ✅ | ⚠️ | ✅ |
 | LarsanaPill (conteúdo PHIL + planos) | ✅ | ✅ | ✅ |
 | Documentos, conta, ajuda, NPS | ✅ | ⚠️ | ⚠️ |
 
@@ -93,12 +94,13 @@ Legenda de status:
 
 | Módulo / funcionalidade | Status | Notas |
 |-------------------------|:------:|-------|
-| Asaas: cobrança PIX/boleto (produção) | ❌ | Stub / dev; webhook pendente |
-| Pagamento antecipado antes da 1ª sessão do ciclo | ⚠️ | Regra de negócio definida; integração pendente |
-| Split PF/PJ + retenção 1º ciclo (PDF v6) | ⚠️ | Migrations parciais; auditoria Fase 4 |
+| Asaas: cobrança PIX/boleto (produção) | ✅ | `create-charge` + `payment-webhook` ativos (conta DELUMA) |
+| Taxa de avaliação (`assessment_request`) | ✅ | PIX/boleto; confirmação libera demanda |
+| Pagamento antecipado antes da 1ª sessão do ciclo | ✅ | Abatimento da taxa de avaliação quando aplicável |
+| Repasse PP (wallet Asaas) | ✅ | `create-asaas-subaccount` + `transfer-wallet` |
+| Split PF/PJ + retenção 1º ciclo (PDF v6) | ⚠️ | Regras no DB; auditoria operacional pendente |
 | Pausa justificada / injustificada + reembolso | ⚠️ | Lógica DB; edge cases em validação |
-| Wallet Asaas PP (credenciamento) | ⚠️ | |
-| App Financeiro (mobile) | ⚠️ | App ativo; escopo operacional limitado |
+| App Financeiro (mobile) | ⚠️ | Repasses e liberação; escopo menor que a web |
 | Exportação DELUMA (NF + recibos por ciclo) | ❌ | |
 | Academy vendas (checkout Asaas — track Elias) | ❌ | Não bloqueia soft launch |
 
@@ -123,7 +125,22 @@ Cadastro → Solicitar atendimento (sem pagamento)
     → Sessões liberadas → Repasse pós-ciclo (com NF do PP)
 ```
 
-Pagamento **não** é exigido na solicitação inicial — apenas antes das sessões do ciclo, após aceite da proposta.
+Pagamento **não** é exigido na solicitação inicial — apenas antes das sessões do ciclo, após aceite da proposta. A **taxa de avaliação** é cobrada via Asaas quando o paciente avança no fluxo de solicitação (antes da demanda ir ao matching).
+
+### Financeiro — Asaas em produção
+
+Integração ativa com a conta **DELUMA SSE LTDA** no Asaas:
+
+| Fluxo | Edge function / RPC | Efeito após confirmação |
+|-------|---------------------|-------------------------|
+| Taxa de avaliação | `create-charge` → webhook | Demanda aberta / matching |
+| Ciclo de tratamento (antecipado) | `create-charge` → webhook | Ciclo ativo + sessões previstas |
+| Repasse ao PP | `transfer-wallet` | Crédito na wallet Asaas do profissional |
+| Subconta PP | `create-asaas-subaccount` | `asaas_wallet_id` no credenciamento |
+
+- **Webhook:** `payment-webhook` (eventos `PAYMENT_RECEIVED`, `PAYMENT_CONFIRMED`, etc.)
+- **Simulação:** botão *Simular pagamento* só em dev/staging — oculto no build de produção (ver variáveis acima)
+- **Operação e troubleshooting:** [docs/ASAAS_PRODUCAO.md](docs/ASAAS_PRODUCAO.md) (chave Pix recebedora, secrets Supabase, teste E2E)
 
 ### Remarcação e SUB (regras V1)
 
@@ -172,10 +189,15 @@ Migrations aplicadas no remoto: `20260815180000`, `20260815180100`, `20260815190
 
 Copie `.env.example` para `.env` na raiz e preencha:
 
-```
-VITE_SUPABASE_URL=https://kispjnlmklzfhxhtdyvm.supabase.co
-VITE_SUPABASE_ANON_KEY=<sua_anon_key>
-```
+| Variável | Obrigatória | Descrição |
+|----------|:-----------:|-----------|
+| `VITE_SUPABASE_URL` | ✅ | URL do projeto Supabase |
+| `VITE_SUPABASE_ANON_KEY` | ✅ | Chave anon/public do Supabase |
+| `VITE_ENABLE_DEV_LOGIN` | — | Botões de login rápido na tela de auth (`true` em dev/Docker local; omitir ou `false` em produção) |
+| `VITE_ENABLE_PAYMENT_SIMULATION` | — | Botão **Simular pagamento** (avaliação e ciclo). **Desligado em produção por padrão**; ligado em `npm run dev`. Use `true` só em staging/homologação |
+| `DOCKER_IMAGE` | — | Tag da imagem Docker (padrão: `sagittadigital/larsana-care-frontend:latest`) |
+
+Mobile (paciente): `EXPO_PUBLIC_ENABLE_PAYMENT_SIMULATION` segue a mesma regra (`__DEV__` liga; produção desliga).
 
 ### Comandos de desenvolvimento (raiz do repositório)
 
@@ -220,9 +242,19 @@ npx supabase db query --linked -f supabase/migrations/<arquivo>.sql
 npx supabase migration repair --status applied <versao>
 ```
 
-Login de teste PP: `parceiro@larsanacare.com.br` / `LarsanaCare2026!`
+Scripts operacionais em `data/supabase/scripts/`:
 
-Login de teste Financeiro: `financeiro@larsanacare.com.br` / `LarsanaCare2026!`
+| Script | Uso |
+|--------|-----|
+| `cleanup-all-test-patients.sql` | Remove pacientes de teste (seed, carga, contas QA) |
+| `cleanup-all-test-professionals.sql` | Remove profissionais de teste (seed, `@larsanacare.com.br`, contas QA) |
+
+Usuários seed (dev local após `supabase db reset`; senha `LarsanaCare2026!`):
+
+| E-mail | Perfil |
+|--------|--------|
+| parceiro@larsanacare.com.br | Profissional (PP demo) |
+| financeiro@larsanacare.com.br | Financeiro |
 
 ### Docker (local)
 
@@ -234,7 +266,7 @@ Acesse http://localhost:5173
 
 ### Docker Swarm + Traefik
 
-Build e push da imagem:
+Build e push da imagem (usa `VITE_SUPABASE_*` e `VITE_ENABLE_DEV_LOGIN` do `.env`; **não** embute simulação de pagamento — produção fica sem o botão):
 
 ```powershell
 # .env: DOCKER_IMAGE=sagittadigital/larsana-care-frontend:latest
@@ -245,6 +277,12 @@ Deploy da stack (rede `sagitta` externa):
 
 ```bash
 docker stack deploy -c docker/stack.yml larsana-care
+```
+
+Atualizar serviço já publicado com nova imagem:
+
+```bash
+docker service update --image sagittadigital/larsana-care-frontend:latest larsana-care_larsana_care_frontend
 ```
 
 Produção: `app.larsanacare.com.br` (ver hosts em `docker/stack.yml`). Atualize Supabase Auth (Site URL + Redirect URLs) após mudar o domínio.
@@ -265,5 +303,8 @@ Produção: `app.larsanacare.com.br` (ver hosts em `docker/stack.yml`). Atualize
 - [Mapa de páginas](docs/PAGES.md)
 - [Design System](docs/DESIGN_SYSTEM.md)
 - [Módulos](docs/modulos.md)
+- [Documentos legais no app](docs/DOCUMENTOS_LEGAIS_INTEGRACAO.md)
+- [Checklist go-live](docs/GO_LIVE_CHECKLIST.md)
+- [Asaas produção](docs/ASAAS_PRODUCAO.md)
 - [Checklist Fase 0](docs/FASE0_CHECKLIST_ALINHAMENTO.md)
 - [Academy](docs/ACADEMY.md)
