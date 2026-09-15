@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { UserProfile } from '@/types/auth'
 import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
+import { cancelAccountDeletionOnLogin } from '@/services/accountDeletion'
 
 async function fetchProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
@@ -63,7 +64,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { error: error.message }
-    return { error: null }
+    // Login explícito cancela automaticamente uma solicitação de exclusão pendente.
+    let deletionCancelled = false
+    try {
+      const result = await cancelAccountDeletionOnLogin()
+      deletionCancelled = result?.cancelled === true
+    } catch {
+      // Não bloqueia o login se a verificação falhar.
+    }
+    return { error: null, deletionCancelled }
   }
 
   const signOut = async () => {

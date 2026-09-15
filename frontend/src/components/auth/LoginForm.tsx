@@ -32,11 +32,20 @@ export function LoginForm() {
     }
 
     setLoading(true)
-    const { error } = await signIn(email.trim(), password)
+    const { error, deletionCancelled } = await signIn(email.trim(), password)
     setLoading(false)
 
     if (error) {
       toast.error('Falha no login', { description: error })
+      return
+    }
+
+    if (deletionCancelled) {
+      toast.success('Solicitação de exclusão cancelada', {
+        description:
+          'Sua solicitação de exclusão foi cancelada porque você acessou novamente sua conta. Caso ainda queira excluir sua conta, será necessário fazer uma nova solicitação.',
+        duration: 9000,
+      })
       return
     }
 

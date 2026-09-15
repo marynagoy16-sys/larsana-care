@@ -14,6 +14,7 @@ import {
   User,
 } from 'lucide-react'
 import { getThemeDescription } from '@/pages/paciente/PacienteAparenciaPage'
+import { AccountDeletionSection } from '@/components/account/AccountDeletionSection'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PatientAccountAvatar } from '@/components/paciente/PatientAccountAvatar'
 import { Button } from '@/components/ui/button'
@@ -134,6 +135,8 @@ export function PacienteContaPage() {
             icon={HelpCircle}
           />
         </div>
+
+        <AccountDeletionSection />
 
         <Button
           variant="outline"

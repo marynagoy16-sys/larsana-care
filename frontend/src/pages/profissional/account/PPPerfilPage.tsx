@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { PPAccountSubpageHeader } from '@/components/profissional/account/PPAccountSubpageHeader'
+import { AccountDeletionSection } from '@/components/account/AccountDeletionSection'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { Button } from '@/components/ui/button'
@@ -157,6 +158,8 @@ export function PPPerfilPage() {
                 </Button>
               </form>
             </Form>
+
+            <AccountDeletionSection />
           </div>
         )}
       </CrudScrollPageLayout>

@@ -14,6 +14,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react'
+import { AccountDeletionSection } from '@/components/account/AccountDeletionSection'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { ProfessionalAccountAvatar } from '@/components/profissional/ProfessionalAccountAvatar'
 import { Button } from '@/components/ui/button'
@@ -157,6 +158,8 @@ export function PPContaPage() {
             icon={Moon}
           />
         </div>
+
+        <AccountDeletionSection />
 
         <Button
           variant="outline"

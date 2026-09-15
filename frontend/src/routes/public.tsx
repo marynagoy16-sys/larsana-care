@@ -18,6 +18,9 @@ const ResetPasswordPageLazy = lazy(() =>
 const PublicLegalTermPageLazy = lazy(() =>
   import('@/pages/auth/PublicLegalTermPage').then((m) => ({ default: m.PublicLegalTermPage })),
 )
+const ExcluirContaPageLazy = lazy(() =>
+  import('@/pages/public/ExcluirContaPage').then((m) => ({ default: m.ExcluirContaPage })),
+)
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -54,6 +57,7 @@ export const publicRoutes: RouteObject[] = [
   { path: '/privacidade-profissionais', element: <PublicLegalTermPageLazy /> },
   { path: '/politica-de-cookies', element: <PublicLegalTermPageLazy /> },
   { path: '/regras-cancelamento', element: <PublicLegalTermPageLazy /> },
+  { path: '/excluir-conta', element: <ExcluirContaPageLazy /> },
   {
     path: '/acesso-plataforma-web',
     element: (
