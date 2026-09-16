@@ -1,5 +1,7 @@
 -- LarsanaCare: fluxo de exclusão de conta com carência de 30 dias (paciente + pp)
--- Migration: 20260916000000_account_deletion_flow
+-- Migration: 20260916200940_account_deletion_flow
+-- NOTA: o lockdown de EXECUTE (revoke de anon/authenticated nas funções internas)
+-- está na migration seguinte 20260916201351_account_deletion_flow_lockdown.sql.
 --
 -- Estratégia de dados (resumo A/B/C; detalhes na página pública /excluir-conta):
 --   A) apagáveis: notificações, chat, tickets de suporte -> DELETE
@@ -13,7 +15,7 @@
 --   - Se a conta NÃO tiver nenhum registro retido (categoria C), o usuário é
 --     excluído do auth.users (hard delete, cascade limpa dados pessoais).
 --   - Se tiver registros retidos, a conta é ANONIMIZADA e o login é DESABILITADO
---     (banned_until = infinity). Assim não destruímos consentimento/prontuário/fiscal.
+--     (banned_until = now() + 100 anos). Assim não destruímos consentimento/prontuário/fiscal.
 
 -- =========================================================================
 -- 1. Tabela de solicitações

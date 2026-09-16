@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Testes do fluxo de exclusão de conta (30 dias)
--- Migration alvo: 20260916000000_account_deletion_flow.sql
+-- Migration alvo: 20260916200940_account_deletion_flow.sql (+ _lockdown)
 --
 -- SEGURO: roda inteiramente dentro de uma transação com ROLLBACK no final,
 -- portanto NÃO persiste nada. Recomendado rodar em STAGING.
