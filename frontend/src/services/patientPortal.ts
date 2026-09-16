@@ -257,7 +257,7 @@ export async function getPatientHomeContext(patientId: string): Promise<Omit<Pat
   const chargeRow = chargeResult.data as PendingChargeSummary | null
   const pendingCharge = chargeRow?.id ? chargeRow : null
 
-  let upcomingAssessment: UpcomingAssessmentAppointment | null = null
+  let upcomingAssessment: UpcomingAssessmentAppointment | null
   try {
     upcomingAssessment = await getUpcomingAssessmentAppointment(patientId, latestAssessment)
   } catch {

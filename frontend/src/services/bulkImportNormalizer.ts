@@ -2,7 +2,7 @@
 
 export type ImportKind = 'patients' | 'professionals'
 
-const SCIENTIFIC_RE = /^[\d,.]+[eE][+\-]?\d+$/
+const SCIENTIFIC_RE = /^[\d,.]+[eE][+-]?\d+$/
 
 export function normalizeDigits(value: unknown, maxLength?: number): string {
   if (value === null || value === undefined) return ''
