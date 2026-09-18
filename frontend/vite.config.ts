@@ -8,7 +8,7 @@ export default defineConfig({
   // (/login, /paciente/...), então o base absoluto evita 404 nos assets no refresh.
   base: process.env.VERCEL ? '/' : './',
   plugins: [react(), tailwindcss()],
-  envDir: path.resolve(__dirname, '..'),
+  envDir: process.env.VERCEL ? __dirname : path.resolve(__dirname, '..'),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
