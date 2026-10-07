@@ -19,9 +19,9 @@ export type PpPointsSettings = {
 
 export const DEFAULT_PP_POINTS_SETTINGS: PpPointsSettings = {
   id: 'default',
-  bronze_threshold: 600,
-  prata_threshold: 800,
-  ouro_threshold: 1000,
+  bronze_threshold: 1000,
+  prata_threshold: 4000,
+  ouro_threshold: 8000,
   show_next_tier_hint: true,
 }
 
@@ -46,7 +46,10 @@ export type PpPointsLedgerEntry = {
 
 export type PpProfessionalPointsProfile = {
   points_total: number
+  points_permanent: number
+  points_variable: number
   patente: PpPatente
+  patente_earned_at: string | null
   referral_code: string | null
   referral_count_pre_bronze: number
 }
@@ -102,7 +105,7 @@ export async function updatePpPointsRule(id: string, values: Partial<Pick<PpPoin
 export async function getProfessionalPointsProfile(professionalId: string): Promise<PpProfessionalPointsProfile | null> {
   const { data, error } = await supabase
     .from('professionals')
-    .select('points_total, patente, referral_code, referral_count_pre_bronze')
+    .select('points_total, points_permanent, points_variable, patente, patente_earned_at, referral_code, referral_count_pre_bronze')
     .eq('id', professionalId)
     .maybeSingle()
   if (error) throw error
@@ -185,6 +188,19 @@ export function resolvePatenteProgress(
     percent: Math.min(100, Math.round((points / Math.max(1, to)) * 100)),
     fromPatente: 'ALUMINIO',
   }
+}
+
+export function monthsRemainingOnPatente(earnedAt: string | null | undefined, patente: PpPatente): number | null {
+  const months = patente === 'ALUMINIO' ? 3 : patente === 'BRONZE' ? 9 : patente === 'PRATA' ? 12 : 0
+  if (patente === 'OURO') return 0
+  if (!earnedAt) return months
+  const target = new Date(earnedAt)
+  target.setMonth(target.getMonth() + months)
+  return Math.max(0, Math.ceil((target.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30)))
+}
+
+export function repassePercentForPatente(tiers: PpPatenteTierRow[], patente: PpPatente): number {
+  return Number(tiers.find((tier) => tier.patente === patente)?.base_pp_percent ?? PATENTE_REPASSE_PERCENT[patente])
 }
 
 export const patenteLabels: Record<PpPatente, string> = {

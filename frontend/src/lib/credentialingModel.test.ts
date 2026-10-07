@@ -20,6 +20,7 @@ const baseSnapshot = (): CredentialingSnapshot => ({
     cardiorrespiratory_experience_description: null,
     credentialing_status: 'rascunho',
     flag_assinado: false,
+    asaas_wallet_id: null,
   },
   council: { council_type: 'CREFITO', registration_number: '123456-F' },
   bank: {

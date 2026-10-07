@@ -20,7 +20,7 @@ export function useCrudMutation<TData, TVariables = void>({
     mutationFn,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey })
-      toast.success(successMessage)
+      if (successMessage) toast.success(successMessage)
       onSuccess?.(data)
     },
     onError: (error) => toast.error(mapSupabaseError(error)),

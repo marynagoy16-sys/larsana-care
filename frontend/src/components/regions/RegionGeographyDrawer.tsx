@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, MapPin, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -66,6 +66,7 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
   const [activeMunicipalityId, setActiveMunicipalityId] = useState('')
   const [selectedNeighborhoodIds, setSelectedNeighborhoodIds] = useState<Record<string, Set<string>>>({})
   const [saving, setSaving] = useState(false)
+  const selectionDirtyRef = useRef(false)
 
   const regionId = region?.id ?? ''
   const regionIdsKey = [...regionMunicipalityIds].sort().join(',')
@@ -108,12 +109,13 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
 
   useEffect(() => {
     if (!open) {
+      selectionDirtyRef.current = false
       setRegionMunicipalityIds(new Set())
       setActiveMunicipalityId('')
       setSelectedNeighborhoodIds({})
       return
     }
-    if (!geography) return
+    if (!geography || selectionDirtyRef.current) return
 
     const ids = geography.cities
       .map((c) => c.sp_municipality_id)
@@ -142,11 +144,13 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
   const selectedHoodCount = selectedNeighborhoodIds[activeMunicipalityId]?.size ?? 0
 
   const addCityToRegion = (municipalityId: string) => {
+    selectionDirtyRef.current = true
     setRegionMunicipalityIds((current) => new Set([...current, municipalityId]))
     setActiveMunicipalityId(municipalityId)
   }
 
   const removeCityFromRegion = (municipalityId: string) => {
+    selectionDirtyRef.current = true
     setRegionMunicipalityIds((current) => {
       const next = new Set(current)
       next.delete(municipalityId)
@@ -164,6 +168,7 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
   }
 
   const toggleNeighborhood = (municipalityId: string, neighborhoodId: string, checked: boolean) => {
+    selectionDirtyRef.current = true
     setSelectedNeighborhoodIds((current) => {
       const next = { ...current }
       const set = new Set(next[municipalityId] ?? [])
@@ -176,6 +181,7 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
 
   const selectAllNeighborhoods = () => {
     if (!activeMunicipalityId) return
+    selectionDirtyRef.current = true
     setSelectedNeighborhoodIds((current) => ({
       ...current,
       [activeMunicipalityId]: new Set(activeNeighborhoods.map((n) => n.id)),
@@ -194,8 +200,8 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
 
       for (const city of updatedCities) {
         if (!city.sp_municipality_id) continue
+        if (!Object.prototype.hasOwnProperty.call(selectedNeighborhoodIds, city.sp_municipality_id)) continue
         const selectedIds = selectedNeighborhoodIds[city.sp_municipality_id] ?? new Set()
-        if (selectedIds.size === 0) continue
 
         const catalog = await listSpNeighborhoods(city.sp_municipality_id)
         const selected = catalog.filter((n) => selectedIds.has(n.id))
@@ -208,6 +214,8 @@ export function RegionGeographyDrawer({ region, open, onOpenChange }: RegionGeog
       await queryClient.invalidateQueries({ queryKey: regionsQueryKeys.geography(region.id) })
       await queryClient.invalidateQueries({ queryKey: regionsQueryKeys.cities(region.id) })
       await queryClient.invalidateQueries({ queryKey: regionsQueryKeys.cities() })
+      await queryClient.invalidateQueries({ queryKey: regionsQueryKeys.regionsWithStats })
+      await queryClient.invalidateQueries({ queryKey: regionsQueryKeys.allCities })
       toast.success('Região atualizada')
       onOpenChange(false)
     } catch (error) {

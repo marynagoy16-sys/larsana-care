@@ -13,7 +13,7 @@ import {
   matchesCredentialingFilters,
   type CredentialingListFilters,
 } from '@/lib/credentialingFilters'
-import { formatCpf, formatDateTime } from '@/lib/formatters'
+import { formatCpfCnpj, formatDateTime } from '@/lib/formatters'
 import {
   councilTypeLabels,
   credentialingStatusLabels,
@@ -22,7 +22,9 @@ import {
 } from '@/constants/labels'
 import {
   adminCredentialingQueryKeys,
+  deleteCredentialingProfessional,
   listCredentialingProfessionals,
+  professionalDeleteMessage,
   type CredentialingListItem,
 } from '@/services/adminCredentialing'
 import {
@@ -71,7 +73,7 @@ const columns: DataTableColumn<CredentialingListItem>[] = [
     key: 'cpf',
     header: 'CPF/CNPJ',
     mobileHidden: true,
-    cell: (r) => (r.cpf_cnpj ? formatCpf(r.cpf_cnpj) : '—'),
+    cell: (r) => (r.cpf_cnpj ? formatCpfCnpj(r.cpf_cnpj) : '—'),
   },
   {
     key: 'council',
@@ -140,6 +142,12 @@ export function CredenciamentoListPage() {
         onClearFilters={() => setFilters(emptyCredentialingFilters)}
         onImport={() => setImportOpen(true)}
         importDisabled={false}
+        canDelete
+        onDelete={async (id) => {
+          await deleteCredentialingProfessional(id)
+        }}
+        deleteDescription="Se não houver atendimentos, avaliações ou repasses, o cadastro é apagado. Se houver, a conta é inativada e o histórico clínico permanece."
+        deleteSuccessMessage={() => professionalDeleteMessage()}
       />
       <CredentialingFilterPanel
         open={filterOpen}

@@ -42,7 +42,10 @@ export function ChatSubOffer({ offer, highlighted = false, onUpdated }: ChatSubO
       }
     >
       <div>
-        <p className="text-sm font-semibold text-foreground">Substituto no horário original</p>
+        <p className="text-sm font-semibold text-foreground">Busca de substituto neste horário</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Se ninguém assumir até o horário, o atendimento volta ao profissional responsável.
+        </p>
         <p className="text-xs text-muted-foreground mt-1">
           {formatDateTime(offer.original_scheduled_at)}
         </p>

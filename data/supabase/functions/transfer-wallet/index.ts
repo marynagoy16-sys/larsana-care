@@ -2,6 +2,8 @@ import { corsHeaders } from '../_shared/cors.ts'
 import { asaasRequest, isAsaasEnabled } from '../_shared/asaas.ts'
 import { requireStaff, serviceClient } from '../_shared/auth.ts'
 
+// Repasse usa POST /transfers + walletId de uma conta Asaas própria do profissional.
+// Não exige subconta criada sob a conta Larsana.
 interface TransferBody {
   transfer_id?: string
   assessment_repasse_id?: string

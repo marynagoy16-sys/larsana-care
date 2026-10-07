@@ -35,7 +35,7 @@ const termSchema = z.object({
   term_type: z.enum(LEGAL_TERM_TYPES),
   version: requiredString('Versão'),
   title: requiredString('Título'),
-  content: requiredString('Conteúdo'),
+  content: requiredString('Conteúdo', 500_000),
   is_current: z.boolean(),
   profile: z.enum(['pp', 'paciente', 'publico']).optional(),
   acceptance_mode: z.enum(['express', 'awareness', 'contextual']).optional(),
@@ -77,6 +77,8 @@ async function saveLegalTerm(id: string | null, values: TermFormValues) {
 export function TermsConfigPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<'todos' | 'vigor' | 'historico'>('todos')
+  const [profileFilter, setProfileFilter] = useState<'todos' | 'paciente' | 'pp'>('todos')
 
   const form = useForm<TermFormValues>({
     resolver: zodResolver(termSchema),
@@ -131,10 +133,38 @@ export function TermsConfigPage() {
         description="Clique em um termo para editar o conteúdo. Termos de Uso (TERMO_ADESAO) e Políticas de Privacidade (LGPD) aparecem no login."
         queryKey={qk}
         queryFn={() =>
-          legalTermsService.list('id, term_type, version, title, content, is_current', {
+          legalTermsService.list('id, term_type, version, title, content, is_current, profile', {
             column: 'term_type',
             ascending: true,
           })
+        }
+        filterResetKey={`${statusFilter}-${profileFilter}`}
+        rowFilter={(row) => {
+          const term = row as LegalTermRow
+          if (statusFilter === 'vigor' && !term.is_current) return false
+          if (statusFilter === 'historico' && term.is_current) return false
+          if (profileFilter !== 'todos' && term.profile !== profileFilter) return false
+          return true
+        }}
+        toolbar={
+          <div className="flex flex-wrap gap-2">
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}>
+              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os status</SelectItem>
+                <SelectItem value="vigor">Em vigor</SelectItem>
+                <SelectItem value="historico">Histórico</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={profileFilter} onValueChange={(value) => setProfileFilter(value as typeof profileFilter)}>
+              <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os públicos</SelectItem>
+                <SelectItem value="paciente">Paciente</SelectItem>
+                <SelectItem value="pp">Fisioterapeuta</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         }
         createLabel="Novo termo"
         onCreate={openCreate}

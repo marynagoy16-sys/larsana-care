@@ -52,7 +52,7 @@ export function PatientHomeKpiRow({ context, isLoading }: PatientHomeKpiRowProps
         },
         {
           label: 'LarsanaPill',
-          value: activeCycle ? 'Ativo' : '—',
+          value: 'Em breve',
           icon: Pill,
           href: '/paciente/larsanapill',
         },

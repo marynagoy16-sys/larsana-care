@@ -1,6 +1,6 @@
 /** Normalização de planilhas legadas (Excel/CSV) antes do bulk import. */
 
-export type ImportKind = 'patients' | 'professionals'
+export type ImportKind = 'patients' | 'professionals' | 'patient_links' | 'evolutions'
 
 const SCIENTIFIC_RE = /^[\d,.]+[eE][+-]?\d+$/
 
@@ -171,7 +171,18 @@ export function normalizeImportRows(
   kind: ImportKind,
   rows: Record<string, unknown>[],
 ): Record<string, string>[] {
-  const normalizer = kind === 'patients' ? normalizePatientRow : normalizeProfessionalRow
+  const normalizer =
+    kind === 'patients'
+      ? normalizePatientRow
+      : kind === 'professionals'
+        ? normalizeProfessionalRow
+        : (row: Record<string, unknown>) => {
+            const normalized: Record<string, string> = {}
+            for (const [key, value] of Object.entries(row)) {
+              normalized[key.trim().toLowerCase()] = String(value ?? '').trim()
+            }
+            return normalized
+          }
   return rows.map(normalizer)
 }
 

@@ -30,20 +30,14 @@ async function geocodeAndSavePatientAddress(
   _patientId: string,
   values: PatientOnboardingValues,
 ): Promise<void> {
-  const { data: city } = await supabase
-    .from('cities')
-    .select('name, state')
-    .eq('id', values.cityId)
-    .maybeSingle()
-
   const point = await resolveAddressCoordinates(
     {
       street: values.street,
       number: values.number,
       neighborhood: values.neighborhood,
       postalCode: values.postalCode,
-      cityName: city?.name ?? null,
-      cityState: city?.state ?? null,
+      cityName: values.cityName,
+      cityState: values.state,
     },
     { delayMs: 1100 },
   )
@@ -67,7 +61,9 @@ export async function completePatientOnboarding(values: PatientOnboardingValues)
     p_complement: values.complement ?? null,
     p_neighborhood: values.neighborhood,
     p_postal_code: values.postalCode,
-    p_city_id: values.cityId,
+    p_city_id: values.cityId || null,
+    p_city_name: values.cityName,
+    p_state: values.state.toUpperCase(),
   } as never)
 
   if (error) throw error

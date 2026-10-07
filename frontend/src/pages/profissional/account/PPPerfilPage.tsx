@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ASAAS_SIGNUP_URL, ASAAS_WALLET_HELP } from '@/constants/asaas'
 import { credentialingStatusLabels, professionTypeLabels } from '@/constants/labels'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -43,7 +44,7 @@ export function PPPerfilPage() {
       if (!user) return null
       const { data, error } = await supabase
         .from('professionals')
-        .select('id, full_name, email, profession, credentialing_status')
+        .select('id, full_name, email, profession, credentialing_status, asaas_wallet_id')
         .eq('user_id', user.id)
         .maybeSingle()
       if (error) throw error
@@ -58,6 +59,7 @@ export function PPPerfilPage() {
       full_name: professional?.full_name ?? '',
       email: professional?.email ?? profile?.email ?? '',
       profession: (professional?.profession ?? 'FISIO') as PpProfileValues['profession'],
+      asaas_wallet_id: professional?.asaas_wallet_id ?? '',
     },
     mode: 'onBlur',
   })
@@ -152,6 +154,34 @@ export function PPPerfilPage() {
                 />
 
                 <ReadOnlyField label="Credenciamento" value={credentialingLabel} />
+
+                <FormField
+                  control={form.control}
+                  name="asaas_wallet_id"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className={softFieldLabelClass}>Wallet ID Asaas</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          autoComplete="off"
+                          placeholder="00000000-0000-0000-0000-000000000000"
+                          className={softFieldInputClass}
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">{ASAAS_WALLET_HELP}</p>
+                      <a
+                        href={ASAAS_SIGNUP_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-primary underline"
+                      >
+                        Criar conta no Asaas
+                      </a>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <Button type="submit" className={softFieldButtonClass} disabled={saveMutation.isPending}>
                   {saveMutation.isPending ? 'Salvando…' : 'Salvar alterações'}

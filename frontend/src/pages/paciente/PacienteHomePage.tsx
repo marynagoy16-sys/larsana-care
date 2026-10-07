@@ -97,7 +97,7 @@ export function PacienteHomePage() {
   const sidebarContent = (
     <>
       {(latestAssessment || activeCycle) && <PatientHomeJourney context={data} />}
-      <PatientHomeLarsanaPillTeaser patientId={linkedPatient.patientId} />
+      <PatientHomeLarsanaPillTeaser />
     </>
   )
 

@@ -109,7 +109,12 @@ const NON_EVOLVABLE_STATUSES = new Set([
 ])
 
 /** Terapia ainda pode receber evolução clínica (detalhe da sessão / menu da agenda). */
-export function canEvolveTherapy(session: { hasEvolution: boolean; status: string }): boolean {
+export function canEvolveTherapy(session: {
+  hasEvolution: boolean
+  status: string
+  checkInAt?: string | null
+}): boolean {
   if (session.hasEvolution) return false
+  if (!session.checkInAt) return false
   return !NON_EVOLVABLE_STATUSES.has(session.status)
 }

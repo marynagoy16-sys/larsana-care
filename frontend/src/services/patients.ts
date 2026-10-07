@@ -11,6 +11,7 @@ export type Patient = Tables<'patients'>
 export type PatientListItem = Patient & {
   regions?: { name: string; code: string } | null
   cities?: { name: string } | null
+  professionals?: { id: string; full_name: string } | null
 }
 
 export interface PatientFilters {
@@ -41,7 +42,7 @@ import { PAUSE_CARE_STATUSES } from '@/lib/patientCareStatus'
 export async function getPatientStats(): Promise<PatientStats> {
   const [totalRes, ativosRes, pausaRes, incompletosRes, semPpRes, valorSocialRes] = await Promise.all([
     supabase.from('patients').select('*', { count: 'exact', head: true }),
-    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('care_status', 'ATIVO'),
+    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('care_status', 'ATIVO').eq('is_active', true),
     supabase.from('patients').select('*', { count: 'exact', head: true }).in('care_status', PAUSE_CARE_STATUSES),
     supabase.from('patients').select('*', { count: 'exact', head: true }).eq('is_data_complete', false),
     supabase.from('patients').select('*', { count: 'exact', head: true }).is('allocated_professional_id', null),
@@ -70,7 +71,7 @@ export async function listPatients(filters: PatientFilters = {}) {
 
   let query = supabase
     .from('patients')
-    .select('*, regions(name, code), cities(name)', { count: 'exact' })
+    .select('*, regions(name, code), cities(name), professionals!patients_allocated_professional_id_fkey(id, full_name)', { count: 'exact' })
     .order(sortBy, { ascending })
     .range(page * pageSize, (page + 1) * pageSize - 1)
 
@@ -104,7 +105,7 @@ export async function listPatients(filters: PatientFilters = {}) {
 export async function getPatient(id: string) {
   const { data, error } = await supabase
     .from('patients')
-    .select('*, regions(name, code), cities(name), patient_responsibles(*), patient_addresses(*), patient_documents(*)')
+    .select('*, regions(name, code), cities(name), professionals!patients_allocated_professional_id_fkey(id, full_name), patient_responsibles(*), patient_addresses(*), patient_documents(*)')
     .eq('id', id)
     .single()
   if (error) throw error
@@ -318,6 +319,12 @@ export async function createPatientWizard(
   }
 
   return createdPatient
+}
+
+export async function setPatientsActive(ids: string[], isActive: boolean) {
+  if (ids.length === 0) return
+  const { error } = await supabase.from('patients').update({ is_active: isActive }).in('id', ids)
+  if (error) throw error
 }
 
 export async function updatePatient(id: string, values: TablesUpdate<'patients'>) {

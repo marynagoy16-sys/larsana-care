@@ -82,7 +82,6 @@ const PricingConfigPage = lazy(() =>
   import('@/pages/admin/pricing/PricingConfigPage').then((m) => ({ default: m.PricingConfigPage })),
 )
 const TermsConfigPage = lazyAdmin('TermsConfigPage')
-const ContractsConfigPage = lazyAdmin('ContractsConfigPage')
 const UsersConfigPage = lazyAdmin('UsersConfigPage')
 const AuditPage = lazyAdmin('AuditPage')
 const SupportPage = lazyAdmin('SupportPage')
@@ -177,7 +176,6 @@ export const adminRoutes: RouteObject[] = [
       { path: 'config/pontos-pp', element: staffRoute(<PpPointsConfigPage />, adminOnly) },
       { path: 'config/plataforma', element: staffRoute(<PlatformSettingsPage />, adminOnly) },
       { path: 'config/termos', element: staffRoute(<TermsConfigPage />, adminOnly) },
-      { path: 'config/contratos', element: staffRoute(<ContractsConfigPage />, adminOnly) },
       { path: 'config/regioes', element: staffRoute(<RegionsConfigPage />, operacaoRoles) },
       { path: 'config/usuarios', element: staffRoute(<UsersConfigPage />, adminOnly) },
       { path: 'config/auditoria', element: staffRoute(<AuditPage />, ['admin', 'gestao']) },

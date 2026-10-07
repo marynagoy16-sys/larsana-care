@@ -51,7 +51,7 @@ export async function loadCredentialingSnapshot(): Promise<CredentialingSnapshot
   const { data: professional, error: proError } = await supabase
     .from('professionals')
     .select(
-      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, patient_preferences, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado',
+      'id, full_name, cpf_cnpj, person_type, birth_date, email, phone, address, profession, specialty, technical_categories, patient_preferences, cardiorrespiratory_habilitation_status, cardiorrespiratory_request_basis, cardiorrespiratory_experience_description, credentialing_status, flag_assinado, asaas_wallet_id',
     )
     .eq('user_id', user.id)
     .maybeSingle()
@@ -196,6 +196,14 @@ export async function saveBancoStep(values: BancoStepValues) {
     )
 
   if (error) throw error
+
+  const walletId = values.asaas_wallet_id?.trim() || null
+  const { error: walletError } = await supabase
+    .from('professionals')
+    .update({ asaas_wallet_id: walletId })
+    .eq('id', professionalId)
+
+  if (walletError) throw walletError
 }
 
 export async function uploadProfessionalDocument(

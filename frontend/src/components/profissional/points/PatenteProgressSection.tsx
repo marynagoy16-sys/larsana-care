@@ -10,6 +10,10 @@ import {
 
 type PatenteProgressSectionProps = {
   points: number
+  permanentPoints?: number
+  variablePoints?: number
+  monthsRemaining?: number | null
+  repassePercent?: number | null
   patente: PpPatente
   settings: PpPointsSettings
   showHintText?: boolean
@@ -17,6 +21,10 @@ type PatenteProgressSectionProps = {
 
 export function PatenteProgressSection({
   points,
+  permanentPoints,
+  variablePoints,
+  monthsRemaining,
+  repassePercent,
   patente,
   settings,
   showHintText = true,
@@ -34,11 +42,17 @@ export function PatenteProgressSection({
         <span>{patenteLabels[nextTarget.patente]}</span>
       </div>
       <Progress value={progress.percent} className="h-2.5" />
+      {permanentPoints != null && variablePoints != null ? (
+        <p className="text-xs text-muted-foreground">
+          Permanentes {permanentPoints} · variáveis {variablePoints} · total {points}
+          {monthsRemaining != null ? ` · ${monthsRemaining} mês(es) restante(s) na patente` : ''}
+        </p>
+      ) : null}
       {showHintText ? (
         <p className="text-sm text-muted-foreground">
           {points} / {nextTarget.threshold} pts · faltam{' '}
           <span className="font-medium text-foreground">{remaining} pts</span> para{' '}
-          {patenteLabels[nextTarget.patente]} ({PATENTE_REPASSE_PERCENT[nextTarget.patente]}% repasse)
+          {patenteLabels[nextTarget.patente]} ({repassePercent ?? PATENTE_REPASSE_PERCENT[nextTarget.patente]}% repasse)
         </p>
       ) : null}
     </div>

@@ -16,6 +16,9 @@ interface DeleteConfirmDialogProps {
   description?: string
   onConfirm: () => void
   isDeleting?: boolean
+  confirmLabel?: string
+  pendingLabel?: string
+  destructive?: boolean
 }
 
 export function DeleteConfirmDialog({
@@ -25,6 +28,9 @@ export function DeleteConfirmDialog({
   description = 'Esta ação não pode ser desfeita.',
   onConfirm,
   isDeleting,
+  confirmLabel = 'Excluir',
+  pendingLabel = 'Excluindo...',
+  destructive = true,
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -41,9 +47,9 @@ export function DeleteConfirmDialog({
               onConfirm()
             }}
             disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className={destructive ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : undefined}
           >
-            {isDeleting ? 'Excluindo...' : 'Excluir'}
+            {isDeleting ? pendingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

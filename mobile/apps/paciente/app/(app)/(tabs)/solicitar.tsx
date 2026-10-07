@@ -163,8 +163,7 @@ export default function SolicitarScreen() {
               <Text className="font-semibold text-foreground">Estamos chegando!</Text>
             </View>
             <Text className="text-sm leading-5 text-muted-foreground">
-              Ainda não temos profissionais parceiros atuando na sua região. Enquanto isso, explore o LarsanaPill
-              com orientações e exercícios para casa.
+              Ainda não temos profissionais parceiros atuando na sua região.
             </Text>
             {!hasWaitlist ? (
               <Button onPress={() => waitlistMutation.mutate()} loading={waitlistMutation.isPending} disabled={busy}>

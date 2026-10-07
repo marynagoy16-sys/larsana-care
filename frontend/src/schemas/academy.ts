@@ -10,6 +10,7 @@ export const courseFormSchema = z.object({
   is_published: z.boolean(),
   sort_order: z.coerce.number().int().min(0),
   estimated_minutes: z.coerce.number().int().min(0).optional().nullable(),
+  points_award: z.coerce.number().int().min(0).default(200),
 })
 
 export const moduleFormSchema = z.object({

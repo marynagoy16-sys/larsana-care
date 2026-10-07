@@ -63,6 +63,7 @@ export async function savePpProfile(values: PpProfileValues): Promise<void> {
       full_name: values.full_name,
       email: values.email,
       profession: values.profession,
+      asaas_wallet_id: values.asaas_wallet_id.trim() || null,
     })
     .eq('id', professionalId)
 

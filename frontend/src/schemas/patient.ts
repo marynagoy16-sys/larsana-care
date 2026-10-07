@@ -8,7 +8,8 @@ import {
   phoneSchema,
   requiredString,
 } from '@/schemas/common'
-import { sanitizeCep, trimText } from '@/lib/sanitize'
+import { isValidCpf } from '@/lib/validators'
+import { sanitizeCep, sanitizeCpf, trimText } from '@/lib/sanitize'
 
 
 export const patientCareStatusSchema = z.enum([
@@ -93,7 +94,66 @@ export const patientWizardSchema = z.object({
   }
 })
 
+const emptyToNull = (value: string | null | undefined) => {
+  const trimmed = value?.trim() ?? ''
+  return trimmed.length ? trimmed : null
+}
+
+const optionalUuidField = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((value) => emptyToNull(value))
+  .refine((value) => value == null || z.string().uuid().safeParse(value).success, 'Valor inválido')
+
+export const patientEditSchema = z.object({
+  full_name: requiredString('Nome completo'),
+  cpf: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => {
+      const digits = value ? sanitizeCpf(value) : ''
+      return digits.length ? digits : null
+    })
+    .refine((value) => value == null || isValidCpf(value), 'CPF inválido'),
+  birth_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => emptyToNull(value))
+    .refine((value) => value == null || !Number.isNaN(Date.parse(value)), 'Data inválida')
+    .refine((value) => value == null || new Date(value) <= new Date(), 'Data não pode ser futura'),
+  patient_level: z.enum(['N1', 'N2', 'N3', 'VALOR_SOCIAL']),
+  care_status: patientCareStatusSchema,
+  region_id: optionalUuidField,
+  city_id: optionalUuidField,
+  allocated_professional_id: optionalUuidField,
+  suggested_weekly_frequency: z.number().min(1).max(7).optional().nullable(),
+  attendance_period: z.enum(['MANHA', 'TARDE', 'NOITE', 'INDIFERENTE']).optional().nullable(),
+  technical_category: z
+    .enum([
+      'ortopedico',
+      'pos_operatorio',
+      'neurologico',
+      'idoso_gerontologia',
+      'funcional_condicionamento',
+      'pediatrico_geral',
+      'cardiorrespiratoria',
+      'atendimento_unico',
+    ])
+    .optional()
+    .nullable(),
+  clinical_summary: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => emptyToNull(value)),
+  is_valor_social: z.boolean().default(false),
+})
+
 export type PatientStepValues = z.infer<typeof patientStepSchema>
+export type PatientEditValues = z.infer<typeof patientEditSchema>
 export type ResponsibleStepValues = z.infer<typeof responsibleStepSchema>
 export type AddressStepValues = z.infer<typeof addressStepSchema>
 export type PatientWizardValues = z.infer<typeof patientWizardSchema>

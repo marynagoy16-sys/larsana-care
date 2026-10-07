@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MaskedInput } from '@/components/forms/MaskedInput'
+import { ASAAS_SIGNUP_URL, ASAAS_WALLET_HELP } from '@/constants/asaas'
 import { bancoStepSchema, type BancoStepValues } from '@/schemas/credentialing'
 import type { CredentialingSnapshot } from '@/lib/credentialingModel'
 
@@ -13,7 +14,8 @@ type Props = {
   disabled?: boolean
 }
 
-function toDefaultValues(bank: CredentialingSnapshot['bank']): BancoStepValues {
+function toDefaultValues(snapshot: CredentialingSnapshot): BancoStepValues {
+  const bank = snapshot.bank
   return {
     bank_code: bank?.bank_code ?? undefined,
     bank_name: bank?.bank_name ?? '',
@@ -23,6 +25,7 @@ function toDefaultValues(bank: CredentialingSnapshot['bank']): BancoStepValues {
     pix_key: bank?.pix_key ?? '',
     holder_name: bank?.holder_name ?? '',
     holder_document: bank?.holder_document ?? '',
+    asaas_wallet_id: snapshot.professional.asaas_wallet_id ?? '',
   }
 }
 
@@ -30,7 +33,7 @@ export function BancoStepForm({ snapshot, onSubmit, disabled }: Props) {
   const form = useForm<BancoStepValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(bancoStepSchema) as any,
-    defaultValues: toDefaultValues(snapshot.bank),
+    defaultValues: toDefaultValues(snapshot),
     mode: 'onBlur',
   })
 
@@ -141,13 +144,31 @@ export function BancoStepForm({ snapshot, onSubmit, disabled }: Props) {
               <FormItem>
                 <FormLabel>CPF/CNPJ do titular</FormLabel>
                 <FormControl>
-                  <MaskedInput mask="cpf" value={field.value} onChange={field.onChange} disabled={disabled} />
+                  <MaskedInput mask="cpf_cnpj" value={field.value} onChange={field.onChange} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="asaas_wallet_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Wallet ID Asaas</FormLabel>
+              <FormControl>
+                <Input {...field} value={field.value ?? ''} disabled={disabled} placeholder="Cole o wallet ID da sua conta" />
+              </FormControl>
+              <p className="text-xs text-muted-foreground">{ASAAS_WALLET_HELP}</p>
+              <a href={ASAAS_SIGNUP_URL} target="_blank" rel="noreferrer" className="text-xs text-primary underline">
+                Criar conta no Asaas
+              </a>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </form>
     </Form>
   )

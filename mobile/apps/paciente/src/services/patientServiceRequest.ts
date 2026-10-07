@@ -169,7 +169,7 @@ export async function getPatientServiceLegalTerms(): Promise<PatientServiceLegal
     .from('legal_terms')
     .select('id, term_type, title')
     .eq('is_current', true)
-    .in('term_type', ['CONTRATO_INTERMEDIACAO', 'TERMO_CONSENTIMENTO', 'LGPD'] as never)
+    .in('term_type', ['TCLE_FISIO', 'LGPD'] as never)
 
   if (error) throw error
   return (data ?? []) as PatientServiceLegalTerm[]

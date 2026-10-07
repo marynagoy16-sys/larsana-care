@@ -42,7 +42,7 @@ import {
 } from '@/services/patientServiceRequest'
 
 const TERMS_DECLARATION =
-  'Declaro que li integralmente e concordo com o Contrato de Intermediação, Termo de Consentimento e Políticas de Privacidade, compreendendo a natureza da atuação da plataforma, a autonomia dos profissionais e as limitações de responsabilidade envolvidas.'
+  'Declaro que li integralmente e concordo com o Termo de Consentimento Livre e Esclarecido (TCLE) e com as Políticas de Privacidade, compreendendo a natureza da atuação da plataforma, a autonomia dos profissionais e as limitações de responsabilidade envolvidas.'
 
 const STEP_ONE_FIELDS = new Set([
   'patientFullName',
@@ -131,8 +131,7 @@ export function ServiceRequestForm({ onPrepare, onCheckout, onSimulate, submitti
     [legalTerms],
   )
 
-  const contractTerm = termsByType.get('CONTRATO_INTERMEDIACAO')
-  const consentTerm = termsByType.get('TERMO_CONSENTIMENTO')
+  const consentTerm = termsByType.get('TCLE_FISIO')
   const privacyTerm = termsByType.get('LGPD')
 
   const buildValues = (): PatientServiceRequestValues => ({
@@ -477,14 +476,9 @@ export function ServiceRequestForm({ onPrepare, onCheckout, onSimulate, submitti
         {fieldError(errors, 'termsAccepted')}
 
         <div className="flex flex-col gap-1 pl-7 text-sm">
-          {contractTerm ? (
-            <Link to={`/paciente/termos/${contractTerm.id}`} className="font-medium text-primary hover:underline">
-              Contrato de Intermediação
-            </Link>
-          ) : null}
           {consentTerm ? (
-            <Link to={`/paciente/termos/${consentTerm.id}`} className="text-primary hover:underline">
-              Termo de Consentimento
+            <Link to={`/paciente/termos/${consentTerm.id}`} className="font-medium text-primary hover:underline">
+              Termo de Consentimento Livre e Esclarecido (TCLE)
             </Link>
           ) : null}
           {privacyTerm ? (

@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase'
-import { edgeFunctions } from '@/services/edgeFunctions'
 import { PROFESSIONAL_DOCS_BUCKET } from '@/services/credentialing'
 import type { Tables } from '@/types/database'
 import {
@@ -163,8 +162,6 @@ export async function getProfessionalDocumentViewUrl(
 }
 
 export async function approveCredentialing(professionalId: string) {
-  await edgeFunctions.createAsaasSubaccount({ professional_id: professionalId })
-
   const { error } = await supabase
     .from('professionals')
     .update({
@@ -176,8 +173,37 @@ export async function approveCredentialing(professionalId: string) {
   if (error) throw error
 }
 
-export async function linkAsaasSubaccount(professionalId: string) {
-  return edgeFunctions.createAsaasSubaccount({ professional_id: professionalId })
+export async function saveProfessionalWallet(professionalId: string, walletId: string) {
+  const trimmed = walletId.trim()
+  const { error } = await supabase
+    .from('professionals')
+    .update({ asaas_wallet_id: trimmed || null })
+    .eq('id', professionalId)
+
+  if (error) throw error
+}
+
+export type ProfessionalDeleteOutcome = 'deleted' | 'inactivated'
+
+let lastProfessionalDeleteOutcome: ProfessionalDeleteOutcome = 'deleted'
+
+export function professionalDeleteMessage(outcome: ProfessionalDeleteOutcome = lastProfessionalDeleteOutcome) {
+  if (outcome === 'inactivated') {
+    return 'Este profissional tem atendimentos ou registros vinculados. A conta foi inativada e o histórico foi mantido.'
+  }
+  return 'Profissional excluído.'
+}
+
+export async function deleteCredentialingProfessional(professionalId: string): Promise<ProfessionalDeleteOutcome> {
+  const { data, error } = await supabase.rpc('admin_delete_professional' as never, {
+    p_professional_id: professionalId,
+  } as never)
+
+  if (error) throw error
+
+  const outcome: ProfessionalDeleteOutcome = data === 'inactivated' ? 'inactivated' : 'deleted'
+  lastProfessionalDeleteOutcome = outcome
+  return outcome
 }
 
 export async function requestCredentialingRevision(professionalId: string) {

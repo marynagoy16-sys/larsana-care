@@ -87,6 +87,29 @@ export async function bulkImportProfessionals(
   return data as BulkImportResult
 }
 
+export async function bulkImportPatientLinks(rows: Record<string, string>[]): Promise<BulkImportResult> {
+  const { data, error } = await supabase.rpc('bulk_import_patient_pp_links' as never, {
+    p_rows: rows,
+    p_skip_duplicates: true,
+  } as never)
+  if (error) throw error
+  return data as BulkImportResult
+}
+
+export async function bulkImportHistoricalEvolutions(rows: Record<string, string>[]): Promise<BulkImportResult> {
+  const { data, error } = await supabase.rpc('bulk_import_historical_evolutions' as never, {
+    p_rows: rows,
+  } as never)
+  if (error) throw error
+  return data as BulkImportResult
+}
+
+export const PATIENT_LINK_IMPORT_TEMPLATE = `cpf_paciente,cpf_pp
+12345678901,98765432100`
+
+export const EVOLUTION_IMPORT_TEMPLATE = `cpf_paciente,data,texto,cpf_profissional,numero_ciclo
+12345678901,2026-01-15,Evolução histórica do atendimento,98765432100,10`
+
 export const PATIENT_IMPORT_TEMPLATE = `full_name,cpf,birth_date,patient_level,region_code,city_name,full_address,asaas_customer_id,clinical_summary
 Maria Silva,12345678901,1980-05-10,N1,C,Mauá,Rua Exemplo 100,,`
 

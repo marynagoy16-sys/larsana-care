@@ -42,7 +42,8 @@ import { getCurrentProfessional } from '@/services/professionals'
 import {
   getProfessionalPointsProfile,
   patenteLabels,
-  PATENTE_REPASSE_PERCENT,
+  listPpPatenteTiers,
+  repassePercentForPatente,
 } from '@/services/ppPoints'
 
 const PP_DEMANDS_QUERY_KEY = ['pp', 'demands'] as const
@@ -226,6 +227,11 @@ export function PPHomePage() {
     queryKey: ['pp', 'points_profile', professional?.id],
     queryFn: () => getProfessionalPointsProfile(professional!.id),
     enabled: !!professional?.id,
+  })
+
+  const { data: patenteTiers = [] } = useQuery({
+    queryKey: ['pp_patente_tiers'],
+    queryFn: listPpPatenteTiers,
   })
 
   const { data: courses } = useQuery({
@@ -416,7 +422,7 @@ export function PPHomePage() {
             <HomeEvolutionCard
               points={pointsProfile?.points_total ?? 0}
               patenteLabel={patenteLabels[pointsProfile?.patente ?? 'ALUMINIO']}
-              repassePercent={PATENTE_REPASSE_PERCENT[pointsProfile?.patente ?? 'ALUMINIO']}
+              repassePercent={repassePercentForPatente(patenteTiers, pointsProfile?.patente ?? 'ALUMINIO')}
             />
           </CascadeItem>
 

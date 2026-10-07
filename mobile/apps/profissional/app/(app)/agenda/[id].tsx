@@ -98,14 +98,6 @@ export default function SessionDetailScreen() {
             <Button onPress={() => checkMutation.mutate('in')} loading={checkMutation.isPending}>
               Check-in
             </Button>
-          ) : !session.checkOutAt ? (
-            <Button
-              variant="outline"
-              onPress={() => checkMutation.mutate('out')}
-              loading={checkMutation.isPending}
-            >
-              Check-out
-            </Button>
           ) : null}
         </View>
       </ScrollView>

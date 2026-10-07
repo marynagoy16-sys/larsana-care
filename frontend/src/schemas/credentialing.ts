@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isAsaasWalletId } from '@/constants/asaas'
 import {
   cpfSchema,
   dateSchema,
@@ -45,6 +46,12 @@ export const bancoStepSchema = z.object({
   pix_key: requiredString('Chave PIX', 128),
   holder_name: requiredString('Titular da conta'),
   holder_document: z.string().min(11, 'CPF/CNPJ do titular inválido').transform(trimText),
+  asaas_wallet_id: z
+    .string()
+    .trim()
+    .optional()
+    .default('')
+    .refine((value) => !value || isAsaasWalletId(value), 'Wallet ID inválido'),
 })
 
 export const contratoAcceptSchema = z.object({

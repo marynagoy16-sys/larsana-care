@@ -1,4 +1,4 @@
-import { X, Pencil, Trash2, Download } from 'lucide-react'
+import { X, Pencil, Trash2, Download, Power } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface SelectionBarProps {
@@ -6,10 +6,20 @@ interface SelectionBarProps {
   onClear: () => void
   onEdit?: () => void
   onDelete?: () => void
+  onToggleActive?: () => void
+  toggleActiveLabel?: string
   onDownload?: () => void
 }
 
-export function SelectionBar({ count, onClear, onEdit, onDelete, onDownload }: SelectionBarProps) {
+export function SelectionBar({
+  count,
+  onClear,
+  onEdit,
+  onDelete,
+  onToggleActive,
+  toggleActiveLabel = 'Ativar/Inativar',
+  onDownload,
+}: SelectionBarProps) {
   if (count === 0) return null
 
   return (
@@ -27,6 +37,12 @@ export function SelectionBar({ count, onClear, onEdit, onDelete, onDownload }: S
           <Button variant="ghost" size="sm" className="h-8" onClick={onEdit}>
             <Pencil size={14} />
             Editar
+          </Button>
+        )}
+        {onToggleActive && (
+          <Button variant="ghost" size="sm" className="h-8" onClick={onToggleActive}>
+            <Power size={14} />
+            {toggleActiveLabel}
           </Button>
         )}
         {onDelete && (

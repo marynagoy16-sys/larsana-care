@@ -21,7 +21,7 @@ Legenda de status:
 | ❌ | Pendente |
 | 🔍 | Decisão externa ou spike |
 
-> Referências: [PRD](docs/PRD.md) · [Mapa de páginas](docs/PAGES.md) · [Checklist Fase 0](docs/FASE0_CHECKLIST_ALINHAMENTO.md)
+> Referências: [PRD](docs/PRD.md) · [Mapa de páginas](docs/PAGES.md) · [Checklist Fase 0](docs/FASE0_CHECKLIST_ALINHAMENTO.md) · [Adequação 07/10/2026](docs/RELATORIO_ATUALIZACOES_2026-10-07.md)
 
 ### Fase 0 — Fundação e alinhamento
 
@@ -59,12 +59,12 @@ Legenda de status:
 | Demandas (aceitar / recusar, mapa) | ✅ | ✅ | ✅ |
 | Minha jornada (rastreio avaliação → proposta) | ✅ | ✅ | ✅ |
 | Wizard pós-aceite (disponibilidade / agendamento) | ✅ | ⚠️ | ✅ |
-| Remarcar sessão (12h/14d, aceite paciente, SUB) | ✅ | ❌ | ⚠️ |
+| Remarcar sessão (pedido do paciente; PP recoloca em 14 dias; SUB só quando o PP desmarca) | ✅ | ⚠️ | ✅ |
 | Evolução / prontuário por ciclos | ✅ | ✅ | ✅ |
 | Credenciamento self-service | ✅ | ✅ | ✅ |
 | Categorias técnicas + habilitação cardio | ✅ | ⚠️ | ✅ |
 | Repasses (lista, detalhe, upload NF) | ✅ | ⚠️ | ✅ |
-| Patentes / pontos / gamificação | ✅ | ❌ | ⚠️ |
+| Patentes (permanente + variável, tempo 3/9/12 meses) | ✅ | ⚠️ | ✅ |
 | Academy (trilhas M1–M5 + gates) | ✅ | ✅ | ✅ |
 | Notificações in-app | ✅ | ⚠️ | ⚠️ |
 
@@ -74,10 +74,10 @@ Legenda de status:
 |-------------------------|:---:|:------:|:------:|
 | Auth: login, cadastro dual (paciente / PP) | ✅ | ⚠️ | ⚠️ |
 | Recuperar / redefinir senha | ✅ | ❌ | ⚠️ |
-| Onboarding pós-cadastro (endereço + região) | ✅ | ❌ | 🔄 |
+| Onboarding pós-cadastro (qualquer município; cobertura só na solicitação) | ✅ | ❌ | ✅ |
 | Início / timeline do tratamento | ✅ | ✅ | ✅ |
 | Solicitar atendimento (formulário + demanda + mapa) | ✅ | ✅ | ✅ |
-| Remarcar sessão (mesmo PP 14d; menos de 12h: atestado + 50%) | ✅ | ❌ | ⚠️ |
+| Remarcar sessão (só pedido; prazo de 14 dias fica com o PP) | ✅ | ❌ | ✅ |
 | Aceite/recusa remarcação e oferta SUB | ✅ | ❌ | ⚠️ |
 | Lista de espera (“Desejo iniciar tratamento”) | ✅ | ✅ | ✅ |
 | Timeline solicitação (estilo Correios) | ⚠️ | ⚠️ | ⚠️ |
@@ -86,7 +86,7 @@ Legenda de status:
 | Tratamento / detalhe do ciclo | ✅ | ✅ | ✅ |
 | Pagamentos antecipados (PIX/boleto Asaas) | ✅ | ⚠️ | ✅ |
 | Documentos legais (onboarding, credenciamento, aceite por ciclo, TCLE) | ✅ | ⚠️ | ✅ |
-| Aceite legal (Contrato intermediação + Termo consentimento) | ✅ | ⚠️ | ✅ |
+| Aceite legal na solicitação (TCLE + privacidade; sem contrato de intermediação) | ✅ | ⚠️ | ✅ |
 | LarsanaPill (conteúdo PHIL + planos) | ✅ | ✅ | ✅ |
 | Documentos, conta, ajuda, NPS | ✅ | ⚠️ | ⚠️ |
 
@@ -97,7 +97,7 @@ Legenda de status:
 | Asaas: cobrança PIX/boleto (produção) | ✅ | `create-charge` + `payment-webhook` ativos (conta DELUMA) |
 | Taxa de avaliação (`assessment_request`) | ✅ | PIX/boleto; confirmação libera demanda |
 | Pagamento antecipado antes da 1ª sessão do ciclo | ✅ | Abatimento da taxa de avaliação quando aplicável |
-| Repasse PP (wallet Asaas) | ✅ | `create-asaas-subaccount` + `transfer-wallet` |
+| Repasse PP (wallet Asaas) | ✅ | Wallet colado pelo PP; aprovação não cria subconta. `transfer-wallet` |
 | Split PF/PJ + retenção 1º ciclo (PDF v6) | ⚠️ | Regras no DB; auditoria operacional pendente |
 | Pausa justificada / injustificada + reembolso | ⚠️ | Lógica DB; edge cases em validação |
 | App Financeiro (mobile) | ⚠️ | Repasses e liberação; escopo menor que a web |

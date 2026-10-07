@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { formatCpf, formatCurrency, formatDate, formatPhone } from '@/lib/formatters'
+import { formatCpf, formatCpfCnpj, formatCurrency, formatDate, formatPhone, maskCpfCnpjInput } from '@/lib/formatters'
 
 describe('formatters', () => {
   it('formata CPF com 11 dígitos', () => {
     expect(formatCpf('12345678901')).toBe('123.456.789-01')
+  })
+
+  it('formata CNPJ com 14 dígitos e preserva a digitação', () => {
+    expect(formatCpfCnpj('12345678000199')).toBe('12.345.678/0001-99')
+    expect(maskCpfCnpjInput('12345678000199')).toBe('12.345.678/0001-99')
   })
 
   it('formata moeda em centavos', () => {

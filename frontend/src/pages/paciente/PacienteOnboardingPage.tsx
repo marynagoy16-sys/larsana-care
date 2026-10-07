@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { LegalTermAcceptanceStepForm } from '@/components/legal/LegalTermAcceptanceStepForm'
 import { PATIENT_ONBOARDING_TERM_TYPES } from '@/constants/legalTerms'
 import type { LegalTermType } from '@/constants/legalTerms'
-import { CityRegionFields } from '@/components/forms/CityRegionFields'
 import { CrudScrollPageLayout } from '@/components/crud/list-page/CrudScrollPageLayout'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -35,6 +34,8 @@ export function PacienteOnboardingPage() {
   const [postalCode, setPostalCode] = useState('')
   const [cityId, setCityId] = useState('')
   const [regionId, setRegionId] = useState('')
+  const [cityName, setCityName] = useState('')
+  const [stateUf, setStateUf] = useState('')
   const [loading, setLoading] = useState(false)
   const [cepLoading, setCepLoading] = useState(false)
   const [allTermsChecked, setAllTermsChecked] = useState(false)
@@ -62,10 +63,16 @@ export function PacienteOnboardingPage() {
       if (address.logradouro) setStreet(address.logradouro)
       if (address.bairro) setNeighborhood(address.bairro)
 
+      setCityName(address.localidade)
+      setStateUf(address.uf.toUpperCase())
+
       const city = await findCityByNameAndState(address.localidade, address.uf)
       if (city) {
         setCityId(city.id)
         setRegionId(city.region_id)
+      } else {
+        setCityId('')
+        setRegionId('')
       }
     } catch {
       // preenchimento manual continua disponível
@@ -94,6 +101,8 @@ export function PacienteOnboardingPage() {
         postalCode,
         cityId,
         regionId,
+        cityName,
+        state: stateUf,
       })
 
       await recordLegalAcceptances(PATIENT_ONBOARDING_TERM_TYPES, 'onboarding')
@@ -234,16 +243,38 @@ export function PacienteOnboardingPage() {
               />
             </div>
 
-            <CityRegionFields
-              cityId={cityId}
-              regionId={regionId}
-              onCityChange={(nextCityId, nextRegionId) => {
-                setCityId(nextCityId)
-                setRegionId(nextRegionId)
-              }}
-              disabled={loading || cepLoading}
-              hideRegion
-            />
+            <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
+              <div className="space-y-2">
+                <Label htmlFor="cityName" className={softFieldLabelClass}>Cidade</Label>
+                <Input
+                  id="cityName"
+                  value={cityName}
+                  onChange={(e) => {
+                    setCityName(e.target.value)
+                    setCityId('')
+                    setRegionId('')
+                  }}
+                  disabled={loading || cepLoading}
+                  required
+                  className={softFieldInputClass}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stateUf" className={softFieldLabelClass}>UF</Label>
+                <Input
+                  id="stateUf"
+                  value={stateUf}
+                  onChange={(e) => setStateUf(e.target.value.toUpperCase().slice(0, 2))}
+                  disabled={loading || cepLoading}
+                  required
+                  maxLength={2}
+                  className={softFieldInputClass}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              O CEP preenche qualquer município. Se ainda não atendemos a cidade, o cadastro segue e a solicitação entra na lista de espera.
+            </p>
           </div>
 
           <LegalTermAcceptanceStepForm

@@ -55,6 +55,18 @@ export const AVALIACAO_MUST_OCCUR_WITHIN_DAYS = 7
 /** Horizonte máximo para oferta de horários de continuidade. */
 export const CONTINUIDADE_OFFER_HORIZON_DAYS = 28
 
+export async function registerFixedCycleSchedule(
+  demandId: string,
+  slots: AvailabilitySlotInput[],
+): Promise<{ scheduled: number }> {
+  const { data, error } = await supabase.rpc('pp_register_fixed_cycle_schedule' as never, {
+    p_demand_id: demandId,
+    p_slots: slots,
+  } as never)
+  if (error) throw error
+  return data as { scheduled: number }
+}
+
 export async function submitPpAvailability(
   demandId: string,
   slots: AvailabilitySlotInput[],

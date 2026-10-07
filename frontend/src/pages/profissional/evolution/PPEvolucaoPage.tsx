@@ -15,8 +15,10 @@ import {
   getPpPointsSettings,
   getProfessionalPointsProfile,
   listPointsLedger,
+  listPpPatenteTiers,
+  monthsRemainingOnPatente,
   patenteLabels,
-  PATENTE_REPASSE_PERCENT,
+  repassePercentForPatente,
   DEFAULT_PP_POINTS_SETTINGS,
 } from '@/services/ppPoints'
 
@@ -49,8 +51,14 @@ export function PPEvolucaoPage() {
     enabled: !!professional?.id,
   })
 
+  const { data: tiers = [] } = useQuery({
+    queryKey: ['pp_patente_tiers'],
+    queryFn: listPpPatenteTiers,
+  })
+
   const patente = profile?.patente ?? 'ALUMINIO'
   const points = profile?.points_total ?? 0
+  const repasse = repassePercentForPatente(tiers, patente)
   const progressSettings = settings ?? DEFAULT_PP_POINTS_SETTINGS
 
   const copyReferral = async () => {
@@ -71,11 +79,15 @@ export function PPEvolucaoPage() {
                   <p className="text-sm text-muted-foreground">Patente atual</p>
                   <p className="text-2xl font-display font-bold">{patenteLabels[patente]}</p>
                 </div>
-                <Badge variant="secondary">{PATENTE_REPASSE_PERCENT[patente]}% repasse</Badge>
+                <Badge variant="secondary">{repasse}% repasse</Badge>
               </div>
               <p className="text-3xl font-bold tabular-nums">{points} <span className="text-base font-normal text-muted-foreground">pontos</span></p>
               <PatenteProgressSection
                 points={points}
+                permanentPoints={profile?.points_permanent ?? 0}
+                variablePoints={profile?.points_variable ?? 0}
+                monthsRemaining={monthsRemainingOnPatente(profile?.patente_earned_at, patente)}
+                repassePercent={repasse}
                 patente={patente}
                 settings={progressSettings}
                 showHintText={progressSettings.show_next_tier_hint}
@@ -92,7 +104,7 @@ export function PPEvolucaoPage() {
               {patente === 'ALUMINIO' ? (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    Ganhe 50 pontos por indicação (máx. 3) enquanto estiver na patente Alumínio.
+                    Ganhe 100 pontos permanentes por indicação (máx. 3) enquanto estiver na patente Alumínio.
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Indicações confirmadas: {profile?.referral_count_pre_bronze ?? 0}/3

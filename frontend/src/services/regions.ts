@@ -65,14 +65,24 @@ export async function findCityByNameAndState(name: string, state: string) {
   return data
 }
 
+async function listAllNeighborhoods(cityIds?: string[]) {
+  const pageSize = 1000
+  const rows: Neighborhood[] = []
+
+  for (let from = 0; ; from += pageSize) {
+    let query = supabase.from('neighborhoods').select('*').order('id').range(from, from + pageSize - 1)
+    if (cityIds) query = query.in('city_id', cityIds)
+    const { data, error } = await query
+    if (error) throw error
+    rows.push(...(data ?? []))
+    if (!data || data.length < pageSize) break
+  }
+
+  return rows
+}
+
 export async function listNeighborhoods(cityId: string) {
-  const { data, error } = await supabase
-    .from('neighborhoods')
-    .select('*')
-    .eq('city_id', cityId)
-    .order('name')
-  if (error) throw error
-  return data ?? []
+  return listAllNeighborhoods([cityId])
 }
 
 export type RegionTableRow = Database['public']['Tables']['regions']['Row'] & {
@@ -86,15 +96,8 @@ export async function listRegionsWithStats(): Promise<RegionTableRow[]> {
 
   const neighborhoodCountByCity = new Map<string, number>()
   if (cities.length > 0) {
-    const { data, error } = await supabase
-      .from('neighborhoods')
-      .select('city_id')
-      .in(
-        'city_id',
-        cities.map((city) => city.id),
-      )
-    if (error) throw error
-    for (const neighborhood of data ?? []) {
+    const data = await listAllNeighborhoods(cities.map((city) => city.id))
+    for (const neighborhood of data) {
       neighborhoodCountByCity.set(
         neighborhood.city_id,
         (neighborhoodCountByCity.get(neighborhood.city_id) ?? 0) + 1,
@@ -122,15 +125,10 @@ export async function listRegionGeography(regionId: string) {
     return { cities: [] as City[], neighborhoodsByCity: {} as Record<string, Neighborhood[]> }
   }
 
-  const { data: neighborhoods, error } = await supabase
-    .from('neighborhoods')
-    .select('*')
-    .in('city_id', cities.map((city) => city.id))
-    .order('name')
-  if (error) throw error
+  const neighborhoods = await listAllNeighborhoods(cities.map((city) => city.id))
 
   const neighborhoodsByCity: Record<string, Neighborhood[]> = {}
-  for (const neighborhood of neighborhoods ?? []) {
+  for (const neighborhood of neighborhoods) {
     if (!neighborhoodsByCity[neighborhood.city_id]) neighborhoodsByCity[neighborhood.city_id] = []
     neighborhoodsByCity[neighborhood.city_id].push(neighborhood)
   }

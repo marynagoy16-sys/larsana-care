@@ -14,6 +14,7 @@ export interface AcademyCourse {
   is_published: boolean
   sort_order: number
   estimated_minutes: number | null
+  points_award?: number | null
 }
 
 export interface AcademyModule {

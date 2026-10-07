@@ -23,7 +23,7 @@ import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { cn } from '@/lib/utils'
 import { demandsService } from '@/services/demands'
-import { submitPpAvailability } from '@/services/scheduling'
+import { registerFixedCycleSchedule, submitPpAvailability } from '@/services/scheduling'
 
 export function PPDemandSchedulePage() {
   const { id } = useParams<{ id: string }>()
@@ -48,13 +48,17 @@ export function PPDemandSchedulePage() {
     enabled: !!id,
   })
 
+  const isFixedSchedule = demand?.demand_type === 'continuidade'
+
   const submitMutation = useCrudMutation({
-    mutationFn: (slots: { starts_at: string; ends_at?: string }[]) => {
+    mutationFn: async (slots: { starts_at: string; ends_at?: string }[]) => {
       if (!id) throw new Error('Demanda não encontrada')
-      return submitPpAvailability(id, slots)
+      if (demand?.demand_type === 'continuidade') return registerFixedCycleSchedule(id, slots)
+      await submitPpAvailability(id, slots)
+      return { scheduled: slots.length }
     },
     queryKey: ['pp', 'demands'],
-    successMessage: 'Horários enviados ao paciente',
+    successMessage: isFixedSchedule ? 'Horários fixos registrados' : 'Horários enviados ao paciente',
     onSuccess: () => {
       if (demand?.demand_type === 'continuidade') {
         navigate('/profissional/agenda')
@@ -104,6 +108,15 @@ export function PPDemandSchedulePage() {
     )
   }
 
+  const weeklyTarget = Math.min(
+    3,
+    Math.max(1, Math.round(Number(demand.patients?.suggested_weekly_frequency ?? 2))),
+  )
+  const slotLimit = demand.demand_type === 'continuidade' ? weeklyTarget : undefined
+  const periodHint = demand.patients?.attendance_period
+    ? ` Preferência informada pelo paciente: ${demand.patients.attendance_period}.`
+    : ''
+
   return (
     <>
       <PageHeader>
@@ -121,8 +134,12 @@ export function PPDemandSchedulePage() {
             <SchedulingAvailabilityInstructions demandType={demand.demand_type} />
           </CascadeItem>
           <CascadeItem>
+            {periodHint ? (
+              <p className="text-sm text-muted-foreground">{periodHint}</p>
+            ) : null}
             <SchedulingAvailabilityWizard
               demandType={demand.demand_type}
+              maxSlots={slotLimit}
               getSelectedSlotsRef={getSelectedSlotsRef}
               onSelectionChange={handleSelectionChange}
             />
@@ -140,15 +157,22 @@ export function PPDemandSchedulePage() {
         <div className="shell-content-x py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-center text-xs text-muted-foreground sm:text-left">
-              {selectedCount} horário(s) selecionado(s)
+              {slotLimit != null ? `${selectedCount}/${slotLimit} selecionados` : `${selectedCount} horário(s) selecionado(s)`}
             </p>
             <Button
               type="button"
               className="h-12 w-full sm:w-auto sm:min-w-[15rem]"
-              disabled={selectedCount === 0 || submitMutation.isPending}
+              disabled={
+                submitMutation.isPending
+                || (slotLimit != null ? selectedCount !== slotLimit : selectedCount === 0)
+              }
               onClick={handleSubmit}
             >
-              {submitMutation.isPending ? 'Enviando...' : 'Enviar opções ao paciente'}
+              {submitMutation.isPending
+                ? 'Salvando...'
+                : slotLimit != null
+                  ? 'Registrar na agenda'
+                  : 'Enviar opções ao paciente'}
             </Button>
           </div>
         </div>

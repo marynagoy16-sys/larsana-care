@@ -70,7 +70,7 @@ export default function InicioScreen() {
           />
         ) : null}
         {(data.latestAssessment || data.activeCycle) ? <PatientHomeJourney context={data} /> : null}
-        <PatientHomeLarsanaPillTeaser patientId={data.linkedPatient.patientId} />
+        <PatientHomeLarsanaPillTeaser />
         <PatientHomeHelpLink />
       </ScrollView>
     </SafeAreaView>

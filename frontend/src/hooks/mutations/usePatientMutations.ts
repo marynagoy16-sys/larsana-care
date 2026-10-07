@@ -5,6 +5,7 @@ import { patientKeys } from '@/hooks/queries/usePatients'
 import {
   createPatientWizard,
   deletePatient,
+  setPatientsActive,
   updatePatient,
   type Patient,
 } from '@/services/patients'
@@ -34,10 +35,26 @@ export function useUpdatePatient() {
   return useMutation({
     mutationFn: ({ id, values }: { id: string; values: TablesUpdate<'patients'> }) =>
       updatePatient(id, values),
-    onSuccess: (data: Patient) => {
-      queryClient.invalidateQueries({ queryKey: patientKeys.all })
-      queryClient.invalidateQueries({ queryKey: patientKeys.detail(data.id) })
+    onSuccess: async (data: Patient) => {
+      queryClient.setQueryData(patientKeys.detail(data.id), (current: Patient | undefined) =>
+        current ? { ...current, ...data } : current,
+      )
+      await queryClient.invalidateQueries({ queryKey: patientKeys.all })
       toast.success('Paciente atualizado')
+    },
+    onError: (error) => toast.error(mapSupabaseError(error)),
+  })
+}
+
+export function useSetPatientsActive() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ ids, isActive }: { ids: string[]; isActive: boolean }) => setPatientsActive(ids, isActive),
+    onSuccess: (_data, { ids, isActive }) => {
+      queryClient.invalidateQueries({ queryKey: patientKeys.all })
+      const count = ids.length
+      const verb = isActive ? 'ativado' : 'inativado'
+      toast.success(count === 1 ? `Paciente ${verb}` : `${count} pacientes ${isActive ? 'ativados' : 'inativados'}`)
     },
     onError: (error) => toast.error(mapSupabaseError(error)),
   })

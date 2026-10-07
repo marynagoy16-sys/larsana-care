@@ -25,7 +25,7 @@ import {
 } from '@/services/patientServiceRequest'
 
 const TERMS_DECLARATION =
-  'Declaro que li integralmente e concordo com o Contrato de Intermediação, Termo de Consentimento e Políticas de Privacidade, compreendendo a natureza da atuação da plataforma, a autonomia dos profissionais e as limitações de responsabilidade envolvidas.'
+  'Declaro que li integralmente e concordo com o Termo de Consentimento Livre e Esclarecido (TCLE) e com as Políticas de Privacidade, compreendendo a natureza da atuação da plataforma, a autonomia dos profissionais e as limitações de responsabilidade envolvidas.'
 
 function fieldError(errors: Record<string, string>, key: string) {
   const message = errors[key]

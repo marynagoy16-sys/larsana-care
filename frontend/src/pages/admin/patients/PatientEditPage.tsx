@@ -1,4 +1,7 @@
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FormActions } from '@/components/crud/FormActions'
 import { MaskedInput } from '@/components/forms/MaskedInput'
 import { CityRegionFields } from '@/components/forms/CityRegionFields'
-import { patientStepSchema, type PatientStepValues } from '@/schemas/patient'
+import { patientEditSchema, type PatientEditValues } from '@/schemas/patient'
 import { usePatient } from '@/hooks/queries/usePatients'
 import { useUpdatePatient } from '@/hooks/mutations/usePatientMutations'
 import { patientLevelLabels, attendancePeriodLabels } from '@/constants/labels'
@@ -23,10 +26,22 @@ export function PatientEditPage() {
   const navigate = useNavigate()
   const { data: patient, isLoading } = usePatient(id)
   const updatePatient = useUpdatePatient()
+  const { data: professionals = [] } = useQuery({
+    queryKey: ['admin', 'professionals', 'options'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('professionals')
+        .select('id, full_name')
+        .eq('is_active', true)
+        .order('full_name')
+      if (error) throw error
+      return data ?? []
+    },
+  })
 
-  const form = useForm<PatientStepValues>({
+  const form = useForm<PatientEditValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(patientStepSchema) as any,
+    resolver: zodResolver(patientEditSchema) as any,
     defaultValues: {
       full_name: '',
       cpf: '',
@@ -44,9 +59,11 @@ export function PatientEditPage() {
 
   const regionId = form.watch('region_id')
   const cityId = form.watch('city_id')
+  const isDirty = form.formState.isDirty
+  const loadedStamp = patient ? `${patient.id}:${patient.updated_at}` : null
 
   useEffect(() => {
-    if (!patient) return
+    if (!patient || !loadedStamp || isDirty) return
     form.reset({
       full_name: patient.full_name,
       cpf: patient.cpf ?? '',
@@ -62,7 +79,9 @@ export function PatientEditPage() {
       clinical_summary: patient.clinical_summary ?? '',
       is_valor_social: patient.is_valor_social,
     })
-  }, [patient, form])
+    // `form` muda de identidade a cada render; depender dele apagava a edição.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedStamp, isDirty])
 
   if (isLoading) {
     return (
@@ -92,8 +111,27 @@ export function PatientEditPage() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(async (values) => {
-            await updatePatient.mutateAsync({ id, values })
+            await updatePatient.mutateAsync({
+              id,
+              values: {
+                full_name: values.full_name,
+                cpf: values.cpf,
+                birth_date: values.birth_date,
+                patient_level: values.patient_level,
+                care_status: values.care_status,
+                region_id: values.region_id,
+                city_id: values.city_id,
+                allocated_professional_id: values.allocated_professional_id,
+                suggested_weekly_frequency: values.suggested_weekly_frequency,
+                attendance_period: values.attendance_period,
+                technical_category: values.technical_category,
+                clinical_summary: values.clinical_summary,
+                is_valor_social: values.is_valor_social,
+              },
+            })
             navigate(`/admin/pacientes/${id}`)
+          }, () => {
+            toast.error('Não foi possível salvar. Revise os campos destacados.')
           })}
           className="space-y-4"
         >
@@ -101,10 +139,28 @@ export function PatientEditPage() {
             <FormItem><FormLabel>Nome completo</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="cpf" render={({ field }) => (
-            <FormItem><FormLabel>CPF</FormLabel><FormControl><MaskedInput mask="cpf" value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>CPF</FormLabel><FormControl><MaskedInput mask="cpf" value={field.value ?? ''} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
           )} />
           <FormField control={form.control} name="birth_date" render={({ field }) => (
-            <FormItem><FormLabel>Data de nascimento</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Data de nascimento</FormLabel><FormControl><Input type="date" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="allocated_professional_id" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profissional responsável</FormLabel>
+              <Select
+                value={field.value ?? 'none'}
+                onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
+              >
+                <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {professionals.map((professional) => (
+                    <SelectItem key={professional.id} value={professional.id}>{professional.full_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )} />
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="patient_level" render={({ field }) => (
@@ -146,8 +202,8 @@ export function PatientEditPage() {
           <FormField control={form.control} name="city_id" render={() => (
             <FormItem>
               <CityRegionFields
-                cityId={cityId}
-                regionId={regionId}
+                cityId={cityId ?? ''}
+                regionId={regionId ?? ''}
                 onCityChange={(nextCityId, nextRegionId) => {
                   form.setValue('city_id', nextCityId, { shouldValidate: true, shouldDirty: true })
                   form.setValue('region_id', nextRegionId, { shouldValidate: true, shouldDirty: true })

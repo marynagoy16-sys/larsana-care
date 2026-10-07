@@ -35,7 +35,7 @@ export function CancelSessionModal({
       open={open}
       onOpenChange={onOpenChange}
       title={`Cancelar terapia #${sessionNumber} sem justificativa`}
-      description="Use quando a família desmarcar com menos de 2 horas de antecedência. Aplica regra de 50% do valor da terapia conforme Anexo II."
+      description="Use quando a família desmarcar com menos de 12 horas de antecedência. Aplica regra de 50% do valor da terapia conforme Anexo II."
     >
       <div className="space-y-4">
         <p className="text-xs text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">{ANEXO_II_CANCELAMENTO_SUMMARY}</p>

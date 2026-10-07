@@ -34,6 +34,8 @@ interface EntityListPageProps<T extends Record<string, unknown> & { id: string }
   canDelete?: boolean
   onDelete?: (id: string) => Promise<void>
   deleteQueryKey?: readonly unknown[]
+  deleteDescription?: string
+  deleteSuccessMessage?: string | (() => string)
   toolbar?: ReactNode
   beforeTable?: ReactNode
   searchable?: boolean
@@ -102,6 +104,8 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   canDelete,
   onDelete,
   deleteQueryKey,
+  deleteDescription,
+  deleteSuccessMessage,
   toolbar,
   beforeTable,
   searchable = true,
@@ -176,8 +180,11 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
   const deleteMutation = useCrudMutation({
     mutationFn: (id: string) => onDelete!(id).then(() => id),
     queryKey: deleteQueryKey ?? queryKey,
-    successMessage: 'Excluído com sucesso',
-    onSuccess: () => setDeleteTarget(null),
+    successMessage: typeof deleteSuccessMessage === 'function' ? '' : (deleteSuccessMessage ?? 'Excluído com sucesso'),
+    onSuccess: () => {
+      setDeleteTarget(null)
+      if (typeof deleteSuccessMessage === 'function') toast.success(deleteSuccessMessage())
+    },
   })
 
   const filteredRows = useMemo(() => {
@@ -436,7 +443,7 @@ export function EntityListPage<T extends Record<string, unknown> & { id: string 
         <DeleteConfirmDialog
           open={!!deleteTarget}
           onOpenChange={(open) => !open && setDeleteTarget(null)}
-          description="Esta ação não pode ser desfeita."
+          description={deleteDescription ?? 'Esta ação não pode ser desfeita.'}
           isDeleting={deleteMutation.isPending}
           onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
         />

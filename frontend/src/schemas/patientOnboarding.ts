@@ -11,8 +11,10 @@ export const patientOnboardingSchema = z
     complement: z.string().optional().transform((v) => (v ? trimText(v) : undefined)),
     neighborhood: requiredString('Bairro'),
     postalCode: z.string().min(8, 'CEP inválido').transform(sanitizeCep),
-    cityId: z.string().uuid('Selecione a cidade'),
-    regionId: z.string().uuid('Selecione a cidade'),
+    cityId: z.string().uuid().optional().or(z.literal('')),
+    regionId: z.string().uuid().optional().or(z.literal('')),
+    cityName: z.string().trim().min(2, 'Informe a cidade'),
+    state: z.string().trim().length(2, 'Informe a UF'),
   })
 
 export type PatientOnboardingValues = z.infer<typeof patientOnboardingSchema>

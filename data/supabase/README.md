@@ -73,6 +73,23 @@ Se o envio do credenciamento retornar `PGRST202` / função `submit_pp_credentia
 node data/supabase/scripts/apply-sql-remote.mjs data/supabase/migrations/20260615180000_pp_credentialing_submit.sql
 ```
 
+## Adequação da review de 07/10/2026
+
+Aplicadas no projeto remoto em 07/10/2026. O detalhe de regra e de tela está em [docs/RELATORIO_ATUALIZACOES_2026-10-07.md](../../docs/RELATORIO_ATUALIZACOES_2026-10-07.md).
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| `20261007155045_review_cnpj_and_wallet` | CNPJ na importação e wallet |
+| `20261007160100_review_terms_step` | TCLE no passo 2 e limpeza dos textos |
+| `20261007160200_review_any_city_waitlist` | Município livre e lista de espera por cidade |
+| `20261007160300_review_cycle1_sessions` | Ciclo 1 e fechamento |
+| `20261007160400_review_fixed_cycle_schedule` | Grade fixa do ciclo pago |
+| `20261007160500_review_complete_session_on_clinical` | Sessão realizada na evolução |
+| `20261007160600_review_reschedule_cancel_absence` | Remarcação, cancelar ciclo e falta de 50% |
+| `20261007160700_review_historical_import` | Vínculo e evoluções históricas |
+| `20261007160800_review_patent_engine` | Motor de patente |
+| `20261007160900_review_account_crefito_invoice` | Encerrar conta e nota de intermediação |
+
 ## RLS
 
 - **55 tabelas** em `public`

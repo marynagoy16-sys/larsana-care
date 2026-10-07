@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { uploadRescheduleCertificate } from '@/services/sessionReschedule'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CreditCard } from 'lucide-react'
@@ -7,6 +9,7 @@ import { CycleSessionsProgress } from '@/components/cycles/CycleSessionsProgress
 import { PatientRescheduleSessionDialog } from '@/components/paciente/PatientRescheduleSessionDialog'
 import { PacienteEmptyState, PacienteSubpageShell } from '@/components/paciente/PacienteSubpageShell'
 import { sessionStatusLabels } from '@/constants/labels'
+import { cycleTherapyProgress, sessionDisplayLabel } from '@/lib/cycleProgress'
 import { formatDateTime } from '@/lib/formatters'
 import { loadPatientCycleDetail, patientTreatmentQueryKeys } from '@/services/patientTreatment'
 import { CycleLegalAcceptancePanel } from '@/components/legal/CycleLegalAcceptancePanel'
@@ -29,6 +32,12 @@ export function PacienteCicloDetailPage() {
   const { id = '' } = useParams()
   const [rescheduleSessionId, setRescheduleSessionId] = useState<string | null>(null)
   const [rescheduleScheduledAt, setRescheduleScheduledAt] = useState<string | null>(null)
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('financeiro')
+  const [cancelNote, setCancelNote] = useState('')
+  const [cancelFile, setCancelFile] = useState<File | null>(null)
+  const [cancelError, setCancelError] = useState<string | null>(null)
+  const [cancelBusy, setCancelBusy] = useState(false)
 
   const { data: cycle, isLoading, refetch } = useQuery({
     queryKey: patientTreatmentQueryKeys.detail(id),
@@ -46,6 +55,9 @@ export function PacienteCicloDetailPage() {
     : '/paciente/pagamentos'
 
   const canReschedule = cycle?.payment_status === 'pago' && cycle.status === 'ativo'
+  const progress = cycle
+    ? cycleTherapyProgress(cycle.cycle_number, cycle.session_count, cycle.completedSessions)
+    : { done: 0, total: 0 }
 
   return (
     <PacienteSubpageShell
@@ -102,8 +114,8 @@ export function PacienteCicloDetailPage() {
                   )}
                 </div>
                 <CycleSessionsProgress
-                  done={cycle.completedSessions}
-                  total={cycle.session_count}
+                  done={progress.done}
+                  total={progress.total}
                   fullWidth
                 />
               </div>
@@ -126,7 +138,9 @@ export function PacienteCicloDetailPage() {
                     return (
                       <div key={session.id} className="flex items-start gap-3 px-4 py-4">
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-foreground">Terapia {session.session_number}</p>
+                          <p className="font-medium text-foreground">
+                            {sessionDisplayLabel(cycle.cycle_number, session.session_number, session.isAssessment)}
+                          </p>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {session.scheduled_at
                               ? formatDateTime(session.scheduled_at)
@@ -161,6 +175,84 @@ export function PacienteCicloDetailPage() {
                 </div>
               )}
             </section>
+
+            {cycle.status === 'ativo' && (
+              <section className="pt-6">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => setCancelOpen(true)}
+                >
+                  Cancelar ciclo
+                </Button>
+                {cancelOpen && (
+                  <div className="mt-4 space-y-3 rounded-xl border border-destructive/30 p-4">
+                    <p className="text-sm font-medium">Confirmar encerramento do tratamento</p>
+                    <p className="text-xs text-muted-foreground">
+                      Financeiro aplica 20% sobre o saldo não realizado. Óbito e outras justificativas excepcionais
+                      devolvem o remanescente.
+                    </p>
+                    <select
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                    >
+                      <option value="financeiro">Financeiro</option>
+                      <option value="obito">Óbito</option>
+                      <option value="outras">Outras justificativas excepcionais</option>
+                    </select>
+                    <textarea
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      placeholder="Observação (opcional)"
+                      value={cancelNote}
+                      onChange={(e) => setCancelNote(e.target.value)}
+                    />
+                    <input
+                      type="file"
+                      accept=".pdf,image/jpeg,image/png,image/webp"
+                      onChange={(e) => setCancelFile(e.target.files?.[0] ?? null)}
+                    />
+                    {cancelError && <p className="text-sm text-destructive">{cancelError}</p>}
+                    <div className="flex gap-2">
+                      <Button type="button" variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelBusy}>
+                        Voltar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={cancelBusy}
+                        onClick={async () => {
+                          setCancelBusy(true)
+                          setCancelError(null)
+                          try {
+                            let path: string | null = null
+                            if (cancelFile) {
+                              path = await uploadRescheduleCertificate(cycle.patient_id, cancelFile)
+                            }
+                            const { error } = await supabase.rpc('patient_cancel_treatment_cycle' as never, {
+                              p_cycle_id: cycle.id,
+                              p_reason: cancelReason,
+                              p_note: cancelNote || null,
+                              p_attachment: path,
+                            } as never)
+                            if (error) throw error
+                            setCancelOpen(false)
+                            await refetch()
+                          } catch (err) {
+                            setCancelError(err instanceof Error ? err.message : 'Não foi possível cancelar o ciclo.')
+                          } finally {
+                            setCancelBusy(false)
+                          }
+                        }}
+                      >
+                        {cancelBusy ? 'Encerrando…' : 'Confirmar cancelamento'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
 
             {rescheduleSessionId && rescheduleScheduledAt && (
               <PatientRescheduleSessionDialog

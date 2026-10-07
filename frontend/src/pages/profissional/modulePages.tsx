@@ -12,6 +12,7 @@ import { FormActions } from '@/components/crud/FormActions'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { requiredString } from '@/schemas/common'
 import { sanitizeRichText } from '@/lib/sanitize'
+import { supabase } from '@/lib/supabase'
 import { medicalRecordsService } from '@/services/index'
 import {
   getEvolutionSessionContext,
@@ -75,7 +76,7 @@ export function PPEvolucaoNovaPage() {
   const create = useCrudMutation({
     mutationFn: async (v: z.infer<typeof schema>) => {
       if (!professional?.id) throw new Error('Profissional não encontrado')
-      return medicalRecordsService.create({
+      const created = await medicalRecordsService.create({
         patient_id: v.patient_id,
         content_richtext: sanitizeRichText(v.content_richtext),
         crefito_number: v.crefto_number,
@@ -84,6 +85,14 @@ export function PPEvolucaoNovaPage() {
         session_id: sessionContext?.sessionId ?? null,
         cycle_id: sessionContext?.cycleId ?? null,
       })
+      if (sessionContext?.sessionId) {
+        await supabase
+          .from('care_sessions')
+          .update({ status: 'realizada' })
+          .eq('id', sessionContext.sessionId)
+          .not('check_in_at', 'is', null)
+      }
+      return created
     },
     queryKey: ['pp'],
     onSuccess: () => navigate('/profissional/evolucoes'),

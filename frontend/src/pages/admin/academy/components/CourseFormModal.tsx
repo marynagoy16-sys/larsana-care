@@ -33,6 +33,7 @@ export function CourseFormModal({ open, onOpenChange, course }: CourseFormModalP
       is_published: false,
       sort_order: 0,
       estimated_minutes: null,
+      points_award: 200,
     },
   })
 
@@ -47,6 +48,7 @@ export function CourseFormModal({ open, onOpenChange, course }: CourseFormModalP
         is_published: course.is_published,
         sort_order: course.sort_order,
         estimated_minutes: course.estimated_minutes,
+        points_award: course.points_award ?? 200,
       })
     } else if (open && !course) {
       form.reset({
@@ -58,6 +60,7 @@ export function CourseFormModal({ open, onOpenChange, course }: CourseFormModalP
         is_published: false,
         sort_order: 0,
         estimated_minutes: null,
+        points_award: 200,
       })
     }
   }, [open, course, form])
@@ -111,6 +114,9 @@ export function CourseFormModal({ open, onOpenChange, course }: CourseFormModalP
             )} />
             <FormField control={form.control} name="estimated_minutes" render={({ field }) => (
               <FormItem><FormLabel>Minutos estimados</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="points_award" render={({ field }) => (
+              <FormItem><FormLabel>Pontos do curso</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
           <FormField control={form.control} name="is_mandatory" render={({ field }) => (

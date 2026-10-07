@@ -22,6 +22,7 @@ export type PatientCycleSession = {
   session_number: number
   scheduled_at: string | null
   status: string
+  isAssessment: boolean
   professionalName: string | null
 }
 
@@ -65,6 +66,7 @@ type CycleDetailRow = {
     session_number: number
     scheduled_at: string | null
     status: string
+    is_assessment_session: boolean
     professionals: { full_name: string } | null
   }> | null
 }
@@ -154,7 +156,7 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
         session_unit_price_cents, total_amount_cents,
       professionals:professionals!care_cycles_assigned_professional_id_fkey ( full_name ),
       care_sessions (
-        id, session_number, scheduled_at, status,
+        id, session_number, scheduled_at, status, is_assessment_session,
         professionals:professionals!care_sessions_professional_id_fkey ( full_name )
       )`,
       )
@@ -189,6 +191,7 @@ export async function loadPatientCycleDetail(cycleId: string): Promise<PatientCy
       session_number: session.session_number,
       scheduled_at: session.scheduled_at,
       status: session.status,
+      isAssessment: session.is_assessment_session,
       professionalName: session.professionals?.full_name ?? null,
     })),
   }

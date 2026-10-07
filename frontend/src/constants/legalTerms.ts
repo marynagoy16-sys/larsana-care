@@ -44,7 +44,7 @@ export const LEGAL_TERM_LABELS: Record<LegalTermType, string> = {
   ANEXO_I_COMERCIAL_PACIENTE: 'Anexo I — Condições Comerciais',
   ANEXO_II_CANCELAMENTO_PACIENTE: 'Anexo II — Cancelamento e Reagendamento',
   ANEXO_III_ESCOPO_PACIENTE: 'Anexo III — Escopo dos Profissionais',
-  TCLE_FISIO: 'TCLE — Fisioterapia Domiciliar',
+  TCLE_FISIO: 'Termo de Consentimento Livre e Esclarecido (TCLE)',
   AUTORIZACAO_FAMILIAR: 'Autorização Familiar',
   REPRESENTACAO_LEGAL: 'Representação Legal',
   AVISO_DADOS_SAUDE: 'Aviso — Dados de Saúde',
@@ -107,7 +107,7 @@ export const PATIENT_CYCLE_TERM_TYPES = [
 ] as const satisfies readonly LegalTermType[]
 
 export const ANEXO_II_CANCELAMENTO_SUMMARY =
-  'Cancelamentos com menos de 2 horas de antecedência podem gerar cobrança parcial conforme Anexo II. Reagendamentos devem ser solicitados pelo app ou chat Sara.'
+  'Cancelamentos com menos de 12 horas de antecedência podem gerar cobrança parcial conforme Anexo II. Reagendamentos devem ser solicitados pelo app ou chat Sara.'
 
 export function legalTermLabel(termType: string, fallbackTitle?: string | null): string {
   return LEGAL_TERM_LABELS[termType as LegalTermType] ?? fallbackTitle ?? termType

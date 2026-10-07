@@ -79,6 +79,7 @@ export type CredentialingSnapshot = {
     | 'credentialing_status'
     | 'flag_assinado'
     | 'patient_preferences'
+    | 'asaas_wallet_id'
   >
   council: Pick<Tables<'professional_councils'>, 'council_type' | 'registration_number'> | null
   bank: Pick<

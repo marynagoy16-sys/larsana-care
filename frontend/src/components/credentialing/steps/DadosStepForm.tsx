@@ -84,7 +84,13 @@ export function DadosStepForm({ snapshot, onSubmit, disabled }: Props) {
                 <FormLabel>{personType === 'PJ' ? 'CNPJ' : 'CPF'}</FormLabel>
                 <FormControl>
                   {personType === 'PJ' ? (
-                    <Input {...field} disabled={disabled} placeholder="00.000.000/0000-00" />
+                    <MaskedInput
+                      mask="cpf_cnpj"
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={disabled}
+                      placeholder="00.000.000/0000-00"
+                    />
                   ) : (
                     <MaskedInput
                       mask="cpf"

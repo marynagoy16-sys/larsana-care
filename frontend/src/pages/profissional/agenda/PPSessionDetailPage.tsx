@@ -27,7 +27,7 @@ import {
 } from '@/services/ppPatients'
 import { PpRescheduleSlotsCard } from '@/components/profissional/agenda/PpRescheduleSlotsCard'
 import { getAwaitingRescheduleRequestForSession } from '@/services/sessionReminderChat'
-import { ppSessionCheckIn, ppSessionCheckOut } from '@/services/ppSessions'
+import { ppSessionCheckIn } from '@/services/ppSessions'
 import { toast } from 'sonner'
 
 function buildGoogleMapsUrl(
@@ -198,7 +198,6 @@ function SessionDetailBody({
   onOpenEvolution,
   onOpenPatient,
   onCheckIn,
-  onCheckOut,
   checkInPending,
 }: {
   session: AgendaSessionItem
@@ -209,7 +208,6 @@ function SessionDetailBody({
   onOpenEvolution: () => void
   onOpenPatient: () => void
   onCheckIn: () => void
-  onCheckOut: () => void
   checkInPending: boolean
 }) {
   const scheduledLabel = session.scheduledAt
@@ -218,6 +216,7 @@ function SessionDetailBody({
   const showClinicalAction = session.isAssessment
     ? !assessmentRegisteredMessage
     : canEvolveTherapy(session)
+  const evolutionLocked = !session.isAssessment && !session.checkInAt && !session.hasEvolution
   const statusCfg = getAgendaStatusConfig(session.displayStatus)
   const clinicalActionLabel = session.isAssessment ? 'Registrar avaliação' : 'Evoluir terapia'
 
@@ -303,10 +302,6 @@ function SessionDetailBody({
             <Button onClick={onCheckIn} disabled={checkInPending} className="h-12 w-full">
               Check-in
             </Button>
-          ) : !session.checkOutAt ? (
-            <Button onClick={onCheckOut} disabled={checkInPending} variant="secondary" className="h-12 w-full">
-              Check-out
-            </Button>
           ) : null}
           {assessmentRegisteredMessage ? (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm font-medium text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200">
@@ -315,6 +310,10 @@ function SessionDetailBody({
           ) : showClinicalAction ? (
             <Button onClick={onOpenEvolution} className="h-12 w-full">
               {clinicalActionLabel}
+            </Button>
+          ) : evolutionLocked ? (
+            <Button disabled className="h-12 w-full">
+              Evoluir terapia após o check-in
             </Button>
           ) : null}
           <Button variant="outline" onClick={onOpenPatient} className="h-12 w-full">
@@ -359,10 +358,9 @@ export function PPSessionDetailPage() {
   })
 
   const checkMutation = useMutation({
-    mutationFn: async (action: 'in' | 'out') => {
+    mutationFn: async () => {
       if (!id) throw new Error('Sessão inválida')
-      if (action === 'in') await ppSessionCheckIn(id)
-      else await ppSessionCheckOut(id)
+      await ppSessionCheckIn(id)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ppAgendaQueryKeys.session(id!) })
@@ -445,6 +443,7 @@ export function PPSessionDetailPage() {
     <PpRescheduleSlotsCard
       requestId={rescheduleRequest.id}
       originalScheduledAt={rescheduleRequest.original_scheduled_at}
+      deadline={rescheduleRequest.reschedule_deadline}
       onSubmitted={() => {
         void refetchRescheduleRequest()
       }}
@@ -467,8 +466,7 @@ export function PPSessionDetailPage() {
           assessmentRegisteredMessage={assessmentRegisteredMessage}
           onOpenEvolution={openEvolution}
           onOpenPatient={openPatient}
-          onCheckIn={() => checkMutation.mutate('in')}
-          onCheckOut={() => checkMutation.mutate('out')}
+          onCheckIn={() => checkMutation.mutate()}
           checkInPending={checkMutation.isPending}
         />
       </MobileSessionLayout>
@@ -504,8 +502,7 @@ export function PPSessionDetailPage() {
           assessmentRegisteredMessage={assessmentRegisteredMessage}
           onOpenEvolution={openEvolution}
           onOpenPatient={openPatient}
-          onCheckIn={() => checkMutation.mutate('in')}
-          onCheckOut={() => checkMutation.mutate('out')}
+          onCheckIn={() => checkMutation.mutate()}
           checkInPending={checkMutation.isPending}
         />
       </CrudScrollPageLayout>

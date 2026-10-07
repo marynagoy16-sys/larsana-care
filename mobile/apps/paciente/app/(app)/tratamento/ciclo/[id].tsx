@@ -84,7 +84,7 @@ export default function CicloDetailScreen() {
                 ) : null}
               </View>
               <Text className="text-sm font-bold text-foreground">
-                {cycle.completedSessions}/{cycle.session_count}
+                {Math.min(cycle.completedSessions, cycle.cycle_number === 1 ? Math.max(cycle.session_count - 1, 1) : cycle.session_count)}/{cycle.cycle_number === 1 ? Math.max(cycle.session_count - 1, 1) : cycle.session_count}
               </Text>
             </View>
           </View>
@@ -104,7 +104,11 @@ export default function CicloDetailScreen() {
                   className="flex-row items-start justify-between gap-3 rounded-xl border border-border bg-card px-4 py-4"
                 >
                   <View className="min-w-0 flex-1">
-                    <Text className="font-medium text-foreground">Sessão {session.session_number}</Text>
+                    <Text className="font-medium text-foreground">
+                      {cycle.cycle_number === 1 && session.session_number === 1
+                        ? 'Avaliação inicial'
+                        : `Terapia ${cycle.cycle_number === 1 ? Math.max(session.session_number - 1, 1) : session.session_number}`}
+                    </Text>
                     <Text className="mt-0.5 text-xs text-muted-foreground">
                       {session.scheduled_at ? formatDateTime(session.scheduled_at) : 'Data a definir'}
                       {session.professionalName ? ` · ${session.professionalName}` : ''}

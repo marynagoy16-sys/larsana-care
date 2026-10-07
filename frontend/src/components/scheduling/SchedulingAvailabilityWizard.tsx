@@ -85,7 +85,7 @@ function getSchedulingPolicyCopy(demandType: 'avaliacao' | 'continuidade') {
     return `A avaliação deve ocorrer em até ${AVALIACAO_MUST_OCCUR_WITHIN_DAYS} dias após o aceite da demanda. Ofereça horários dentro desse prazo.`
   }
 
-  return `Você pode navegar entre semanas para encontrar disponibilidade (até ${CONTINUIDADE_OFFER_HORIZON_DAYS} dias à frente).`
+  return 'Escolha os horários fixos da semana. Eles se repetem até o fim do ciclo e o paciente só recebe a confirmação.'
 }
 
 export function SchedulingAvailabilityInstructions({
@@ -110,10 +110,12 @@ export function SchedulingAvailabilityWizard({
   demandType,
   onSelectionChange,
   getSelectedSlotsRef,
+  maxSlots,
 }: {
   demandType: 'avaliacao' | 'continuidade'
   onSelectionChange?: (count: number) => void
   getSelectedSlotsRef?: MutableRefObject<(() => AvailabilitySlotInput[]) | null>
+  maxSlots?: number
 }) {
   const { minWeekStart, maxWeekStart } = useMemo(() => getWeekBounds(demandType), [demandType])
   const latestOfferDay = useMemo(() => getLatestOfferDay(demandType), [demandType])
@@ -155,7 +157,7 @@ export function SchedulingAvailabilityWizard({
     setSelected((prev) => {
       const next = new Set(prev)
       if (next.has(key)) next.delete(key)
-      else next.add(key)
+      else if (maxSlots == null || next.size < maxSlots) next.add(key)
       return next
     })
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cpfSchema } from '@/schemas/common'
-import { patientStepSchema, patientWizardSchema } from '@/schemas/patient'
+import { patientEditSchema, patientStepSchema, patientWizardSchema } from '@/schemas/patient'
 import { syncCityRegion } from '@/services/regions'
 
 describe('patient schemas', () => {
@@ -21,6 +21,28 @@ describe('patient schemas', () => {
       is_valor_social: false,
     })
     expect(result.success).toBe(true)
+  })
+
+  it('salva edição mesmo sem CPF, nascimento ou cidade', () => {
+    const result = patientEditSchema.safeParse({
+      full_name: 'Maria Silva',
+      cpf: '',
+      birth_date: '',
+      patient_level: 'N1',
+      care_status: 'ATIVO',
+      region_id: '',
+      city_id: '',
+      allocated_professional_id: '00000000-0000-4000-8000-000000000010',
+      clinical_summary: '  Nova nota  ',
+      is_valor_social: false,
+    })
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    expect(result.data.cpf).toBeNull()
+    expect(result.data.birth_date).toBeNull()
+    expect(result.data.city_id).toBeNull()
+    expect(result.data.clinical_summary).toBe('Nova nota')
+    expect(result.data.allocated_professional_id).toBe('00000000-0000-4000-8000-000000000010')
   })
 
   it('exige cidade igual entre paciente e endereço no wizard', () => {

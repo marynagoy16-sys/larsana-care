@@ -21,14 +21,19 @@ import { CrudListPageLayout } from '@/components/crud/list-page/CrudListPageLayo
 import { PageFooter } from '@/components/layout/PageFooter'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
 import { usePatients, usePatientStats } from '@/hooks/queries/usePatients'
-import { useDeletePatient } from '@/hooks/mutations/usePatientMutations'
+import { useSetPatientsActive } from '@/hooks/mutations/usePatientMutations'
 import { formatCpf, formatDate } from '@/lib/formatters'
 import { exportToCsv } from '@/lib/exportCsv'
 import { careStatusLabels } from '@/constants/labels'
+import { Button } from '@/components/ui/button'
 import { AdminImportDialog } from '@/components/admin/import/AdminImportDialog'
 import {
+  bulkImportHistoricalEvolutions,
+  bulkImportPatientLinks,
   bulkImportPatients,
+  EVOLUTION_IMPORT_TEMPLATE,
   PATIENT_IMPORT_TEMPLATE,
+  PATIENT_LINK_IMPORT_TEMPLATE,
 } from '@/services/bulkImport'
 import type { PatientListItem } from '@/services/patients'
 import { cn } from '@/lib/utils'
@@ -42,7 +47,16 @@ const CSV_COLUMNS = [
   { header: 'Cadastrado em', value: (r: PatientListItem) => formatDate(r.created_at) },
 ]
 
-function StatusCell({ status }: { status: string }) {
+function StatusCell({ status, accountActive = true }: { status: string; accountActive?: boolean }) {
+  if (!accountActive) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-muted-foreground">
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" />
+        Inativo
+      </span>
+    )
+  }
+
   const isActive = status === 'ATIVO'
   const label = careStatusLabels[status] ?? status
 
@@ -72,9 +86,11 @@ export function PatientListPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [filterOpen, setFilterOpen] = useState(false)
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [activeChange, setActiveChange] = useState<{ ids: string[]; activate: boolean } | null>(null)
   const [previewId, setPreviewId] = useState<string | null>(null)
   const [importOpen, setImportOpen] = useState(false)
+  const [linkImportOpen, setLinkImportOpen] = useState(false)
+  const [evolutionImportOpen, setEvolutionImportOpen] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -99,7 +115,7 @@ export function PatientListPage() {
 
   const { data, isLoading, refetch, isFetching } = usePatients(queryFilters)
   const { data: stats, isLoading: statsLoading } = usePatientStats()
-  const deletePatient = useDeletePatient()
+  const setPatientsActive = useSetPatientsActive()
 
   const patients = data?.data ?? []
   const listTotal = data?.count ?? 0
@@ -179,22 +195,27 @@ export function PatientListPage() {
     navigate(`/admin/pacientes/${[...selectedIds][0]}/editar`)
   }
 
-  const handleBulkDelete = async () => {
-    const ids = [...selectedIds]
-    for (const id of ids) {
-      await deletePatient.mutateAsync(id)
+  const requestActiveChange = (rows: PatientListItem[]) => {
+    if (rows.length === 0) return
+    const activate = rows.every((row) => row.is_active === false)
+    setActiveChange({ ids: rows.map((row) => row.id), activate })
+  }
+
+  const confirmActiveChange = async () => {
+    if (!activeChange) return
+    try {
+      await setPatientsActive.mutateAsync({ ids: activeChange.ids, isActive: activeChange.activate })
+      setSelectedIds(new Set())
+      setActiveChange(null)
+    } catch {
+      // O aviso de erro já é exibido pela mutação.
     }
-    setSelectedIds(new Set())
-    setBulkDeleteOpen(false)
   }
 
   const rowActions = [
     { label: 'Ver detalhe', onClick: (r: PatientListItem) => setPreviewId(r.id) },
     { label: 'Editar', onClick: (r: PatientListItem) => navigate(`/admin/pacientes/${r.id}/editar`) },
-    { label: 'Excluir', variant: 'destructive' as const, onClick: (r: PatientListItem) => {
-      setSelectedIds(new Set([r.id]))
-      setBulkDeleteOpen(true)
-    }},
+    { label: 'Ativar/Inativar', onClick: (r: PatientListItem) => requestActiveChange([r]) },
   ]
 
   const contentKey = isInitialLoad ? 'skeleton' : 'loaded'
@@ -225,6 +246,14 @@ export function PatientListPage() {
                 onSettings={() => toast.info('Configurações em breve')}
                 isRefreshing={isFetching}
               />
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => setLinkImportOpen(true)}>
+                  Importar vínculo paciente–PP
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setEvolutionImportOpen(true)}>
+                  Importar evoluções históricas
+                </Button>
+              </div>
             </CascadeItem>
 
             <CascadeItem>
@@ -232,7 +261,7 @@ export function PatientListPage() {
                 count={selectedIds.size}
                 onClear={() => setSelectedIds(new Set())}
                 onEdit={handleBulkEdit}
-                onDelete={() => setBulkDeleteOpen(true)}
+                onToggleActive={() => requestActiveChange(patients.filter((patient) => selectedIds.has(patient.id)))}
                 onDownload={handleDownloadSelected}
               />
             </CascadeItem>
@@ -267,7 +296,7 @@ export function PatientListPage() {
                       key: 'status',
                       header: 'Status',
                       mobileBadge: true,
-                      cell: (r) => <StatusCell status={r.care_status} />,
+                      cell: (r) => <StatusCell status={r.care_status} accountActive={r.is_active !== false} />,
                     },
                     {
                       key: 'location',
@@ -279,6 +308,11 @@ export function PatientListPage() {
                           {r.regions?.code && <span> · {r.regions.code}</span>}
                         </span>
                       ),
+                    },
+                    {
+                      key: 'professional',
+                      header: 'Profissional',
+                      cell: (r) => <span className="text-sm">{r.professionals?.full_name ?? '—'}</span>,
                     },
                     {
                       key: 'cpf',
@@ -345,15 +379,27 @@ export function PatientListPage() {
       />
 
       <DeleteConfirmDialog
-        open={bulkDeleteOpen}
-        onOpenChange={setBulkDeleteOpen}
-        description={
-          selectedIds.size === 1
-            ? 'Excluir o paciente selecionado? Esta ação não pode ser desfeita.'
-            : `Excluir ${selectedIds.size} pacientes? Esta ação não pode ser desfeita.`
+        open={activeChange != null}
+        onOpenChange={(open) => !open && setActiveChange(null)}
+        title={
+          activeChange?.activate
+            ? activeChange.ids.length === 1 ? 'Ativar paciente' : 'Ativar pacientes'
+            : activeChange?.ids.length === 1 ? 'Inativar paciente' : 'Inativar pacientes'
         }
-        isDeleting={deletePatient.isPending}
-        onConfirm={handleBulkDelete}
+        description={
+          activeChange?.activate
+            ? activeChange.ids.length === 1
+              ? 'Ativar o paciente selecionado?'
+              : `Ativar ${activeChange.ids.length} pacientes?`
+            : activeChange?.ids.length === 1
+              ? 'Inativar o paciente selecionado? O cadastro permanece na lista.'
+              : `Inativar ${activeChange?.ids.length ?? 0} pacientes? O cadastro permanece na lista.`
+        }
+        confirmLabel={activeChange?.activate ? 'Ativar' : 'Inativar'}
+        pendingLabel={activeChange?.activate ? 'Ativando...' : 'Inativando...'}
+        destructive={false}
+        isDeleting={setPatientsActive.isPending}
+        onConfirm={() => void confirmActiveChange()}
       />
 
       <AdminImportDialog
@@ -365,6 +411,30 @@ export function PatientListPage() {
         templateFilename="modelo_importacao_pacientes.csv"
         importKind="patients"
         importFn={bulkImportPatients}
+        onSuccess={() => void refetch()}
+      />
+
+      <AdminImportDialog
+        open={linkImportOpen}
+        onOpenChange={setLinkImportOpen}
+        title="Importar vínculo paciente–PP"
+        description="Colunas: cpf_paciente e cpf_pp. Define o profissional responsável na ficha do paciente."
+        templateCsv={PATIENT_LINK_IMPORT_TEMPLATE}
+        templateFilename="modelo_vinculo_paciente_pp.csv"
+        importKind="patient_links"
+        importFn={bulkImportPatientLinks}
+        onSuccess={() => void refetch()}
+      />
+
+      <AdminImportDialog
+        open={evolutionImportOpen}
+        onOpenChange={setEvolutionImportOpen}
+        title="Importar evoluções históricas"
+        description="Colunas: cpf_paciente, data, texto, cpf_profissional e numero_ciclo. O paciente permanece nesse número de ciclo."
+        templateCsv={EVOLUTION_IMPORT_TEMPLATE}
+        templateFilename="modelo_evolucoes_historicas.csv"
+        importKind="evolutions"
+        importFn={bulkImportHistoricalEvolutions}
         onSuccess={() => void refetch()}
       />
     </>

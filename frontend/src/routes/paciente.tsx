@@ -50,23 +50,6 @@ const PacienteTermosPage = lazyPaciente('PacienteTermosPage')
 const PacienteTermoDetailPage = lazyPaciente('PacienteTermoDetailPage')
 const PacienteAjudaPage = lazyPaciente('PacienteAjudaPage')
 const LarsanaPillHubPage = lazy(() => import('@/pages/paciente/larsanapill/LarsanaPillHubPage').then((m) => ({ default: m.LarsanaPillHubPage })))
-const LarsanaPillCategoryPage = lazy(() =>
-  import('@/pages/paciente/larsanapill/LarsanaPillCategoryPage').then((m) => ({ default: m.LarsanaPillCategoryPage })),
-)
-const LarsanaPillContentPage = lazy(() =>
-  import('@/pages/paciente/larsanapill/LarsanaPillContentPage').then((m) => ({ default: m.LarsanaPillContentPage })),
-)
-const LarsanaPillContentRedirectPage = lazy(() =>
-  import('@/pages/paciente/larsanapill/LarsanaPillContentRedirectPage').then((m) => ({
-    default: m.LarsanaPillContentRedirectPage,
-  })),
-)
-const WeeklyPlanSalesPage = lazy(() =>
-  import('@/pages/paciente/larsanapill/WeeklyPlanSalesPage').then((m) => ({ default: m.WeeklyPlanSalesPage })),
-)
-const WeeklyPlanPlayerPage = lazy(() =>
-  import('@/pages/paciente/larsanapill/WeeklyPlanPlayerPage').then((m) => ({ default: m.WeeklyPlanPlayerPage })),
-)
 
 export const pacienteRoutes: RouteObject[] = [
   {
@@ -97,11 +80,7 @@ export const pacienteRoutes: RouteObject[] = [
       { path: 'termos/:id', element: pacienteRoute(<PacienteTermoDetailPage />) },
       { path: 'ajuda', element: pacienteRoute(<PacienteAjudaPage />) },
       { path: 'larsanapill', element: pacienteRoute(<LarsanaPillHubPage />) },
-      { path: 'larsanapill/categoria/:slug', element: pacienteRoute(<LarsanaPillCategoryPage />) },
-      { path: 'larsanapill/planos/:slug', element: pacienteRoute(<WeeklyPlanSalesPage />) },
-      { path: 'larsanapill/planos/:slug/dia/:dayIndex', element: pacienteRoute(<WeeklyPlanPlayerPage />) },
-      { path: 'larsanapill/categoria/:slug/conteudo/:id', element: pacienteRoute(<LarsanaPillContentPage />) },
-      { path: 'larsanapill/conteudo/:id', element: pacienteRoute(<LarsanaPillContentRedirectPage />) },
+      { path: 'larsanapill/*', element: pacienteRoute(<LarsanaPillHubPage />) },
       { path: 'notificacoes', element: pacienteRoute(<PacienteNotificacoesPage />) },
     ],
   },

@@ -19,8 +19,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Checkbox } from '@/components/ui/checkbox'
 import { usePatient } from '@/hooks/queries/usePatients'
-import { formatCpf, formatDateTime, formatPhone } from '@/lib/formatters'
-import { careStatusLabels, getPpTechnicalCategoryLabel, patientDocumentTypeLabels, patientLevelLabels } from '@/constants/labels'
+import { formatCpf, formatDate, formatDateTime, formatPhone } from '@/lib/formatters'
+import { attendancePeriodLabels, careStatusLabels, getPpTechnicalCategoryLabel, patientDocumentTypeLabels, patientLevelLabels } from '@/constants/labels'
 import { ResponsibleFormModal } from '@/components/patients/ResponsibleFormModal'
 import { AddressFormModal } from '@/components/patients/AddressFormModal'
 import { DocumentUploadModal } from '@/components/patients/DocumentUploadModal'
@@ -195,7 +195,10 @@ export function PatientPreviewDrawer({
 
                 {/* Key info grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-5 py-4 border-b border-border">
-                  <InfoCell label="Status" value={careStatusLabels[patient.care_status] ?? patient.care_status} />
+                  <InfoCell
+                    label="Status"
+                    value={patient.is_active === false ? 'Inativo' : (careStatusLabels[patient.care_status] ?? patient.care_status)}
+                  />
                   <InfoCell
                     label="Categoria técnica"
                     value={patient.technical_category
@@ -203,9 +206,15 @@ export function PatientPreviewDrawer({
                       : '—'}
                   />
                   <InfoCell label="Nível" value={patientLevelLabels[patient.patient_level] ?? patient.patient_level} />
+                  <InfoCell label="Profissional" value={patient.professionals?.full_name ?? '—'} />
                   <InfoCell label="Região" value={patient.regions ? `${patient.regions.code} — ${patient.regions.name}` : '—'} />
                   <InfoCell label="Cidade" value={patient.cities?.name ?? '—'} />
                   <InfoCell label="CPF" value={formatCpf(patient.cpf)} />
+                  <InfoCell label="Nascimento" value={formatDate(patient.birth_date)} />
+                  <InfoCell
+                    label="Período"
+                    value={patient.attendance_period ? (attendancePeriodLabels[patient.attendance_period] ?? patient.attendance_period) : '—'}
+                  />
                 </div>
 
                 {/* Journey segments */}

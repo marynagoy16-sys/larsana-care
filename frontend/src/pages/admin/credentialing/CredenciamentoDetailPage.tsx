@@ -5,8 +5,10 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, CheckCircle2, ExternalLink, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DeleteConfirmDialog } from '@/components/crud/DeleteConfirmDialog'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
 import { CascadeItem, CascadeReveal } from '@/components/motion/CascadeReveal'
@@ -20,7 +22,9 @@ import {
   isCredentialingPendingReview,
   resolveCurrentStep,
 } from '@/lib/credentialingModel'
-import { formatCpf, formatDate, formatDateTime } from '@/lib/formatters'
+import { ASAAS_SIGNUP_URL, ASAAS_WALLET_HELP, isAsaasWalletId } from '@/constants/asaas'
+import { formatCpfCnpj, formatDate, formatDateTime } from '@/lib/formatters'
+import { supabase } from '@/lib/supabase'
 import {
   councilTypeLabels,
   credentialingStatusLabels,
@@ -41,9 +45,11 @@ import {
 import {
   adminCredentialingQueryKeys,
   approveCredentialing,
+  deleteCredentialingProfessional,
   getProfessionalDocumentViewUrl,
-  linkAsaasSubaccount,
   loadAdminCredentialingSnapshot,
+  professionalDeleteMessage,
+  saveProfessionalWallet,
   requestCredentialingRevision,
   reviewCardiorrespiratoryHabilitation,
   type CardiorrespiratoryReviewStatus,
@@ -64,6 +70,50 @@ function DetailSection({
     <div className={cn('rounded-xl border border-border bg-card p-5 space-y-3', className)}>
       <h3 className="font-display text-base font-semibold">{title}</h3>
       {children}
+    </div>
+  )
+}
+
+function WalletEditor({
+  professionalId,
+  initialValue,
+}: {
+  professionalId: string
+  initialValue: string
+}) {
+  const [value, setValue] = useState(initialValue)
+  const save = useCrudMutation({
+    mutationFn: () => {
+      const trimmed = value.trim()
+      if (trimmed && !isAsaasWalletId(trimmed)) {
+        throw new Error('Wallet ID inválido. Cole o UUID da conta Asaas.')
+      }
+      return saveProfessionalWallet(professionalId, trimmed)
+    },
+    queryKey: adminCredentialingQueryKeys.detail(professionalId),
+    successMessage: 'Wallet Asaas salvo',
+  })
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={initialValue ? 'secondary' : 'outline'}>
+          {initialValue ? 'Vinculado' : 'Pendente'}
+        </Badge>
+        <Input
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="wallet ID"
+          className="max-w-xs font-mono text-xs"
+        />
+        <Button type="button" size="sm" variant="outline" disabled={save.isPending} onClick={() => save.mutate(undefined)}>
+          Salvar wallet
+        </Button>
+      </div>
+      <p className="text-xs font-normal text-muted-foreground">{ASAAS_WALLET_HELP}</p>
+      <a href={ASAAS_SIGNUP_URL} target="_blank" rel="noreferrer" className="text-xs text-primary underline">
+        Criar conta no Asaas
+      </a>
     </div>
   )
 }
@@ -203,17 +253,23 @@ export function CredenciamentoDetailPage() {
     },
   })
 
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const removeProfessional = useCrudMutation({
+    mutationFn: () => deleteCredentialingProfessional(id!),
+    queryKey: adminCredentialingQueryKeys.list,
+    successMessage: '',
+    onSuccess: (outcome) => {
+      setDeleteOpen(false)
+      toast.success(professionalDeleteMessage(outcome))
+      navigate('/admin/profissionais')
+    },
+  })
+
   const cardioReview = useCrudMutation({
     mutationFn: ({ status, notes }: { status: CardiorrespiratoryReviewStatus; notes?: string }) =>
       reviewCardiorrespiratoryHabilitation(id!, status, notes),
     queryKey: adminCredentialingQueryKeys.detail(id ?? ''),
     successMessage: 'Status de habilitação Cardiorrespiratória atualizado',
-  })
-
-  const linkAsaas = useCrudMutation({
-    mutationFn: () => linkAsaasSubaccount(id!),
-    queryKey: adminCredentialingQueryKeys.detail(id ?? ''),
-    successMessage: 'Wallet Asaas vinculado',
   })
 
   if (isLoading) {
@@ -330,7 +386,7 @@ export function CredenciamentoDetailPage() {
             <DetailRow label="E-mail" value={pro.email} />
             <DetailRow
               label="CPF/CNPJ"
-              value={pro.cpf_cnpj ? formatCpf(pro.cpf_cnpj) : '—'}
+              value={pro.cpf_cnpj ? formatCpfCnpj(pro.cpf_cnpj) : '—'}
             />
             <DetailRow
               label="Tipo de pessoa"
@@ -350,27 +406,10 @@ export function CredenciamentoDetailPage() {
             <DetailRow
               label="Wallet Asaas"
               value={
-                proExtended.asaas_wallet_id ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Badge variant="secondary">Vinculado</Badge>
-                    <span className="font-mono text-xs break-all">{proExtended.asaas_wallet_id}</span>
-                  </span>
-                ) : isCredentialingActive(proExtended.credentialing_status) ? (
-                  <span className="inline-flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">Pendente</Badge>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={linkAsaas.isPending}
-                      onClick={() => linkAsaas.mutate(undefined)}
-                    >
-                      Criar subconta Asaas
-                    </Button>
-                  </span>
-                ) : (
-                  '—'
-                )
+                <WalletEditor
+                  professionalId={pro.id}
+                  initialValue={proExtended.asaas_wallet_id ?? ''}
+                />
               }
             />
             <DetailRow
@@ -486,6 +525,10 @@ export function CredenciamentoDetailPage() {
                   value={councilTypeLabels[snapshot.council.council_type] ?? snapshot.council.council_type}
                 />
                 <DetailRow label="Registro" value={snapshot.council.registration_number} />
+                <CrefitoLookup
+                  document={pro.cpf_cnpj}
+                  registration={snapshot.council.registration_number}
+                />
               </>
             ) : (
               <p className="text-sm text-muted-foreground">Conselho ainda não informado.</p>
@@ -545,7 +588,7 @@ export function CredenciamentoDetailPage() {
                   <DetailRow label="Titular" value={snapshot.bank.holder_name} />
                   <DetailRow
                     label="CPF/CNPJ titular"
-                    value={snapshot.bank.holder_document ? formatCpf(snapshot.bank.holder_document) : '—'}
+                    value={snapshot.bank.holder_document ? formatCpfCnpj(snapshot.bank.holder_document) : '—'}
                   />
                 </>
               ) : (
@@ -580,6 +623,21 @@ export function CredenciamentoDetailPage() {
           </CascadeReveal>
         </div>
 
+        <div className="shrink-0 border-t border-border shell-content-x py-3 flex justify-end">
+          <Button
+            variant="destructive"
+            onClick={() => setDeleteOpen(true)}
+          >
+            Excluir profissional
+          </Button>
+          <DeleteConfirmDialog
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            description="Se não houver atendimentos, avaliações ou repasses, o cadastro é apagado. Se houver, a conta é inativada e o histórico clínico permanece."
+            isDeleting={removeProfessional.isPending}
+            onConfirm={() => removeProfessional.mutate(undefined)}
+          />
+        </div>
         {pendingReview && (
           <footer className="shrink-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 shell-content-x py-4 flex flex-wrap items-center justify-end gap-2">
             <Button
@@ -601,5 +659,47 @@ export function CredenciamentoDetailPage() {
         )}
       </div>
     </>
+  )
+}
+
+function CrefitoLookup({ document, registration }: { document?: string | null; registration?: string | null }) {
+  const [status, setStatus] = useState<string | null>(null)
+  const [detail, setDetail] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  return (
+    <div className="space-y-2 py-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={loading}
+        onClick={async () => {
+          setLoading(true)
+          try {
+            const { data, error } = await supabase.functions.invoke('lookup-crefito', {
+              body: { document, registration },
+            })
+            if (error) throw error
+            const result = data as { status?: string; detail?: string | null }
+            setStatus(result.status ?? 'indisponivel')
+            setDetail(result.detail ?? null)
+          } catch (err) {
+            setStatus('indisponivel')
+            setDetail(err instanceof Error ? err.message : 'Consulta indisponível. A aprovação manual segue.')
+          } finally {
+            setLoading(false)
+          }
+        }}
+      >
+        {loading ? 'Consultando CREFITO…' : 'Consultar CREFITO-3'}
+      </Button>
+      {status && (
+        <p className="text-sm text-muted-foreground">
+          Situação: {status}
+          {detail ? ` — ${detail}` : ''}
+        </p>
+      )}
+    </div>
   )
 }

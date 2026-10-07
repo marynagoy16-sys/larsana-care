@@ -214,8 +214,7 @@ export function PacienteSolicitarPage() {
                 <p className="font-semibold text-foreground">Estamos chegando!</p>
               </div>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Ainda não temos profissionais parceiros atuando na sua região. Enquanto isso, explore o LarsanaPill
-                com orientações e exercícios para casa.
+                Ainda não temos profissionais parceiros atuando na sua região.
               </p>
               {!hasWaitlist ? (
                 <Button onClick={() => waitlistMutation.mutate()} disabled={busy}>
