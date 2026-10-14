@@ -129,7 +129,14 @@ export const patientEditSchema = z.object({
   region_id: optionalUuidField,
   city_id: optionalUuidField,
   allocated_professional_id: optionalUuidField,
-  suggested_weekly_frequency: z.number().min(1).max(7).optional().nullable(),
+  suggested_weekly_frequency: z.preprocess(
+    (value) => {
+      if (value == null || value === '') return null
+      const parsed = typeof value === 'number' ? value : Number(value)
+      return Number.isFinite(parsed) ? parsed : value
+    },
+    z.number().min(1).max(7).nullable().optional(),
+  ),
   attendance_period: z.enum(['MANHA', 'TARDE', 'NOITE', 'INDIFERENTE']).optional().nullable(),
   technical_category: z
     .enum([

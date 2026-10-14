@@ -132,12 +132,17 @@ export function SearchCombobox({
     <div ref={containerRef} className={cn('relative', className)}>
       {selected && !open ? (
         <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 min-h-10">
-          <div className="flex-1 min-w-0">
+          <button
+            type="button"
+            className="flex-1 min-w-0 text-left"
+            disabled={disabled}
+            onClick={() => setOpen(true)}
+          >
             <p className="text-sm font-medium truncate">{selected.label}</p>
             {selected.subtitle && (
               <p className="text-xs text-muted-foreground truncate">{selected.subtitle}</p>
             )}
-          </div>
+          </button>
           {!disabled && (
             <Button
               type="button"

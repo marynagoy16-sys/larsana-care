@@ -23,11 +23,18 @@ SheetOverlay.displayName = DialogPrimitive.Overlay.displayName
 const SheetContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { side?: 'left' | 'right' }
->(({ side = 'left', className, children, ...props }, ref) => (
+>(({ side = 'left', className, children, onInteractOutside, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onInteractOutside={(event) => {
+        const target = event.target
+        if (target instanceof Element && target.closest('[data-radix-select-content], [data-radix-popper-content-wrapper]')) {
+          event.preventDefault()
+        }
+        onInteractOutside?.(event)
+      }}
       className={cn(
         'fixed z-50 flex h-[100dvh] max-h-[100dvh] flex-col gap-0 overflow-hidden border border-border bg-card p-0 shadow-lg',
         side === 'left' ? 'animate-slide-in-left' : '',

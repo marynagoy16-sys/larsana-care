@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { SearchCombobox } from '@/components/forms/SearchCombobox'
-import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAllCities, useRegions } from '@/hooks/queries/useRegions'
 import { getCitySearchOption, searchCities, syncCityRegion } from '@/services/regions'
 
@@ -33,16 +33,26 @@ export function CityRegionFields({
 
   const handleCityChange = useCallback(
     (nextCityId: string) => {
+      if (!nextCityId) {
+        onCityChange('', regionId ?? '')
+        return
+      }
       const synced = syncCityRegion(nextCityId, cities)
       if (synced) onCityChange(synced.cityId, synced.regionId)
     },
-    [cities, onCityChange],
+    [cities, onCityChange, regionId],
   )
 
-  const selectedRegion = regions.find((region) => region.id === regionId)
-  const regionDisplay = selectedRegion
-    ? `${selectedRegion.code} — ${selectedRegion.name}`
-    : ''
+  const handleRegionChange = useCallback(
+    (value: string) => {
+      const nextRegionId = value === '__none__' ? '' : value
+      const cityStillValid = Boolean(
+        cityId && cities.some((city) => city.id === cityId && city.region_id === nextRegionId),
+      )
+      onCityChange(cityStillValid && cityId ? cityId : '', nextRegionId)
+    },
+    [cities, cityId, onCityChange],
+  )
 
   return (
     <div className="space-y-4">
@@ -55,18 +65,29 @@ export function CityRegionFields({
           resolveOption={getCitySearchOption}
           placeholder={citiesLoading ? 'Carregando cidades…' : 'Buscar cidade…'}
           emptyMessage="Nenhuma cidade encontrada"
-          disabled={disabled || citiesLoading}
+          disabled={disabled}
         />
       </div>
       {!hideRegion ? (
         <div className="space-y-2">
           <label className="text-sm font-medium leading-none">{regionLabel}</label>
-          <Input
-            value={regionsLoading ? 'Carregando…' : regionDisplay}
-            placeholder="Selecione a cidade"
-            disabled
-            readOnly
-          />
+          <Select
+            value={regionId || '__none__'}
+            onValueChange={handleRegionChange}
+            disabled={disabled || regionsLoading}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={regionsLoading ? 'Carregando…' : 'Selecione a região'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">Não informada</SelectItem>
+              {regions.map((region) => (
+                <SelectItem key={region.id} value={region.id}>
+                  {region.code} — {region.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       ) : null}
     </div>

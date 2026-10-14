@@ -17,6 +17,7 @@ import { patientEditSchema, type PatientEditValues } from '@/schemas/patient'
 import { usePatient } from '@/hooks/queries/usePatients'
 import { useUpdatePatient } from '@/hooks/mutations/usePatientMutations'
 import { patientLevelLabels, attendancePeriodLabels } from '@/constants/labels'
+import { Checkbox } from '@/components/ui/checkbox'
 import { PatientCareStatusSelect } from '@/components/forms/PatientCareStatusSelect'
 import { PatientTechnicalCategorySelect } from '@/components/forms/PatientTechnicalCategorySelect'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
@@ -31,8 +32,7 @@ export function PatientEditPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('professionals')
-        .select('id, full_name')
-        .eq('is_active', true)
+        .select('id, full_name, is_active')
         .order('full_name')
       if (error) throw error
       return data ?? []
@@ -73,7 +73,9 @@ export function PatientEditPage() {
       region_id: patient.region_id ?? '',
       city_id: patient.city_id ?? '',
       allocated_professional_id: patient.allocated_professional_id,
-      suggested_weekly_frequency: patient.suggested_weekly_frequency,
+      suggested_weekly_frequency: patient.suggested_weekly_frequency == null
+        ? null
+        : Number(patient.suggested_weekly_frequency),
       attendance_period: patient.attendance_period ?? null,
       technical_category: patient.technical_category ?? null,
       clinical_summary: patient.clinical_summary ?? '',
@@ -155,7 +157,9 @@ export function PatientEditPage() {
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
                   {professionals.map((professional) => (
-                    <SelectItem key={professional.id} value={professional.id}>{professional.full_name}</SelectItem>
+                    <SelectItem key={professional.id} value={professional.id}>
+                      {professional.is_active ? professional.full_name : `${professional.full_name} (inativo)`}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -217,6 +221,38 @@ export function PatientEditPage() {
               <FormMessage />
             </FormItem>
           )} />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField control={form.control} name="suggested_weekly_frequency" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Frequência semanal</FormLabel>
+                <Select
+                  value={field.value == null || Number.isNaN(Number(field.value)) ? '__none__' : String(field.value)}
+                  onValueChange={(value) => field.onChange(value === '__none__' ? null : Number(value))}
+                >
+                  <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="__none__">Não informada</SelectItem>
+                    {[1, 2, 3, 4, 5, 6, 7].map((count) => (
+                      <SelectItem key={count} value={String(count)}>{count}x por semana</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="is_valor_social" render={({ field }) => (
+              <FormItem className="flex items-end gap-3 space-y-0 pb-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                </FormControl>
+                <FormLabel>Valor social</FormLabel>
+                <FormMessage />
+              </FormItem>
+            )} />
+          </div>
           <FormField control={form.control} name="attendance_period" render={({ field }) => (
             <FormItem>
               <FormLabel>Período de atendimento</FormLabel>

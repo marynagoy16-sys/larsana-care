@@ -45,6 +45,19 @@ describe('patient schemas', () => {
     expect(result.data.allocated_professional_id).toBe('00000000-0000-4000-8000-000000000010')
   })
 
+  it('aceita frequência semanal vinda do banco como texto', () => {
+    const result = patientEditSchema.safeParse({
+      full_name: 'Maria Silva',
+      patient_level: 'N1',
+      care_status: 'ATIVO',
+      suggested_weekly_frequency: '2.00',
+      is_valor_social: false,
+    })
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    expect(result.data.suggested_weekly_frequency).toBe(2)
+  })
+
   it('exige cidade igual entre paciente e endereço no wizard', () => {
     const base = {
       patient: {
