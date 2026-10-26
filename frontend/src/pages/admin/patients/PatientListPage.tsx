@@ -11,6 +11,7 @@ import {
   PatientFilterPanel,
   countActiveFilters,
   emptyPatientFilters,
+  isSolePatientFilter,
   type PatientListFilters,
 } from '@/components/crud/list-page/PatientFilterPanel'
 import { DeleteConfirmDialog } from '@/components/crud/DeleteConfirmDialog'
@@ -128,12 +129,24 @@ export function PatientListPage() {
   const isInitialLoad = statsLoading && isLoading
   const isTableRefreshing = isFetching && !isLoading
 
+  const ativosOnly = isSolePatientFilter(filters, { care_status: 'ATIVO' })
+  const incompletosOnly = isSolePatientFilter(filters, { is_data_complete: false })
+  const semPpOnly = isSolePatientFilter(filters, { sem_pp: true })
+
+  const applyQuickFilter = (next: PatientListFilters, alreadyOn: boolean) => {
+    setFilters(alreadyOn ? emptyPatientFilters : next)
+    setPage(0)
+    setSelectedIds(new Set())
+  }
+
   const statCards = [
     {
       label: 'Cadastrados',
       value: total,
       icon: Users,
       footer: `${ativos} ativos`,
+      selected: activeFilterCount === 0,
+      onClick: () => applyQuickFilter(emptyPatientFilters, activeFilterCount === 0),
     },
     {
       label: 'Ativos',
@@ -142,19 +155,24 @@ export function PatientListPage() {
       trend: shareAtivos,
       trendLabel: 'do total',
       footer: 'Em tratamento',
-      href: '/admin/pacientes',
+      selected: ativosOnly,
+      onClick: () => applyQuickFilter({ care_status: 'ATIVO' }, ativosOnly),
     },
     {
       label: 'Cadastro incompleto',
       value: stats?.incompletos ?? 0,
       icon: FileWarning,
       footer: 'Dados pendentes',
+      selected: incompletosOnly,
+      onClick: () => applyQuickFilter({ is_data_complete: false }, incompletosOnly),
     },
     {
       label: 'Sem PP alocado',
       value: stats?.sem_pp ?? 0,
       icon: UserX,
       footer: 'Sem profissional',
+      selected: semPpOnly,
+      onClick: () => applyQuickFilter({ sem_pp: true }, semPpOnly),
     },
   ]
 

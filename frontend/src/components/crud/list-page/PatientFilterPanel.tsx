@@ -24,6 +24,14 @@ interface PatientFilterPanelProps {
 
 export const emptyPatientFilters: PatientListFilters = {}
 
+export function isSolePatientFilter(filters: PatientListFilters, expected: PatientListFilters): boolean {
+  return (filters.care_status ?? undefined) === (expected.care_status ?? undefined)
+    && (filters.patient_level ?? undefined) === (expected.patient_level ?? undefined)
+    && (filters.region_id ?? undefined) === (expected.region_id ?? undefined)
+    && filters.is_data_complete === expected.is_data_complete
+    && Boolean(filters.sem_pp) === Boolean(expected.sem_pp)
+}
+
 export function countActiveFilters(filters: PatientListFilters): number {
   let n = 0
   if (filters.care_status) n++

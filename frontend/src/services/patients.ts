@@ -80,6 +80,11 @@ export async function listPatients(filters: PatientFilters = {}) {
   }
   if (filters.care_status) {
     query = query.eq('care_status', filters.care_status as Patient['care_status'])
+    // O badge e o card "Ativos" exigem cadastro ligado. care_status ATIVO sozinho
+    // ainda inclui pacientes que o admin inativou.
+    if (filters.care_status === 'ATIVO') {
+      query = query.eq('is_active', true)
+    }
   }
   if (filters.patient_level) {
     query = query.eq('patient_level', filters.patient_level as Patient['patient_level'])

@@ -125,7 +125,12 @@ function AppShellContent({
           }}
           className={
             lockScroll
-              ? 'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden'
+              ? cn(
+                  'flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden',
+                  // O cabeçalho mobile é fixed e tem 1rem abaixo do bloco medido.
+                  // Sem este recuo, ele cobre as setas de semana da agenda.
+                  showMobileHeader && 'pt-[calc(var(--shell-mobile-header-total)+1rem)]',
+                )
               : cn(
                   'shell-scroll-region flex-1 min-h-0 min-w-0 scrollbar-sidebar',
                   showMobileHeader && 'shell-has-mobile-header',

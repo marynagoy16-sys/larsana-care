@@ -11,6 +11,8 @@ export interface MetricCardProps {
   trendLabel?: string
   footer?: string
   href?: string
+  onClick?: () => void
+  selected?: boolean
   isLoading?: boolean
 }
 
@@ -29,13 +31,20 @@ export function MetricCard({
   trendLabel = 'Mês anterior',
   footer,
   href,
+  onClick,
+  selected = false,
   isLoading,
 }: MetricCardProps) {
   const trendUp = trend !== undefined && trend >= 0
   const displayValue = isLoading ? '—' : formatMetricValue(value)
+  const shellClass = cn(
+    'flex h-full w-full flex-col rounded-xl border bg-card overflow-hidden min-w-0 text-left',
+    selected ? 'border-primary ring-1 ring-primary' : 'border-border',
+    onClick && 'cursor-pointer transition-colors hover:border-primary/50',
+  )
 
-  return (
-    <div className="flex h-full flex-col rounded-xl border border-border bg-card overflow-hidden min-w-0">
+  const content = (
+    <>
       <div className="flex flex-1 flex-col p-4 pb-3 min-h-[88px]">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -82,6 +91,16 @@ export function MetricCard({
           {footer}
         </div>
       )}
-    </div>
+    </>
   )
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={shellClass} aria-pressed={selected}>
+        {content}
+      </button>
+    )
+  }
+
+  return <div className={shellClass}>{content}</div>
 }
