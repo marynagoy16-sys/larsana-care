@@ -11,6 +11,7 @@ import {
   buildDemandBriefProps,
   ContinuidadeSections,
   DemandBriefCard,
+  SubstituicaoSections,
   DemandDetailInfoCard,
   DemandDetailPageHeader,
   resolveRegionLabel,
@@ -95,6 +96,8 @@ export function DemandDetailPage() {
 
           {isAvaliacao ? (
             <AvaliacaoSections simulation={pricingContext?.avaliacao ?? null} loading={pricingLoading} />
+          ) : demand.demand_type === 'substituicao' ? (
+            <SubstituicaoSections notes={demand.notes} />
           ) : (
             <ContinuidadeSections simulation={pricingContext?.continuidade ?? null} loading={pricingLoading} />
           )}

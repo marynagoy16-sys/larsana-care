@@ -25,6 +25,7 @@ import {
   buildDemandBriefProps,
   ContinuidadeSections,
   DemandBriefCard,
+  SubstituicaoSections,
   DemandDetailPageHeader,
   useDemandPricingContext,
 } from '@/components/demands/DemandDetailContent'
@@ -35,12 +36,19 @@ import { demandResponsesService } from '@/services/index'
 import { useCrudMutation } from '@/hooks/useCrudMutation'
 import { formatDateTime } from '@/lib/formatters'
 
-function resolveAcceptConfirmCopy(demandType: 'avaliacao' | 'continuidade') {
+function resolveAcceptConfirmCopy(demandType: string) {
   if (demandType === 'avaliacao') {
     return {
       title: 'Assumir avaliação',
       description:
         'Você tem certeza que deseja assumir esta avaliação? Após aceitar, você será responsável pela realização do atendimento.',
+    }
+  }
+  if (demandType === 'substituicao') {
+    return {
+      title: 'Assumir este atendimento',
+      description:
+        'Você assume só este horário, que já está marcado. O paciente continua com o profissional responsável nos demais atendimentos.',
     }
   }
   return {
@@ -95,6 +103,10 @@ export function PPDemandDetailPage() {
   useSuppressBottomNav(showActionBar)
 
   const navigateAfterAccept = (result: AcceptDemandResult) => {
+    if (result.demand_type === 'substituicao') {
+      navigate('/profissional/agenda')
+      return
+    }
     navigate(`/profissional/demandas/${result.demand_id}/agendar`)
   }
 
@@ -197,6 +209,8 @@ export function PPDemandDetailPage() {
 
           {isAvaliacao ? (
             <AvaliacaoSections simulation={pricingContext?.avaliacao ?? null} loading={pricingLoading} />
+          ) : demand.demand_type === 'substituicao' ? (
+            <SubstituicaoSections notes={demand.notes} />
           ) : (
             <ContinuidadeSections simulation={pricingContext?.continuidade ?? null} loading={pricingLoading} />
           )}
@@ -215,7 +229,12 @@ export function PPDemandDetailPage() {
                     {formatDateTime(existingResponse.responded_at)}
                   </p>
                 </div>
-                {existingResponse.response === 'accepted' && (
+                {existingResponse.response === 'accepted' && demand.demand_type === 'substituicao' && (
+                  <Button size="sm" onClick={() => navigate('/profissional/agenda')}>
+                    Ir para a agenda
+                  </Button>
+                )}
+                {existingResponse.response === 'accepted' && demand.demand_type !== 'substituicao' && (
                   <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {isAssignedToMe && schedulingFollowUp?.kind === 'needs_slots' && id && (
                       <Button size="sm" onClick={() => navigate(`/profissional/demandas/${id}/agendar`)}>

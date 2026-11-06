@@ -6381,7 +6381,7 @@ export type Database = {
       demand_request_source: "gestao" | "paciente_app"
       demand_response_type: "accepted" | "declined"
       demand_status: "aberta" | "alocada" | "cancelada"
-      demand_type: "avaliacao" | "continuidade"
+      demand_type: "avaliacao" | "continuidade" | "substituicao"
       family_response: "SIM" | "NAO"
       financial_ledger_entry_type:
         | "pp_held"
@@ -6791,7 +6791,7 @@ export const Constants = {
       demand_request_source: ["gestao", "paciente_app"],
       demand_response_type: ["accepted", "declined"],
       demand_status: ["aberta", "alocada", "cancelada"],
-      demand_type: ["avaliacao", "continuidade"],
+      demand_type: ["avaliacao", "continuidade", "substituicao"],
       family_response: ["SIM", "NAO"],
       financial_ledger_entry_type: [
         "pp_held",

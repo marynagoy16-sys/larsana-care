@@ -132,6 +132,10 @@ export default function DemandDetailScreen() {
     mutationFn: () => acceptDemand(id!),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['pp', 'demands'] })
+      if (result.demand_type === 'substituicao') {
+        router.replace('/(app)/(tabs)/agenda')
+        return
+      }
       router.push(`/(app)/demandas/${result.demand_id}/agendar`)
     },
   })
@@ -179,6 +183,7 @@ export default function DemandDetailScreen() {
   }
 
   const isAvaliacao = demand.demand_type === 'avaliacao'
+  const isSubstituicao = demand.demand_type === 'substituicao'
   const regionCode = demand.regions?.code ?? demand.patients?.regions?.code ?? null
   const levelRegion = formatDemandLevelRegion(demand.patients?.patient_level, regionCode)
   const location = formatDemandLocation(demand, demand.demand_type)
@@ -193,7 +198,10 @@ export default function DemandDetailScreen() {
           </Pressable>
           <View className="flex-1 flex-row items-center justify-between pr-2">
             <Text className="text-lg font-semibold text-foreground">Demanda</Text>
-            <Badge label={isAvaliacao ? 'Avaliação' : 'Continuidade'} variant="primary" />
+            <Badge
+              label={isAvaliacao ? 'Avaliação' : isSubstituicao ? 'Substituição' : 'Continuidade'}
+              variant="primary"
+            />
           </View>
         </View>
       </PageHeader>
@@ -202,7 +210,7 @@ export default function DemandDetailScreen() {
         <View className="rounded-xl border border-border bg-card overflow-hidden">
           <View className="border-b border-border bg-muted/20 px-4 py-3">
             <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {isAvaliacao ? 'Avaliação inicial' : 'Continuidade'}
+              {isAvaliacao ? 'Avaliação inicial' : isSubstituicao ? 'Substituição' : 'Continuidade'}
             </Text>
           </View>
           <View className="px-4 py-3 gap-3">
@@ -214,7 +222,24 @@ export default function DemandDetailScreen() {
           </View>
         </View>
 
-        {!isAvaliacao && (
+        {isSubstituicao && (
+          <View className="rounded-xl border border-border bg-card overflow-hidden">
+            <View className="border-b border-border bg-muted/20 px-4 py-3">
+              <Text className="text-sm font-semibold text-foreground">Substituição deste atendimento</Text>
+            </View>
+            <View className="px-4 py-3 gap-2">
+              <Text className="text-xs leading-5 text-muted-foreground">
+                {demand.notes
+                  || 'Um atendimento já marcado. O horário não muda e o paciente continua com o profissional responsável nos demais horários.'}
+              </Text>
+              <Text className="text-xs leading-5 text-muted-foreground">
+                Você assume só esta sessão. Se ninguém assumir até o horário, ela volta ao profissional responsável.
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {!isAvaliacao && !isSubstituicao && (
           <View className="rounded-xl border border-border bg-card overflow-hidden">
             <View className="border-b border-border bg-muted/20 px-4 py-3">
               <Text className="text-sm font-semibold text-foreground">Continuidade de atendimento — substituição de profissional</Text>

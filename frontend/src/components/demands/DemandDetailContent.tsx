@@ -262,6 +262,25 @@ export function AvaliacaoSections({
   )
 }
 
+export function SubstituicaoSections({ notes }: { notes: string | null }) {
+  return (
+    <CascadeItem>
+      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-border bg-muted/20">
+          <h3 className="font-semibold text-sm">Substituição deste atendimento</h3>
+        </div>
+        <div className="p-5 space-y-3 text-sm text-muted-foreground">
+          <p>
+            {notes
+              || 'Um atendimento já marcado. O horário não muda e o paciente continua com o profissional responsável nos demais horários.'}
+          </p>
+          <p>Você assume só esta sessão. Ela entra na sua agenda no horário que já estava marcado.</p>
+        </div>
+      </div>
+    </CascadeItem>
+  )
+}
+
 export function ContinuidadeSections({
   simulation,
   loading,

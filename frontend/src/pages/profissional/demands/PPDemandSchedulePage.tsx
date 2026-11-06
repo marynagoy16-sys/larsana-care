@@ -93,6 +93,26 @@ export function PPDemandSchedulePage() {
     )
   }
 
+  if (demand?.demand_type === 'substituicao') {
+    return (
+      <>
+        <PageHeader>
+          <div className="flex min-w-0 items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/profissional/agenda')} className="shrink-0 rounded-xl" aria-label="Voltar">
+              <ArrowLeft size={20} />
+            </Button>
+            <h1 className="truncate font-display text-xl font-bold">Atendimento já marcado</h1>
+          </div>
+        </PageHeader>
+        <CrudScrollPageLayout>
+          <p className="p-6 text-sm text-muted-foreground">
+            {demand.notes || 'Esta substituição já tem horário. Ela aparece na sua agenda.'}
+          </p>
+        </CrudScrollPageLayout>
+      </>
+    )
+  }
+
   if (!demand) {
     return (
       <>

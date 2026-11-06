@@ -18,7 +18,7 @@ export function formatDemandLevelRegion(
 
 export function formatDemandLocation(
   demand: DemandDetail,
-  demandType: 'avaliacao' | 'continuidade',
+  demandType: string,
 ): string {
   const address = resolvePrimaryAddress(demand)
   const city = demand.patients?.cities?.name?.trim() ?? ''

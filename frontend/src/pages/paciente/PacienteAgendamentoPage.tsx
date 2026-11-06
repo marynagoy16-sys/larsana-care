@@ -49,7 +49,7 @@ export function PacienteAgendamentoPage() {
   const rejectRescheduleMutation = useCrudMutation({
     mutationFn: (proposalId: string) => patientRespondRescheduleProposal(proposalId, false),
     queryKey: ['paciente', 'scheduling_proposals'],
-    successMessage: 'Vamos buscar um substituto para você',
+    successMessage: 'Opção de substituto enviada no chat',
     onSuccess: () => {
       refetch()
       refetchSub()
@@ -59,7 +59,7 @@ export function PacienteAgendamentoPage() {
   const acceptSubMutation = useCrudMutation({
     mutationFn: (requestId: string) => patientRespondSubOffer(requestId, true),
     queryKey: ['paciente', 'sub_offers'],
-    successMessage: 'Substituto confirmado!',
+    successMessage: 'Estamos buscando um substituto para este horário',
     onSuccess: () => refetchSub(),
   })
 

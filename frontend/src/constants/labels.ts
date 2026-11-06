@@ -106,11 +106,13 @@ export const assessmentStatusLabels: Record<string, string> = {
 export const demandTypeLabels: Record<string, string> = {
   avaliacao: 'Avaliação',
   continuidade: 'Continuidade',
+  substituicao: 'Substituição',
 }
 
 export const demandTypeDescriptions: Record<string, string> = {
   avaliacao: 'Primeiro contato com o paciente',
   continuidade: 'Paciente já em tratamento que precisa de troca de profissional ou continuação do atendimento',
+  substituicao: 'Um atendimento já marcado. Se ninguém assumir até o horário, volta ao profissional responsável.',
 }
 
 export const demandStatusLabels: Record<string, string> = {

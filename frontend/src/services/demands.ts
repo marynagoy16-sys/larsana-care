@@ -29,7 +29,7 @@ type DemandAddressJoin = {
 }
 
 export type DemandListItem = CrudRow & {
-  demand_type: 'avaliacao' | 'continuidade'
+  demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
   technical_category: string | null
   patient_abbreviation: string
   patient_sex: string
@@ -77,7 +77,7 @@ type DemandPatientDetail = {
 
 export type DemandDetail = CrudRow & {
   patient_id: string
-  demand_type: 'avaliacao' | 'continuidade'
+  demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
   status: string
   required_profession: string
   notes: string | null
@@ -109,7 +109,7 @@ export type DemandDetail = CrudRow & {
 export type AcceptDemandResult = {
   demand_id: string
   patient_id: string
-  demand_type: 'avaliacao' | 'continuidade'
+  demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
 }
 
 const DEMAND_DETAIL_SELECT = `

@@ -176,6 +176,8 @@ const AGENDA_SESSION_STATUSES = [
 
 /** Demanda ainda precisa que o PP envie horários (inclui continuidade pós-pagamento com sessões sem data). */
 export async function demandNeedsScheduleSlots(demand: DemandScheduleContext): Promise<boolean> {
+  if (demand.demand_type === 'substituicao') return false
+
   const { data: latestProposal, error: proposalError } = await supabase
     .from('scheduling_proposals')
     .select('status')
@@ -226,6 +228,8 @@ export async function getDemandSchedulingFollowUp(demandId: string): Promise<Dem
 
   if (demandError) throw demandError
   const demand = demandRaw as DemandScheduleContext | null
+
+  if (demand?.demand_type === 'substituicao') return { kind: 'confirmed' }
 
   if (demand && (await demandNeedsScheduleSlots(demand))) {
     return { kind: 'needs_slots' }

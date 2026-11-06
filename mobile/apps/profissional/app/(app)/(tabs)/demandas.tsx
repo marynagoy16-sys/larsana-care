@@ -172,7 +172,11 @@ export default function DemandasScreen() {
                     <View className="min-w-0 flex-1 gap-1">
                       <Text className="font-medium text-foreground">{demand.patient_abbreviation}</Text>
                       <Text className="text-xs text-muted-foreground">
-                        {demand.demand_type === 'avaliacao' ? 'Avaliacao inicial' : 'Continuidade'}
+                        {demand.demand_type === 'avaliacao'
+                          ? 'Avaliacao inicial'
+                          : demand.demand_type === 'substituicao'
+                            ? 'Substituicao'
+                            : 'Continuidade'}
                         {demand.patient_level ? ` · ${demand.patient_level}` : ''}
                       </Text>
                       {demand.location_neighborhood ? (

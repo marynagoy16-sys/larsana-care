@@ -18,7 +18,7 @@ export function ChatSubOffer({ offer, highlighted = false, onUpdated }: ChatSubO
       await patientRespondSubOffer(offer.id, true)
     },
     queryKey: ['paciente', 'sub_offers'],
-    successMessage: 'Substituto confirmado!',
+    successMessage: 'Estamos buscando um substituto para este horário',
     onSuccess: () => onUpdated?.(),
   })
 

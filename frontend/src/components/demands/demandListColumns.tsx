@@ -7,15 +7,18 @@ function DemandTypeBadge({ type }: { type: string }) {
   const label = demandTypeLabels[type] ?? type
   const description = demandTypeDescriptions[type]
   const isContinuidade = type === 'continuidade'
+  const isSubstituicao = type === 'substituicao'
 
   return (
     <span
       title={description}
       className={cn(
         'inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap',
-        isContinuidade
-          ? 'bg-primary/10 text-primary'
-          : 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
+        isSubstituicao
+          ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300'
+          : isContinuidade
+            ? 'bg-primary/10 text-primary'
+            : 'bg-sky-500/10 text-sky-700 dark:text-sky-400',
       )}
     >
       {label}

@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 
 export type DemandListItem = {
   id: string
-  demand_type: 'avaliacao' | 'continuidade'
+  demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
   status: string
   location_address: string | null
   location_neighborhood: string | null
@@ -18,7 +18,7 @@ export type DemandListItem = {
 export type DemandDetail = {
   id: string
   patient_id: string
-  demand_type: 'avaliacao' | 'continuidade'
+  demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
   status: string
   required_profession: string
   notes: string | null
@@ -74,7 +74,7 @@ export type DemandDetail = {
 export type AcceptDemandResult = {
   demand_id: string
   patient_id: string
-  demand_type: 'avaliacao' | 'continuidade'
+  demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
 }
 
 const DEMAND_LIST_SELECT = `
@@ -157,7 +157,7 @@ export async function listOpenDemandsForPp(): Promise<{ data: DemandListItem[]; 
 
   const rows = (data ?? []) as Array<{
     id: string
-    demand_type: 'avaliacao' | 'continuidade'
+    demand_type: 'avaliacao' | 'continuidade' | 'substituicao'
     status: string
     created_at: string
     patients: {
