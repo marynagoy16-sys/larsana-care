@@ -186,6 +186,8 @@ export default function PacienteDetailScreen() {
   const primaryAddress = data.patient_addresses?.find((a) => a.is_primary) ?? data.patient_addresses?.[0] ?? null
   const latestAssessment = data.initial_assessments?.[0] ?? null
   const statusLabel = careStatusLabels[data.care_status] ?? data.care_status
+  const situationCancelled = data.care_status === 'OBITO' || data.care_status === 'CANCELADO'
+  const showEvaluationPending = data.evaluation_pending && !situationCancelled
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
@@ -200,18 +202,22 @@ export default function PacienteDetailScreen() {
               <View className="rounded-full bg-primary px-2 py-0.5">
                 <Text className="text-[10px] font-semibold text-primary-foreground">{statusLabel}</Text>
               </View>
-              {data.evaluation_pending && (
+              {situationCancelled ? (
+                <View className="rounded-full bg-muted px-2 py-0.5">
+                  <Text className="text-[10px] font-semibold text-muted-foreground">Cancelado</Text>
+                </View>
+              ) : showEvaluationPending ? (
                 <View className="rounded-full bg-amber-100 px-2 py-0.5">
                   <Text className="text-[10px] font-semibold text-amber-800">Avaliação pendente</Text>
                 </View>
-              )}
+              ) : null}
             </View>
           </View>
         </View>
       </PageHeader>
 
       <ScrollView className="flex-1" contentContainerClassName="gap-4 px-4 pb-8">
-        {data.evaluation_pending && (
+        {showEvaluationPending && (
           <View className="rounded-xl border border-amber-200 bg-amber-50/80 px-5 py-4">
             <Text className="font-medium text-amber-900">Avaliação inicial pendente</Text>
             <Text className="text-sm text-amber-800/90 mt-1">
@@ -293,7 +299,7 @@ export default function PacienteDetailScreen() {
                     </View>
                   ))}
                 </View>
-              ) : data.evaluation_pending ? (
+              ) : showEvaluationPending ? (
                 <Text className="text-sm text-muted-foreground">
                   Avaliação inicial ainda não registrada no prontuário.
                 </Text>

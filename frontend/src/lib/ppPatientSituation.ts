@@ -10,6 +10,7 @@ export type PPPatientSituation =
   | 'evolution_pending'
   | 'on_pause'
   | 'in_treatment'
+  | 'cancelled'
   | 'none'
 
 export type PPPatientSituationInput = {
@@ -22,8 +23,11 @@ export type PPPatientSituationInput = {
 }
 
 const FAMILY_REVIEW_STATUSES = new Set(['proposta_enviada', 'em_analise'])
+const CANCELLED_CARE_STATUSES = new Set(['OBITO', 'CANCELADO'])
 
 export function resolvePPPatientSituation(input: PPPatientSituationInput): PPPatientSituation {
+  if (CANCELLED_CARE_STATUSES.has(input.care_status)) return 'cancelled'
+
   if (input.evaluation_pending) return 'evaluation_pending'
 
   if (input.pending_evolution_count > 0) return 'evolution_pending'
@@ -74,6 +78,7 @@ export const ppPatientSituationLabels: Record<PPPatientSituation, string> = {
   evolution_pending: 'Evolução pendente',
   on_pause: 'Em pausa',
   in_treatment: 'Em tratamento',
+  cancelled: 'Cancelado',
   none: '—',
 }
 
@@ -87,6 +92,7 @@ export const ppPatientSituationBadgeClass: Record<PPPatientSituation, string> = 
   evolution_pending: 'bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-300',
   on_pause: 'bg-muted text-muted-foreground',
   in_treatment: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300',
+  cancelled: 'bg-muted text-muted-foreground',
   none: '',
 }
 

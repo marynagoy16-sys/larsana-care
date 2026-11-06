@@ -245,7 +245,7 @@ export function PPPacienteDetailPage() {
 
       <CrudScrollPageLayout>
         <CascadeReveal className="space-y-5 pb-8">
-          {pendingScheduleDemand && (
+          {pendingScheduleDemand && patient.situation !== 'cancelled' && (
             <CascadeItem>
               <div className="rounded-xl border border-primary/25 bg-primary/5 px-5 py-4">
                 <p className="font-medium text-foreground">
@@ -271,7 +271,7 @@ export function PPPacienteDetailPage() {
             </CascadeItem>
           )}
 
-          {patient.evaluation_pending && (
+          {patient.situation === 'evaluation_pending' && (
             <CascadeItem>
               <div className="rounded-xl border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/20 px-5 py-4">
                 <p className="font-medium text-amber-900 dark:text-amber-200">Avaliação inicial pendente</p>
