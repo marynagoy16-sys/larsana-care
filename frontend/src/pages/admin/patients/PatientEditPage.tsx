@@ -16,11 +16,13 @@ import { CityRegionFields } from '@/components/forms/CityRegionFields'
 import { patientEditSchema, type PatientEditValues } from '@/schemas/patient'
 import { usePatient } from '@/hooks/queries/usePatients'
 import { useUpdatePatient } from '@/hooks/mutations/usePatientMutations'
+import { cancelOpenWorkForDeath, savePrimaryResponsibleContact } from '@/services/patients'
 import { patientLevelLabels, attendancePeriodLabels } from '@/constants/labels'
 import { Checkbox } from '@/components/ui/checkbox'
 import { PatientCareStatusSelect } from '@/components/forms/PatientCareStatusSelect'
 import { PatientTechnicalCategorySelect } from '@/components/forms/PatientTechnicalCategorySelect'
 import { DetailPageSkeleton } from '@/components/crud/list-page/CrudListSkeleton'
+import { applyMask } from '@/lib/masks'
 
 export function PatientEditPage() {
   const { id } = useParams<{ id: string }>()
@@ -54,16 +56,22 @@ export function PatientEditPage() {
       technical_category: null,
       clinical_summary: '',
       is_valor_social: false,
+      death_date: '',
+      responsible_email: '',
+      responsible_phone: '',
     },
   })
 
   const regionId = form.watch('region_id')
   const cityId = form.watch('city_id')
+  const careStatus = form.watch('care_status')
   const isDirty = form.formState.isDirty
   const loadedStamp = patient ? `${patient.id}:${patient.updated_at}` : null
 
   useEffect(() => {
     if (!patient || !loadedStamp || isDirty) return
+    const responsibles = patient.patient_responsibles ?? []
+    const primaryResponsible = responsibles.find((item) => item.is_primary) ?? responsibles[0]
     form.reset({
       full_name: patient.full_name,
       cpf: patient.cpf ?? '',
@@ -80,6 +88,9 @@ export function PatientEditPage() {
       technical_category: patient.technical_category ?? null,
       clinical_summary: patient.clinical_summary ?? '',
       is_valor_social: patient.is_valor_social,
+      death_date: patient.death_date ?? '',
+      responsible_email: primaryResponsible?.email ?? '',
+      responsible_phone: primaryResponsible?.phone ? applyMask('phone', primaryResponsible.phone) : '',
     })
     // `form` muda de identidade a cada render; depender dele apagava a edição.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,8 +140,16 @@ export function PatientEditPage() {
                 technical_category: values.technical_category,
                 clinical_summary: values.clinical_summary,
                 is_valor_social: values.is_valor_social,
+                death_date: values.care_status === 'OBITO' ? values.death_date : null,
               },
             })
+            await savePrimaryResponsibleContact(id, values.full_name, {
+              email: values.responsible_email,
+              phone: values.responsible_phone,
+            })
+            if (values.care_status === 'OBITO') {
+              await cancelOpenWorkForDeath(id)
+            }
             navigate(`/admin/pacientes/${id}`)
           }, () => {
             toast.error('Não foi possível salvar. Revise os campos destacados.')
@@ -145,6 +164,25 @@ export function PatientEditPage() {
           )} />
           <FormField control={form.control} name="birth_date" render={({ field }) => (
             <FormItem><FormLabel>Data de nascimento</FormLabel><FormControl><Input type="date" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="responsible_email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>E-mail do responsável</FormLabel>
+              <FormControl><Input type="email" autoComplete="off" {...field} value={field.value ?? ''} /></FormControl>
+              <p className="text-xs text-muted-foreground">
+                O aplicativo não tem login do paciente. Quem entra é o responsável principal, com o e-mail da conta vinculada a ele.
+              </p>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="responsible_phone" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone do responsável</FormLabel>
+              <FormControl>
+                <MaskedInput mask="phone" value={field.value ?? ''} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )} />
           <FormField control={form.control} name="allocated_professional_id" render={({ field }) => (
             <FormItem>
@@ -190,6 +228,18 @@ export function PatientEditPage() {
                 <FormMessage />
               </FormItem>
             )} />
+            {careStatus === 'OBITO' && (
+              <FormField control={form.control} name="death_date" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data do óbito</FormLabel>
+                  <FormControl><Input type="date" {...field} value={field.value ?? ''} /></FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Avaliação ou demanda ainda em aberto deste paciente passa para cancelada.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            )}
             <FormField control={form.control} name="technical_category" render={({ field }) => (
               <FormItem>
                 <FormLabel>Categoria técnica de atendimento</FormLabel>

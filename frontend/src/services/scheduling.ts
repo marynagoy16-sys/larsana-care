@@ -166,6 +166,14 @@ type DemandScheduleContext = {
   demand_type: string
 }
 
+const AGENDA_SESSION_STATUSES = [
+  'prevista',
+  'realizada',
+  'remarcada',
+  'falta',
+  'intercorrencia',
+] as const
+
 /** Demanda ainda precisa que o PP envie horários (inclui continuidade pós-pagamento com sessões sem data). */
 export async function demandNeedsScheduleSlots(demand: DemandScheduleContext): Promise<boolean> {
   const { data: latestProposal, error: proposalError } = await supabase
@@ -180,6 +188,18 @@ export async function demandNeedsScheduleSlots(demand: DemandScheduleContext): P
   if (latestProposal?.status === 'pendente') return false
 
   if (demand.cycle_id && demand.demand_type === 'continuidade') {
+    // Horário fixo grava dia e hora em care_sessions sem criar scheduling_proposal.
+    const { count: scheduledCount, error: scheduledError } = await supabase
+      .from('care_sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('cycle_id', demand.cycle_id)
+      .eq('is_assessment_session', false)
+      .not('scheduled_at', 'is', null)
+      .in('status', [...AGENDA_SESSION_STATUSES])
+
+    if (scheduledError) throw scheduledError
+    if ((scheduledCount ?? 0) > 0) return false
+
     const { count, error: sessionError } = await supabase
       .from('care_sessions')
       .select('id', { count: 'exact', head: true })
@@ -220,9 +240,15 @@ export async function getDemandSchedulingFollowUp(demandId: string): Promise<Dem
     .maybeSingle()
 
   if (error) throw error
-  if (!data) return { kind: 'needs_slots' }
+  if (!data) {
+    if (demand?.demand_type === 'continuidade' && demand.cycle_id) {
+      return { kind: 'confirmed' }
+    }
+    return { kind: 'needs_slots' }
+  }
   if (data.status === 'pendente') return { kind: 'awaiting_patient' }
   if (data.status === 'confirmado') return { kind: 'confirmed' }
+  if (demand?.demand_type === 'continuidade' && demand.cycle_id) return { kind: 'confirmed' }
   return { kind: 'needs_slots' }
 }
 

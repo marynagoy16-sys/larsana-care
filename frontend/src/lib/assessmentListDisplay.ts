@@ -44,7 +44,7 @@ export function formatAssessmentProposalSummary(row: AssessmentListDisplayInput)
 }
 
 export function formatFamilyDeadline(row: AssessmentListDisplayInput): string {
-  if (row.status === 'avaliacao_feita') return '—'
+  if (row.status === 'avaliacao_feita' || row.status === 'cancelada') return '—'
 
   if (!row.response_deadline_at && !row.proposal_sent_at) {
     return 'Após envio'

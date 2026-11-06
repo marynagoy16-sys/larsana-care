@@ -3206,6 +3206,7 @@ export type Database = {
             | null
           birth_date: string | null
           birth_place: string | null
+          death_date: string | null
           care_status: Database["public"]["Enums"]["patient_care_status"]
           city_id: string | null
           clinical_summary: string | null
@@ -3245,6 +3246,7 @@ export type Database = {
             | null
           birth_date?: string | null
           birth_place?: string | null
+          death_date?: string | null
           care_status?: Database["public"]["Enums"]["patient_care_status"]
           city_id?: string | null
           clinical_summary?: string | null
@@ -3284,6 +3286,7 @@ export type Database = {
             | null
           birth_date?: string | null
           birth_place?: string | null
+          death_date?: string | null
           care_status?: Database["public"]["Enums"]["patient_care_status"]
           city_id?: string | null
           clinical_summary?: string | null
@@ -6335,6 +6338,7 @@ export type Database = {
         | "respondida_sim"
         | "respondida_nao"
         | "vencida"
+        | "cancelada"
       cardiorrespiratory_habilitation_status:
         | "nao_solicitado"
         | "em_analise"
@@ -6738,6 +6742,7 @@ export const Constants = {
         "respondida_sim",
         "respondida_nao",
         "vencida",
+        "cancelada",
       ],
       cardiorrespiratory_habilitation_status: [
         "nao_solicitado",

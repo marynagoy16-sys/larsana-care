@@ -100,6 +100,7 @@ export const assessmentStatusLabels: Record<string, string> = {
   respondida_sim: 'Respondida SIM',
   respondida_nao: 'Respondida NÃO',
   vencida: 'Vencida',
+  cancelada: 'Cancelada',
 }
 
 export const demandTypeLabels: Record<string, string> = {

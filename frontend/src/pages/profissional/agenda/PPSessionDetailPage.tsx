@@ -25,6 +25,7 @@ import {
   getPatientLatestAssessment,
   ppPatientQueryKeys,
 } from '@/services/ppPatients'
+import { PpInitiateRescheduleDialog } from '@/components/profissional/agenda/PpInitiateRescheduleDialog'
 import { PpRescheduleSlotsCard } from '@/components/profissional/agenda/PpRescheduleSlotsCard'
 import { getAwaitingRescheduleRequestForSession } from '@/services/sessionReminderChat'
 import { ppSessionCheckIn } from '@/services/ppSessions'
@@ -199,6 +200,7 @@ function SessionDetailBody({
   onOpenPatient,
   onCheckIn,
   checkInPending,
+  onReschedule,
 }: {
   session: AgendaSessionItem
   isFetching: boolean
@@ -209,6 +211,7 @@ function SessionDetailBody({
   onOpenPatient: () => void
   onCheckIn: () => void
   checkInPending: boolean
+  onReschedule?: () => void
 }) {
   const scheduledLabel = session.scheduledAt
     ? format(new Date(session.scheduledAt), "EEEE, d 'de' MMMM · HH:mm", { locale: ptBR })
@@ -316,6 +319,11 @@ function SessionDetailBody({
               Evoluir terapia após o check-in
             </Button>
           ) : null}
+          {onReschedule ? (
+            <Button variant="outline" onClick={onReschedule} className="h-12 w-full">
+              Reagendar
+            </Button>
+          ) : null}
           <Button variant="outline" onClick={onOpenPatient} className="h-12 w-full">
             Ver paciente
           </Button>
@@ -330,6 +338,7 @@ export function PPSessionDetailPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const isLgUp = useIsLgUp()
+  const [rescheduleOpen, setRescheduleOpen] = useState(false)
   useMobileImmersive(true)
   const goBack = () => navigate('/profissional/agenda')
 
@@ -438,6 +447,7 @@ export function PPSessionDetailPage() {
   }
 
   const statusCfg = getAgendaStatusConfig(session.displayStatus)
+  const canReschedule = (session.status === 'prevista' || session.status === 'remarcada') && !rescheduleRequest
 
   const rescheduleCard = rescheduleRequest ? (
     <PpRescheduleSlotsCard
@@ -468,6 +478,15 @@ export function PPSessionDetailPage() {
           onOpenPatient={openPatient}
           onCheckIn={() => checkMutation.mutate()}
           checkInPending={checkMutation.isPending}
+          onReschedule={canReschedule ? () => setRescheduleOpen(true) : undefined}
+        />
+        <PpInitiateRescheduleDialog
+          open={rescheduleOpen}
+          onOpenChange={setRescheduleOpen}
+          sessionId={session.id}
+          onSubmitted={() => {
+            queryClient.invalidateQueries({ queryKey: ppAgendaQueryKeys.session(session.id) })
+          }}
         />
       </MobileSessionLayout>
     )
@@ -504,8 +523,17 @@ export function PPSessionDetailPage() {
           onOpenPatient={openPatient}
           onCheckIn={() => checkMutation.mutate()}
           checkInPending={checkMutation.isPending}
+          onReschedule={canReschedule ? () => setRescheduleOpen(true) : undefined}
         />
       </CrudScrollPageLayout>
+      <PpInitiateRescheduleDialog
+        open={rescheduleOpen}
+        onOpenChange={setRescheduleOpen}
+        sessionId={session.id}
+        onSubmitted={() => {
+          queryClient.invalidateQueries({ queryKey: ppAgendaQueryKeys.session(session.id) })
+        }}
+      />
     </>
   )
 }

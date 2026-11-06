@@ -9,7 +9,7 @@ import {
   requiredString,
 } from '@/schemas/common'
 import { isValidCpf } from '@/lib/validators'
-import { sanitizeCep, sanitizeCpf, trimText } from '@/lib/sanitize'
+import { sanitizeCep, sanitizeCpf, sanitizeEmail, sanitizePhone, trimText } from '@/lib/sanitize'
 
 
 export const patientCareStatusSchema = z.enum([
@@ -99,6 +99,24 @@ const emptyToNull = (value: string | null | undefined) => {
   return trimmed.length ? trimmed : null
 }
 
+const optionalContactEmail = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((value) => emptyToNull(value))
+  .refine((value) => value == null || z.string().email().safeParse(value).success, 'E-mail inválido')
+  .transform((value) => (value ? sanitizeEmail(value) : null))
+
+const optionalContactPhone = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((value) => {
+    const trimmed = emptyToNull(value)
+    return trimmed ? sanitizePhone(trimmed) : null
+  })
+  .refine((value) => value == null || value.length >= 10, 'Telefone inválido')
+
 const optionalUuidField = z
   .string()
   .nullable()
@@ -157,6 +175,23 @@ export const patientEditSchema = z.object({
     .optional()
     .transform((value) => emptyToNull(value)),
   is_valor_social: z.boolean().default(false),
+  death_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => emptyToNull(value))
+    .refine((value) => value == null || !Number.isNaN(Date.parse(value)), 'Data inválida')
+    .refine((value) => value == null || new Date(`${value}T00:00:00`) <= new Date(), 'Data não pode ser futura'),
+  responsible_email: optionalContactEmail,
+  responsible_phone: optionalContactPhone,
+}).superRefine((data, ctx) => {
+  if (data.care_status === 'OBITO' && !data.death_date) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Informe a data do óbito',
+      path: ['death_date'],
+    })
+  }
 })
 
 export type PatientStepValues = z.infer<typeof patientStepSchema>

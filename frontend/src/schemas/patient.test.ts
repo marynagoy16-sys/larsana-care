@@ -58,6 +58,25 @@ describe('patient schemas', () => {
     expect(result.data.suggested_weekly_frequency).toBe(2)
   })
 
+  it('exige data quando o status é óbito', () => {
+    const missing = patientEditSchema.safeParse({
+      full_name: 'Maria Silva',
+      patient_level: 'N1',
+      care_status: 'OBITO',
+      is_valor_social: false,
+    })
+    expect(missing.success).toBe(false)
+
+    const withDate = patientEditSchema.safeParse({
+      full_name: 'Maria Silva',
+      patient_level: 'N1',
+      care_status: 'OBITO',
+      death_date: '2026-11-01',
+      is_valor_social: false,
+    })
+    expect(withDate.success).toBe(true)
+  })
+
   it('exige cidade igual entre paciente e endereço no wizard', () => {
     const base = {
       patient: {

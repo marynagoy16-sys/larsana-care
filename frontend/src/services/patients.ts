@@ -332,10 +332,66 @@ export async function setPatientsActive(ids: string[], isActive: boolean) {
   if (error) throw error
 }
 
+const PENDING_ASSESSMENT_STATUSES = ['avaliacao_feita', 'proposta_enviada', 'em_analise'] as const
+
 export async function updatePatient(id: string, values: TablesUpdate<'patients'>) {
   const { data, error } = await supabase.from('patients').update(values).eq('id', id).select().single()
   if (error) throw error
   return data
+}
+
+export async function savePrimaryResponsibleContact(
+  patientId: string,
+  patientName: string,
+  contact: { email: string | null; phone: string | null },
+) {
+  const { data: rows, error } = await supabase
+    .from('patient_responsibles')
+    .select('id, is_primary')
+    .eq('patient_id', patientId)
+
+  if (error) throw error
+
+  const primary = rows?.find((row) => row.is_primary) ?? rows?.[0]
+  if (primary) {
+    const { error: updateError } = await supabase
+      .from('patient_responsibles')
+      .update({
+        email: contact.email,
+        phone: contact.phone,
+      })
+      .eq('id', primary.id)
+    if (updateError) throw updateError
+    return
+  }
+
+  if (!contact.email && !contact.phone) return
+
+  const { error: insertError } = await supabase.from('patient_responsibles').insert({
+    patient_id: patientId,
+    full_name: patientName,
+    email: contact.email,
+    phone: contact.phone,
+    is_primary: true,
+  })
+  if (insertError) throw insertError
+}
+
+/** Encerra demanda e avaliação que ainda não foram concluídas quando o paciente vai a óbito. */
+export async function cancelOpenWorkForDeath(patientId: string) {
+  const { error: demandError } = await supabase
+    .from('demands')
+    .update({ status: 'cancelada' })
+    .eq('patient_id', patientId)
+    .in('status', ['aberta', 'alocada'])
+  if (demandError) throw demandError
+
+  const { error: assessmentError } = await supabase
+    .from('initial_assessments')
+    .update({ status: 'cancelada' })
+    .eq('patient_id', patientId)
+    .in('status', [...PENDING_ASSESSMENT_STATUSES])
+  if (assessmentError) throw assessmentError
 }
 
 export async function deletePatient(id: string) {
