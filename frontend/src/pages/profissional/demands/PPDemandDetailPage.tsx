@@ -272,6 +272,7 @@ export function PPDemandDetailPage() {
 
       {showActionBar && (
         <div
+          data-shell-action-bar
           className={cn(
             'fixed bottom-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur shadow-[0_-4px_24px_rgba(0,0,0,0.08)] supports-[backdrop-filter]:bg-background/90',
             'left-0 lg:transition-[left] lg:duration-300 lg:ease-in-out',

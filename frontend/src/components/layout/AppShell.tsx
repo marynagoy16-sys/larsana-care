@@ -27,6 +27,7 @@ import { PageHeaderProvider } from '@/contexts/PageHeaderContext'
 import { ImmersiveLayoutProvider, useImmersiveLayout } from '@/contexts/ImmersiveLayoutContext'
 import { useBottomNavAutoHide } from '@/hooks/useBottomNavAutoHide'
 import type { UserRole } from '@/types/auth'
+import { setAppViewportLock } from '@/lib/mobileKeyboardViewport'
 import { cn } from '@/lib/utils'
 
 export type LayoutVariant = 'admin' | 'profissional' | 'paciente'
@@ -183,6 +184,11 @@ function AppShellInner({ variant }: AppShellProps) {
   const location = useLocation()
   const pageTitle = getPageTitle(location.pathname)
 
+  useEffect(() => {
+    setAppViewportLock(true)
+    return () => setAppViewportLock(false)
+  }, [])
+
   const userRole = role as UserRole
 
   const adminSections = filterNavByRole(adminNavSections, userRole)
@@ -205,7 +211,7 @@ function AppShellInner({ variant }: AppShellProps) {
   const showBottomNav = (variant === 'profissional' || variant === 'paciente') && !immersive
 
   return (
-    <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
+    <div className="app-shell flex h-dvh min-h-0 overflow-hidden bg-background">
       {hasDesktopSidebar && (
         <>
           <Sidebar

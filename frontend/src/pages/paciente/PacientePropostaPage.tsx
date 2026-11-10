@@ -204,7 +204,7 @@ export function PacientePropostaPage() {
         </CascadeReveal>
       </CrudScrollPageLayout>
 
-      <div className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
+      <div data-shell-action-bar className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
         <div className="shell-content-x space-y-3 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <Button
             size="lg"
