@@ -140,9 +140,6 @@ export default function PropostaScreen() {
             {selectedOption ? (
               <View className="rounded-xl border border-border bg-card p-5 gap-3">
                 <Text className="font-semibold text-sm">Aceite comercial do ciclo</Text>
-                <Text className="text-sm text-muted-foreground">
-                  {selectedOption.session_count} terapias — total {formatCurrency(selectedOption.total_amount_cents)}
-                </Text>
                 <Pressable
                   className="flex-row items-start gap-3 rounded-lg border border-border p-3"
                   onPress={() => setAcceptAnexoI((v) => !v)}

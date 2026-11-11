@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Checkbox } from '@/components/ui/checkbox'
-import { formatCurrency } from '@/lib/formatters'
 import {
   ANEXO_II_CANCELAMENTO_SUMMARY,
   LEGAL_TERM_PUBLIC_PATHS,
@@ -11,9 +10,6 @@ import {
 import { loadCurrentLegalTerms } from '@/services/legalDocuments'
 
 type Props = {
-  sessionCount: number
-  unitPriceCents: number
-  totalCents: number
   acceptI: boolean
   acceptII: boolean
   onAcceptIChange: (value: boolean) => void
@@ -32,9 +28,6 @@ function TermLink({ termType, title }: { termType: string; title?: string | null
 }
 
 export function CycleLegalAcceptanceFields({
-  sessionCount,
-  unitPriceCents,
-  totalCents,
   acceptI,
   acceptII,
   onAcceptIChange,
@@ -50,13 +43,7 @@ export function CycleLegalAcceptanceFields({
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-4">
-      <div>
-        <p className="font-semibold text-sm">Aceite comercial do ciclo</p>
-        <p className="text-sm text-muted-foreground mt-1">
-          {sessionCount} terapias × {formatCurrency(unitPriceCents / 100)} ={' '}
-          <span className="font-medium text-foreground">{formatCurrency(totalCents / 100)}</span>
-        </p>
-      </div>
+      <p className="font-semibold text-sm">Aceite comercial do ciclo</p>
 
       <label className="flex items-start gap-3 text-sm cursor-pointer rounded-lg border p-3">
         <Checkbox checked={acceptI} onCheckedChange={(v) => onAcceptIChange(v === true)} />

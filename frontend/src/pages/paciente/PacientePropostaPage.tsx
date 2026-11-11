@@ -162,11 +162,6 @@ export function PacientePropostaPage() {
   }
 
   const preview = previewQuery.data
-  const cycleSessionCount = selectedOption?.session_count ?? preview.proposed_session_count
-  const cycleTotalCents = selectedOption?.total_amount_cents ?? 0
-  const cycleUnitPriceCents = cycleSessionCount > 0
-    ? Math.round(cycleTotalCents / cycleSessionCount)
-    : 0
   const canAccept = acceptAnexoI && acceptAnexoII && Boolean(selectedOption)
 
   return (
@@ -191,9 +186,6 @@ export function PacientePropostaPage() {
           {selectedOption ? (
             <CascadeItem>
               <CycleLegalAcceptanceFields
-                sessionCount={cycleSessionCount}
-                unitPriceCents={cycleUnitPriceCents}
-                totalCents={cycleTotalCents}
                 acceptI={acceptAnexoI}
                 acceptII={acceptAnexoII}
                 onAcceptIChange={setAcceptAnexoI}

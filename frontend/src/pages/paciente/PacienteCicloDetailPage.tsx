@@ -75,9 +75,6 @@ export function PacienteCicloDetailPage() {
             {needsPayment && (
               <CycleLegalAcceptancePanel
                 cycleId={cycle.id}
-                sessionCount={cycle.session_count}
-                unitPriceCents={cycle.session_unit_price_cents}
-                totalCents={cycle.total_amount_cents}
                 onAccepted={() => void refetch()}
               />
             )}

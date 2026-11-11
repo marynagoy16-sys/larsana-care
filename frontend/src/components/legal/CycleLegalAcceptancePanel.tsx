@@ -6,17 +6,11 @@ import { recordCycleLegalAcceptances } from '@/services/legalDocuments'
 
 type Props = {
   cycleId: string
-  sessionCount: number
-  unitPriceCents: number
-  totalCents: number
   onAccepted?: () => void
 }
 
 export function CycleLegalAcceptancePanel({
   cycleId,
-  sessionCount,
-  unitPriceCents,
-  totalCents,
   onAccepted,
 }: Props) {
   const [acceptI, setAcceptI] = useState(false)
@@ -30,9 +24,6 @@ export function CycleLegalAcceptancePanel({
   return (
     <div className="space-y-4">
       <CycleLegalAcceptanceFields
-        sessionCount={sessionCount}
-        unitPriceCents={unitPriceCents}
-        totalCents={totalCents}
         acceptI={acceptI}
         acceptII={acceptII}
         onAcceptIChange={setAcceptI}
